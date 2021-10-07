@@ -1,7 +1,14 @@
 {
-  "name": "frontend-npm-ide-ce",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@mov-ai/frontend-npm-ide-ce",
+  "version": "0.0.1-0",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/mov-ai"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MOV-AI/frontend-npm-ide-ce.git"
+  },
+  "homepage": "/static/mov-fe-app-ide-ce",
   "dependencies": {
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
@@ -17,11 +24,21 @@
     "react-scripts": "4.0.3",
     "web-vitals": "^1.1.2"
   },
+  "files": [
+    "manifest.txt",
+    "build",
+    "database",
+    "scripts",
+    "debian"
+  ],
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "REACT_APP_VERSION=$npm_package_appversion react-scripts start",
+    "build": "REACT_APP_VERSION=$npm_package_appversion react-scripts --max_old_space_size=4096 build && python3 ./scripts/detach_manifest.py",
+    "test": "REACT_APP_VERSION=$npm_package_appversion react-scripts test",
+    "eject": "react-scripts eject",
+    "deploy": "./scripts/deployApp.sh mov-fe-app-ide",
+    "clean": "rm -r node_modules; rm package-lock.json",
+    "coverage": "npm test -- --coverage"
   },
   "eslintConfig": {
     "extends": [
@@ -40,5 +57,23 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "movai": {
+    "name": "mov-fe-app-ide-ce",
+    "Label": "IDE-CE",
+    "Type": "application",
+    "Package": "mov-fe-app-ide-ce",
+    "EntryPoint": "index.html",
+    "Description": "Integrated Development Environment - CE",
+    "Icon": "fas fa-code",
+    "Callbacks": [
+      "backend.viewer",
+      "backend.CallbackEditor",
+      "backend.FlowAPI"
+    ],
+    "Configuration": "app-ide-ce",
+    "CustomConfiguration": "app-custom-ide-ce",
+    "Version": "0.0.1",
+    "generateMetadata": true
   }
 }

@@ -1,0 +1,3 @@
+./build/* /opt/mov.ai/frontend/ide-ce/bin
+./database /opt/mov.ai/frontend/ide-ce
+./manifest.txt /opt/mov.ai/frontend/ide-ce 

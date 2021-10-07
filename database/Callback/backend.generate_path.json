@@ -1,0 +1,27 @@
+{
+    "Callback": {
+        "backend.generate_path": {
+            "Code": "def generate_path(scene, initial_pose, final_pose, robot_config):\n    step_size = 0.1\n    max_radius = 1.0\n    scene_name = scene\n\n    in_pos = initial_pose['position']\n    in_ori = initial_pose['orientation']\n    in_yaw = 2 * numpy.arctan2(in_ori['z'], in_ori['w'])\n    q0 = (in_pos['x'], in_pos['y'], in_yaw)\n    \n    out_pos = final_pose['position']\n    out_ori = final_pose['orientation']\n    out_yaw = 2 * numpy.arctan2(out_ori['z'], out_ori['w'])\n    q1 = (out_pos['x'], out_pos['y'], out_yaw)\n    \n    \n    path = shortest_path(q0, q1, max_radius)\n    configurations, _ = path.sample_many(step_size)\n    \n    poses = []\n    for i in range(0, len(configurations)):\n        theta = configurations[i][1]\n        quat = [0.0, 0.0, numpy.sin(theta / 2), numpy.cos(theta / 2)]\n        pose = {\n            \"position\": {\n                \"x\":configurations[i][0],\n                \"y\":configurations[i][1],\n                \"z\": 0.0\n            },\n            \"orientation\": {\n                \"x\": quat[0],\n                \"y\": quat[1],\n                \"z\": quat[2],\n                \"w\": quat[3]\n            }\n        }\n        poses.append({\"pose\": pose})\n    return {\"poses\": poses}\n\nkey2action_map = {\"generate_path\": generate_path }\n\nkey, args = msg['func'], msg[\"args\"]\nprint(\"generate_path...\", key, args)\ntry:\n    response = {\"success\": True}\n    if isinstance(args, list):\n        response[\"result\"] = key2action_map[key](*args)\n    else:\n        response[\"result\"] = key2action_map[key](args)\nexcept Exception as e:\n    print(\"Caught exception\", e)\n    response = {\"success\": False, \"error\": str(e)}",
+            "Info": "",
+            "Label": "backend.generate_path",
+            "LastUpdate": {
+                "date": "18/05/2021 at 17:37:41",
+                "user": "movai"
+            },
+            "Message": "movai_msgs/Any",
+            "Py3Lib": {
+                "numpy": {
+                    "Class": false,
+                    "Module": "numpy"
+                },
+                "shortest_path": {
+                    "Class": "shortest_path",
+                    "Module": "dubins"
+                }
+            },
+            "User": "",
+            "Version": "",
+            "VersionDelta": {}
+        }
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "Callback": {
+        "backend.CopyAppsIDE": {
+            "Code": "\"\"\"\n   Copyright (C) Mov.ai  - All Rights Reserved\n   Unauthorized copying of this file, via any medium is strictly prohibited\n   Proprietary and confidential\n\n   Developers:\n   - Manuel Silva  (manuel.silva@mov.ai) - 2021\n\"\"\"\n\ndef copy (scope, from_id, to_name, workspace=\"global\"):\n    response = {\"success\": False}\n    \n    try:\n        \n        # check if the a document with name 'to_name' already exists\n        if scopes().list_versions(scope=scope, ref=to_name):\n        \n            error_msg = f\"{scope} {to_name} already exists\"\n            raise KeyError(error_msg)\n        \n        # get the document to copy\n        to_copy = getattr(scopes(), scope)[from_id]\n\n        data = to_copy.serialize()\n        data[\"Label\"] = to_name\n\n        # create the new document\n        scopes(workspace=workspace).write(data, version=\"_unversioned_\", ref=to_name, scope=scope)\n        \n        response = {\"success\": True}\n    \n    except Exception:\n        raise\n\n    return response\n    \n# ----------------------------------------------------------------------\nkey2action_map = {\n\t\"copy\"   : copy\n}\n\ntry:\n    key = msg[\"func\"]\n    args = msg[\"args\"]\n    \n    response = {\"success\": True}\n\n    if isinstance(args, list):\n        response[\"result\"] = key2action_map[key](*args)\n    else:\n        response[\"result\"] = key2action_map[key](args)\n\nexcept Exception as e:\n    import traceback\n    traceback.print_exc()\n    exc_result = f\"{type(e).__name__} {str(e)}\"\n    \n    response = {\"success\": False, \"error\": exc_result}\n",
+            "Info": "",
+            "Label": "backend.CopyAppsIDE",
+            "LastUpdate": {
+                "date": "07/01/2021 at 18:01:58",
+                "user": "movai"
+            },
+            "Message": "",
+            "User": "joao",
+            "Version": "",
+            "VersionDelta": {}
+        }
+    }
+}

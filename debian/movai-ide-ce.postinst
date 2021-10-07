@@ -1,0 +1,28 @@
+#!/bin/bash
+# post install script
+
+# this should require movai-backend to be installed
+
+APP=ide-ce
+
+if [ "$1" == "configure" ]; then
+
+    APP_PATH="/opt/mov.ai/frontend/$APP"
+    mkdir -p $APP_PATH
+    
+    # upload ui
+    cd /opt/mov.ai/app
+    /usr/bin/python3 -m tools.upload_ui -f "$APP_PATH/bin"
+
+    # upload database
+    /usr/bin/python3 -m tools.backup -f -a import -m "$APP_PATH/manifest.txt" -r $APP_PATH -p "$APP_PATH/database" || exit 1
+
+    /usr/bin/python3 -m tools.deployApp -p "$APP_PATH/bin" -f package.json || exit 2
+
+elif [ "$1" == "abort-remove" ]; then
+    rm -r $APP_PATH || true
+
+    #remove from database 
+    # remove the upload_ui metadata (what was done in the deploy app)
+    # revert whatever the deploy app did
+fi

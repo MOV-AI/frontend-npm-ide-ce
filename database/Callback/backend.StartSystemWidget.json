@@ -1,0 +1,17 @@
+{
+    "Callback": {
+        "backend.StartSystemWidget": {
+            "Code": "\"\"\"\n   Copyright (C) Mov.ai  - All Rights Reserved\n   Unauthorized copying of this file, via any medium is strictly prohibited\n   Proprietary and confidential\n\n   Developers:\n   - Vicente Queiroz (vicente.queiroz@mov.ai) - 2020\n\n\"\"\"\n\naction_name = msg['args'][0]\nflow_name = msg['args'][1]['Value']\nrobot_name = msg['args'][2]['Value']\n\nif flow_name != None:\n\n    if robot_name == \"\":\n        robot = Robot\n    else:\n        robot = FleetRobot(robot_name)\n\n    robot.send_cmd(command=action_name, flow=flow_name)\n",
+            "Label": "backend.StartSystemWidget",
+            "LastUpdate": {
+                "date": "07/01/2021 at 18:08:38",
+                "user": "movai"
+            },
+            "User": "joao",
+            "VersionDelta": {},
+            "Info": "",
+            "Version": "",
+            "Message": ""
+        }
+    }
+}
