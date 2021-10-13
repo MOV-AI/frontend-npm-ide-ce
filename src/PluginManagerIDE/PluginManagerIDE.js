@@ -20,7 +20,6 @@ export default class PluginManagerIDE {
   }
 
   async install(pluginName, plugin) {
-    console.log("debug install plugin", pluginName)
     if (!this.engine.isRegistered(pluginName)) {
       this.engine.register(plugin);
     }
