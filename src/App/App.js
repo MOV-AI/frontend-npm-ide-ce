@@ -8,17 +8,24 @@ import CentralPanel from "../plugins/hosts/CentralPanel/CentralPanel";
 function App() {
   writeMovaiLogo();
   React.useEffect(() => {
-    const listProfile = {
-      name: "list",
-      displayName: "plugin list",
-      location: "leftPanel"
-    };
-    const list = new PluginList(listProfile);
-    PluginManagerIDE.install(listProfile.name, list);
+    installViewPlugins();
   }, []);
+  return <div style={{ display: "flex" }}>{getHostedPlugins()}</div>;
+}
 
+function installViewPlugins() {
+  const listProfile = {
+    name: "list",
+    displayName: "plugin list",
+    location: "leftPanel"
+  };
+  const list = new PluginList(listProfile);
+  PluginManagerIDE.install(listProfile.name, list);
+}
+
+function getHostedPlugins() {
   return (
-    <div style={{ display: "flex" }}>
+    <>
       <SidePanel style={{ flexGrow: 1 }} name="leftPanel"></SidePanel>
       <CentralPanel style={{ flexGrow: 1 }} name="mainPanel"></CentralPanel>
       <SidePanel
@@ -26,7 +33,7 @@ function App() {
         name="rightPanel"
         anchor="right"
       ></SidePanel>
-    </div>
+    </>
   );
 }
 
