@@ -12,7 +12,7 @@ const profile = (name, displayName = name) => ({
 const CentralPanel = props => {
   const { name, displayName } = props;
   const children = useHostReactPlugin(profile(name, displayName));
-  return <div {...props.style}>{children}</div>;
+  return <div style={{ ...props.style }}>{children}</div>;
 };
 
 CentralPanel.propTypes = {

@@ -8,6 +8,14 @@ import PluginManagerIDE from "../../../PluginManagerIDE/PluginManagerIDE";
 import PluginButton from "../PluginButton/PluginButton";
 
 const PluginList = ({ call, profile }) => {
+  const [random, setRandom] = React.useState({ value: 0 });
+  React.useEffect(() => {
+    setTimeout(() => {
+      console.log("debug set random");
+      setRandom({ value: 100 });
+    }, 10000);
+  }, []);
+
   return (
     <List>
       {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => {
@@ -18,13 +26,16 @@ const PluginList = ({ call, profile }) => {
             onClick={async () => {
               await PluginManagerIDE.install(
                 text,
-                new PluginButton({
-                  name: text,
-                  displayName: text,
-                  location: "mainPanel"
-                })
+                new PluginButton(
+                  {
+                    name: text,
+                    displayName: text,
+                    location: "mainPanel"
+                  },
+                  { random }
+                )
               );
-              await call("mainPanel", "update", text);
+              await call("mainPanel", "update", text, );
             }}
           >
             <ListItemIcon>

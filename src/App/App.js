@@ -7,10 +7,14 @@ import CentralPanel from "../plugins/hosts/CentralPanel/CentralPanel";
 
 function App() {
   writeMovaiLogo();
+
   React.useEffect(() => {
     installViewPlugins();
   }, []);
-  return <div style={{ display: "flex" }}>{getHostedPlugins()}</div>;
+
+  return (
+    <div style={{ display: "flex", height: "100%" }}>{getHostedPlugins()}</div>
+  );
 }
 
 function installViewPlugins() {

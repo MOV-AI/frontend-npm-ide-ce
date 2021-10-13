@@ -32,8 +32,18 @@ export class ViewReactPlugin extends Plugin {
  */
 export function withPlugin(ReactComponent) {
   const WithPlugin = class extends ViewReactPlugin {
+    constructor(profile, props = {}) {
+      super(profile);
+      this.props = props;
+    }
     render() {
-      return ReactComponent({ call: this.call, profile: this.profile });
+      return (
+        <ReactComponent
+          {...this.props}
+          call={this.call}
+          profile={this.profile}
+        ></ReactComponent>
+      );
     }
   };
   return WithPlugin;

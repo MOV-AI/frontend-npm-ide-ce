@@ -5,7 +5,7 @@ import { withPlugin } from "../../../ReactPlugin/ViewReactPlugin";
 import PluginManagerIDE from "../../../PluginManagerIDE/PluginManagerIDE";
 import PluginLabel from "../PluginLabel/PluginLabel";
 
-const PluginButton = ({ profile, call }) => {
+const PluginButton = ({ profile, call, random }) => {
   const { name } = profile;
   return (
     <Button
@@ -19,7 +19,7 @@ const PluginButton = ({ profile, call }) => {
         await call("rightPanel", "update", pluginName);
       }}
     >
-      Generate Data {name}
+      {random.value} Generate Data {name}
     </Button>
   );
 };
