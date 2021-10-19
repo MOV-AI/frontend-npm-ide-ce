@@ -31,8 +31,9 @@ export class HostReactPlugin extends Plugin {
   /**
    *
    * @param {String} viewName
+   * @param {Object} viewPluginProps
    */
-  update(viewName) {
+  update(viewName, viewPluginProps) {
     // Abstract method to implement in subclasses
   }
 }
@@ -49,9 +50,9 @@ export const useHostReactPlugin = ({ name }) => {
         setElements(view);
       }
 
-      update(viewName) {
+      update(viewName, props) {
         if (viewName in this.name2Component) {
-          setElements(this.name2Component[viewName]);
+          setElements(React.cloneElement(this.name2Component[viewName], props));
         }
       }
 
