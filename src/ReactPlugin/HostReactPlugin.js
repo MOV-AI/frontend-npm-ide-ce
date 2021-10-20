@@ -38,6 +38,14 @@ export class HostReactPlugin extends Plugin {
   }
 }
 
+export function withHostReactPlugin(Component) {
+  const InnerHost = props => {
+    const children = useHostReactPlugin({ name: props.name });
+    return <Component {...props} viewPlugins={children}></Component>;
+  };
+  return InnerHost;
+}
+
 export const useHostReactPlugin = ({ name }) => {
   const [elements, setElements] = React.useState([]);
   React.useEffect(() => {
