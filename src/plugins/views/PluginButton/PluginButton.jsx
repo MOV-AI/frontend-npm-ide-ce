@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Button } from "@mui/material";
-import { withPlugin } from "../../../ReactPlugin/ViewReactPlugin";
+import { withViewPlugin } from "../../../ReactPlugin/ViewReactPlugin";
 import PluginManagerIDE from "../../../PluginManagerIDE/PluginManagerIDE";
 import PluginLabel from "../PluginLabel/PluginLabel";
 
@@ -27,7 +27,7 @@ const PluginButton = ({ profile, call, random }) => {
   );
 };
 
-export default withPlugin(PluginButton);
+export default withViewPlugin(PluginButton);
 
 PluginButton.propTypes = {
   call: PropTypes.func.isRequired,

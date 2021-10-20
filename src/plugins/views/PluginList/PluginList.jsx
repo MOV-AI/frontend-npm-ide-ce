@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { List, ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
-import { withPlugin } from "../../../ReactPlugin/ViewReactPlugin";
+import { withViewPlugin } from "../../../ReactPlugin/ViewReactPlugin";
 import PluginManagerIDE from "../../../PluginManagerIDE/PluginManagerIDE";
 import PluginButton from "../PluginButton/PluginButton";
 
@@ -48,7 +48,7 @@ const PluginList = ({ call, profile }) => {
   );
 };
 
-export default withPlugin(PluginList);
+export default withViewPlugin(PluginList);
 
 PluginList.propTypes = {
   call: PropTypes.func.isRequired

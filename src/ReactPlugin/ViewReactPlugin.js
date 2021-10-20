@@ -30,7 +30,7 @@ export class ViewReactPlugin extends Plugin {
  * @param {ReactComponent} ReactComponent
  * @returns {ViewReactPlugin}
  */
-export function withPlugin(ReactComponent) {
+export function withViewPlugin(ReactComponent) {
   const WithPlugin = class extends ViewReactPlugin {
     constructor(profile, props = {}) {
       super(profile);
