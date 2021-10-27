@@ -3,8 +3,12 @@ import React from "react";
 import { withHostReactPlugin } from "../../../engine/ReactPlugin/HostReactPlugin";
 
 function CentralPanel(props) {
-  const { viewPlugins, hostName } = props;
-  return <div id={hostName}>{viewPlugins}</div>;
+  const { viewPlugins, hostName, style } = props;
+  return (
+    <div id={hostName} style={{ ...style }}>
+      {viewPlugins}
+    </div>
+  );
 }
 
 export default withHostReactPlugin(CentralPanel);

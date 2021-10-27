@@ -8,7 +8,7 @@ export class ViewReactPlugin extends Plugin {
   render() {
     // Abstract method should be implemented in subclasses
   }
-
+  
   async activate() {
     await this.call(
       this.profile.location,

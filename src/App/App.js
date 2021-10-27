@@ -7,6 +7,7 @@ import CentralPanel from "../plugins/hosts/CentralPanel/CentralPanel";
 import TopBar from "../plugins/hosts/TopBar/TopBar";
 import BottomBar from "../plugins/hosts/BottomBar/BottomBar";
 import Grid from "@mui/material/Grid";
+import MainMenu from "../plugins/views/MainMenu/MainMenu";
 
 function App() {
   writeMovaiLogo();
@@ -19,50 +20,41 @@ function App() {
 }
 
 function installViewPlugins() {
-  const listProfile = {
-    name: "list",
-    displayName: "plugin list",
+  const mainMenuProfile = {
+    name: "mainMenu",
     location: "leftPanel"
   };
-  const list = new PluginList(listProfile);
-  PluginManagerIDE.install(listProfile.name, list);
+  const mainMenu = new MainMenu(mainMenuProfile);
+  PluginManagerIDE.install(mainMenuProfile.name, mainMenu);
 }
 
 function getHostedPlugins() {
   return (
-    <>
-      <Grid container spacing={1}>
-        <Grid item xs={12}>
-          <TopBar></TopBar>
-        </Grid>
-        <Grid item xs={12}>
-          <Grid container>
-            <Grid item xs="auto">
-              <SidePanel
-                style={{ flexGrow: 1 }}
-                hostName="leftPanel"
-              ></SidePanel>
-            </Grid>
-            <Grid item xs="auto">
-              <CentralPanel
-                style={{ flexGrow: 1 }}
-                hostName="mainPanel"
-              ></CentralPanel>
-            </Grid>
-            <Grid item xs="auto">
-              <SidePanel
-                style={{ flexGrow: 1 }}
-                hostName="rightPanel"
-                anchor="right"
-              ></SidePanel>
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid item xs={12}>
-          <BottomBar></BottomBar>
-        </Grid>
+    <Grid container direction="column">
+      <Grid container alignItems="flex-start">
+        <TopBar style={{ border: "solid 5px purple", width: "100%" }}></TopBar>
       </Grid>
-    </>
+      <Grid container alignItems="stretch" style={{ flexGrow: 1 }}>
+        <SidePanel
+          hostName="leftPanel"
+          style={{ border: "solid 5px red" }}
+        ></SidePanel>
+        <CentralPanel
+          style={{ flexGrow: 1, border: "solid 5px green" }}
+          hostName="mainPanel"
+        ></CentralPanel>
+        <SidePanel
+          hostName="rightPanel"
+          anchor="right"
+          style={{ border: "solid 5px blue" }}
+        ></SidePanel>
+      </Grid>
+      <Grid container alignItems="flex-end">
+        <BottomBar
+          style={{ border: "solid 5px orange", width: "100%" }}
+        ></BottomBar>
+      </Grid>
+    </Grid>
   );
 }
 
