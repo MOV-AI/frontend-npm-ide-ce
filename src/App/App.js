@@ -1,13 +1,13 @@
-import "./App.css";
+import Grid from "@mui/material/Grid";
 import React from "react";
 import PluginManagerIDE from "../engine/PluginManagerIDE/PluginManagerIDE";
-import PluginList from "../plugins/views/PluginList/PluginList";
-import SidePanel from "../plugins/hosts/SidePanel/SidePanel";
-import CentralPanel from "../plugins/hosts/CentralPanel/CentralPanel";
-import TopBar from "../plugins/hosts/TopBar/TopBar";
 import BottomBar from "../plugins/hosts/BottomBar/BottomBar";
-import Grid from "@mui/material/Grid";
+import CentralPanel from "../plugins/hosts/CentralPanel/CentralPanel";
+import DrawerPanel from "../plugins/hosts/DrawerPanel/DrawerPanel";
+import SidePanel from "../plugins/hosts/SidePanel/SidePanel";
+import TopBar from "../plugins/hosts/TopBar/TopBar";
 import MainMenu from "../plugins/views/MainMenu/MainMenu";
+import "./App.css";
 
 function App() {
   writeMovaiLogo();
@@ -35,19 +35,19 @@ function getHostedPlugins() {
         <TopBar style={{ border: "solid 5px purple", width: "100%" }}></TopBar>
       </Grid>
       <Grid container alignItems="stretch" style={{ flexGrow: 1 }}>
-        <SidePanel
-          hostName="leftPanel"
-          style={{ border: "solid 5px red" }}
-        ></SidePanel>
+        <div style={{ border: "solid 5px red" }}>
+          <SidePanel hostName="leftPanel"></SidePanel>
+          <DrawerPanel hostName="leftDrawer"></DrawerPanel>
+        </div>
         <CentralPanel
           style={{ flexGrow: 1, border: "solid 5px green" }}
           hostName="mainPanel"
         ></CentralPanel>
-        <SidePanel
-          hostName="rightPanel"
+        <DrawerPanel
+          hostName="rightDrawer"
           anchor="right"
           style={{ border: "solid 5px blue" }}
-        ></SidePanel>
+        ></DrawerPanel>
       </Grid>
       <Grid container alignItems="flex-end">
         <BottomBar
