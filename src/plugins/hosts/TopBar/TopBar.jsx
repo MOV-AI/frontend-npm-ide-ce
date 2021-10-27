@@ -1,26 +1,18 @@
+import PropTypes from "prop-types";
 import * as React from "react";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import { useHostReactPlugin } from "../../../ReactPlugin/HostReactPlugin";
-
-const profile = (name, displayName = name) => ({
-  name: name,
-  displayName: displayName,
-  description: "Side Panel",
-  version: "1.0.0"
-});
+import { withHostReactPlugin } from "../../../engine/ReactPlugin/HostReactPlugin";
 
 function TopBar(props) {
-  const { name, displayName } = props;
-  const elements = useHostReactPlugin(profile(name, displayName));
-  return (
-    <Box sx={{ ...props.style }}>
-      <AppBar position="static">
-        <Toolbar>{elements}</Toolbar>
-      </AppBar>
-    </Box>
-  );
+  const { viewPlugins, hostName } = props;
+  return <div id={hostName}>{viewPlugins}</div>;
 }
 
-export default TopBar;
+export default withHostReactPlugin(TopBar);
+
+TopBar.propTypes = {
+  hostName: PropTypes.string.isRequired
+};
+
+TopBar.defaultProps = {
+  hostName: "topBar"
+};

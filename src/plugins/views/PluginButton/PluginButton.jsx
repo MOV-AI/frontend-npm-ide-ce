@@ -1,8 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Button } from "@mui/material";
-import { withViewPlugin } from "../../../ReactPlugin/ViewReactPlugin";
-import PluginManagerIDE from "../../../PluginManagerIDE/PluginManagerIDE";
+import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
+import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import PluginLabel from "../PluginLabel/PluginLabel";
 
 const PluginButton = ({ profile, call, random }) => {

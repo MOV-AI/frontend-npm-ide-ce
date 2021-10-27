@@ -1,28 +1,18 @@
-import { Drawer } from "@mui/material";
-import React from "react";
-import { withHostReactPlugin } from "../../../ReactPlugin/HostReactPlugin";
 import PropTypes from "prop-types";
+import React from "react";
+import { withHostReactPlugin } from "../../../engine/ReactPlugin/HostReactPlugin";
 
-const SidePanel = props => {
-  const { anchor = "left", viewPlugins } = props;
-  return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        "& .MuiDrawer-paper": { boxSizing: "border-box", width: "200px" },
-        ...props.style
-      }}
-      open
-      anchor={anchor}
-    >
-      {viewPlugins}
-    </Drawer>
-  );
-};
-
-SidePanel.propTypes = {
-  name: PropTypes.string.isRequired,
-  displayName: PropTypes.string
-};
+function SidePanel(props) {
+  const { viewPlugins, hostName } = props;
+  return <div id={hostName}>{viewPlugins}</div>;
+}
 
 export default withHostReactPlugin(SidePanel);
+
+SidePanel.propTypes = {
+  hostName: PropTypes.string.isRequired
+};
+
+SidePanel.defaultProps = {
+  hostName: "topBar"
+};

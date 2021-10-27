@@ -40,8 +40,12 @@ export class HostReactPlugin extends Plugin {
 
 export function withHostReactPlugin(Component) {
   const InnerHost = props => {
-    const children = useHostReactPlugin({ name: props.name });
+    const children = useHostReactPlugin({ name: props.hostName });
     return <Component {...props} viewPlugins={children}></Component>;
+  };
+
+  InnerHost.propTypes = {
+    hostName: PropTypes.string.isRequired
   };
   return InnerHost;
 }

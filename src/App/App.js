@@ -1,9 +1,12 @@
 import "./App.css";
 import React from "react";
-import PluginManagerIDE from "../PluginManagerIDE/PluginManagerIDE";
+import PluginManagerIDE from "../engine/PluginManagerIDE/PluginManagerIDE";
 import PluginList from "../plugins/views/PluginList/PluginList";
 import SidePanel from "../plugins/hosts/SidePanel/SidePanel";
 import CentralPanel from "../plugins/hosts/CentralPanel/CentralPanel";
+import TopBar from "../plugins/hosts/TopBar/TopBar";
+import BottomBar from "../plugins/hosts/BottomBar/BottomBar";
+import Grid from "@mui/material/Grid";
 
 function App() {
   writeMovaiLogo();
@@ -12,9 +15,7 @@ function App() {
     installViewPlugins();
   }, []);
 
-  return (
-    <div style={{ display: "flex", height: "100%" }}>{getHostedPlugins()}</div>
-  );
+  return <div className="App">{getHostedPlugins()}</div>;
 }
 
 function installViewPlugins() {
@@ -30,13 +31,37 @@ function installViewPlugins() {
 function getHostedPlugins() {
   return (
     <>
-      <SidePanel style={{ flexGrow: 1 }} name="leftPanel"></SidePanel>
-      <CentralPanel style={{ flexGrow: 1 }} name="mainPanel"></CentralPanel>
-      <SidePanel
-        style={{ flexGrow: 1 }}
-        name="rightPanel"
-        anchor="right"
-      ></SidePanel>
+      <Grid container spacing={1}>
+        <Grid item xs={12}>
+          <TopBar></TopBar>
+        </Grid>
+        <Grid item xs={12}>
+          <Grid container>
+            <Grid item xs="auto">
+              <SidePanel
+                style={{ flexGrow: 1 }}
+                hostName="leftPanel"
+              ></SidePanel>
+            </Grid>
+            <Grid item xs="auto">
+              <CentralPanel
+                style={{ flexGrow: 1 }}
+                hostName="mainPanel"
+              ></CentralPanel>
+            </Grid>
+            <Grid item xs="auto">
+              <SidePanel
+                style={{ flexGrow: 1 }}
+                hostName="rightPanel"
+                anchor="right"
+              ></SidePanel>
+            </Grid>
+          </Grid>
+        </Grid>
+        <Grid item xs={12}>
+          <BottomBar></BottomBar>
+        </Grid>
+      </Grid>
     </>
   );
 }

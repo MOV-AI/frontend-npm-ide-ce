@@ -3,8 +3,8 @@ import PropTypes from "prop-types";
 import { List, ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
-import { withViewPlugin } from "../../../ReactPlugin/ViewReactPlugin";
-import PluginManagerIDE from "../../../PluginManagerIDE/PluginManagerIDE";
+import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
+import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import PluginButton from "../PluginButton/PluginButton";
 
 const PluginList = ({ call, profile }) => {
