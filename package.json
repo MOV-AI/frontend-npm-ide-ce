@@ -8,6 +8,7 @@
     "@mov-ai/mov-fe-lib-react": "^1.0.28",
     "@mui/icons-material": "^5.0.1",
     "@mui/material": "^5.0.2",
+    "@mui/styles": "^5.0.2",
     "@remixproject/engine": "^0.3.19",
     "@remixproject/engine-web": "^0.3.19",
     "@testing-library/jest-dom": "^5.14.1",

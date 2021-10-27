@@ -1,9 +1,9 @@
-import { Plugin } from "@remixproject/engine";
 import React from "react";
 import PluginManagerIDE from "../PluginManagerIDE/PluginManagerIDE";
 import PropTypes from "prop-types";
+import IDEPlugin from "../IDEplugin/IDEPlugin";
 
-export class HostReactPlugin extends Plugin {
+export class HostReactPlugin extends IDEPlugin {
   constructor(profile) {
     // Remove duplicated if needed
     const methods = Array.from(
@@ -38,10 +38,26 @@ export class HostReactPlugin extends Plugin {
   }
 }
 
+/**
+ *
+ * @param {ReactComponent} Component
+ * @returns {ReactComponent}
+ */
 export function withHostReactPlugin(Component) {
   const InnerHost = props => {
-    const children = useHostReactPlugin({ name: props.hostName });
-    return <Component {...props} viewPlugins={children}></Component>;
+    const { viewPlugins, plugin } = useHostReactPlugin({
+      name: props.hostName
+    });
+    return (
+      <Component
+        {...props}
+        viewPlugins={viewPlugins}
+        call={plugin.call}
+        on={plugin.on}
+        emit={plugin.emit}
+        onTopic={plugin.onTopic}
+      ></Component>
+    );
   };
 
   InnerHost.propTypes = {
@@ -52,19 +68,22 @@ export function withHostReactPlugin(Component) {
 
 export const useHostReactPlugin = ({ name }) => {
   const [elements, setElements] = React.useState([]);
+  const [plugin, setPlugin] = React.useState(DEFAULT_PLUGIN);
   React.useEffect(() => {
-    class InnerHost extends HostReactPlugin {
+    class InnerPlugin extends HostReactPlugin {
       name2Component = {};
       addView(profile, view) {
         if (!(profile.name in this.name2Component)) {
           this.name2Component[profile.name] = view;
         }
         setElements(view);
+        setPlugin(this);
       }
 
       update(viewName, props) {
         if (viewName in this.name2Component) {
           setElements(React.cloneElement(this.name2Component[viewName], props));
+          setPlugin(this);
         }
       }
 
@@ -72,16 +91,24 @@ export const useHostReactPlugin = ({ name }) => {
         if (profile.name in this.name2Component) {
           delete this.name2Component[profile.name];
           setElements([]);
+          setPlugin(DEFAULT_PLUGIN);
         }
       }
     }
-    const plugin = new InnerHost({ name });
+    const plugin = new InnerPlugin({ name });
     PluginManagerIDE.install(name, plugin);
   }, [name]);
 
-  return elements;
+  return { viewPlugins: elements, plugin };
 };
 
 useHostReactPlugin.propTypes = {
   profile: PropTypes.object.isRequired
+};
+
+const DEFAULT_PLUGIN = {
+  call: () => {},
+  emit: () => {},
+  on: () => {},
+  onTopic: () => {}
 };

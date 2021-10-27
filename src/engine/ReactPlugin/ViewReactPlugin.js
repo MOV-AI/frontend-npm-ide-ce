@@ -1,6 +1,6 @@
-import { Plugin } from "@remixproject/engine";
+import IDEPlugin from "../IDEplugin/IDEPlugin";
 
-export class ViewReactPlugin extends Plugin {
+export class ViewReactPlugin extends IDEPlugin {
   /**
    *
    * @returns {React Component}
@@ -8,7 +8,7 @@ export class ViewReactPlugin extends Plugin {
   render() {
     // Abstract method should be implemented in subclasses
   }
-  
+
   async activate() {
     await this.call(
       this.profile.location,
@@ -42,6 +42,9 @@ export function withViewPlugin(ReactComponent) {
           {...this.props}
           call={this.call}
           profile={this.profile}
+          emit={this.emit}
+          on={this.on}
+          onTopic={this.onTopic}
         ></ReactComponent>
       );
     }

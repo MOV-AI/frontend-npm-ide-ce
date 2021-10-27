@@ -6,6 +6,7 @@ import CentralPanel from "../plugins/hosts/CentralPanel/CentralPanel";
 import DrawerPanel from "../plugins/hosts/DrawerPanel/DrawerPanel";
 import SidePanel from "../plugins/hosts/SidePanel/SidePanel";
 import TopBar from "../plugins/hosts/TopBar/TopBar";
+import Explorer from "../plugins/views/Explorer/Explorer";
 import MainMenu from "../plugins/views/MainMenu/MainMenu";
 import "./App.css";
 
@@ -20,24 +21,49 @@ function App() {
 }
 
 function installViewPlugins() {
-  const mainMenuProfile = {
-    name: "mainMenu",
-    location: "leftPanel"
-  };
-  const mainMenu = new MainMenu(mainMenuProfile);
-  PluginManagerIDE.install(mainMenuProfile.name, mainMenu);
+  const plugins = [
+    {
+      profile: { name: "mainMenu", location: "leftPanel" },
+      factory: profile => new MainMenu(profile)
+    },
+    {
+      profile: { name: "explorer", location: "leftDrawer" },
+      factory: profile => new Explorer(profile)
+    }
+  ];
+  plugins.forEach(pluginDescription => {
+    const plugin = pluginDescription.factory(pluginDescription.profile);
+    PluginManagerIDE.install(pluginDescription.profile.name, plugin);
+  });
+  console.log("debug pluginManagerIde", PluginManagerIDE.getInstance());
 }
 
 function getHostedPlugins() {
   return (
     <Grid container direction="column">
       <Grid container alignItems="flex-start">
-        <TopBar style={{ border: "solid 5px purple", width: "100%" }}></TopBar>
+        <TopBar
+          hostName="topBar"
+          style={{ border: "solid 5px purple", width: "100%" }}
+        ></TopBar>
       </Grid>
       <Grid container alignItems="stretch" style={{ flexGrow: 1 }}>
-        <div style={{ border: "solid 5px red" }}>
-          <SidePanel hostName="leftPanel"></SidePanel>
-          <DrawerPanel hostName="leftDrawer"></DrawerPanel>
+        <div
+          style={{
+            border: "solid 5px red",
+            display: "flex",
+            position: "relative"
+          }}
+        >
+          <SidePanel
+            hostName="leftPanel"
+            style={{ height: "100%" }}
+          ></SidePanel>
+          <DrawerPanel
+            hostName="leftDrawer"
+            anchor="left"
+            initialOpenState
+          ></DrawerPanel>
         </div>
         <CentralPanel
           style={{ flexGrow: 1, border: "solid 5px green" }}
@@ -46,11 +72,12 @@ function getHostedPlugins() {
         <DrawerPanel
           hostName="rightDrawer"
           anchor="right"
-          style={{ border: "solid 5px blue" }}
+          style={{ border: "solid 5px blue", position: "relative" }}
         ></DrawerPanel>
       </Grid>
       <Grid container alignItems="flex-end">
         <BottomBar
+          hostName="bottomBar"
           style={{ border: "solid 5px orange", width: "100%" }}
         ></BottomBar>
       </Grid>
