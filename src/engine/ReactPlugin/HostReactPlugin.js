@@ -1,7 +1,7 @@
 import React from "react";
 import PluginManagerIDE from "../PluginManagerIDE/PluginManagerIDE";
 import PropTypes from "prop-types";
-import IDEPlugin from "../IDEplugin/IDEPlugin";
+import IDEPlugin from "../IDEPlugin/IDEPlugin";
 
 export class HostReactPlugin extends IDEPlugin {
   constructor(profile) {

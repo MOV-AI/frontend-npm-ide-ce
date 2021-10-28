@@ -1,5 +1,5 @@
 import React from "react";
-import IDEPlugin from "../IDEplugin/IDEPlugin";
+import IDEPlugin from "../IDEPlugin/IDEPlugin";
 
 export class ViewReactPlugin extends IDEPlugin {
   /**
