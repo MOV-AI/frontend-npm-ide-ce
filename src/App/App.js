@@ -10,6 +10,7 @@ import Explorer from "../plugins/views/Explorer/Explorer";
 import MainMenu from "../plugins/views/MainMenu/MainMenu";
 import Tabs from "../plugins/views/Tabs/Tabs";
 import "./App.css";
+import { withAuthentication } from "@mov-ai/mov-fe-lib-react";
 
 function App() {
   writeMovaiLogo();
@@ -102,4 +103,4 @@ const MOVAI_LOGO = `
 ██║ ╚═╝ ██║ ╚██████═╝   ╚███═╝         ██║  ██║██║
 `;
 
-export default App;
+export default withAuthentication(App);

@@ -38,7 +38,7 @@ const MENUS = [
   {
     name: "debug",
     icon: props => <BugReportIcon {...props}></BugReportIcon>,
-    title: "Nodes",
+    title: "Debug",
     getOnClick: (call, emit) => () => {
       console.log("debug");
     }

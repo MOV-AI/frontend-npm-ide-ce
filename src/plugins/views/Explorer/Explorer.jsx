@@ -13,12 +13,26 @@ import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 //   }
 // }));
 
-const Explorer = ({ profile, call }) => {
+const Explorer = ({ profile, call, on, emit, onTopic }) => {
   //   const classes = useStyles();
+
   return (
     <>
       <h1>Explorer</h1>
-      <Button onClick={() => {}}></Button>
+      <Button
+        onClick={() => {
+          const id = `tab-${Math.floor(10 * Math.random())}`;
+          call("tabs", "open", {
+            id: id,
+            title: id,
+            content: <div>Hello World {id}</div>
+          });
+        }}
+        color="primary"
+        variant="outlined"
+      >
+        {"button"}
+      </Button>
     </>
   );
 };
