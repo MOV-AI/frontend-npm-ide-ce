@@ -11,15 +11,30 @@ import MainMenu from "../plugins/views/MainMenu/MainMenu";
 import Tabs from "../plugins/views/Tabs/Tabs";
 import "./App.css";
 import { withAuthentication } from "@mov-ai/mov-fe-lib-react";
+import DocManager from "../plugins/DocManager/DocManager";
 
 function App() {
   writeMovaiLogo();
 
   React.useEffect(() => {
+    installAppPlugins();
     installViewPlugins();
   }, []);
 
   return <div className="App">{getHostedPlugins()}</div>;
+}
+
+function installAppPlugins() {
+  const plugins = [
+    {
+      profile: { name: "docManager" },
+      factory: profile => new DocManager(profile)
+    }
+  ];
+  plugins.forEach(pluginDescription => {
+    const plugin = pluginDescription.factory(pluginDescription.profile);
+    PluginManagerIDE.install(pluginDescription.profile.name, plugin);
+  });
 }
 
 function installViewPlugins() {
@@ -41,7 +56,6 @@ function installViewPlugins() {
     const plugin = pluginDescription.factory(pluginDescription.profile);
     PluginManagerIDE.install(pluginDescription.profile.name, plugin);
   });
-  console.log("debug pluginManagerIde", PluginManagerIDE.getInstance());
 }
 
 function getHostedPlugins() {
