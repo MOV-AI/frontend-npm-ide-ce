@@ -16,6 +16,12 @@ import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 const Explorer = ({ profile, call, on, emit, onTopic }) => {
   //   const classes = useStyles();
 
+  React.useEffect(() => {
+    const loadDocs = docs => {};
+
+    on("docManager", "loadDocs", loadDocs);
+  }, [on]);
+
   return (
     <>
       <h1>Explorer</h1>

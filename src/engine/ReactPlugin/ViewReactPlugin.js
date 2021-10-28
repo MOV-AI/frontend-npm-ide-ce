@@ -31,7 +31,7 @@ export class ViewReactPlugin extends IDEPlugin {
  * @param {ReactComponent} ReactComponent
  * @returns {ViewReactPlugin}
  */
-export function withViewPlugin(ReactComponent, methods=[]) {
+export function withViewPlugin(ReactComponent, methods = []) {
   const WithPlugin = class extends ViewReactPlugin {
     constructor(profile, props = {}) {
       super({
@@ -66,3 +66,14 @@ export function withViewPlugin(ReactComponent, methods=[]) {
   };
   return WithPlugin;
 }
+
+/**
+ * Hook to allow use of methods in view plugins
+ * @param {ReactRef} ref : React ref
+ * @param {Object} methods : Object maping all the methods to be exported in the plugin
+ */
+export const usePluginMethods = (ref, methods) => {
+  React.useImperativeHandle(ref, () => ({
+    ...methods
+  }));
+};

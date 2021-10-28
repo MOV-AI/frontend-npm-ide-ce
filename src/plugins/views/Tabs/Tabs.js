@@ -3,7 +3,10 @@ import PropTypes from "prop-types";
 import DockLayout from "rc-dock";
 import "rc-dock/dist/rc-dock.css";
 import React from "react";
-import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
+import {
+  withViewPlugin,
+  usePluginMethods
+} from "../../../engine/ReactPlugin/ViewReactPlugin";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -36,6 +39,9 @@ const useLayout = dockRef => {
   const dockLayout = dockRef.current;
   const [layout, setLayout] = React.useState({ ...DEFAULT_LAYOUT });
 
+  /**
+   * Open/Focus tab
+   */
   const open = React.useCallback(
     tabData => {
       tabsById.current.set(tabData.id, tabData);
@@ -63,11 +69,20 @@ const useLayout = dockRef => {
     },
     [dockLayout]
   );
+
+  /**
+   * Close Tab
+   */
   const close = React.useCallback(() => {
     // Close tab dynamically
     console.log("removeTab");
   }, []);
 
+  /**
+   * Load tab data
+   * @param {*} data
+   * @returns
+   */
   const loadTab = data => {
     let { id, content } = tabsById.current.get(data.id);
     return {
@@ -78,17 +93,15 @@ const useLayout = dockRef => {
     };
   };
 
+  /**
+   * Triggered at any manual layout change
+   * @param {*} newLayout
+   */
   const onLayoutChange = newLayout => {
     setLayout(newLayout);
   };
 
   return { layout, open, close, loadTab, onLayoutChange };
-};
-
-const usePluginMethods = (ref, methods) => {
-  React.useImperativeHandle(ref, () => ({
-    ...methods
-  }));
 };
 
 const Tabs = React.forwardRef((props, ref) => {
