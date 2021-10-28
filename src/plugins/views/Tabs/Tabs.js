@@ -6,7 +6,15 @@ import React from "react";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 
 const useStyles = makeStyles(() => ({
-  root: { position: "relative", width: "100%", height: "100%" },
+  root: {
+    position: "relative",
+    width: "100%",
+    height: "100%",
+    "& .dock-layout": {
+      width: "100%",
+      height: "100%"
+    }
+  },
   dockLayout: {
     position: "absolute",
     left: 10,
@@ -14,7 +22,6 @@ const useStyles = makeStyles(() => ({
     right: 10,
     bottom: 10
   }
-
 }));
 
 const DEFAULT_LAYOUT = {
@@ -71,7 +78,7 @@ const useLayout = dockRef => {
     };
   };
 
-  const onLayoutChange = (newLayout) => {
+  const onLayoutChange = newLayout => {
     setLayout(newLayout);
   };
 
