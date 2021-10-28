@@ -22,9 +22,8 @@ const useStyles = (isLeft, isOpen) =>
       }
     }
   });
-  
-var openState = false;
 
+let openState = false;
 function DrawerPanel(props) {
   const {
     viewPlugins,
@@ -40,7 +39,6 @@ function DrawerPanel(props) {
   const classes = useStyles(anchor === "left", open)({ height: height });
 
   React.useEffect(() => {
-    // console.log("debug drawer onTopic", onTopic);
     onTopic(`toggle-${hostName}`, () => {
       setOpen(!openState);
     });
@@ -48,8 +46,8 @@ function DrawerPanel(props) {
   }, [onTopic]);
 
   React.useEffect(() => {
-      openState = open;
-  }, [open])
+    openState = open;
+  }, [open]);
 
   return (
     <Drawer

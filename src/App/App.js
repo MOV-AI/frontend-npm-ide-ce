@@ -8,6 +8,7 @@ import SidePanel from "../plugins/hosts/SidePanel/SidePanel";
 import TopBar from "../plugins/hosts/TopBar/TopBar";
 import Explorer from "../plugins/views/Explorer/Explorer";
 import MainMenu from "../plugins/views/MainMenu/MainMenu";
+import Tabs from "../plugins/views/Tabs/Tabs";
 import "./App.css";
 
 function App() {
@@ -29,6 +30,10 @@ function installViewPlugins() {
     {
       profile: { name: "explorer", location: "leftDrawer" },
       factory: profile => new Explorer(profile)
+    },
+    {
+      profile: { name: "tabs", location: "mainPanel" },
+      factory: profile => new Tabs(profile)
     }
   ];
   plugins.forEach(pluginDescription => {

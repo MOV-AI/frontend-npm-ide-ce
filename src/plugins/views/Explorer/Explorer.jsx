@@ -1,20 +1,26 @@
-import { makeStyles } from "@mui/styles";
+import { Button } from "@material-ui/core";
+// import { makeStyles } from "@mui/styles";
 import PropTypes from "prop-types";
 import React from "react";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 
-const useStyles = makeStyles(() => ({
-  icon: {
-    color: "primary",
-    "&:hover": {
-      cursor: "pointer"
-    }
-  }
-}));
+// const useStyles = makeStyles(() => ({
+//   icon: {
+//     color: "primary",
+//     "&:hover": {
+//       cursor: "pointer"
+//     }
+//   }
+// }));
 
 const Explorer = ({ profile, call }) => {
-  const classes = useStyles();
-  return <h1>Explorer</h1>;
+  //   const classes = useStyles();
+  return (
+    <>
+      <h1>Explorer</h1>
+      <Button onClick={() => {}}></Button>
+    </>
+  );
 };
 
 export default withViewPlugin(Explorer);
