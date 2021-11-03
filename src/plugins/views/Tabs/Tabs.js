@@ -1,4 +1,4 @@
-import { makeStyles } from "@mui/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import DockLayout from "rc-dock";
 import "rc-dock/dist/rc-dock.css";
