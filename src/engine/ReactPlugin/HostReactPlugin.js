@@ -77,13 +77,11 @@ export const useHostReactPlugin = ({ name }) => {
           this.name2Component[profile.name] = view;
         }
         setElements(view);
-        setPlugin(this);
       }
 
       update(viewName, props) {
         if (viewName in this.name2Component) {
           setElements(React.cloneElement(this.name2Component[viewName], props));
-          setPlugin(this);
         }
       }
 
@@ -91,12 +89,12 @@ export const useHostReactPlugin = ({ name }) => {
         if (profile.name in this.name2Component) {
           delete this.name2Component[profile.name];
           setElements([]);
-          setPlugin(DEFAULT_PLUGIN);
         }
       }
     }
-    const plugin = new InnerPlugin({ name });
-    PluginManagerIDE.install(name, plugin);
+    const _plugin = new InnerPlugin({ name });
+    PluginManagerIDE.install(name, _plugin);
+    setPlugin(_plugin);
   }, [name]);
 
   return { viewPlugins: elements, plugin };

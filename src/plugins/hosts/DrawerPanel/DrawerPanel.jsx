@@ -10,20 +10,18 @@ const useStyles = (isLeft, isOpen) =>
       overflow: "hidden",
       position: "relative",
       [isLeft ? "marginRight" : "marginLeft"]: "auto",
-      width: isOpen ? 300 : "auto",
+      width: isOpen ? 340 : "auto",
       height: "100%",
       "& .MuiBackdrop-root": {
         display: "none"
       },
       "& .MuiDrawer-paper": {
-        width: 300,
+        width: 340,
         position: "absolute",
         transition: "none !important"
       }
     }
   });
-
-let openState = false;
 function DrawerPanel(props) {
   const {
     viewPlugins,
@@ -35,19 +33,25 @@ function DrawerPanel(props) {
     initialOpenState
   } = props;
   const [open, setOpen] = React.useState(initialOpenState);
-  openState = initialOpenState;
   const classes = useStyles(anchor === "left", open)({ height: height });
 
   React.useEffect(() => {
+    // Handle drawer toggle
     onTopic(`toggle-${hostName}`, () => {
-      setOpen(!openState);
+      setOpen(prevState => {
+        return !prevState;
+      });
+    });
+    // Handle dynamic drawer open
+    onTopic(`open-${hostName}`, () => {
+      setOpen(true);
+    });
+    // Handle dynamic drawer close
+    onTopic(`close-${hostName}`, () => {
+      setOpen(false);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onTopic]);
-
-  React.useEffect(() => {
-    openState = open;
-  }, [open]);
 
   return (
     <Drawer

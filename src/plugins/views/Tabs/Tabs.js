@@ -34,7 +34,7 @@ const DEFAULT_LAYOUT = {
   }
 };
 
-const useLayout = dockRef => {
+const useLayout = (props, dockRef) => {
   const tabsById = React.useRef(new Map());
   const dockLayout = dockRef.current;
   const [layout, setLayout] = React.useState({ ...DEFAULT_LAYOUT });
@@ -84,10 +84,10 @@ const useLayout = dockRef => {
    * @returns
    */
   const loadTab = data => {
-    let { id, content } = tabsById.current.get(data.id);
+    let { id, title, content } = tabsById.current.get(data.id);
     return {
       id: id,
-      title: id,
+      title: title,
       content: content,
       closable: true
     };
@@ -97,7 +97,8 @@ const useLayout = dockRef => {
    * Triggered at any manual layout change
    * @param {*} newLayout
    */
-  const onLayoutChange = newLayout => {
+  const onLayoutChange = (newLayout, tabId, direction) => {
+    props.call("rightDrawer", "update", `${tabId}-menu`);
     setLayout(newLayout);
   };
 
@@ -107,7 +108,10 @@ const useLayout = dockRef => {
 const Tabs = React.forwardRef((props, ref) => {
   const classes = useStyles();
   const dockRef = React.useRef();
-  const { layout, open, close, onLayoutChange, loadTab } = useLayout(dockRef);
+  const { layout, open, close, onLayoutChange, loadTab } = useLayout(
+    props,
+    dockRef
+  );
 
   usePluginMethods(ref, {
     open,

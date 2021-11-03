@@ -11,17 +11,19 @@ export class ViewReactPlugin extends IDEPlugin {
   }
 
   async activate() {
-    await this.call(
-      this.profile.location,
-      "addView",
-      this.profile,
-      this.render()
-    );
+    if (this.profile.location)
+      await this.call(
+        this.profile.location,
+        "addView",
+        this.profile,
+        this.render()
+      );
     super.activate();
   }
 
   deactivate() {
-    this.call(this.profile.location, "removeView", this.profile);
+    if (this.profile.location)
+      this.call(this.profile.location, "removeView", this.profile);
     super.deactivate();
   }
 }
