@@ -1,4 +1,4 @@
-import Grid from "@mui/material/Grid";
+import Grid from "@material-ui/core/Grid";
 import React from "react";
 import PluginManagerIDE from "../engine/PluginManagerIDE/PluginManagerIDE";
 import BottomBar from "../plugins/hosts/BottomBar/BottomBar";
