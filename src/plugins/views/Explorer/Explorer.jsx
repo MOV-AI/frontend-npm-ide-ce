@@ -8,19 +8,17 @@ import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 
 const useStyles = makeStyles(() => ({
-  icon: {
-    color: "primary",
-    "&:hover": {
-      cursor: "pointer"
-    }
+  typography: {
+    overflowY: "auto",
+    overflowX: "hidden",
+    justifyContent: "center",
+    width: "100%"
   }
 }));
 
-let openedPanelIndex = undefined;
-
 const Explorer = props => {
-  const { profile, call, on, emit, onTopic } = props;
-  // const classes = useStyles();
+  const { call, on } = props;
+  const classes = useStyles();
   const [data, setData] = React.useState([]);
 
   React.useEffect(() => {
@@ -61,7 +59,6 @@ const Explorer = props => {
             expanded: !isExpanded
           });
 
-          openedPanelIndex = node.id;
           // Close other panels
           prevData
             .filter(elem => elem.id !== node.id)
@@ -73,24 +70,21 @@ const Explorer = props => {
           return nextData;
         });
       },
-      1: () => {}
+      1: () => {
+        call("tabs", "open", {
+          id: node.url,
+          title: node.name,
+          content: <div>Hello World {node.name}</div>
+        });
+      }
     };
     _get(deepnessToAction, node.deepness, () => {})();
-    (deepnessToAction[node.deepness] || (() => {}))();
   };
 
   return (
     <>
       <h1>Explorer</h1>
-      <Typography
-        component="div"
-        style={{
-          overflowY: "auto",
-          overflowX: "hidden",
-          justifyContent: "center",
-          width: "100%"
-        }}
-      >
+      <Typography component="div" className={classes.typography}>
         <VirtualizedTree
           onClickNode={node => {
             console.log("debug click node", node);
