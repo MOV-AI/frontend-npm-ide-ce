@@ -1,12 +1,12 @@
 import PropTypes from "prop-types";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import { VerticalBar, ProfileMenu } from "@mov-ai/mov-fe-lib-react";
-import BugReportIcon from "@mui/icons-material/BugReport";
-import CompareIcon from "@mui/icons-material/Compare";
-import TextSnippetIcon from "@mui/icons-material/TextSnippet";
+import BugReportIcon from "@material-ui/icons/BugReport";
+import CompareIcon from "@material-ui/icons/Compare";
+import TextSnippetIcon from "@material-ui/icons/Description";
 import { Tooltip } from "@material-ui/core";
-import AndroidIcon from "@mui/icons-material/Android";
-import { makeStyles } from "@mui/styles";
+import AndroidIcon from "@material-ui/icons/Android";
+import { makeStyles } from "@material-ui/core/styles";
 import React from "react";
 
 const useStyles = makeStyles(() => ({
