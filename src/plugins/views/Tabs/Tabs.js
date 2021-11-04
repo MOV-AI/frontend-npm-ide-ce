@@ -98,10 +98,11 @@ const useLayout = (props, dockRef) => {
    * @param {*} newLayout
    */
   const onLayoutChange = (newLayout, tabId, direction) => {
+    setLayout(newLayout);
+    if (!tabId) return;
     props.call("rightDrawer", "resetBookmarks").then(() => {
       props.emit(`${tabId}-active`);
     });
-    setLayout(newLayout);
   };
 
   return { layout, open, close, loadTab, onLayoutChange };
