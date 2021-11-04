@@ -4,7 +4,7 @@ import { Divider, List, ListItem, ListItemText } from "@material-ui/core";
 const Menu = ({ id, name, lastUpdate }) => {
   return (
     <div>
-      <h2>{name}</h2>
+      <h2 style={{ textAlign: "center" }}>{name}</h2>
       <List
         sx={{
           width: "100%",

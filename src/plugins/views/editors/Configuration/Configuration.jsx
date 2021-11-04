@@ -144,7 +144,7 @@ const Configuration = ({ id, name, profile, call, on, emit, alert }) => {
       >
         <MonacoCodeEditor
           ref={editorRef}
-          style={{ flexGrow: 1, height: "100%" }}
+          style={{ flexGrow: 1, height: "100%", width: "100%" }}
           value={code}
           language={type}
           theme={"light"}
@@ -165,7 +165,7 @@ const Configuration = ({ id, name, profile, call, on, emit, alert }) => {
       className={classes.container}
       onFocus={() => {
         console.log("debug onFocus", id);
-        call("rightDrawer", "update", `${id}-menu`);
+        renderRightMenu();
       }}
     >
       <AppBar position="static" color="inherit">
