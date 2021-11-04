@@ -1,23 +1,23 @@
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import Collapse from "@mui/material/Collapse";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
+import ExpandLess from "@material-ui/icons/ExpandLess";
+import ExpandMore from "@material-ui/icons/ExpandMore";
+import Collapse from "@material-ui/core/Collapse";
+import List from "@material-ui/core/List";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItem from "@material-ui/core/ListItem";
 import React from "react";
 import Search from "../../../components/Search/Search";
 
 function CollapseList(props) {
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const handleClick = () => {
     setOpen(!open);
   };
   return (
     <>
-      <ListItemButton onClick={handleClick}>
+      <ListItem onClick={handleClick}>
         <ListItemText primary={props.node.name} />
         {open ? <ExpandLess /> : <ExpandMore />}
-      </ListItemButton>
+      </ListItem>
       <Collapse in={open} timeout="auto" unmountOnExit>
         {renderTree(props.node.children)}
       </Collapse>
@@ -31,9 +31,9 @@ function renderTree(tree) {
       {tree.map(node => {
         if (node.children.length === 0) {
           return (
-            <ListItemButton sx={{ pl: 4 }}>
+            <ListItem sx={{ pl: 4 }}>
               <ListItemText primary={node.name} />
-            </ListItemButton>
+            </ListItem>
           );
         }
         return <CollapseList node={node} />;

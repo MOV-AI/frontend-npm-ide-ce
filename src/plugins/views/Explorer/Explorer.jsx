@@ -1,4 +1,4 @@
-import { makeStyles } from "@mui/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import React from "react";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
@@ -13,48 +13,29 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const INITIAL_SCOPE_DATA = [
-  {
-    id: 1,
-    name: "Callbacks",
-    scope: "Callback",
-    children: []
-  },
-  {
-    id: 2,
-    name: "Configurations",
-    scope: "Configuration",
-    children: []
-  },
-  {
-    id: 3,
-    name: "Flows",
-    scope: "Flow",
-    children: []
-  },
-  {
-    id: 4,
-    name: "Nodes",
-    scope: "Node",
-    children: []
-  }
-];
-
-const Explorer = ({ profile, call, on, emit, onTopic }) => {
+const Explorer = props => {
+  const { profile, call, on, emit, onTopic } = props;
   // const classes = useStyles();
-  const [data, setData] = React.useState(INITIAL_SCOPE_DATA);
+  const [data, setData] = React.useState([]);
 
   React.useEffect(() => {
     const loadDocs = docs => {
-      const newData = data.map(e => ({
-        ...e,
-        children: docs.has(e.scope) ? docs.get(e.scope) : []
-      }));
-      setData(newData);
+      setData(_ => {
+        const docsByType = docs.getDocumentsByType();
+        return Object.values(docsByType).map(docType => {
+          const docsFromType = docType.docs;
+          const docTypeName = docType.name;
+          return {
+            name: docTypeName,
+            children: Object.keys(docsFromType).map(key => {
+              return { name: docsFromType[key].name, children: [] };
+            })
+          };
+        });
+      });
     };
-
     on("docManager", "loadDocs", loadDocs);
-  }, [on, data]);
+  }, [on]);
 
   return (
     <>
