@@ -4,7 +4,7 @@ import _get from "lodash/get";
 import _set from "lodash/set";
 import PropTypes from "prop-types";
 import React from "react";
-import VirtualizedTree from "../../../components/VirtualizedTree/VirtualizedTree";
+import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 
 const useStyles = makeStyles(() => ({
