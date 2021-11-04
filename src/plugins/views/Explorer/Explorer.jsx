@@ -1,13 +1,10 @@
 import { Button } from "@material-ui/core";
-// import { makeStyles } from "@mui/styles";
+// import { makeStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import React from "react";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
+import { List, ListItem, ListItemText } from "@material-ui/core";
 import Configuration from "../editors/Configuration/Configuration";
-import { ListItemButton } from "@mui/material";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 
 // const useStyles = makeStyles(() => ({
@@ -52,25 +49,25 @@ const Explorer = ({ profile, call, on, emit, onTopic }) => {
       <h3>Configuration</h3>
       <List>
         {mockedData.map(id => (
-          <ListItem disablePadding key={id}>
-            <ListItemButton
-              onClick={async () => {
-                const tabName = `${id}.conf`;
-                const path = `global/Configuration/${id}`;
-                const viewPlugin = new Configuration(
-                  { name: path },
-                  { id: path, name: id }
-                );
-                await PluginManagerIDE.install(path, viewPlugin);
-                call("tabs", "open", {
-                  id: path,
-                  title: tabName,
-                  content: viewPlugin.render()
-                });
-              }}
-            >
-              <ListItemText primary={id} />
-            </ListItemButton>
+          <ListItem
+            button
+            key={id}
+            onClick={async () => {
+              const tabName = `${id}.conf`;
+              const path = `global/Configuration/${id}`;
+              const viewPlugin = new Configuration(
+                { name: path },
+                { id: path, name: id }
+              );
+              await PluginManagerIDE.install(path, viewPlugin);
+              call("tabs", "open", {
+                id: path,
+                title: tabName,
+                content: viewPlugin.render()
+              });
+            }}
+          >
+            <ListItemText primary={id} />
           </ListItem>
         ))}
       </List>

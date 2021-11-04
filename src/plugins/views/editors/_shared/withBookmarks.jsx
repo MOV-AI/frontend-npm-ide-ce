@@ -1,18 +1,17 @@
 import React from "react";
-import IconButton from "@mui/material/IconButton";
-import { useTheme } from "@mui/material/styles";
-import { makeStyles } from "@mui/styles";
+import IconButton from "@material-ui/core/IconButton";
+import { makeStyles } from "@material-ui/core/styles";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 
-const useStyles = (side, oppositeSide, theme) =>
+const useStyles = oppositeSide =>
   makeStyles(() => ({
     panel: {
       position: "absolute",
       [oppositeSide]: -40,
       background: "#fff0",
       top: 40,
-      maxWidth: 40,
-      zIndex: 999
+      width: 40,
+      zIndex: 9999
     },
     bookmark: {
       margin: "10px 0 !important",
@@ -29,10 +28,9 @@ const withBookmarks = Component => {
     const [renderedView, setRenderedView] = React.useState(<></>);
     // Refs
     const drawerRef = React.useRef();
-    const positionSide = props.anchor === "left" ? "right" : "left";
+    const oppositeSide = props.anchor === "left" ? "right" : "left";
     // Style hooks
-    const theme = useTheme();
-    const classes = useStyles(props.anchor, positionSide, theme)();
+    const classes = useStyles(oppositeSide)();
 
     //========================================================================================
     /*                                                                                      *

@@ -11,7 +11,7 @@ import Explorer from "../plugins/views/Explorer/Explorer";
 import MainMenu from "../plugins/views/MainMenu/MainMenu";
 import Tabs from "../plugins/views/Tabs/Tabs";
 import Placeholder from "../plugins/views/Placeholder/Placeholder";
-import Grid from "@mui/material/Grid";
+import Grid from "@material-ui/core/Grid";
 import { withAuthentication } from "@mov-ai/mov-fe-lib-react";
 
 function App() {

@@ -1,12 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { SCOPES } from "../../../../utils/Constants";
-import { makeStyles } from "@mui/styles";
-// import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
+import { makeStyles } from "@material-ui/core/styles";
+import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
 import { withViewPlugin } from "../../../../engine/ReactPlugin/ViewReactPlugin";
-import { AppBar, ToggleButton, ToggleButtonGroup } from "@mui/material";
-import { Toolbar } from "@material-ui/core";
-import InfoIcon from "@mui/icons-material/Info";
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
+import { AppBar, Toolbar } from "@material-ui/core";
+import InfoIcon from "@material-ui/icons/Info";
 import Menu from "./Menu";
 
 const useStyles = makeStyles(() => ({
@@ -46,7 +46,7 @@ const Configuration = ({ id, name, profile, call, on, emit, alert }) => {
 
   //========================================================================================
   /*                                                                                      *
-   *                                   React life cycles                                   *
+   *                                   React lifecycles                                   *
    *                                                                                      */
   //========================================================================================
 
@@ -142,12 +142,12 @@ const Configuration = ({ id, name, profile, call, on, emit, alert }) => {
         className={classes.container}
         style={{ maxHeight: "calc(100% - 48px)" }}
       >
-        <textarea
+        <MonacoCodeEditor
           ref={editorRef}
           style={{ flexGrow: 1, height: "100%" }}
           value={code}
           language={type}
-          // theme={theme.codeEditor.theme}
+          theme={"light"}
           // options={{ readOnly: !editable }}
           onLoad={editor => {
             if (!id) editor.focus();
