@@ -40,23 +40,33 @@ export class HostReactPlugin extends IDEPlugin {
 
 /**
  *
- * @param {ReactComponent} Component
+ * @param {ReactComponent} ReactComponent
  * @returns {ReactComponent}
  */
-export function withHostReactPlugin(Component) {
+export function withHostReactPlugin(ReactComponent, methods = []) {
   const InnerHost = props => {
-    const { viewPlugins, plugin } = useHostReactPlugin({
-      name: props.hostName
-    });
+    const ref = React.useRef();
+    const RefComponent = React.forwardRef((props, ref) =>
+      ReactComponent(props, ref)
+    );
+    const { viewPlugins, plugin } = useHostReactPlugin(
+      {
+        name: props.hostName,
+        methods
+      },
+      ref
+    );
+
     return (
-      <Component
+      <RefComponent
         {...props}
+        ref={ref}
         viewPlugins={viewPlugins}
-        call={plugin.call}
-        on={plugin.on}
-        emit={plugin.emit}
         onTopic={plugin.onTopic}
-      ></Component>
+        call={plugin.call}
+        emit={plugin.emit}
+        on={plugin.on}
+      />
     );
   };
 
@@ -66,12 +76,23 @@ export function withHostReactPlugin(Component) {
   return InnerHost;
 }
 
-export const useHostReactPlugin = ({ name }) => {
+export const useHostReactPlugin = ({ name, methods }, componentRef) => {
   const [elements, setElements] = React.useState([]);
   const [plugin, setPlugin] = React.useState(DEFAULT_PLUGIN);
   React.useEffect(() => {
     class InnerPlugin extends HostReactPlugin {
-      name2Component = {};
+      constructor(profile) {
+        super(profile);
+        this.name2Component = {};
+        this.initMethods();
+      }
+
+      initMethods = () => {
+        methods.forEach(name => {
+          this[name] = (...args) => componentRef.current[name](...args);
+        });
+      };
+
       addView(profile, view) {
         if (!(profile.name in this.name2Component)) {
           this.name2Component[profile.name] = view;
@@ -92,10 +113,10 @@ export const useHostReactPlugin = ({ name }) => {
         }
       }
     }
-    const _plugin = new InnerPlugin({ name });
+    const _plugin = new InnerPlugin({ name, methods });
     PluginManagerIDE.install(name, _plugin);
     setPlugin(_plugin);
-  }, [name]);
+  }, [name, methods, componentRef]);
 
   return { viewPlugins: elements, plugin };
 };

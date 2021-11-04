@@ -6,7 +6,7 @@ import { makeStyles } from "@mui/styles";
 import { withViewPlugin } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { AppBar, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { Toolbar } from "@material-ui/core";
-import PluginManagerIDE from "../../../../engine/PluginManagerIDE/PluginManagerIDE";
+import InfoIcon from "@mui/icons-material/Info";
 import Menu from "./Menu";
 
 const useStyles = makeStyles(() => ({
@@ -31,6 +31,18 @@ const Configuration = ({ id, name, profile, call, on, emit, alert }) => {
   const classes = useStyles();
   // React Refs
   const editorRef = React.useRef();
+
+  const renderRightMenu = React.useCallback(() => {
+    const menuName = `${id}-detail-menu`;
+    // add bookmark
+    call("rightDrawer", "setBookmark", {
+      [menuName]: {
+        icon: <InfoIcon></InfoIcon>,
+        name: menuName,
+        view: <Menu id={id} name={name} lastUpdate={lastUpdate}></Menu>
+      }
+    });
+  }, [call, id, lastUpdate, name]);
 
   //========================================================================================
   /*                                                                                      *
@@ -57,22 +69,21 @@ const Configuration = ({ id, name, profile, call, on, emit, alert }) => {
     // call("docManager", "read", id).then(data => loadData(data));
     // Open right menu details
     emit("open-rightDrawer");
+    on("tabs", `${id}-active`, () => {
+      renderRightMenu();
+    });
     // Subscribed to changes
     on("docManager", "update", data => {
       if (data.id === id) loadData(data);
     });
     // component will unmount
     return () => {};
-  }, [profile, on, id, emit, call]);
+  }, [profile, on, id, emit, renderRightMenu]);
 
   // Render right menu
   React.useEffect(() => {
-    const viewPlugin = new Menu(
-      { name: `${id}-menu`, location: "rightDrawer" },
-      { id, name, lastUpdate }
-    );
-    PluginManagerIDE.install(`${id}-menu`, viewPlugin);
-  }, [id, name, lastUpdate]);
+    renderRightMenu();
+  }, [renderRightMenu]);
 
   //========================================================================================
   /*                                                                                      *

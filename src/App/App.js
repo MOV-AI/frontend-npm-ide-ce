@@ -1,6 +1,7 @@
-import Grid from "@mui/material/Grid";
 import React from "react";
+import "./App.css";
 import PluginManagerIDE from "../engine/PluginManagerIDE/PluginManagerIDE";
+import DocManager from "../plugins/DocManager/DocManager";
 import BottomBar from "../plugins/hosts/BottomBar/BottomBar";
 import CentralPanel from "../plugins/hosts/CentralPanel/CentralPanel";
 import DrawerPanel from "../plugins/hosts/DrawerPanel/DrawerPanel";
@@ -9,9 +10,9 @@ import TopBar from "../plugins/hosts/TopBar/TopBar";
 import Explorer from "../plugins/views/Explorer/Explorer";
 import MainMenu from "../plugins/views/MainMenu/MainMenu";
 import Tabs from "../plugins/views/Tabs/Tabs";
-import "./App.css";
+import Placeholder from "../plugins/views/Placeholder/Placeholder";
+import Grid from "@mui/material/Grid";
 import { withAuthentication } from "@mov-ai/mov-fe-lib-react";
-import DocManager from "../plugins/DocManager/DocManager";
 
 function App() {
   writeMovaiLogo();
@@ -50,6 +51,10 @@ function installViewPlugins() {
     {
       profile: { name: "tabs", location: "mainPanel" },
       factory: profile => new Tabs(profile)
+    },
+    {
+      profile: { name: "placeholder", location: "rightDrawer" },
+      factory: profile => new Placeholder(profile)
     }
   ];
   plugins.forEach(pluginDescription => {

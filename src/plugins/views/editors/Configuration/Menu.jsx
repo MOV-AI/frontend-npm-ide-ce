@@ -1,6 +1,5 @@
 import React from "react";
 import { Divider, List, ListItem, ListItemText } from "@material-ui/core";
-import { withViewPlugin } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 
 const Menu = ({ id, name, lastUpdate }) => {
   return (
@@ -29,4 +28,4 @@ const Menu = ({ id, name, lastUpdate }) => {
   );
 };
 
-export default withViewPlugin(Menu);
+export default Menu;

@@ -3,6 +3,10 @@ import { makeStyles } from "@mui/styles";
 import PropTypes from "prop-types";
 import React from "react";
 import { withHostReactPlugin } from "../../../engine/ReactPlugin/HostReactPlugin";
+import { usePluginMethods } from "../../../engine/ReactPlugin/ViewReactPlugin";
+import withBookmarks, {
+  exposedMethods
+} from "../../views/editors/_shared/withBookmarks";
 
 const useStyles = (isLeft, isOpen) =>
   makeStyles({
@@ -22,52 +26,93 @@ const useStyles = (isLeft, isOpen) =>
       }
     }
   });
-function DrawerPanel(props) {
-  const {
-    viewPlugins,
-    onTopic,
-    hostName,
-    style,
-    anchor,
-    height,
-    initialOpenState
-  } = props;
+
+const DrawerPanel = React.forwardRef((props, ref) => {
+  const { viewPlugins, onTopic, hostName, style, anchor, initialOpenState } =
+    props;
   const [open, setOpen] = React.useState(initialOpenState);
-  const classes = useStyles(anchor === "left", open)({ height: height });
+  const classes = useStyles(anchor === "left", open)();
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                   Component's methods                                *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Toggle drawer
+   */
+  const toggleDrawer = React.useCallback(() => {
+    setOpen(prevState => {
+      return !prevState;
+    });
+  }, []);
+
+  /**
+   * Open Drawer
+   */
+  const openDrawer = React.useCallback(() => {
+    setOpen(true);
+  }, []);
+
+  /**
+   * Close Drawer
+   */
+  const closeDrawer = React.useCallback(() => {
+    setOpen(false);
+  }, []);
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                   React lifecycles                                   *
+   *                                                                                      */
+  //========================================================================================
 
   React.useEffect(() => {
     // Handle drawer toggle
-    onTopic(`toggle-${hostName}`, () => {
-      setOpen(prevState => {
-        return !prevState;
-      });
-    });
+    onTopic(`toggle-${hostName}`, toggleDrawer);
     // Handle dynamic drawer open
-    onTopic(`open-${hostName}`, () => {
-      setOpen(true);
-    });
+    onTopic(`open-${hostName}`, openDrawer);
     // Handle dynamic drawer close
-    onTopic(`close-${hostName}`, () => {
-      setOpen(false);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onTopic]);
+    onTopic(`close-${hostName}`, closeDrawer);
+  }, [onTopic, hostName, toggleDrawer, openDrawer, closeDrawer]);
+
+  /**
+   * Expose methods
+   */
+  usePluginMethods(ref, {
+    toggleDrawer,
+    openDrawer,
+    closeDrawer
+  });
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                         Render                                       *
+   *                                                                                      */
+  //========================================================================================
 
   return (
     <Drawer
       id={hostName}
-      style={{ ...style }}
       open={open}
-      className={classes.drawer}
-      variant="persistent"
       anchor={anchor}
+      variant="persistent"
+      style={{ ...style }}
+      className={classes.drawer}
     >
+      {props.children}
       {viewPlugins}
     </Drawer>
   );
-}
+});
 
-export default withHostReactPlugin(DrawerPanel);
+DrawerPanel.pluginMethods = [...exposedMethods];
+
+export default withHostReactPlugin(
+  withBookmarks(DrawerPanel),
+  DrawerPanel.pluginMethods
+);
 
 DrawerPanel.propTypes = {
   hostName: PropTypes.string.isRequired,

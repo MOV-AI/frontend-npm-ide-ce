@@ -34,6 +34,9 @@ export class ViewReactPlugin extends IDEPlugin {
  * @returns {ViewReactPlugin}
  */
 export function withViewPlugin(ReactComponent, methods = []) {
+  const RefComponent = React.forwardRef((props, ref) =>
+    ReactComponent(props, ref)
+  );
   const WithPlugin = class extends ViewReactPlugin {
     constructor(profile, props = {}) {
       super({
@@ -54,9 +57,9 @@ export function withViewPlugin(ReactComponent, methods = []) {
 
     render() {
       return (
-        <ReactComponent
-          ref={this.ref}
+        <RefComponent
           {...this.props}
+          ref={this.ref}
           call={this.call}
           profile={this.profile}
           emit={this.emit}

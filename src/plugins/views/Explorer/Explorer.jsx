@@ -74,14 +74,6 @@ const Explorer = ({ profile, call, on, emit, onTopic }) => {
           </ListItem>
         ))}
       </List>
-      {/* <Button
-        fullWidth
-        color="primary"
-        variant="contained"
-        onClick={}
-      >
-        project
-      </Button> */}
     </div>
   );
 };

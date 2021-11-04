@@ -98,14 +98,16 @@ const useLayout = (props, dockRef) => {
    * @param {*} newLayout
    */
   const onLayoutChange = (newLayout, tabId, direction) => {
-    props.call("rightDrawer", "update", `${tabId}-menu`);
+    props.call("rightDrawer", "resetBookmarks").then(() => {
+      props.emit(`${tabId}-active`);
+    });
     setLayout(newLayout);
   };
 
   return { layout, open, close, loadTab, onLayoutChange };
 };
 
-const Tabs = React.forwardRef((props, ref) => {
+const Tabs = (props, ref) => {
   const classes = useStyles();
   const dockRef = React.useRef();
   const { layout, open, close, onLayoutChange, loadTab } = useLayout(
@@ -129,7 +131,7 @@ const Tabs = React.forwardRef((props, ref) => {
       />
     </div>
   );
-});
+};
 
 Tabs.pluginMethods = ["open", "close"];
 
@@ -144,5 +146,5 @@ Tabs.propTypes = {
 };
 
 Tabs.defaultProps = {
-  profile: { name: "explorer" }
+  profile: { name: "tabs" }
 };
