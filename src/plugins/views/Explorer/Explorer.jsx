@@ -1,8 +1,11 @@
+import { Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import _get from "lodash/get";
+import _set from "lodash/set";
 import PropTypes from "prop-types";
 import React from "react";
+import VirtualizedTree from "../../../components/VirtualizedTree/VirtualizedTree";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import ExplorerTree from "./ExplorerTree";
 
 const useStyles = makeStyles(() => ({
   icon: {
@@ -13,6 +16,8 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
+let openedPanelIndex = undefined;
+
 const Explorer = props => {
   const { profile, call, on, emit, onTopic } = props;
   // const classes = useStyles();
@@ -22,13 +27,19 @@ const Explorer = props => {
     const loadDocs = docs => {
       setData(_ => {
         const docsByType = docs.getDocumentsByType();
-        return Object.values(docsByType).map(docType => {
+        return Object.values(docsByType).map((docType, id) => {
           const docsFromType = docType.docs;
           const docTypeName = docType.name;
           return {
+            id,
             name: docTypeName,
-            children: Object.keys(docsFromType).map(key => {
-              return { name: docsFromType[key].name, children: [] };
+            children: Object.keys(docsFromType).map((key, innerId) => {
+              const doc = docsFromType[key];
+              return {
+                id: innerId,
+                name: doc.name,
+                url: doc.url
+              };
             })
           };
         });
@@ -37,10 +48,73 @@ const Explorer = props => {
     on("docManager", "loadDocs", loadDocs);
   }, [on]);
 
+  const requestScopeVersions = node => {
+    const deepnessToAction = {
+      0: () => {
+        // Toggle the expansion of the clicked panel
+        setData(prevData => {
+          const nextData = [...prevData];
+          const isExpanded = _get(
+            prevData,
+            [node.id, "state", "expanded"],
+            false
+          );
+          _set(nextData, [node.id, "state"], {
+            expanded: !isExpanded
+          });
+
+          openedPanelIndex = node.id;
+          // Close other panels
+          prevData
+            .filter(elem => elem.id !== node.id)
+            .forEach(panel => {
+              _set(nextData, [panel.id, "state"], {
+                expanded: false
+              });
+            });
+          return nextData;
+        });
+      },
+      1: () => {}
+    };
+    _get(deepnessToAction, node.deepness, () => {})();
+    (deepnessToAction[node.deepness] || (() => {}))();
+  };
+
   return (
     <>
       <h1>Explorer</h1>
-      <ExplorerTree tree={data} onClickNode={node => {}} />
+      <Typography
+        component="div"
+        style={{
+          overflowY: "auto",
+          overflowX: "hidden",
+          justifyContent: "center",
+          width: "100%"
+        }}
+      >
+        <VirtualizedTree
+          onClickNode={node => {
+            console.log("debug click node", node);
+            requestScopeVersions(node);
+          }}
+          data={data}
+          handleChange={nodes => {
+            console.log("debug handle change", nodes);
+          }}
+          handleCopyClick={node => {
+            console.log("debug copy node", node);
+          }}
+          handleDeleteClick={node => {
+            console.log("debug delete node", node);
+          }}
+          handleCompareClick={node => {
+            console.log("debug compare click", node);
+          }}
+          showIcons={true}
+          height={props.height}
+        ></VirtualizedTree>
+      </Typography>
     </>
   );
 };
