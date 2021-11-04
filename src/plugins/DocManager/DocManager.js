@@ -39,8 +39,23 @@ class DocManager extends IDEPlugin {
     this.docsSubscribe();
   }
 
-  getDocumentsByType() {
-    return this.docsMap;
+  /**
+   *
+   * @returns {Array<String>} Array<documentType: String>
+   */
+  getDocTypes() {
+    return Object.keys(this.docsMap);
+  }
+
+  /**
+   *
+   * @param {String} type
+   * @returns {Array<Model>} Array<model: Model>
+   */
+  getDocsFromType(type) {
+    const answer = this.docsMap[type]?.docs;
+    if (!answer) return [];
+    return Object.values(answer);
   }
 
   //========================================================================================

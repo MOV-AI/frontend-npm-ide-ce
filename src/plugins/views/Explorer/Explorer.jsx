@@ -26,21 +26,19 @@ const Explorer = props => {
   React.useEffect(() => {
     const loadDocs = docs => {
       setData(_ => {
-        const docsByType = docs.getDocumentsByType();
-        return Object.values(docsByType).map((docType, id) => {
-          const docsFromType = docType.docs;
-          const docTypeName = docType.name;
+        return Object.values(docs.getDocTypes()).map((docTypeName, id) => {
           return {
             id,
             name: docTypeName,
-            children: Object.keys(docsFromType).map((key, innerId) => {
-              const doc = docsFromType[key];
-              return {
-                id: innerId,
-                name: doc.name,
-                url: doc.url
-              };
-            })
+            children: docs
+              .getDocsFromType(docTypeName)
+              .map((docFromType, innerId) => {
+                return {
+                  id: innerId,
+                  name: docFromType.name,
+                  url: docFromType.url
+                };
+              })
           };
         });
       });
