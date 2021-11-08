@@ -20,7 +20,7 @@ const useStyles = (side, oppositeSide) =>
       border: "solid 1px gray !important",
       [`border-${side}`]: "none !important",
       borderRadius: "0px !important",
-      background: "white"
+      background: "white !important"
     }
   }));
 
