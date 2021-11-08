@@ -1,44 +1,112 @@
-import { Button } from "@material-ui/core";
-// import { makeStyles } from "@mui/styles";
+import { Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import _get from "lodash/get";
+import _set from "lodash/set";
 import PropTypes from "prop-types";
 import React from "react";
+import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 
-// const useStyles = makeStyles(() => ({
-//   icon: {
-//     color: "primary",
-//     "&:hover": {
-//       cursor: "pointer"
-//     }
-//   }
-// }));
+const useStyles = makeStyles(() => ({
+  typography: {
+    overflowY: "auto",
+    overflowX: "hidden",
+    justifyContent: "center",
+    width: "100%"
+  }
+}));
 
-const Explorer = ({ profile, call, on, emit, onTopic }) => {
-  //   const classes = useStyles();
+const Explorer = props => {
+  const { call, on } = props;
+  const classes = useStyles();
+  const [data, setData] = React.useState([]);
 
   React.useEffect(() => {
-    const loadDocs = docs => {};
-
+    const loadDocs = docs => {
+      setData(_ => {
+        return Object.values(docs.getDocTypes()).map((docTypeName, id) => {
+          return {
+            id,
+            name: docTypeName,
+            children: docs
+              .getDocsFromType(docTypeName)
+              .map((docFromType, innerId) => {
+                return {
+                  id: innerId,
+                  name: docFromType.name,
+                  url: docFromType.url
+                };
+              })
+          };
+        });
+      });
+    };
     on("docManager", "loadDocs", loadDocs);
   }, [on]);
+
+  const requestScopeVersions = node => {
+    const deepnessToAction = {
+      0: () => {
+        // Toggle the expansion of the clicked panel
+        setData(prevData => {
+          const nextData = [...prevData];
+          const isExpanded = _get(
+            prevData,
+            [node.id, "state", "expanded"],
+            false
+          );
+          _set(nextData, [node.id, "state"], {
+            expanded: !isExpanded
+          });
+
+          // Close other panels
+          prevData
+            .filter(elem => elem.id !== node.id)
+            .forEach(panel => {
+              _set(nextData, [panel.id, "state"], {
+                expanded: false
+              });
+            });
+          return nextData;
+        });
+      },
+      1: () => {
+        call("tabs", "open", {
+          id: node.url,
+          title: node.name,
+          content: <div>Hello World {node.name}</div>
+        });
+      }
+    };
+    _get(deepnessToAction, node.deepness, () => {})();
+  };
 
   return (
     <>
       <h1>Explorer</h1>
-      <Button
-        onClick={() => {
-          const id = `tab-${Math.floor(10 * Math.random())}`;
-          call("tabs", "open", {
-            id: id,
-            title: id,
-            content: <div>Hello World {id}</div>
-          });
-        }}
-        color="primary"
-        variant="outlined"
-      >
-        {"button"}
-      </Button>
+      <Typography component="div" className={classes.typography}>
+        <VirtualizedTree
+          onClickNode={node => {
+            console.log("debug click node", node);
+            requestScopeVersions(node);
+          }}
+          data={data}
+          handleChange={nodes => {
+            console.log("debug handle change", nodes);
+          }}
+          handleCopyClick={node => {
+            console.log("debug copy node", node);
+          }}
+          handleDeleteClick={node => {
+            console.log("debug delete node", node);
+          }}
+          handleCompareClick={node => {
+            console.log("debug compare click", node);
+          }}
+          showIcons={true}
+          height={props.height}
+        ></VirtualizedTree>
+      </Typography>
     </>
   );
 };
