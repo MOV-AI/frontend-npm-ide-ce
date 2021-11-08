@@ -4,9 +4,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import { withHostReactPlugin } from "../../../engine/ReactPlugin/HostReactPlugin";
 import { usePluginMethods } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import withBookmarks, {
-  exposedMethods
-} from "../../views/editors/_shared/withBookmarks";
+import withBookmarks, { exposedMethods } from "../_shared/withBookmarks";
 
 const useStyles = (isLeft, isOpen) =>
   makeStyles({
@@ -28,8 +26,15 @@ const useStyles = (isLeft, isOpen) =>
   });
 
 const DrawerPanel = React.forwardRef((props, ref) => {
-  const { viewPlugins, onTopic, hostName, style, anchor, initialOpenState } =
-    props;
+  const {
+    viewPlugins,
+    onTopic,
+    hostName,
+    style,
+    anchor,
+    initialOpenState,
+    className
+  } = props;
   const [open, setOpen] = React.useState(initialOpenState);
   const classes = useStyles(anchor === "left", open)();
 
@@ -99,7 +104,7 @@ const DrawerPanel = React.forwardRef((props, ref) => {
       anchor={anchor}
       variant="persistent"
       style={{ ...style }}
-      className={classes.drawer}
+      className={`${classes.drawer} ${className}`}
     >
       {props.children}
       {viewPlugins}

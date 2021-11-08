@@ -11,10 +11,8 @@ import React from "react";
 
 const useStyles = makeStyles(() => ({
   icon: {
-    color: "primary",
-    "&:hover": {
-      cursor: "pointer"
-    }
+    color: "#007197",
+    cursor: "pointer"
   }
 }));
 
@@ -23,6 +21,7 @@ const MENUS = [
     name: "explorer",
     icon: props => <TextSnippetIcon {...props}></TextSnippetIcon>,
     title: "Explorer",
+    isActive: true,
     getOnClick: (call, emit) => () => {
       emit("toggle-leftDrawer");
     }
@@ -53,27 +52,34 @@ const MENUS = [
   }
 ];
 
-const MainMenu = ({ profile, call, emit }) => {
+const MainMenu = ({ call, emit }) => {
   const classes = useStyles();
+  const theme = {
+    palette: {
+      background: { primary: "rgb(226, 226, 226)" },
+      primary: { main: "#007197" }
+    }
+  };
   return (
     <VerticalBar
       unsetAccountAreaPadding={true}
+      backgroundColor={theme.palette.background.primary}
       navigationList={MENUS.map(menu => (
         <div>
           <Tooltip title={menu.title}>
             {menu.icon({
-              onClick: menu.getOnClick(call, emit),
-              color: "primary",
-              className: classes.icon
+              className: classes.icon,
+              onClick: menu.getOnClick(call, emit)
             })}
           </Tooltip>
         </div>
       ))}
       lowerElement={
         <ProfileMenu
+          className={classes.icon}
           version={"1.2.3"}
           userName={"movai"}
-          isDarkTheme={true}
+          isDarkTheme={false}
           handleLogout={() => {}}
           handleToggleTheme={() => {}}
         />
