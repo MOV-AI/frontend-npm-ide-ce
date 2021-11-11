@@ -7,6 +7,7 @@ module.exports = function (app) {
         "/token-auth/**",
         "/api/**",
         "/token-verify/**",
+        "/token-refresh/**",
         "/ws/**",
         "/static/maps/**",
         "/static/meshes/**",

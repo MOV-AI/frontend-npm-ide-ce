@@ -4,23 +4,24 @@ import { makeStyles } from "@material-ui/core/styles";
 import { usePluginMethods } from "../../../engine/ReactPlugin/ViewReactPlugin";
 
 const useStyles = (side, oppositeSide) =>
-  makeStyles(() => ({
+  makeStyles(theme => ({
     panel: {
       position: "absolute",
       [oppositeSide]: -40,
       background: "#fff0",
       top: 40,
       width: 40,
-      zIndex: 9999
+      zIndex: 999
     },
     bookmark: {
       width: 40,
       height: 40,
       margin: "10px 0 !important",
-      border: "solid 1px gray !important",
+      border: `solid 1px ${theme.palette.background.primary} !important`,
       [`border-${side}`]: "none !important",
       borderRadius: "0px !important",
-      background: "white !important"
+      color: theme.palette.primary.main,
+      background: `${theme.palette.background.secondary} !important`
     }
   }));
 

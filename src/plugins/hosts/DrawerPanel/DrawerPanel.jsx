@@ -1,4 +1,4 @@
-import { Drawer } from "@material-ui/core";
+import { Drawer, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import React from "react";
@@ -7,7 +7,12 @@ import { usePluginMethods } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import withBookmarks, { exposedMethods } from "../_shared/withBookmarks";
 
 const useStyles = (isLeft, isOpen) =>
-  makeStyles({
+  makeStyles(theme => ({
+    content: {
+      background: theme.palette.background.primary,
+      color: theme.backdrop.color,
+      height: "100%"
+    },
     drawer: {
       overflow: "hidden",
       position: "relative",
@@ -23,7 +28,7 @@ const useStyles = (isLeft, isOpen) =>
         transition: "none !important"
       }
     }
-  });
+  }));
 
 const DrawerPanel = React.forwardRef((props, ref) => {
   const {
@@ -106,8 +111,10 @@ const DrawerPanel = React.forwardRef((props, ref) => {
       style={{ ...style }}
       className={`${classes.drawer} ${className}`}
     >
-      {props.children}
-      {viewPlugins}
+      <Typography component="div" className={classes.content}>
+        {props.children}
+        {viewPlugins}
+      </Typography>
     </Drawer>
   );
 });

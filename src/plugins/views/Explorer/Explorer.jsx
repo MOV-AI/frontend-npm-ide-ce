@@ -9,7 +9,7 @@ import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Configuration from "../editors/Configuration/Configuration";
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(theme => ({
   typography: {
     overflowY: "auto",
     overflowX: "hidden",
@@ -30,12 +30,14 @@ const Explorer = props => {
           return {
             id,
             name: docTypeName,
+            title: docTypeName,
             children: docs
               .getDocsFromType(docTypeName)
               .map((docFromType, innerId) => {
                 return {
                   id: innerId,
                   name: docFromType.name,
+                  title: docFromType.name,
                   url: docFromType.url
                 };
               })
@@ -92,12 +94,11 @@ const Explorer = props => {
   };
 
   return (
-    <div style={{ padding: 5 }}>
+    <Typography component="div">
       <h1>Explorer</h1>
       <Typography component="div" className={classes.typography}>
         <VirtualizedTree
           onClickNode={async node => {
-            console.log("debug click node", node);
             requestScopeVersions(node);
           }}
           data={data}
@@ -117,7 +118,7 @@ const Explorer = props => {
           height={props.height}
         ></VirtualizedTree>
       </Typography>
-    </div>
+    </Typography>
   );
 };
 

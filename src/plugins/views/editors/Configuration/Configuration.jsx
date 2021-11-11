@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { SCOPES } from "../../../../utils/Constants";
-import { makeStyles } from "@material-ui/core/styles";
+// import { SCOPES } from "../../../../utils/Constants";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
 import { withViewPlugin } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
@@ -9,17 +9,25 @@ import { AppBar, Toolbar } from "@material-ui/core";
 import InfoIcon from "@material-ui/icons/Info";
 import Menu from "./Menu";
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(theme => ({
   container: {
     display: "flex",
     flexDirection: "column",
     flexGrow: 1,
     height: "100%",
     maxHeight: "100%"
+  },
+  appBar: {
+    background: theme.palette.background.default,
+    color: theme.palette.text.primary,
+    "& button span": {
+      color: theme.palette.text.primary
+    }
   }
 }));
 
-const Configuration = ({ id, name, profile, call, on, emit, alert }) => {
+const Configuration = props => {
+  const { id, name, profile, call, on, emit } = props;
   // State Hooks
   const [code, setCode] = React.useState("testingcode");
   const [lastUpdate, setLastUpdate] = React.useState({
@@ -29,6 +37,7 @@ const Configuration = ({ id, name, profile, call, on, emit, alert }) => {
   const [type, setType] = React.useState("yaml");
   // Style Hooks
   const classes = useStyles();
+  const theme = useTheme();
   // React Refs
   const editorRef = React.useRef();
 
@@ -91,44 +100,44 @@ const Configuration = ({ id, name, profile, call, on, emit, alert }) => {
    *                                                                                      */
   //========================================================================================
 
-  const createNewConfig = newName => {
-    if (!newName) return;
+  // const createNewConfig = newName => {
+  //   if (!newName) return;
 
-    const payload = {
-      type: SCOPES.Configuration,
-      name: newName,
-      body: { Yaml: code, Type: type }
-    };
+  //   const payload = {
+  //     type: SCOPES.Configuration,
+  //     name: newName,
+  //     body: { Yaml: code, Type: type }
+  //   };
 
-    call("docManager", "create", payload)
-      .then(response => {
-        // TODO: Expose updateTab method to rename tab after creation
-        call("tabs", "updateTab", {
-          oldName: "untitled.conf",
-          newName: response.name
-        });
-        // TODO: send success alert
-        alert("Successfully saved");
-      })
-      .catch(error => {
-        // TODO: send error alert
-        alert(error.statusText, "error");
-      });
-  };
+  //   call("docManager", "create", payload)
+  //     .then(response => {
+  //       // TODO: Expose updateTab method to rename tab after creation
+  //       call("tabs", "updateTab", {
+  //         oldName: "untitled.conf",
+  //         newName: response.name
+  //       });
+  //       // TODO: send success alert
+  //       alert("Successfully saved");
+  //     })
+  //     .catch(error => {
+  //       // TODO: send error alert
+  //       alert(error.statusText, "error");
+  //     });
+  // };
 
-  const saveConfig = () => {
-    // Create new document
-    if (!id) {
-      // TODO
-      createNewConfig("newName");
-    }
-    // Update existing document
-    else {
-      call("docManager", "update", { Label: id, Yaml: code, Type: type })
-        .then(res => alert("Successfully saved"))
-        .catch(error => alert(error.statusText, "error"));
-    }
-  };
+  // const saveConfig = () => {
+  //   // Create new document
+  //   if (!id) {
+  //     // TODO
+  //     createNewConfig("newName");
+  //   }
+  //   // Update existing document
+  //   else {
+  //     call("docManager", "update", { Label: id, Yaml: code, Type: type })
+  //       .then(res => alert("Successfully saved"))
+  //       .catch(error => alert(error.statusText, "error"));
+  //   }
+  // };
 
   //========================================================================================
   /*                                                                                      *
@@ -147,13 +156,11 @@ const Configuration = ({ id, name, profile, call, on, emit, alert }) => {
           style={{ flexGrow: 1, height: "100%", width: "100%" }}
           value={code}
           language={type}
-          theme={"light"}
+          theme={theme.codeEditor.theme}
           // options={{ readOnly: !editable }}
+          onChange={setCode}
           onLoad={editor => {
             if (!id) editor.focus();
-          }}
-          onChange={newCode => {
-            setCode(newCode);
           }}
         />
       </div>
@@ -161,28 +168,17 @@ const Configuration = ({ id, name, profile, call, on, emit, alert }) => {
   };
 
   return (
-    <div
-      className={classes.container}
-      onFocus={() => {
-        console.log("debug onFocus", id);
-        renderRightMenu();
-      }}
-    >
-      <AppBar position="static" color="inherit">
+    <div className={classes.container} onFocus={renderRightMenu}>
+      <AppBar position="static" className={classes.appBar}>
         <Toolbar variant="dense">
           <ToggleButtonGroup
-            value={type}
-            exclusive
-            onChange={(event, newAlignment) => setType(newAlignment)}
-            aria-label="text alignment"
             size="small"
+            exclusive
+            value={type}
+            onChange={(event, newAlignment) => setType(newAlignment)}
           >
-            <ToggleButton value="xml" aria-label="left aligned">
-              XML
-            </ToggleButton>
-            <ToggleButton value="yaml" aria-label="centered">
-              YAML
-            </ToggleButton>
+            <ToggleButton value="xml">XML</ToggleButton>
+            <ToggleButton value="yaml">YAML</ToggleButton>
           </ToggleButtonGroup>
         </Toolbar>
       </AppBar>
@@ -192,6 +188,7 @@ const Configuration = ({ id, name, profile, call, on, emit, alert }) => {
 };
 
 export default withViewPlugin(Configuration);
+// export default withViewPluginwithStyles(styles)(Configuration);
 
 Configuration.propTypes = {
   profile: PropTypes.object.isRequired,

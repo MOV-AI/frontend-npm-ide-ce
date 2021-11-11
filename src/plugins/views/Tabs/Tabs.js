@@ -8,14 +8,40 @@ import {
   usePluginMethods
 } from "../../../engine/ReactPlugin/ViewReactPlugin";
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(theme => ({
   root: {
     position: "relative",
     width: "100%",
     height: "100%",
     "& .dock-layout": {
       width: "100%",
-      height: "100%"
+      height: "100%",
+      "& .dock-panel": {
+        borderColor: theme.palette.background.default,
+        "& .dock-bar": {
+          borderColor: theme.background,
+          background: theme.palette.background.primary,
+          "& .dock-tab": {
+            borderTopLeftRadius: 5,
+            borderTopRightRadius: 5,
+            background: theme.backdrop.background,
+            color: theme.backdrop.color,
+            padding: "0 10px",
+            "& .dock-tab-close-btn": {
+              right: "1px"
+            }
+          },
+          "& .dock-ink-bar": {
+            backgroundColor: theme.palette.primary.main
+          }
+        },
+        "& .dock-drop-layer .dock-drop-square": {
+          background: theme.palette.background.primary
+        }
+      },
+      "& .dock-style-place-holder": {
+        background: theme.palette.background.default
+      }
     }
   },
   dockLayout: {
@@ -84,7 +110,10 @@ const useLayout = (props, dockRef) => {
    * @returns
    */
   const loadTab = data => {
-    let { id, title, content } = tabsById.current.get(data.id);
+    const tabFromMemory = tabsById.current.get(data.id);
+    if (!tabFromMemory && !data.title && !data.content) return;
+    const { id, title, content } = tabFromMemory || data;
+    tabsById.current.set(id, { id, title, content });
     return {
       id: id,
       title: title,

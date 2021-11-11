@@ -1,7 +1,27 @@
 import React, { Component } from "react";
 import { InputBase, IconButton, Typography } from "@material-ui/core";
+import { withStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
 import ClearIcon from "@material-ui/icons/Clear";
+
+const styles = theme => ({
+  root: {
+    padding: "2px 4px",
+    display: "flex",
+    alignItems: "center",
+    width: "100%"
+  },
+  input: {
+    marginLeft: 10,
+    flex: 1,
+    "& input::placeholder": {
+      color: theme.backdrop.color
+    }
+  },
+  icon: {
+    color: theme.palette.primary.main
+  }
+});
 
 const t = s => s;
 class Search extends Component {
@@ -35,22 +55,12 @@ class Search extends Component {
   }
 
   render() {
+    const { classes } = this.props;
     return (
-      <Typography
-        component="div"
-        style={{
-          padding: "2px 4px",
-          display: "flex",
-          alignItems: "center",
-          width: "100%"
-        }}
-      >
+      <Typography component="div" className={classes.root}>
         <InputBase
           ref={this.inputRef}
-          style={{
-            marginLeft: 10,
-            flex: 1
-          }}
+          className={classes.input}
           placeholder={t("Search")}
           onChange={this.handleChange}
         />
@@ -62,11 +72,15 @@ class Search extends Component {
             }
           }}
         >
-          {this.isEmpty() ? <SearchIcon /> : <ClearIcon />}
+          {this.isEmpty() ? (
+            <SearchIcon className={classes.icon} />
+          ) : (
+            <ClearIcon className={classes.icon} />
+          )}
         </IconButton>
       </Typography>
     );
   }
 }
 
-export default Search;
+export default withStyles(styles, { withTheme: true })(Search);
