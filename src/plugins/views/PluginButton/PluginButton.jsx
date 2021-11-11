@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button } from "@mui/material";
+import Button from "@material-ui/core/Button";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import PluginLabel from "../PluginLabel/PluginLabel";

@@ -1,6 +1,7 @@
-import Grid from "@material-ui/core/Grid";
 import React from "react";
+import "./App.css";
 import PluginManagerIDE from "../engine/PluginManagerIDE/PluginManagerIDE";
+import DocManager from "../plugins/DocManager/DocManager";
 import BottomBar from "../plugins/hosts/BottomBar/BottomBar";
 import CentralPanel from "../plugins/hosts/CentralPanel/CentralPanel";
 import DrawerPanel from "../plugins/hosts/DrawerPanel/DrawerPanel";
@@ -9,11 +10,34 @@ import TopBar from "../plugins/hosts/TopBar/TopBar";
 import Explorer from "../plugins/views/Explorer/Explorer";
 import MainMenu from "../plugins/views/MainMenu/MainMenu";
 import Tabs from "../plugins/views/Tabs/Tabs";
-import "./App.css";
+import Placeholder from "../plugins/views/Placeholder/Placeholder";
+import Grid from "@material-ui/core/Grid";
+import { makeStyles } from "@material-ui/core/styles";
 import { withAuthentication } from "@mov-ai/mov-fe-lib-react";
-import DocManager from "../plugins/DocManager/DocManager";
+import { Typography } from "@material-ui/core";
+
+const DEBUG_MODE = false;
+
+const useStyles = debugMode =>
+  makeStyles(() => ({
+    topBar: { border: debugMode ? "solid 5px purple" : "", width: "100%" },
+    leftPanel: {
+      border: debugMode ? "solid 5px red" : "",
+      borderRight: debugMode ? "" : "1px solid gray",
+      display: "flex",
+      position: "relative"
+    },
+    centralPanel: { flexGrow: 1, border: debugMode ? "solid 5px green" : "" },
+    rightDrawer: {
+      border: debugMode ? "solid 5px blue" : "",
+      borderLeft: debugMode ? "" : "1px solid gray",
+      position: "relative"
+    },
+    bottomBar: { border: debugMode ? "solid 5px orange" : "", width: "100%" }
+  }));
 
 function App() {
+  const classes = useStyles(DEBUG_MODE)();
   writeMovaiLogo();
 
   React.useEffect(() => {
@@ -21,7 +45,7 @@ function App() {
     installViewPlugins();
   }, []);
 
-  return <div className="App">{getHostedPlugins()}</div>;
+  return <div className="App">{getHostedPlugins(classes)}</div>;
 }
 
 function installAppPlugins() {
@@ -50,6 +74,10 @@ function installViewPlugins() {
     {
       profile: { name: "tabs", location: "mainPanel" },
       factory: profile => new Tabs(profile)
+    },
+    {
+      profile: { name: "placeholder", location: "rightDrawer" },
+      factory: profile => new Placeholder(profile)
     }
   ];
   plugins.forEach(pluginDescription => {
@@ -58,23 +86,14 @@ function installViewPlugins() {
   });
 }
 
-function getHostedPlugins() {
+function getHostedPlugins(classes) {
   return (
     <Grid container direction="column">
       <Grid container alignItems="flex-start">
-        <TopBar
-          hostName="topBar"
-          style={{ border: "solid 5px purple", width: "100%" }}
-        ></TopBar>
+        <TopBar hostName="topBar" className={classes.topBar}></TopBar>
       </Grid>
       <Grid container alignItems="stretch" style={{ flexGrow: 1 }}>
-        <div
-          style={{
-            border: "solid 5px red",
-            display: "flex",
-            position: "relative"
-          }}
-        >
+        <Typography component="div" className={classes.leftPanel}>
           <SidePanel
             hostName="leftPanel"
             style={{ height: "100%" }}
@@ -84,21 +103,21 @@ function getHostedPlugins() {
             anchor="left"
             initialOpenState
           ></DrawerPanel>
-        </div>
+        </Typography>
         <CentralPanel
-          style={{ flexGrow: 1, border: "solid 5px green" }}
+          className={classes.centralPanel}
           hostName="mainPanel"
         ></CentralPanel>
         <DrawerPanel
+          className={classes.rightDrawer}
           hostName="rightDrawer"
           anchor="right"
-          style={{ border: "solid 5px blue", position: "relative" }}
         ></DrawerPanel>
       </Grid>
       <Grid container alignItems="flex-end">
         <BottomBar
           hostName="bottomBar"
-          style={{ border: "solid 5px orange", width: "100%" }}
+          className={classes.bottomBar}
         ></BottomBar>
       </Grid>
     </Grid>

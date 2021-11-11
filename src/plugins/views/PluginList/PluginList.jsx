@@ -1,8 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { List, ListItem, ListItemIcon, ListItemText } from "@mui/material";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
+import { List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import InboxIcon from "@material-ui/icons/Inbox";
+import MailIcon from "@material-ui/icons/Mail";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import PluginButton from "../PluginButton/PluginButton";

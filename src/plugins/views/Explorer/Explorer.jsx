@@ -1,11 +1,13 @@
-import { Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { Typography } from "@material-ui/core";
 import _get from "lodash/get";
 import _set from "lodash/set";
 import PropTypes from "prop-types";
 import React from "react";
 import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
+import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
+import Configuration from "../editors/Configuration/Configuration";
 
 const useStyles = makeStyles(() => ({
   typography: {
@@ -71,10 +73,18 @@ const Explorer = props => {
         });
       },
       1: () => {
-        call("tabs", "open", {
-          id: node.url,
-          title: node.name,
-          content: <div>Hello World {node.name}</div>
+        const tabName = `${node.name}.conf`;
+        const viewPlugin = new Configuration(
+          { name: node.url },
+          { id: node.url, name: node.name }
+        );
+        PluginManagerIDE.install(node.url, viewPlugin).then(() => {
+          // Open tab
+          call("tabs", "open", {
+            id: node.url,
+            title: tabName,
+            content: viewPlugin.render()
+          });
         });
       }
     };
@@ -82,11 +92,11 @@ const Explorer = props => {
   };
 
   return (
-    <>
+    <div style={{ padding: 5 }}>
       <h1>Explorer</h1>
       <Typography component="div" className={classes.typography}>
         <VirtualizedTree
-          onClickNode={node => {
+          onClickNode={async node => {
             console.log("debug click node", node);
             requestScopeVersions(node);
           }}
@@ -107,7 +117,7 @@ const Explorer = props => {
           height={props.height}
         ></VirtualizedTree>
       </Typography>
-    </>
+    </div>
   );
 };
 
