@@ -23,6 +23,9 @@ const Explorer = props => {
   const classes = useStyles();
   const [data, setData] = React.useState([]);
 
+  const { t } = useTranslation();
+
+  /* eslint-disable react-hooks/exhaustive-deps */
   React.useEffect(() => {
     const loadDocs = docs => {
       setData(_ => {
@@ -131,3 +134,7 @@ Explorer.propTypes = {
 Explorer.defaultProps = {
   profile: { name: "explorer" }
 };
+
+function useTranslation() {
+  return { t: s => s };
+}

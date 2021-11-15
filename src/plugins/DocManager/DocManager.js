@@ -35,6 +35,14 @@ const INITIAL_DOCS_MAP = {
 class DocManager extends IDEPlugin {
   docsMap = INITIAL_DOCS_MAP;
 
+  constructor(profile) {
+    // Remove duplicated if needed
+    const methods = Array.from(
+      new Set([...(profile.methods || []), "getDocTypes", "getDocsFromType"])
+    );
+    super({ ...profile, methods });
+  }
+
   activate() {
     this.docsSubscribe();
   }
@@ -65,8 +73,13 @@ class DocManager extends IDEPlugin {
   //========================================================================================
 
   getUpdateDoc(document) {
+    const event2actionMap = { del: data => {}, set: data => {} };
     return data => {
-      this.emit("loadDocs", this);
+      console.log("debug update doc", data);
+
+      // const docType = document.name;
+      // this.addDocs(docType, data.value[docType]);
+      // this.emit("loadDocs", this);
     };
   }
 
