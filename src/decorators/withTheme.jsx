@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ApplicationTheme } from "../../../themes";
+import { ApplicationTheme } from "../themes";
 import { ThemeProvider } from "@material-ui/styles";
 
 export function withTheme(Component) {

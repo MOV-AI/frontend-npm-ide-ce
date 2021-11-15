@@ -6,8 +6,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
-import Configuration from "../editors/Configuration/Configuration";
+// import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 
 const useStyles = makeStyles(theme => ({
   typography: {
@@ -26,18 +25,19 @@ const Explorer = props => {
   React.useEffect(() => {
     const loadDocs = docs => {
       setData(_ => {
-        return Object.values(docs.getDocTypes()).map((docTypeName, id) => {
+        return Object.values(docs.getDocTypes()).map((docType, id) => {
           return {
             id,
-            name: docTypeName,
-            title: docTypeName,
+            name: docType.name,
+            title: docType.title,
             children: docs
-              .getDocsFromType(docTypeName)
+              .getDocsFromType(docType.scope)
               .map((docFromType, innerId) => {
                 return {
                   id: innerId,
                   name: docFromType.name,
                   title: docFromType.name,
+                  scope: docType.scope,
                   url: docFromType.url
                 };
               })
@@ -75,18 +75,13 @@ const Explorer = props => {
         });
       },
       1: () => {
+        console.log("debug node", node);
         const tabName = `${node.name}.conf`;
-        const viewPlugin = new Configuration(
-          { name: node.url },
-          { id: node.url, name: node.name }
-        );
-        PluginManagerIDE.install(node.url, viewPlugin).then(() => {
-          // Open tab
-          call("tabs", "open", {
-            id: node.url,
-            title: tabName,
-            content: viewPlugin.render()
-          });
+        call("tabs", "openEditor", {
+          id: node.url,
+          title: tabName,
+          name: node.name,
+          scope: node.scope
         });
       }
     };

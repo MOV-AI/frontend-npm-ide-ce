@@ -1,7 +1,7 @@
 import React from "react";
 import IconButton from "@material-ui/core/IconButton";
 import { makeStyles } from "@material-ui/core/styles";
-import { usePluginMethods } from "../../../engine/ReactPlugin/ViewReactPlugin";
+import { usePluginMethods } from "../engine/ReactPlugin/ViewReactPlugin";
 
 const useStyles = (side, oppositeSide) =>
   makeStyles(theme => ({
@@ -96,6 +96,7 @@ const withBookmarks = Component => {
     const resetBookmarks = React.useCallback(() => {
       setBookmarks({});
       setRenderedView([]);
+      drawerRef.current.closeDrawer();
     }, []);
 
     /**
@@ -107,7 +108,6 @@ const withBookmarks = Component => {
         const firstBookmark = Object.values(bookmarks)[0];
         if (firstBookmark) {
           selectBookmark(firstBookmark.name);
-          drawerRef.current.openDrawer();
         }
       },
       [selectBookmark]

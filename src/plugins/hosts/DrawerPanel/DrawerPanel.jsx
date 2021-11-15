@@ -4,7 +4,9 @@ import PropTypes from "prop-types";
 import React from "react";
 import { withHostReactPlugin } from "../../../engine/ReactPlugin/HostReactPlugin";
 import { usePluginMethods } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import withBookmarks, { exposedMethods } from "../_shared/withBookmarks";
+import withBookmarks, {
+  exposedMethods
+} from "../../../decorators/withBookmarks";
 
 const useStyles = (isLeft, isOpen) =>
   makeStyles(theme => ({

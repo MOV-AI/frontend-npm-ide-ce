@@ -1,5 +1,6 @@
 import React from "react";
 import IDEPlugin from "../IDEPlugin/IDEPlugin";
+import PluginManagerIDE from "../PluginManagerIDE/PluginManagerIDE";
 
 export class ViewReactPlugin extends IDEPlugin {
   /**
@@ -22,6 +23,7 @@ export class ViewReactPlugin extends IDEPlugin {
   }
 
   deactivate() {
+    console.log("debug deactivate", this.profile.name);
     if (this.profile.location)
       this.call(this.profile.location, "removeView", this.profile);
     super.deactivate();
@@ -39,6 +41,8 @@ export function withViewPlugin(ReactComponent, methods = []) {
   );
   const WithPlugin = class extends ViewReactPlugin {
     constructor(profile, props = {}) {
+      const existingPlugin = PluginManagerIDE.getPlugin(profile.name);
+      if (existingPlugin) return existingPlugin;
       super({
         ...profile,
         methods: ["render", ...methods]

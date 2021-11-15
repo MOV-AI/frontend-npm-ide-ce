@@ -14,7 +14,7 @@ import Placeholder from "../plugins/views/Placeholder/Placeholder";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
 import { withAuthentication, Style } from "@mov-ai/mov-fe-lib-react";
-import { withTheme } from "../plugins/hosts/_shared/withTheme";
+import { withTheme } from "../decorators/withTheme";
 import { MainContext } from "../main-context";
 import { Typography } from "@material-ui/core";
 

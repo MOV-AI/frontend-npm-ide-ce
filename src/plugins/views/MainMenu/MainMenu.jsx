@@ -66,11 +66,6 @@ const MainMenu = ({ call, emit }) => {
   const classes = useStyles();
   const theme = useTheme();
 
-  const getUser = () => {
-    const token = Authentication.getTokenData();
-    return token.message.name || "";
-  };
-
   return (
     <MainContext.Consumer>
       {({ isDarkTheme, handleLogOut, handleToggleTheme }) => (
@@ -90,7 +85,7 @@ const MainMenu = ({ call, emit }) => {
           lowerElement={
             <ProfileMenu
               version={VERSION}
-              userName={getUser()}
+              userName={Authentication.getTokenData().message.name || ""}
               isDarkTheme={isDarkTheme}
               handleLogout={handleLogOut}
               handleToggleTheme={handleToggleTheme}

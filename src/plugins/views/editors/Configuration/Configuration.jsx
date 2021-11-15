@@ -188,7 +188,6 @@ const Configuration = props => {
 };
 
 export default withViewPlugin(Configuration);
-// export default withViewPluginwithStyles(styles)(Configuration);
 
 Configuration.propTypes = {
   profile: PropTypes.object.isRequired,
