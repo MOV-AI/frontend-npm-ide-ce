@@ -33,15 +33,8 @@ const useStyles = (isLeft, isOpen) =>
   }));
 
 const DrawerPanel = React.forwardRef((props, ref) => {
-  const {
-    viewPlugins,
-    onTopic,
-    hostName,
-    style,
-    anchor,
-    initialOpenState,
-    className
-  } = props;
+  const { viewPlugins, hostName, style, anchor, initialOpenState, className } =
+    props;
   const [open, setOpen] = React.useState(initialOpenState);
   const classes = useStyles(anchor === "left", open)();
 
@@ -54,40 +47,31 @@ const DrawerPanel = React.forwardRef((props, ref) => {
   /**
    * Toggle drawer
    */
-  const toggleDrawer = React.useCallback(() => {
+  const toggleDrawer = () => {
     setOpen(prevState => {
       return !prevState;
     });
-  }, []);
+  };
 
   /**
    * Open Drawer
    */
-  const openDrawer = React.useCallback(() => {
+  const openDrawer = () => {
     setOpen(true);
-  }, []);
+  };
 
   /**
    * Close Drawer
    */
-  const closeDrawer = React.useCallback(() => {
+  const closeDrawer = () => {
     setOpen(false);
-  }, []);
+  };
 
   //========================================================================================
   /*                                                                                      *
    *                                   React lifecycles                                   *
    *                                                                                      */
   //========================================================================================
-
-  React.useEffect(() => {
-    // Handle drawer toggle
-    onTopic(`toggle-${hostName}`, toggleDrawer);
-    // Handle dynamic drawer open
-    onTopic(`open-${hostName}`, openDrawer);
-    // Handle dynamic drawer close
-    onTopic(`close-${hostName}`, closeDrawer);
-  }, [onTopic, hostName, toggleDrawer, openDrawer, closeDrawer]);
 
   /**
    * Expose methods
@@ -121,7 +105,7 @@ const DrawerPanel = React.forwardRef((props, ref) => {
   );
 });
 
-DrawerPanel.pluginMethods = [...exposedMethods];
+DrawerPanel.pluginMethods = [...exposedMethods, "open", "close", "toggle"];
 
 export default withHostReactPlugin(
   withBookmarks(DrawerPanel),

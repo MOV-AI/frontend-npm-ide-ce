@@ -72,6 +72,12 @@ const useLayout = (props, dockRef) => {
   const tabsById = React.useRef(new Map());
   const [layout, setLayout] = React.useState({ ...DEFAULT_LAYOUT });
 
+  const getFirstContainer = React.useCallback(dockbox => {
+    const boxData = dockbox.children[0];
+    if (boxData?.tabs) return boxData;
+    else return getFirstContainer(boxData);
+  }, []);
+
   const getTabData = React.useCallback(
     async docData => {
       return props.call("docManager", "getDocTypes").then(docTypes => {
@@ -131,10 +137,6 @@ const useLayout = (props, dockRef) => {
     tabData => {
       tabsById.current.set(tabData.id, tabData);
       workspaceManager.setTabs(tabsById.current);
-      const getFirstContainer = dockbox => {
-        if (dockbox.children[0]?.tabs) return dockbox.children[0];
-        else return getFirstContainer(dockbox.children[0]);
-      };
 
       setLayout(prevState => {
         const newState = { ...prevState };
@@ -154,7 +156,7 @@ const useLayout = (props, dockRef) => {
         return { ...newState };
       });
     },
-    [dockRef, workspaceManager]
+    [dockRef, workspaceManager, getFirstContainer]
   );
 
   const openEditor = React.useCallback(
@@ -198,7 +200,9 @@ const useLayout = (props, dockRef) => {
    * @param {*} newLayout
    */
   const onLayoutChange = (newLayout, tabId, direction) => {
-    const newActiveTab = newLayout.dockbox?.children?.[0].activeId;
+    const firstContainer = getFirstContainer(newLayout.dockbox);
+    const newActiveTab =
+      direction !== "remove" ? tabId : firstContainer.activeId;
     setLayout(newLayout);
     workspaceManager.setLayout(newLayout);
     if (!tabId) return;

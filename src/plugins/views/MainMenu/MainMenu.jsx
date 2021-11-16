@@ -30,7 +30,7 @@ const MENUS = [
     isActive: true,
     getOnClick: (call, emit) => () => {
       // Toggle left drawer
-      emit("toggle-leftDrawer");
+      call("leftDrawer", "toggle");
     }
   },
   {

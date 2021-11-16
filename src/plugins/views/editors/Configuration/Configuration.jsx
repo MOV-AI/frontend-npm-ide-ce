@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Configuration = props => {
-  const { id, name, profile, call, on, emit } = props;
+  const { id, name, call, on } = props;
   // State Hooks
   const [code, setCode] = React.useState("testingcode");
   const [lastUpdate, setLastUpdate] = React.useState({
@@ -77,7 +77,7 @@ const Configuration = props => {
     // Load data
     // call("docManager", "read", id).then(data => loadData(data));
     // Open right menu details
-    emit("open-rightDrawer");
+    call("rightDrawer", "open");
     on("tabs", `${id}-active`, () => {
       renderRightMenu();
     });
@@ -87,7 +87,7 @@ const Configuration = props => {
     });
     // component will unmount
     return () => {};
-  }, [profile, on, id, emit, renderRightMenu]);
+  }, [on, id, call, renderRightMenu]);
 
   // Render right menu
   React.useEffect(() => {

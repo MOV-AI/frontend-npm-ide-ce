@@ -62,22 +62,19 @@ const withBookmarks = Component => {
     /**
      * Add bookmark to drawer
      *  data: {
-     *    icon {Element} : Bookmark icon
-     *    name {String} : Title
-     *    view {Element} : Element to be rendered in menu container
+     *    icon {Element}  : Bookmark icon
+     *    name {String}   : Title
+     *    view {Element}  : Element to be rendered in menu container
      *  }
      *  isDefault {Boolean} : Set bookmark as active if true
      */
-    const addBookmark = React.useCallback(
-      (data, isDefault = false) => {
-        const name = data.name;
-        setBookmarks(prevState => {
-          return { ...prevState, [name]: data };
-        });
-        if (isDefault) selectBookmark(name);
-      },
-      [selectBookmark]
-    );
+    const addBookmark = React.useCallback((data, isDefault = false) => {
+      const name = data.name;
+      setBookmarks(prevState => {
+        return { ...prevState, [name]: data };
+      });
+      if (isDefault) setActive(name);
+    }, []);
 
     /**
      * Remove bookmark by name
@@ -102,16 +99,13 @@ const withBookmarks = Component => {
     /**
      * Set bookmarks
      */
-    const setBookmark = React.useCallback(
-      (bookmarks = {}) => {
-        setBookmarks(bookmarks);
-        const firstBookmark = Object.values(bookmarks)[0];
-        if (firstBookmark) {
-          selectBookmark(firstBookmark.name);
-        }
-      },
-      [selectBookmark]
-    );
+    const setBookmark = React.useCallback((bookmarks = {}) => {
+      setBookmarks(bookmarks);
+      const firstBookmark = Object.values(bookmarks)[0];
+      if (firstBookmark) {
+        setActive(firstBookmark.name);
+      }
+    }, []);
 
     //========================================================================================
     /*                                                                                      *
@@ -136,7 +130,10 @@ const withBookmarks = Component => {
       setBookmark,
       addBookmark,
       resetBookmarks,
-      removeBookmark
+      removeBookmark,
+      open: () => drawerRef.current.openDrawer(),
+      close: () => drawerRef.current.closeDrawer(),
+      toggle: () => drawerRef.current.toggleDrawer()
     });
 
     //========================================================================================

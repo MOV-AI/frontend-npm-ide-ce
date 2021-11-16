@@ -101,5 +101,4 @@ Object.keys(overrideTheme).forEach(theme => {
 });
 // Merge app theme with base theme
 const mergedTheme = lodash.merge(Themes, overrideTheme);
-console.log("debug mergedTheme", mergedTheme);
 export const ApplicationTheme = mergedTheme;
