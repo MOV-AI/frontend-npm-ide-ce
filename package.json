@@ -37,6 +37,7 @@
     "build": "react-scripts --max_old_space_size=4096 build && python3 ./scripts/detach_manifest.py",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "clean": "rm -r node_modules; rm package-lock.json",
     "deploy": "./scripts/deployApp.sh mov-fe-app-ide",
     "coverage": "npm test -- --coverage"
   },
