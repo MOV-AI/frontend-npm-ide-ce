@@ -38,7 +38,12 @@ class DocManager extends IDEPlugin {
   constructor(profile) {
     // Remove duplicated if needed
     const methods = Array.from(
-      new Set([...(profile.methods || []), "getDocTypes", "getDocsFromType"])
+      new Set([
+        ...(profile.methods || []),
+        "getDocTypes",
+        "getDocsFromType",
+        "read"
+      ])
     );
     super({ ...profile, methods });
     this.docsMap = INITIAL_DOCS_MAP;
@@ -65,6 +70,19 @@ class DocManager extends IDEPlugin {
     const answer = this.docsMap[type]?.docs;
     if (!answer) return [];
     return Object.values(answer);
+  }
+
+  /**
+   * Request document data
+   * @param {DocumentRequest} data
+   */
+  read(data) {
+    const { scope, name } = data;
+    const model = new MODELS_CLASS_BY_NAME[scope](name);
+    // mock model data
+    model?.mock();
+    // return model with mocked data
+    return model;
   }
 
   //========================================================================================

@@ -19,6 +19,7 @@ const useStyles = makeStyles(theme => ({
       width: "100%",
       height: "100%",
       "& .dock-panel": {
+        background: theme.palette.background.default,
         borderColor: theme.palette.background.default,
         "& .dock-bar": {
           borderColor: theme.background,
@@ -85,7 +86,7 @@ const useLayout = (props, dockRef) => {
         try {
           const viewPlugin = new plugin(
             { name: docData.id },
-            { id: docData.id, name: docData.name }
+            { id: docData.id, name: docData.name, scope: docData.scope }
           );
           return PluginManagerIDE.install(docData.id, viewPlugin).then(() => {
             // Create and return tab data
@@ -196,7 +197,7 @@ const useLayout = (props, dockRef) => {
   };
 
   /**
-   * Triggered at any manual layout change
+   * Triggered at any manual layout/active tab change
    * @param {*} newLayout
    */
   const onLayoutChange = (newLayout, tabId, direction) => {
@@ -206,9 +207,8 @@ const useLayout = (props, dockRef) => {
     setLayout(newLayout);
     workspaceManager.setLayout(newLayout);
     if (!tabId) return;
-    props.call("rightDrawer", "resetBookmarks").then(() => {
-      if (newActiveTab) props.emit(`${newActiveTab}-active`);
-    });
+    if (newActiveTab) props.emit(`${newActiveTab}-active`);
+    else props.call("rightDrawer", "resetBookmarks");
   };
 
   return { layout, open, openEditor, close, loadTab, onLayoutChange };

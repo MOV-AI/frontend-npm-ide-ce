@@ -1,7 +1,7 @@
 import React from "react";
 import { Divider, List, ListItem, ListItemText } from "@material-ui/core";
 
-const Menu = ({ id, name, lastUpdate }) => {
+const Menu = ({ name, details }) => {
   return (
     <div>
       <h2 style={{ textAlign: "center" }}>{name}</h2>
@@ -17,11 +17,11 @@ const Menu = ({ id, name, lastUpdate }) => {
         </ListItem>
         <Divider />
         <ListItem divider>
-          <ListItemText primary={`Last Updated: ${lastUpdate.lastUpdate}`} />
+          <ListItemText primary={`Last Updated: ${details.date}`} />
         </ListItem>
         <Divider />
         <ListItem divider>
-          <ListItemText primary={`User: ${lastUpdate.user}`} />
+          <ListItemText primary={`User: ${details.user}`} />
         </ListItem>
       </List>
     </div>

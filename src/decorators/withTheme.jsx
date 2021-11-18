@@ -21,6 +21,9 @@ export function withTheme(Component) {
     React.useEffect(() => {
       const currentTheme = ApplicationTheme.getTheme();
       setTheme(currentTheme);
+      // Set body background color
+      document.body.style.backgroundColor =
+        ApplicationTheme[currentTheme].background;
     }, [theme]);
 
     return (

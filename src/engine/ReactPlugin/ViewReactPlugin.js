@@ -30,6 +30,28 @@ export class ViewReactPlugin extends IDEPlugin {
   }
 }
 
+export class ViewPlugin extends ViewReactPlugin {
+  constructor(profile, props = {}, methods = []) {
+    const existingPlugin = PluginManagerIDE.getPlugin(profile.name);
+    if (existingPlugin) return existingPlugin;
+    super({
+      ...profile,
+      methods: ["render", ...methods]
+    });
+
+    this.methods = methods;
+    this.ref = React.createRef();
+    this.initMethods();
+    this.props = props;
+  }
+
+  initMethods = () => {
+    this.methods.forEach(name => {
+      this[name] = (...a) => this.ref.current[name](...a);
+    });
+  };
+}
+
 /**
  *
  * @param {ReactComponent} ReactComponent
@@ -39,25 +61,10 @@ export function withViewPlugin(ReactComponent, methods = []) {
   const RefComponent = React.forwardRef((props, ref) =>
     ReactComponent(props, ref)
   );
-  const WithPlugin = class extends ViewReactPlugin {
+  const WithPlugin = class extends ViewPlugin {
     constructor(profile, props = {}) {
-      const existingPlugin = PluginManagerIDE.getPlugin(profile.name);
-      if (existingPlugin) return existingPlugin;
-      super({
-        ...profile,
-        methods: ["render", ...methods]
-      });
-
-      this.ref = React.createRef();
-      this.initMethods();
-      this.props = props;
+      super(profile, props, methods);
     }
-
-    initMethods = () => {
-      methods.forEach(name => {
-        this[name] = (...a) => this.ref.current[name](...a);
-      });
-    };
 
     render() {
       return (
@@ -76,6 +83,12 @@ export function withViewPlugin(ReactComponent, methods = []) {
   return WithPlugin;
 }
 
+//========================================================================================
+/*                                                                                      *
+ *                                   Shared hooks                                      *
+ *                                                                                      */
+//========================================================================================
+
 /**
  * Hook to allow use of methods in view plugins
  * @param {ReactRef} ref : React ref
@@ -85,4 +98,17 @@ export const usePluginMethods = (ref, methods) => {
   React.useImperativeHandle(ref, () => ({
     ...methods
   }));
+};
+
+/**
+ * Give the previous state of a prop or state hook on change
+ * @param {*} value : Value to get previous state
+ * @returns {*} Previous value
+ */
+export const usePrevious = value => {
+  const ref = React.useRef();
+  React.useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
 };
