@@ -10,7 +10,7 @@ export default class Callback {
 
   static TYPE = "Callback";
 
-  static ofBEJSON(json) {
+  static ofJSON(json) {
     return new Callback(json.Label);
   }
 }

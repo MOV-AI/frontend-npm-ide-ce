@@ -23,19 +23,6 @@ export default class Model {
   }
 
   /**
-   * Creates new model in DB
-   * @param {String} newId
-   * @returns {Promise<Model>}
-   */
-  create(newId) {
-    if (!newId) {
-      // create new model
-    } else {
-      // create copy of the model
-    }
-  }
-
-  /**
    * Updates model in DB
    * @returns {Model}
    */

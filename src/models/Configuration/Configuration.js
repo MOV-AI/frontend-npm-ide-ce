@@ -10,7 +10,7 @@ export default class Configuration {
 
   static TYPE = "Configuration";
 
-  static ofBEJSON(json) {
+  static ofJSON(json) {
     return new Configuration(json.Label);
   }
 }

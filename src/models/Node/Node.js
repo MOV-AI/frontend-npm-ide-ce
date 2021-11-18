@@ -10,7 +10,7 @@ export default class Node {
 
   static TYPE = "Node";
 
-  static ofBEJSON(json) {
+  static ofJSON(json) {
     return new Node(json.Label);
   }
 }

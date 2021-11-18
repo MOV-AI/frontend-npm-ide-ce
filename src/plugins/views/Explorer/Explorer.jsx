@@ -8,6 +8,7 @@ import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Configuration from "../editors/Configuration/Configuration";
+import { Maybe } from "monet";
 
 const useStyles = makeStyles(() => ({
   typography: {
@@ -27,26 +28,87 @@ const Explorer = props => {
 
   /* eslint-disable react-hooks/exhaustive-deps */
   React.useEffect(() => {
-    const loadDocs = docs => {
+    const loadDocs = docManager => {
       setData(_ => {
-        return Object.values(docs.getDocTypes()).map((docTypeName, id) => {
-          return {
-            id,
-            name: docTypeName,
-            children: docs
-              .getDocsFromType(docTypeName)
-              .map((docFromType, innerId) => {
-                return {
-                  id: innerId,
-                  name: docFromType.name,
-                  url: docFromType.url
-                };
-              })
-          };
-        });
+        return Object.values(docManager.getDocTypes()).map(
+          (docTypeName, id) => {
+            return {
+              id,
+              name: docTypeName,
+              children: docManager
+                .getDocsFromType(docTypeName)
+                .map((docFromType, innerId) => {
+                  return {
+                    id: innerId,
+                    name: docFromType.name,
+                    url: docFromType.url
+                  };
+                })
+            };
+          }
+        );
       });
     };
     on("docManager", "loadDocs", loadDocs);
+
+    const updateDocs = (docManager, { action, documentName, documentType }) => {
+      const updateByActionMap = {
+        delete: () => {
+          setData(oldData => {
+            const newData = [...oldData];
+            // TODO: optimize time
+            const typeIndex = newData.findIndex(
+              type => type.name === documentType
+            );
+            if (typeIndex >= 0) {
+              const documentIndex = newData[typeIndex].children.findIndex(
+                doc => doc.name === documentName
+              );
+              if (documentIndex >= 0) {
+                newData[typeIndex].children.splice(documentIndex, 1);
+              }
+            }
+            return newData;
+          });
+        },
+        update: () => {
+          setData(oldData => {
+            const newData = [...oldData];
+            // TODO: optimize time
+            const typeIndex = newData.findIndex(
+              type => type.name === documentType
+            );
+            if (typeIndex >= 0) {
+              const documentIndex = newData[typeIndex].children.findIndex(
+                doc => doc.name === documentName
+              );
+              if (documentIndex < 0) {
+                const document = docManager.getDocFromNameType(
+                  documentName,
+                  documentType
+                );
+                if (document) {
+                  pushSorted(
+                    newData[typeIndex].children,
+                    { name: document.name, url: document.url },
+                    (a, b) => {
+                      const nameA = a.name.toLowerCase();
+                      const nameB = b.name.toLowerCase();
+                      return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
+                    }
+                  );
+                }
+              }
+            }
+            return newData;
+          });
+        }
+      };
+      Maybe.fromNull(updateByActionMap[action]).forEach(updateAction =>
+        updateAction()
+      );
+    };
+    on("docManager", "updateDocs", updateDocs);
   }, [on]);
 
   const requestScopeVersions = node => {
@@ -137,4 +199,9 @@ Explorer.defaultProps = {
 
 function useTranslation() {
   return { t: s => s };
+}
+
+function pushSorted(list, elem, comparator) {
+  list.push(elem);
+  return list.sort(comparator).map((x, i) => ({ ...x, id: i }));
 }

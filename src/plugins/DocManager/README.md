@@ -13,12 +13,12 @@
 
 # Public methods
 
-- read: (name: String) => Promise<Model>
-- update: (model: Model) => Promise<Boolean>
-- create: (model: Model) => Promise<Model>
-- delete: (name: String) => Promise<Boolean>
-- validate: (model: Model) => Promise<Boolean> // return model.validate()
-- subscribe: (x : {model: Model, callback} ) => {} // model.subscribe();
+- create: (x: {scope: String}) => Promise<Model>
+- read: (modelKey: {name: String, scope: String}) => Promise<Model>
+- update: (modelKey: {name: String, scope: String}) => Promise<Boolean>
+- delete: (modelKey: {name: String, scope: String}) => Promise<Boolean>
+- validate: (modelKey: {name: String, scope: String}) => Promise<Boolean>
+- subscribe: (x: {modelKey: {name: String, scope: String}, callback} ) => {}
 
 # Config example
 
@@ -30,29 +30,9 @@ const Config = props => {
   const [configText, setConfigText] = React.useState("");
   const [details, setDetails] = React.useState({ user: "", lastUpdate: "" });
 
-  const create = newConfigName => {
-    const actualConfig = configRef.current;
-    // actualConfig.setId(newConfigName).create(); option v1
-
-    /**
-     * Create has no side effects
-     *
-     * if id is undefined => creates new Config in DB
-     * else => it creates a copy of actualConfig in DB
-     * */
-    actualConfig
-      .create(newConfigName)
-      .then(newConfig => (configRef.current = newConfig));
-  };
-
   const save = () => {
     const actualConfig = configRef.current;
-    if (!actualConfig.id) {
-      // call("newEditorModal", "create", "Create new config").then(create); v1
-      call("newEditorModal", "create", "Create new config", create); // v2
-    } else {
-      actualConfig.save();
-    }
+    actualConfig.save();
   };
 
   const updateConfigType = configType => {
@@ -68,7 +48,7 @@ const Config = props => {
       renderRightMenu();
     });
 
-    call("DocManager", "read", path)
+    call("DocManager", "read", { scope: "Configuration" })
       .then(config => {
         configRef.current = config;
         setConfigText(config.getText());
@@ -118,5 +98,43 @@ const Config = props => {
 ```
 
 ```javascript
-new Config({ text: "", type: "yaml", id: "batata" }).create();
+const Config = props => {
+  const {data: ConfigData, onChange: (key: String, value: Any) => {} } = props;
+
+  const renderRightMenu = React.useCallback(() => {
+    const menuName = `${path}-detail-menu`;
+    const actualConfig = configRef.current;
+    // add bookmark
+    call("rightDrawer", "setBookmark", {
+      [menuName]: {
+        icon: <InfoIcon></InfoIcon>,
+        name: menuName,
+        view: <Menu id={path} details={actualConfig.getDetails()}></Menu>
+      }
+    });
+  }, [call, configRef, path]);
+
+  React.useEffect(() => {
+    on("tabs", `${id}-active`, () => {
+      renderRightMenu();
+    });
+
+  }, []);
+
+  return (
+    <>
+      <Selector
+        selected={data.type}
+        onChange={item => onChange("type", item.value)}
+      >
+        <Item value="xml">XML</Item>
+        <Item value="yaml">YAML</Item>
+      </Selector>
+      <CodeEditor
+        value={data.text}
+        onChange={newText => onChange("text", newText)}
+      />
+    </>
+  );
+}
 ```
