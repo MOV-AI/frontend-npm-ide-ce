@@ -1,6 +1,7 @@
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
 import { MasterDB } from "@mov-ai/mov-fe-lib-core";
 import { MODELS_CLASS_BY_NAME } from "../../models";
+import Configuration from "../views/editors/Configuration/Configuration";
 
 const INITIAL_DOCS_MAP = {
   Callback: {
@@ -13,6 +14,7 @@ const INITIAL_DOCS_MAP = {
     name: "Configuration",
     title: "Configurations",
     scope: "Configuration",
+    plugin: Configuration,
     docs: {}
   },
   Flow: {
@@ -33,7 +35,19 @@ const INITIAL_DOCS_MAP = {
  * Document Manager plugin to handle requests, subscribers and more
  */
 class DocManager extends IDEPlugin {
-  docsMap = INITIAL_DOCS_MAP;
+  constructor(profile) {
+    // Remove duplicated if needed
+    const methods = Array.from(
+      new Set([
+        ...(profile.methods || []),
+        "getDocTypes",
+        "getDocsFromType",
+        "read"
+      ])
+    );
+    super({ ...profile, methods });
+    this.docsMap = INITIAL_DOCS_MAP;
+  }
 
   activate() {
     this.docsSubscribe();
@@ -44,7 +58,7 @@ class DocManager extends IDEPlugin {
    * @returns {Array<String>} Array<documentType: String>
    */
   getDocTypes() {
-    return Object.keys(this.docsMap);
+    return this.docsMap;
   }
 
   /**
@@ -56,6 +70,19 @@ class DocManager extends IDEPlugin {
     const answer = this.docsMap[type]?.docs;
     if (!answer) return [];
     return Object.values(answer);
+  }
+
+  /**
+   * Request document data
+   * @param {DocumentRequest} data
+   */
+  read(data) {
+    const { scope, name } = data;
+    const model = new MODELS_CLASS_BY_NAME[scope](name);
+    // mock model data
+    model?.mock();
+    // return model with mocked data
+    return model;
   }
 
   //========================================================================================

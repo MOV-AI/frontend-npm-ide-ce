@@ -1,26 +1,27 @@
 import React from "react";
 import IconButton from "@material-ui/core/IconButton";
 import { makeStyles } from "@material-ui/core/styles";
-import { usePluginMethods } from "../../../engine/ReactPlugin/ViewReactPlugin";
+import { usePluginMethods } from "../engine/ReactPlugin/ViewReactPlugin";
 
 const useStyles = (side, oppositeSide) =>
-  makeStyles(() => ({
+  makeStyles(theme => ({
     panel: {
       position: "absolute",
       [oppositeSide]: -40,
       background: "#fff0",
       top: 40,
       width: 40,
-      zIndex: 9999
+      zIndex: 999
     },
     bookmark: {
       width: 40,
       height: 40,
       margin: "10px 0 !important",
-      border: "solid 1px gray !important",
+      border: `solid 1px ${theme.palette.background.primary} !important`,
       [`border-${side}`]: "none !important",
       borderRadius: "0px !important",
-      background: "white !important"
+      color: theme.palette.primary.main,
+      background: `${theme.palette.background.secondary} !important`
     }
   }));
 
@@ -61,22 +62,19 @@ const withBookmarks = Component => {
     /**
      * Add bookmark to drawer
      *  data: {
-     *    icon {Element} : Bookmark icon
-     *    name {String} : Title
-     *    view {Element} : Element to be rendered in menu container
+     *    icon {Element}  : Bookmark icon
+     *    name {String}   : Title
+     *    view {Element}  : Element to be rendered in menu container
      *  }
      *  isDefault {Boolean} : Set bookmark as active if true
      */
-    const addBookmark = React.useCallback(
-      (data, isDefault = false) => {
-        const name = data.name;
-        setBookmarks(prevState => {
-          return { ...prevState, [name]: data };
-        });
-        if (isDefault) selectBookmark(name);
-      },
-      [selectBookmark]
-    );
+    const addBookmark = React.useCallback((data, isDefault = false) => {
+      const name = data.name;
+      setBookmarks(prevState => {
+        return { ...prevState, [name]: data };
+      });
+      if (isDefault) setActive(name);
+    }, []);
 
     /**
      * Remove bookmark by name
@@ -95,22 +93,19 @@ const withBookmarks = Component => {
     const resetBookmarks = React.useCallback(() => {
       setBookmarks({});
       setRenderedView([]);
+      drawerRef.current.closeDrawer();
     }, []);
 
     /**
      * Set bookmarks
      */
-    const setBookmark = React.useCallback(
-      (bookmarks = {}) => {
-        setBookmarks(bookmarks);
-        const firstBookmark = Object.values(bookmarks)[0];
-        if (firstBookmark) {
-          selectBookmark(firstBookmark.name);
-          drawerRef.current.openDrawer();
-        }
-      },
-      [selectBookmark]
-    );
+    const setBookmark = React.useCallback((bookmarks = {}) => {
+      setBookmarks(bookmarks);
+      const firstBookmark = Object.values(bookmarks)[0];
+      if (firstBookmark) {
+        setActive(firstBookmark.name);
+      }
+    }, []);
 
     //========================================================================================
     /*                                                                                      *
@@ -135,7 +130,10 @@ const withBookmarks = Component => {
       setBookmark,
       addBookmark,
       resetBookmarks,
-      removeBookmark
+      removeBookmark,
+      open: () => drawerRef.current.openDrawer(),
+      close: () => drawerRef.current.closeDrawer(),
+      toggle: () => drawerRef.current.toggleDrawer()
     });
 
     //========================================================================================

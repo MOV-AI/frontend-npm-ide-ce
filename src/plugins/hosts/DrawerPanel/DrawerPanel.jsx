@@ -1,13 +1,20 @@
-import { Drawer } from "@material-ui/core";
+import { Drawer, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import React from "react";
 import { withHostReactPlugin } from "../../../engine/ReactPlugin/HostReactPlugin";
 import { usePluginMethods } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import withBookmarks, { exposedMethods } from "../_shared/withBookmarks";
+import withBookmarks, {
+  exposedMethods
+} from "../../../decorators/withBookmarks";
 
 const useStyles = (isLeft, isOpen) =>
-  makeStyles({
+  makeStyles(theme => ({
+    content: {
+      background: theme.palette.background.primary,
+      color: theme.backdrop.color,
+      height: "100%"
+    },
     drawer: {
       overflow: "hidden",
       position: "relative",
@@ -23,18 +30,11 @@ const useStyles = (isLeft, isOpen) =>
         transition: "none !important"
       }
     }
-  });
+  }));
 
 const DrawerPanel = React.forwardRef((props, ref) => {
-  const {
-    viewPlugins,
-    onTopic,
-    hostName,
-    style,
-    anchor,
-    initialOpenState,
-    className
-  } = props;
+  const { viewPlugins, hostName, style, anchor, initialOpenState, className } =
+    props;
   const [open, setOpen] = React.useState(initialOpenState);
   const classes = useStyles(anchor === "left", open)();
 
@@ -47,40 +47,31 @@ const DrawerPanel = React.forwardRef((props, ref) => {
   /**
    * Toggle drawer
    */
-  const toggleDrawer = React.useCallback(() => {
+  const toggleDrawer = () => {
     setOpen(prevState => {
       return !prevState;
     });
-  }, []);
+  };
 
   /**
    * Open Drawer
    */
-  const openDrawer = React.useCallback(() => {
+  const openDrawer = () => {
     setOpen(true);
-  }, []);
+  };
 
   /**
    * Close Drawer
    */
-  const closeDrawer = React.useCallback(() => {
+  const closeDrawer = () => {
     setOpen(false);
-  }, []);
+  };
 
   //========================================================================================
   /*                                                                                      *
    *                                   React lifecycles                                   *
    *                                                                                      */
   //========================================================================================
-
-  React.useEffect(() => {
-    // Handle drawer toggle
-    onTopic(`toggle-${hostName}`, toggleDrawer);
-    // Handle dynamic drawer open
-    onTopic(`open-${hostName}`, openDrawer);
-    // Handle dynamic drawer close
-    onTopic(`close-${hostName}`, closeDrawer);
-  }, [onTopic, hostName, toggleDrawer, openDrawer, closeDrawer]);
 
   /**
    * Expose methods
@@ -106,13 +97,15 @@ const DrawerPanel = React.forwardRef((props, ref) => {
       style={{ ...style }}
       className={`${classes.drawer} ${className}`}
     >
-      {props.children}
-      {viewPlugins}
+      <Typography component="div" className={classes.content}>
+        {props.children}
+        {viewPlugins}
+      </Typography>
     </Drawer>
   );
 });
 
-DrawerPanel.pluginMethods = [...exposedMethods];
+DrawerPanel.pluginMethods = [...exposedMethods, "open", "close", "toggle"];
 
 export default withHostReactPlugin(
   withBookmarks(DrawerPanel),

@@ -13,30 +13,32 @@ import Tabs from "../plugins/views/Tabs/Tabs";
 import Placeholder from "../plugins/views/Placeholder/Placeholder";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
-import { withAuthentication } from "@mov-ai/mov-fe-lib-react";
+import { withAuthentication, Style } from "@mov-ai/mov-fe-lib-react";
+import { withTheme } from "../decorators/withTheme";
+import { MainContext } from "../main-context";
 import { Typography } from "@material-ui/core";
 
 const DEBUG_MODE = false;
 
 const useStyles = debugMode =>
-  makeStyles(() => ({
+  makeStyles(theme => ({
     topBar: { border: debugMode ? "solid 5px purple" : "", width: "100%" },
     leftPanel: {
       border: debugMode ? "solid 5px red" : "",
-      borderRight: debugMode ? "" : "1px solid gray",
+      borderRight: debugMode ? "" : `1px solid ${theme.background}`,
       display: "flex",
       position: "relative"
     },
     centralPanel: { flexGrow: 1, border: debugMode ? "solid 5px green" : "" },
     rightDrawer: {
       border: debugMode ? "solid 5px blue" : "",
-      borderLeft: debugMode ? "" : "1px solid gray",
+      borderLeft: debugMode ? "" : `1px solid ${theme.background}`,
       position: "relative"
     },
     bottomBar: { border: debugMode ? "solid 5px orange" : "", width: "100%" }
   }));
 
-function App() {
+function App(props) {
   const classes = useStyles(DEBUG_MODE)();
   writeMovaiLogo();
 
@@ -45,7 +47,19 @@ function App() {
     installViewPlugins();
   }, []);
 
-  return <div className="App">{getHostedPlugins(classes)}</div>;
+  return (
+    <MainContext.Provider
+      value={{
+        selectedTheme: props.theme,
+        isDarkTheme: props.theme === "dark",
+        handleToggleTheme: props.handleToggleTheme,
+        handleLogOut: props.handleLogOut
+      }}
+    >
+      <Style />
+      <div className="App">{getHostedPlugins(classes)}</div>
+    </MainContext.Provider>
+  );
 }
 
 function installAppPlugins() {
@@ -136,4 +150,4 @@ const MOVAI_LOGO = `
 ██║ ╚═╝ ██║ ╚██████═╝   ╚███═╝         ██║  ██║██║
 `;
 
-export default withAuthentication(App);
+export default withTheme(withAuthentication(App));
