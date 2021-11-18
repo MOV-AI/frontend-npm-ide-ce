@@ -158,7 +158,7 @@ const Explorer = props => {
 
   return (
     <div style={{ padding: 5 }}>
-      <h1>Explorer</h1>
+      <h1>{t(Explorer)}</h1>
       <Typography component="div" className={classes.typography}>
         <VirtualizedTree
           onClickNode={async node => {

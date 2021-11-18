@@ -20,6 +20,9 @@
 - validate: (modelKey: {name: String, scope: String}) => Promise<Boolean>
 - subscribe: (x: {modelKey: {name: String, scope: String}, callback} ) => {}
 
+
+# Usage
+
 # Config example
 
 ```javascript

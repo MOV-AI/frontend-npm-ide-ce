@@ -1,5 +1,5 @@
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
-import { MasterDB } from "@mov-ai/mov-fe-lib-core";
+import { MasterDB, Document } from "@mov-ai/mov-fe-lib-core";
 import { MODELS_CLASS_BY_NAME } from "../../models";
 import { Maybe } from "monet";
 
@@ -30,16 +30,27 @@ const INITIAL_DOCS_MAP = {
   }
 };
 
+const TOPICS = {
+  updateDocs: "updateDocs",
+  loadDocs: "loadDocs"
+};
+
 /**
  * Document Manager plugin to handle requests, subscribers and more
  */
 class DocManager extends IDEPlugin {
   docsMap = INITIAL_DOCS_MAP;
 
-  constructor(profile) {
+  constructor(profile = {}) {
     // Remove duplicated if needed
     const methods = Array.from(
-      new Set([...(profile.methods || []), "getDocTypes", "getDocsFromType"])
+      new Set([
+        ...(profile.methods || []),
+        "getDocTypes",
+        "getDocsFromType",
+        "getDocsFromNameType",
+        "read"
+      ])
     );
     super({ ...profile, methods });
   }
@@ -49,7 +60,7 @@ class DocManager extends IDEPlugin {
   }
 
   /**
-   *
+   * Returns array of document types
    * @returns {Array<String>} Array<documentType: String>
    */
   getDocTypes() {
@@ -57,7 +68,7 @@ class DocManager extends IDEPlugin {
   }
 
   /**
-   *
+   * Returns array of data models from type
    * @param {String} type
    * @returns {Array<Model>} Array<model: Model>
    */
@@ -68,7 +79,7 @@ class DocManager extends IDEPlugin {
   }
 
   /**
-   *
+   * Returns data model from name and type
    * @param {String} name
    * @param {String} type
    * @returns {Model || undefined}
@@ -77,7 +88,22 @@ class DocManager extends IDEPlugin {
     return this.docsMap?.[type]?.docs[name];
   }
 
-  read(path) {}
+  /**
+   * Read model from DB
+   * @param {{name: String, scope: String}} modelKey
+   *
+   * @returns {Promise<Model>}
+   */
+  read(modelKey) {
+    const { name, scope } = modelKey;
+    return new Document(Document.parsePath(name, scope)).read().then(file => {
+      this.addDoc(scope, {
+        name: file.Label,
+        content: file
+      });
+      return this.getDocFromNameType(name, scope);
+    });
+  }
 
   //========================================================================================
   /*                                                                                      *
@@ -88,7 +114,8 @@ class DocManager extends IDEPlugin {
   /**
    * Add document
    * @param {String} docType
-   * @param {{name:String, content:Object}} doc
+   * @param {{name:String, content:Object}} doc,
+   * @returns {DocManager}
    */
   addDoc(docType, doc) {
     if (docType in this.docsMap) {
@@ -100,6 +127,7 @@ class DocManager extends IDEPlugin {
         );
       }
     }
+    return this;
   }
 
   /**
@@ -113,11 +141,13 @@ class DocManager extends IDEPlugin {
    * Delete document
    * @param {String} docType
    * @param {{name:String, content:Object}} doc
+   * @returns {DocManager}
    */
   delDoc(docType, doc) {
     Maybe.fromNull(this.docsMap[docType]).forEach(
       ({ docs }) => delete docs[doc.name]
     );
+    return this;
   }
 
   getUpdateDoc(document) {
@@ -125,7 +155,7 @@ class DocManager extends IDEPlugin {
     const event2actionMap = {
       del: updateDoc => {
         this.delDoc(docType, { name: updateDoc.name });
-        this.emit("updateDocs", this, {
+        this.emit(TOPICS.updateDocs, this, {
           action: "delete",
           documentName: updateDoc.name,
           documentType: docType
@@ -133,7 +163,7 @@ class DocManager extends IDEPlugin {
       },
       set: updateDoc => {
         this.addDoc(docType, updateDoc);
-        this.emit("updateDocs", this, {
+        this.emit(TOPICS.updateDocs, this, {
           action: "update",
           documentName: updateDoc.name,
           documentType: docType
@@ -158,7 +188,7 @@ class DocManager extends IDEPlugin {
           content: { ...doc }
         }))
         .forEach(doc => this.addDoc(docType, doc));
-      this.emit("loadDocs", this);
+      this.emit(TOPICS.loadDocs, this);
     };
   }
 

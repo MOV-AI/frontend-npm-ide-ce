@@ -39,4 +39,12 @@ export default class Model {
     // subscribe
     return this;
   }
+
+  /**
+   * Method to be implemented in its sub-classes
+   * 
+   */
+  getType() {
+    return "Model";
+  }
 }
