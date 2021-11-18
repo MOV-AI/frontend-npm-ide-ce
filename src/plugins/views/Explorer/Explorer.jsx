@@ -10,7 +10,7 @@ import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE"
 import Configuration from "../editors/Configuration/Configuration";
 import { Maybe } from "monet";
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(theme => ({
   typography: {
     overflowY: "auto",
     overflowX: "hidden",
@@ -30,23 +30,24 @@ const Explorer = props => {
   React.useEffect(() => {
     const loadDocs = docManager => {
       setData(_ => {
-        return Object.values(docManager.getDocTypes()).map(
-          (docTypeName, id) => {
-            return {
-              id,
-              name: docTypeName,
-              children: docManager
-                .getDocsFromType(docTypeName)
-                .map((docFromType, innerId) => {
-                  return {
-                    id: innerId,
-                    name: docFromType.name,
-                    url: docFromType.url
-                  };
-                })
-            };
-          }
-        );
+        return docManager.getDocTypes().map((docType, id) => {
+          return {
+            id,
+            name: docType.name,
+            title: docType.title,
+            children: docManager
+              .getDocsFromType(docType.scope)
+              .map((docFromType, innerId) => {
+                return {
+                  id: innerId,
+                  name: docFromType.name,
+                  title: docFromType.name,
+                  scope: docType.scope,
+                  url: docFromType.url
+                };
+              })
+          };
+        });
       });
     };
     on("docManager", "loadDocs", loadDocs);
@@ -138,18 +139,13 @@ const Explorer = props => {
         });
       },
       1: () => {
+        console.log("debug node", node);
         const tabName = `${node.name}.conf`;
-        const viewPlugin = new Configuration(
-          { name: node.url },
-          { id: node.url, name: node.name }
-        );
-        PluginManagerIDE.install(node.url, viewPlugin).then(() => {
-          // Open tab
-          call("tabs", "open", {
-            id: node.url,
-            title: tabName,
-            content: viewPlugin.render()
-          });
+        call("tabs", "openEditor", {
+          id: node.url,
+          title: tabName,
+          name: node.name,
+          scope: node.scope
         });
       }
     };
@@ -157,12 +153,11 @@ const Explorer = props => {
   };
 
   return (
-    <div style={{ padding: 5 }}>
+    <Typography component="div">
       <h1>{t(Explorer)}</h1>
       <Typography component="div" className={classes.typography}>
         <VirtualizedTree
           onClickNode={async node => {
-            console.log("debug click node", node);
             requestScopeVersions(node);
           }}
           data={data}
@@ -182,7 +177,7 @@ const Explorer = props => {
           height={props.height}
         ></VirtualizedTree>
       </Typography>
-    </div>
+    </Typography>
   );
 };
 

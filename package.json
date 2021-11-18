@@ -1,7 +1,14 @@
 {
-  "name": "frontend-npm-ide-ce",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@mov-ai/mov-fe-app-ide-ce",
+  "version": "0.0.1-0",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/mov-ai"
+  },  
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MOV-AI/frontend-npm-ide-ce.git"
+  },
+  "homepage": "/static/mov-fe-app-ide-ce",
   "dependencies": {
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
@@ -10,6 +17,7 @@
     "@material-ui/styles": "^4.11.4",
     "@mov-ai/mov-fe-lib-code-editor": "^1.0.2",
     "@mov-ai/mov-fe-lib-react": "^1.0.29",
+    "@mov-ai/mov-fe-lib-core": "^1.0.31",
     "@remixproject/engine": "^0.3.19",
     "@remixproject/engine-web": "^0.3.19",
     "@testing-library/jest-dom": "^5.14.1",
@@ -26,10 +34,12 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts --max_old_space_size=4096 build && python3 ./scripts/detach_manifest.py",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "clean": "rm -r node_modules; rm package-lock.json"
+    "clean": "rm -r node_modules; rm package-lock.json",
+    "deploy": "./scripts/deployApp.sh mov-fe-app-ide",
+    "coverage": "npm test -- --coverage"
   },
   "eslintConfig": {
     "extends": [
@@ -60,5 +70,26 @@
     "moduleNameMapper": {
       "ace-builds": "<rootDir>/node_modules/ace-builds"
     }
+  },
+  "files": [
+    "manifest.txt",
+    "build",
+    "database",
+    "scripts",
+    "debian"
+  ],
+  "movai": {
+    "name": "mov-fe-app-ide-ce",
+    "Label": "IDE-CE",
+    "Type": "application",
+    "Package": "mov-fe-app-ide-ce",
+    "EntryPoint": "index.html",
+    "Description": "Integrated Development Environment - CE",
+    "Icon": "fas fa-code",
+    "Callbacks": [],
+    "Configuration": "app-ide-ce",
+    "CustomConfiguration": "app-custom-ide-ce",
+    "Version": "0.0.1",
+    "generateMetadata": true
   }
 }

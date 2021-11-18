@@ -2,30 +2,35 @@ import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
 import { MasterDB, Document } from "@mov-ai/mov-fe-lib-core";
 import { MODELS_CLASS_BY_NAME } from "../../models";
 import { Maybe } from "monet";
+import Configuration from "../views/editors/Configuration/Configuration";
 
 const INITIAL_DOCS_MAP = {
   Callback: {
     name: "Callback",
     title: "Callbacks",
     scope: "Callback",
+    plugin: {},
     docs: {}
   },
   Configuration: {
     name: "Configuration",
     title: "Configurations",
     scope: "Configuration",
+    plugin: Configuration,
     docs: {}
   },
   Flow: {
     name: "Flow",
     title: "Flows",
     scope: "Flow",
+    plugin: {},
     docs: {}
   },
   Node: {
     name: "Node",
     title: "Nodes",
     scope: "Node",
+    plugin: {},
     docs: {}
   }
 };
@@ -39,20 +44,20 @@ const TOPICS = {
  * Document Manager plugin to handle requests, subscribers and more
  */
 class DocManager extends IDEPlugin {
-  docsMap = INITIAL_DOCS_MAP;
-
-  constructor(profile = {}) {
+  constructor(profile) {
     // Remove duplicated if needed
     const methods = Array.from(
       new Set([
         ...(profile.methods || []),
         "getDocTypes",
+        "getDocPlugin",
         "getDocsFromType",
-        "getDocsFromNameType",
+        "getDocFromNameType",
         "read"
       ])
     );
     super({ ...profile, methods });
+    this.docsMap = INITIAL_DOCS_MAP;
   }
 
   activate() {
@@ -61,10 +66,19 @@ class DocManager extends IDEPlugin {
 
   /**
    * Returns array of document types
-   * @returns {Array<String>} Array<documentType: String>
+   * @returns {Array<{name: String, title: String, scope: String}>} 
    */
   getDocTypes() {
-    return Object.keys(this.docsMap);
+    return Object.values(this.docsMap).map(type => ({ name: type.name, title: type.title, scope: type.scope  }));
+  }
+
+  /**
+   * Returns Type object
+   * @param {String} type
+   * @returns {DocCollection} 
+   */
+  getDocPlugin(type) {
+    return this.docsMap[type].plugin
   }
 
   /**

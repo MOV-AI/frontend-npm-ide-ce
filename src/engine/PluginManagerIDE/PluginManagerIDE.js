@@ -66,6 +66,10 @@ export default class PluginManagerIDE {
     return this.topics;
   }
 
+  getPlugin(pluginName) {
+    return this.engine?.plugins?.[pluginName];
+  }
+
   static getInstance() {
     return new PluginManagerIDE();
   }
@@ -77,5 +81,9 @@ export default class PluginManagerIDE {
    */
   static async install(pluginName, plugin) {
     await PluginManagerIDE.getInstance().install(pluginName, plugin);
+  }
+
+  static getPlugin(pluginName) {
+    return PluginManagerIDE.getInstance().getPlugin(pluginName);
   }
 }

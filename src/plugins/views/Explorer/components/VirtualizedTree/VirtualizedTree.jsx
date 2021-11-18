@@ -156,7 +156,6 @@ class VirtualizedTree extends Component {
   render() {
     const { t, classes, showIcons } = this.props;
     const nodeTooltip = this.state.nodeTooltip;
-    const iconStyle = <i className="fas fa-home" />;
     const nodes = this.props.data;
     return (
       <div>
@@ -164,7 +163,6 @@ class VirtualizedTree extends Component {
           style={{
             overflow: "auto"
           }}
-          icon={iconStyle}
           onSearch={input => {
             this.setState({
               searchValue: input
@@ -240,7 +238,7 @@ class VirtualizedTree extends Component {
                               className={classes.ellipsis}
                               onMouseLeave={this.handleTooltipClose}
                             >
-                              {node.name}
+                              {node.title}
                             </div>
                           </CustomTooltip>
                           {showIcons && node.deepness === 1 && (
