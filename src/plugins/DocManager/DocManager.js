@@ -44,7 +44,7 @@ const TOPICS = {
  * Document Manager plugin to handle requests, subscribers and more
  */
 class DocManager extends IDEPlugin {
-  constructor(profile) {
+  constructor(profile = {}) {
     // Remove duplicated if needed
     const methods = Array.from(
       new Set([
@@ -66,19 +66,23 @@ class DocManager extends IDEPlugin {
 
   /**
    * Returns array of document types
-   * @returns {Array<{name: String, title: String, scope: String}>} 
+   * @returns {Array<{name: String, title: String, scope: String}>}
    */
   getDocTypes() {
-    return Object.values(this.docsMap).map(type => ({ name: type.name, title: type.title, scope: type.scope  }));
+    return Object.values(this.docsMap).map(type => ({
+      name: type.name,
+      title: type.title,
+      scope: type.scope
+    }));
   }
 
   /**
    * Returns Type object
    * @param {String} type
-   * @returns {DocCollection} 
+   * @returns {DocCollection}
    */
   getDocPlugin(type) {
-    return this.docsMap[type].plugin
+    return this.docsMap[type].plugin;
   }
 
   /**
@@ -135,11 +139,9 @@ class DocManager extends IDEPlugin {
     if (docType in this.docsMap) {
       const documentsOfType = this.docsMap[docType].docs;
       const docName = doc.name;
-      if (!(docName in documentsOfType)) {
-        documentsOfType[docName] = MODELS_CLASS_BY_NAME[docType].ofJSON(
-          doc.content
-        );
-      }
+      documentsOfType[docName] = MODELS_CLASS_BY_NAME[docType].ofJSON(
+        doc.content
+      );
     }
     return this;
   }

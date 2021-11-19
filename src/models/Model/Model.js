@@ -1,17 +1,24 @@
+/**
+ * Abstract class of a Model
+ */
 export default class Model {
-  id; // unique identifier
+  name;
   details; // model details
-  constructor({ id, details = { user: "", lastUpdate: "" } }) {
-    this.id = id;
+  constructor(
+    name = "__placeholder__",
+    details = { user: "N/A", lastUpdate: "N/A" }
+  ) {
+    this.name = name;
     this.details = details;
+    this.url = `global/${this.getScope()}/${this.name}`;
   }
 
-  getId() {
-    return this.id;
+  getName() {
+    return this.name;
   }
 
-  setId(id) {
-    this.id = id;
+  setName(name) {
+    this.name = name;
   }
 
   getDetails() {
@@ -23,28 +30,9 @@ export default class Model {
   }
 
   /**
-   * Updates model in DB
-   * @returns {Model}
-   */
-  save() {
-    // save in DB
-    return this;
-  }
-
-  /**
-   * @param {Model => {}} callback
-   * @returns {Model}
-   */
-  subscribe(callback) {
-    // subscribe
-    return this;
-  }
-
-  /**
    * Method to be implemented in its sub-classes
-   * 
    */
-  getType() {
+  getScope() {
     return "Model";
   }
 }

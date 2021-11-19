@@ -18,7 +18,7 @@ const DataHandler = props => {
     props
       .call("docManager", "read", { scope: props.scope, name: props.name })
       .then(model => {
-        setData(model.data);
+        setData(model);
         // Handle editor menus rendering
         props.initRightMenu();
       });

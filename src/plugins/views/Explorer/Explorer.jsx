@@ -1,14 +1,12 @@
-import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 import _get from "lodash/get";
 import _set from "lodash/set";
+import { Maybe } from "monet";
 import PropTypes from "prop-types";
 import React from "react";
-import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
-import Configuration from "../editors/Configuration/Configuration";
-import { Maybe } from "monet";
+import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
 
 const useStyles = makeStyles(theme => ({
   typography: {
@@ -91,7 +89,12 @@ const Explorer = props => {
                 if (document) {
                   pushSorted(
                     newData[typeIndex].children,
-                    { name: document.name, url: document.url },
+                    {
+                      name: document.name,
+                      title: document.name,
+                      scope: document.getScope(),
+                      url: document.url
+                    },
                     (a, b) => {
                       const nameA = a.name.toLowerCase();
                       const nameB = b.name.toLowerCase();
