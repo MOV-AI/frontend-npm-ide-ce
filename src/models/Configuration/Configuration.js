@@ -1,51 +1,52 @@
-export default class Configuration {
-  constructor(name) {
-    this.name = name;
-    this.data = {
-      Label: name,
-      LastUpdate: { user: "", date: "" },
-      Type: "",
-      Yaml: ""
-    };
-    this.url = `global/${this.getScope()}/${this.name}`;
-  }
+import Model from "../Model/Model";
 
-  getScope() {
-    return Configuration.TYPE;
-  }
-
-  getDetails() {
-    return this.data.LastUpdate;
+export default class Configuration extends Model {
+  /**
+   * This should be private
+   * @param {*} name
+   * @param {*} extension
+   * @param {*} code
+   * @param {*} details
+   */
+  constructor(name, extension, code, details) {
+    super(name, details);
+    this.extension = extension || "yaml";
+    this.code = code || "";
   }
 
   getCode() {
-    return this.data.Yaml;
-  }
-
-  getType() {
-    return this.data.Type;
-  }
-
-  setType(type) {
-    this.data.Type = type;
-    return this;
+    return this.code;
   }
 
   setCode(code) {
-    this.data.Yaml = code;
+    this.code = code;
     return this;
   }
 
-  mock() {
-    this.data.Yaml = `${this.name} : yaml code`;
-    this.data.Type = "yaml";
-    this.data.LastUpdate.user = "movai";
-    this.data.LastUpdate.date = new Date().toLocaleString();
+  getExtension() {
+    return this.extension;
   }
 
-  static TYPE = "Configuration";
-
-  static ofBEJSON(json) {
-    return new Configuration(json.Label);
+  setExtension(extension) {
+    this.extension = extension;
+    return this;
   }
+
+  getScope() {
+    return Configuration.SCOPE;
+  }
+
+  static SCOPE = "Configuration";
+
+  static ofJSON(json) {
+    const {
+      Label: name,
+      Yaml: code,
+      Type: extension,
+      LastUpdate: details
+    } = json;
+    return new Configuration(name, extension, code, details);
+  }
+
+  static EMPTY = new Configuration();
 }

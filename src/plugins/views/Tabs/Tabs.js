@@ -81,8 +81,7 @@ const useLayout = (props, dockRef) => {
 
   const getTabData = React.useCallback(
     async docData => {
-      return props.call("docManager", "getDocTypes").then(docTypes => {
-        const plugin = docTypes[docData.scope].plugin;
+      return props.call("docManager", "getDocPlugin", docData.scope).then(plugin => {
         try {
           const viewPlugin = new plugin(
             { name: docData.id },

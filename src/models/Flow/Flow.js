@@ -10,7 +10,7 @@ export default class Flow {
 
   static TYPE = "Flow";
 
-  static ofBEJSON(json) {
+  static ofJSON(json) {
     return new Flow(json.Label);
   }
 }

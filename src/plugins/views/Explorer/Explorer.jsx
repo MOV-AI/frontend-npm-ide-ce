@@ -1,12 +1,12 @@
-import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 import _get from "lodash/get";
 import _set from "lodash/set";
+import { Maybe } from "monet";
 import PropTypes from "prop-types";
 import React from "react";
-import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
-// import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
+import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
 
 const useStyles = makeStyles(theme => ({
   typography: {
@@ -22,15 +22,18 @@ const Explorer = props => {
   const classes = useStyles();
   const [data, setData] = React.useState([]);
 
+  const { t } = useTranslation();
+
+  /* eslint-disable react-hooks/exhaustive-deps */
   React.useEffect(() => {
-    const loadDocs = docs => {
+    const loadDocs = docManager => {
       setData(_ => {
-        return Object.values(docs.getDocTypes()).map((docType, id) => {
+        return docManager.getDocTypes().map((docType, id) => {
           return {
             id,
             name: docType.name,
             title: docType.title,
-            children: docs
+            children: docManager
               .getDocsFromType(docType.scope)
               .map((docFromType, innerId) => {
                 return {
@@ -46,6 +49,70 @@ const Explorer = props => {
       });
     };
     on("docManager", "loadDocs", loadDocs);
+
+    const updateDocs = (docManager, { action, documentName, documentType }) => {
+      const updateByActionMap = {
+        delete: () => {
+          setData(oldData => {
+            const newData = [...oldData];
+            // TODO: optimize time
+            const typeIndex = newData.findIndex(
+              type => type.name === documentType
+            );
+            if (typeIndex >= 0) {
+              const documentIndex = newData[typeIndex].children.findIndex(
+                doc => doc.name === documentName
+              );
+              if (documentIndex >= 0) {
+                newData[typeIndex].children.splice(documentIndex, 1);
+              }
+            }
+            return newData;
+          });
+        },
+        update: () => {
+          setData(oldData => {
+            const newData = [...oldData];
+            // TODO: optimize time
+            const typeIndex = newData.findIndex(
+              type => type.name === documentType
+            );
+            if (typeIndex >= 0) {
+              const documentIndex = newData[typeIndex].children.findIndex(
+                doc => doc.name === documentName
+              );
+              if (documentIndex < 0) {
+                const document = docManager.getDocFromNameType(
+                  documentName,
+                  documentType
+                );
+                if (document) {
+                  pushSorted(
+                    newData[typeIndex].children,
+                    {
+                      name: document.name,
+                      title: document.name,
+                      scope: document.getScope(),
+                      url: document.url
+                    },
+                    (a, b) => {
+                      const nameA = a.name.toLowerCase();
+                      const nameB = b.name.toLowerCase();
+                      return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
+                    }
+                  );
+                }
+              }
+            }
+            return newData;
+          });
+        }
+      };
+      Maybe.fromNull(updateByActionMap[action]).forEach(updateAction =>
+        updateAction()
+      );
+    };
+    on("docManager", "updateDocs", updateDocs);
   }, [on]);
 
   const requestScopeVersions = node => {
@@ -90,7 +157,7 @@ const Explorer = props => {
 
   return (
     <Typography component="div">
-      <h1>Explorer</h1>
+      <h1>{t("Explorer")}</h1>
       <Typography component="div" className={classes.typography}>
         <VirtualizedTree
           onClickNode={async node => {
@@ -127,3 +194,12 @@ Explorer.propTypes = {
 Explorer.defaultProps = {
   profile: { name: "explorer" }
 };
+
+function useTranslation() {
+  return { t: s => s };
+}
+
+function pushSorted(list, elem, comparator) {
+  list.push(elem);
+  return list.sort(comparator).map((x, i) => ({ ...x, id: i }));
+}

@@ -1,6 +1,7 @@
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
-import { MasterDB } from "@mov-ai/mov-fe-lib-core";
+import { MasterDB, Document } from "@mov-ai/mov-fe-lib-core";
 import { MODELS_CLASS_BY_NAME } from "../../models";
+import { Maybe } from "monet";
 import Configuration from "../views/editors/Configuration/Configuration";
 
 const INITIAL_DOCS_MAP = {
@@ -8,6 +9,7 @@ const INITIAL_DOCS_MAP = {
     name: "Callback",
     title: "Callbacks",
     scope: "Callback",
+    plugin: {},
     docs: {}
   },
   Configuration: {
@@ -21,28 +23,39 @@ const INITIAL_DOCS_MAP = {
     name: "Flow",
     title: "Flows",
     scope: "Flow",
+    plugin: {},
     docs: {}
   },
   Node: {
     name: "Node",
     title: "Nodes",
     scope: "Node",
+    plugin: {},
     docs: {}
   }
+};
+
+const TOPICS = {
+  updateDocs: "updateDocs",
+  loadDocs: "loadDocs"
 };
 
 /**
  * Document Manager plugin to handle requests, subscribers and more
  */
 class DocManager extends IDEPlugin {
-  constructor(profile) {
+  constructor(profile = {}) {
     // Remove duplicated if needed
     const methods = Array.from(
       new Set([
         ...(profile.methods || []),
         "getDocTypes",
+        "getDocPlugin",
         "getDocsFromType",
-        "read"
+        "getDocFromNameType",
+        "create",
+        "read",
+        "save"
       ])
     );
     super({ ...profile, methods });
@@ -54,15 +67,28 @@ class DocManager extends IDEPlugin {
   }
 
   /**
-   *
-   * @returns {Array<String>} Array<documentType: String>
+   * Returns array of document types
+   * @returns {Array<{name: String, title: String, scope: String}>}
    */
   getDocTypes() {
-    return this.docsMap;
+    return Object.values(this.docsMap).map(type => ({
+      name: type.name,
+      title: type.title,
+      scope: type.scope
+    }));
   }
 
   /**
-   *
+   * Returns Type object
+   * @param {String} type
+   * @returns {DocCollection}
+   */
+  getDocPlugin(type) {
+    return this.docsMap[type].plugin;
+  }
+
+  /**
+   * Returns array of data models from type
    * @param {String} type
    * @returns {Array<Model>} Array<model: Model>
    */
@@ -73,16 +99,46 @@ class DocManager extends IDEPlugin {
   }
 
   /**
-   * Request document data
-   * @param {DocumentRequest} data
+   * Returns data model from name and type
+   * @param {String} name
+   * @param {String} type
+   * @returns {Model || undefined}
    */
-  read(data) {
-    const { scope, name } = data;
-    const model = new MODELS_CLASS_BY_NAME[scope](name);
-    // mock model data
-    model?.mock();
-    // return model with mocked data
-    return model;
+  getDocFromNameType(name, type) {
+    return this.docsMap?.[type]?.docs[name];
+  }
+
+  /**
+   * Read model from DB
+   * @param {{name: String, scope: String}} modelKey
+   *
+   * @returns {Promise<Model>}
+   */
+  read(modelKey) {
+    const { name, scope } = modelKey;
+    return new Document(Document.parsePath(name, scope)).read().then(file => {
+      this.addDoc(scope, {
+        name: file.Label,
+        content: file
+      });
+      return this.getDocFromNameType(name, scope);
+    });
+  }
+
+  /**
+   *
+   * @param {*} modelKey
+   */
+  save(modelKey) {
+    console.log("debug docManager save", modelKey);
+  }
+
+  /**
+   *
+   * @param {*} modelKey
+   */
+  create(modelKey) {
+    console.log("debug docManager create", modelKey);
   }
 
   //========================================================================================
@@ -91,31 +147,82 @@ class DocManager extends IDEPlugin {
    *                                                                                      */
   //========================================================================================
 
-  getUpdateDoc(document) {
-    return data => {
-      this.emit("loadDocs", this);
-    };
-  }
-
-  addDocs(docType, docs) {
+  /**
+   * Add document
+   * @param {String} docType
+   * @param {{name:String, content:Object}} doc,
+   * @returns {DocManager}
+   */
+  addDoc(docType, doc) {
     if (docType in this.docsMap) {
       const documentsOfType = this.docsMap[docType].docs;
-      Object.keys(docs).forEach(key => {
-        const docLabel = docs[key].Label;
-        if (!(docLabel in documentsOfType)) {
-          documentsOfType[docLabel] = MODELS_CLASS_BY_NAME[docType].ofBEJSON(
-            docs[key]
-          );
-        }
-      });
+      const docName = doc.name;
+      documentsOfType[docName] = MODELS_CLASS_BY_NAME[docType].ofJSON(
+        doc.content
+      );
     }
+    return this;
+  }
+
+  /**
+   * update doc
+   * @param {String} docType
+   * @param {{name: String, content:Object}} doc
+   */
+  updateDoc(docType, doc) {}
+
+  /**
+   * Delete document
+   * @param {String} docType
+   * @param {{name:String, content:Object}} doc
+   * @returns {DocManager}
+   */
+  delDoc(docType, doc) {
+    Maybe.fromNull(this.docsMap[docType]).forEach(
+      ({ docs }) => delete docs[doc.name]
+    );
+    return this;
+  }
+
+  getUpdateDoc(document) {
+    const docType = document.name;
+    const event2actionMap = {
+      del: updateDoc => {
+        this.delDoc(docType, { name: updateDoc.name });
+        this.emit(TOPICS.updateDocs, this, {
+          action: "delete",
+          documentName: updateDoc.name,
+          documentType: docType
+        });
+      },
+      set: updateDoc => {
+        this.addDoc(docType, updateDoc);
+        this.emit(TOPICS.updateDocs, this, {
+          action: "update",
+          documentName: updateDoc.name,
+          documentType: docType
+        });
+      }
+    };
+    return data => {
+      if (data.event in event2actionMap) {
+        const docName = Object.keys(data.key[docType])[0];
+        const docContent = Object.values(data.key[docType])[0];
+        event2actionMap[data.event]({ name: docName, content: docContent });
+      }
+    };
   }
 
   getRetrieveDoc(document) {
     return data => {
       const docType = document.name;
-      this.addDocs(docType, data.value[docType]);
-      this.emit("loadDocs", this);
+      Object.values(data.value[docType])
+        .map(doc => ({
+          name: doc.Label,
+          content: { ...doc }
+        }))
+        .forEach(doc => this.addDoc(docType, doc));
+      this.emit(TOPICS.loadDocs, this);
     };
   }
 

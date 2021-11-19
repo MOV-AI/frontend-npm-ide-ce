@@ -30,15 +30,14 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const EMPTY_MODEL_NAME = "__placeholder__";
-
 const Configuration = (props, ref) => {
   const {
     id,
     name,
     call,
     setData = () => {},
-    data = new ConfigurationModel(EMPTY_MODEL_NAME).data,
+    activateEditor = () => {},
+    data = ConfigurationModel.EMPTY,
     editable = true
   } = props;
   // Style Hooks
@@ -55,7 +54,7 @@ const Configuration = (props, ref) => {
   //========================================================================================
 
   const renderRightMenu = React.useCallback(() => {
-    const details = data.LastUpdate || {};
+    const details = data.details || {};
     const menuName = `${id}-detail-menu`;
     // add bookmark
     call("rightDrawer", "setBookmark", {
@@ -65,7 +64,7 @@ const Configuration = (props, ref) => {
         view: <Menu id={id} name={name} details={details}></Menu>
       }
     });
-  }, [call, id, name, data.LastUpdate]);
+  }, [call, id, name, data.details]);
 
   usePluginMethods(ref, {
     renderRightMenu
@@ -80,9 +79,12 @@ const Configuration = (props, ref) => {
   // Render right menu
   React.useEffect(() => {
     // Reset editor undoManager after first load
-    if (editorRef.current && previousData?.Label === EMPTY_MODEL_NAME) {
+    if (
+      editorRef.current &&
+      previousData?.name === ConfigurationModel.EMPTY.name
+    ) {
       const editorModel = editorRef.current.getModel();
-      const loadedCode = data?.Yaml || "";
+      const loadedCode = data?.code || "";
       editorModel.setValue(loadedCode);
     }
   }, [data, previousData]);
@@ -93,15 +95,17 @@ const Configuration = (props, ref) => {
    *                                                                                      */
   //========================================================================================
 
-  const updateConfigType = configType => {
+  const updateConfigExtension = configExtension => {
     setData(prevState => {
-      return { ...prevState, Type: configType };
+      return (prevState || ConfigurationModel.EMPTY).setExtension(
+        configExtension
+      );
     });
   };
 
-  const updateConfigText = configText => {
+  const updateConfigCode = configCode => {
     setData(prevState => {
-      return { ...prevState, Yaml: configText };
+      return (prevState || ConfigurationModel.EMPTY).setCode(configCode);
     });
   };
 
@@ -120,11 +124,11 @@ const Configuration = (props, ref) => {
         <MonacoCodeEditor
           ref={editorRef}
           style={{ flexGrow: 1, height: "100%", width: "100%" }}
-          value={data.Yaml}
-          language={data.Type}
+          value={data.code}
+          language={data.extension}
           theme={theme.codeEditor.theme}
           options={{ readOnly: !editable }}
-          onChange={updateConfigText}
+          onChange={updateConfigCode}
           onLoad={editor => {
             if (!id) editor.focus();
           }}
@@ -134,14 +138,16 @@ const Configuration = (props, ref) => {
   };
 
   return (
-    <div className={classes.container} onFocus={renderRightMenu}>
+    <div className={classes.container}>
       <AppBar position="static" className={classes.appBar}>
-        <Toolbar variant="dense" onClick={renderRightMenu}>
+        <Toolbar variant="dense" onClick={activateEditor}>
           <ToggleButtonGroup
             size="small"
             exclusive
-            value={data.Type}
-            onChange={(event, newValue) => updateConfigType(newValue)}
+            value={data.extension}
+            onChange={(event, newExtension) =>
+              updateConfigExtension(newExtension)
+            }
           >
             <ToggleButton value="xml">XML</ToggleButton>
             <ToggleButton value="yaml">YAML</ToggleButton>
