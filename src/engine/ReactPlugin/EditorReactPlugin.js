@@ -1,11 +1,82 @@
 import React from "react";
-import DataHandler from "../../plugins/DocManager/DataHandler";
+import withKeyBinds from "../../decorators/withKeyBinds";
+import withMenuHandler from "../../decorators/withMenuHandler";
+import { withDataHandler } from "../../plugins/DocManager/DataHandler";
 import { ViewPlugin } from "./ViewReactPlugin";
+
+/**
+ *
+ * @param {*} Component
+ * @param {*} decorators
+ * @returns
+ */
+const composeDecorators = (Component, decorators) => {
+  const [withFirstDecorator, ...otherDecorators] = decorators;
+  const composed = React.forwardRef((props, ref) =>
+    withFirstDecorator(Component)(props, ref)
+  );
+  if (otherDecorators.length)
+    return composeDecorators(composed, otherDecorators);
+  else return composed;
+};
 
 export function withEditorPlugin(ReactComponent, methods = []) {
   const RefComponent = React.forwardRef((props, ref) =>
     ReactComponent(props, ref)
   );
+
+  const EditorComponent = React.forwardRef((props, ref) => {
+    const {
+      id,
+      on,
+      addKeyBind,
+      data,
+      save,
+      create,
+      activateKeyBind,
+      initRightMenu,
+      updateRightMenu
+    } = props;
+
+    /**
+     *
+     */
+    const saveDocument = React.useCallback(() => {
+      if (data.isNew) {
+        // open new widget modal passing create as callback
+        create();
+      } else {
+        save();
+      }
+    }, [save, data, create]);
+
+    /**
+     *
+     */
+    const activateEditor = React.useCallback(() => {
+      activateKeyBind();
+      updateRightMenu();
+    }, [activateKeyBind, updateRightMenu]);
+
+    React.useEffect(() => {
+      addKeyBind("ctrl+s", saveDocument);
+      initRightMenu();
+      on("tabs", `${id}-active`, activateEditor);
+    }, [activateEditor, addKeyBind, id, initRightMenu, on, saveDocument]);
+
+    return (
+      <div onFocus={activateEditor} style={{ height: "100%" }}>
+        <RefComponent {...props} activateEditor={activateEditor} ref={ref} />
+      </div>
+    );
+  });
+
+  const DecoratedEditorComponent = composeDecorators(EditorComponent, [
+    withMenuHandler,
+    withKeyBinds,
+    withDataHandler
+  ]);
+
   const WithEditorPlugin = class extends ViewPlugin {
     constructor(profile, props = {}) {
       super(profile, props, methods);
@@ -13,17 +84,15 @@ export function withEditorPlugin(ReactComponent, methods = []) {
 
     render() {
       return (
-        <DataHandler {...this.props} call={this.call} on={this.on}>
-          <RefComponent
-            {...this.props}
-            ref={this.ref}
-            call={this.call}
-            profile={this.profile}
-            emit={this.emit}
-            on={this.on}
-            onTopic={this.onTopic}
-          />
-        </DataHandler>
+        <DecoratedEditorComponent
+          {...this.props}
+          ref={this.ref}
+          call={this.call}
+          profile={this.profile}
+          emit={this.emit}
+          on={this.on}
+          onTopic={this.onTopic}
+        />
       );
     }
   };

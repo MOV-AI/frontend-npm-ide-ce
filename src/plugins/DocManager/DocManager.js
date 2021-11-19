@@ -53,7 +53,9 @@ class DocManager extends IDEPlugin {
         "getDocPlugin",
         "getDocsFromType",
         "getDocFromNameType",
-        "read"
+        "create",
+        "read",
+        "save"
       ])
     );
     super({ ...profile, methods });
@@ -121,6 +123,22 @@ class DocManager extends IDEPlugin {
       });
       return this.getDocFromNameType(name, scope);
     });
+  }
+
+  /**
+   *
+   * @param {*} modelKey
+   */
+  save(modelKey) {
+    console.log("debug docManager save", modelKey);
+  }
+
+  /**
+   *
+   * @param {*} modelKey
+   */
+  create(modelKey) {
+    console.log("debug docManager create", modelKey);
   }
 
   //========================================================================================

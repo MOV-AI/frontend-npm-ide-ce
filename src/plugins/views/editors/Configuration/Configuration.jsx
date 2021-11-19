@@ -36,6 +36,7 @@ const Configuration = (props, ref) => {
     name,
     call,
     setData = () => {},
+    activateEditor = () => {},
     data = ConfigurationModel.EMPTY,
     editable = true
   } = props;
@@ -96,13 +97,15 @@ const Configuration = (props, ref) => {
 
   const updateConfigExtension = configExtension => {
     setData(prevState => {
-      return prevState.setExtension(configExtension);
+      return (prevState || ConfigurationModel.EMPTY).setExtension(
+        configExtension
+      );
     });
   };
 
   const updateConfigCode = configCode => {
     setData(prevState => {
-      return prevState.setCode(configCode);
+      return (prevState || ConfigurationModel.EMPTY).setCode(configCode);
     });
   };
 
@@ -135,9 +138,9 @@ const Configuration = (props, ref) => {
   };
 
   return (
-    <div className={classes.container} onFocus={renderRightMenu}>
+    <div className={classes.container}>
       <AppBar position="static" className={classes.appBar}>
-        <Toolbar variant="dense" onClick={renderRightMenu}>
+        <Toolbar variant="dense" onClick={activateEditor}>
           <ToggleButtonGroup
             size="small"
             exclusive

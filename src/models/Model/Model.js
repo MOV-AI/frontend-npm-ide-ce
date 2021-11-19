@@ -6,11 +6,13 @@ export default class Model {
   details; // model details
   constructor(
     name = "__placeholder__",
-    details = { user: "N/A", lastUpdate: "N/A" }
+    details = { user: "N/A", date: "N/A" }
   ) {
     this.name = name;
     this.details = details;
     this.url = `global/${this.getScope()}/${this.name}`;
+    this.isNew = true;
+    this.isDirty = true;
   }
 
   getName() {

@@ -157,7 +157,7 @@ const Explorer = props => {
 
   return (
     <Typography component="div">
-      <h1>{t(Explorer)}</h1>
+      <h1>{t("Explorer")}</h1>
       <Typography component="div" className={classes.typography}>
         <VirtualizedTree
           onClickNode={async node => {

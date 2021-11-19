@@ -1,32 +1,39 @@
 import React from "react";
-import withMenuHandler from "../../decorators/withMenuHandler";
 
 const DataHandler = props => {
-  const children = props.children;
+  const { children, call, scope, name, id } = props;
   const [data, setData] = React.useState();
 
-  // const save = () => {
-  //   console.log("debug saved data", data);
-  // };
+  const save = () => {
+    console.log("debug SAVE", data.name, data);
+    call("docManager", "save", { scope, name });
+  };
 
-  const addKeyBind = (key, callback) => {
-    console.log("debug addKeyBind", key, callback);
+  const create = () => {
+    console.log("debug CREATE", data.name, data);
+    call("docManager", "create", { scope, name });
   };
 
   React.useEffect(() => {
-    if (!props.id) return;
-    props
-      .call("docManager", "read", { scope: props.scope, name: props.name })
-      .then(model => {
-        setData(model);
-        // Handle editor menus rendering
-        props.initRightMenu();
-      });
-  }, [props]);
+    if (!id) return;
+    call("docManager", "read", { scope, name }).then(model => setData(model));
+  }, [call, id, scope, name]);
 
   return React.Children.map(children, el =>
-    React.cloneElement(el, { data, setData, addKeyBind })
+    React.cloneElement(el, { data, setData, save, create })
   );
 };
 
-export default withMenuHandler(DataHandler);
+const withDataHandler = Component => {
+  return (props, ref) => {
+    return (
+      <DataHandler {...props}>
+        <Component {...props} ref={ref} />
+      </DataHandler>
+    );
+  };
+};
+
+export default DataHandler;
+
+export { withDataHandler };

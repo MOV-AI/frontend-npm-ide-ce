@@ -7,14 +7,15 @@ import React from "react";
  */
 const withMenuHandler = Component => {
   return (props, ref) => {
-    const children = props.children;
+    const { call } = props;
+    const updateRightMenuRef = React.useRef();
 
     /**
      * Reset right menu : clear menu and close right drawer
      */
     const resetRightMenu = React.useCallback(() => {
-      props.call("rightDrawer", "resetBookmarks");
-    }, [props]);
+      call("rightDrawer", "resetBookmarks");
+    }, [call]);
 
     /**
      * Render components menu if any and bind events of active tab to trigger the component's renderRightMenu method
@@ -22,18 +23,32 @@ const withMenuHandler = Component => {
      */
     const initRightMenu = () => {
       // render component menus (if any)
-      const childrenRef = children?.ref?.current;
-      if (!childrenRef) return;
-      const updateRightMenu = childrenRef.renderRightMenu
-        ? childrenRef.renderRightMenu
+      const editorRef = ref?.current;
+      if (!editorRef) return;
+      const updateRightMenu = editorRef.renderRightMenu
+        ? editorRef.renderRightMenu
         : resetRightMenu;
       // Render (or close) right menu details
       updateRightMenu();
-      if (childrenRef.renderRightMenu) props.call("rightDrawer", "open");
-      props.on("tabs", `${props.id}-active`, updateRightMenu);
+      updateRightMenuRef.current = updateRightMenu;
+      if (editorRef.renderRightMenu) call("rightDrawer", "open");
     };
 
-    return <Component {...props} ref={ref} initRightMenu={initRightMenu} />;
+    /**
+     *
+     */
+    const updateRightMenu = () => {
+      updateRightMenuRef.current();
+    };
+
+    return (
+      <Component
+        {...props}
+        ref={ref}
+        initRightMenu={initRightMenu}
+        updateRightMenu={updateRightMenu}
+      />
+    );
   };
 };
 
