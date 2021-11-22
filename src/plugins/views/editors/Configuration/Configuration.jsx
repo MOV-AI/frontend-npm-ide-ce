@@ -37,6 +37,7 @@ const Configuration = (props, ref) => {
     call,
     setData = () => {},
     activateEditor = () => {},
+    saveDocument = () => {},
     data = ConfigurationModel.EMPTY,
     editable = true
   } = props;
@@ -129,6 +130,7 @@ const Configuration = (props, ref) => {
           theme={theme.codeEditor.theme}
           options={{ readOnly: !editable }}
           onChange={updateConfigCode}
+          onSave={saveDocument}
           onLoad={editor => {
             if (!id) editor.focus();
           }}
