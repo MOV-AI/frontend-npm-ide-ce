@@ -1,0 +1,17 @@
+{
+    "Callback": {
+        "backend.FlowTopBar": {
+            "Code": "\"\"\"\n   Copyright (C) Mov.ai  - All Rights Reserved\n   Unauthorized copying of this file, via any medium is strictly prohibited\n   Proprietary and confidential\n\n   Developers:\n   - Vicente Queiroz (vicente.queiroz@mov.ai) - 2020\n\n\"\"\"\n\ndef getDefaultRobot(msg):\n    return {\"robotName\": Robot.name, \"robotIP\": Robot.IP}\n\ndef sendToRobot(msg):\n    action_name = msg[0]\n    flow_name = msg[1]\n    robot_name = msg[2]\n    \n    if robot_name == \"Default\":\n        robot = Robot\n    else:\n        robot = FleetRobot(robot_name)\n    robot.send_cmd(command=action_name, flow=flow_name)\n    return True\n    \ndef commandNode(msg):\n    if msg[\"robotName\"] == \"Default\":\n        robot = Robot\n    else:\n        robot = FleetRobot(msg[\"robotName\"])\n    robot.send_cmd(command=msg[\"command\"], node=msg[\"nodeName\"])\n\nkey2action_map = {\n    \"getDefaultRobot\" : getDefaultRobot,\n    \"sendToRobot\": sendToRobot,\n    \"commandNode\": commandNode\n}\n\ntry:\n    response = {\"success\": True}\n    response[\"result\"] = key2action_map[msg['func']](msg['args'])\n\nexcept Exception as e:\n    response = {\"success\": False, \"error\": str(e)}",
+            "Label": "backend.FlowTopBar",
+            "LastUpdate": {
+                "date": "01/04/2021 at 18:39:58",
+                "user": "movai"
+            },
+            "User": "movai",
+            "VersionDelta": {},
+            "Info": "",
+            "Version": "",
+            "Message": ""
+        }
+    }
+}
