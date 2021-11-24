@@ -23,7 +23,6 @@ export class ViewReactPlugin extends IDEPlugin {
   }
 
   deactivate() {
-    console.log("debug deactivate", this.profile.name);
     if (this.profile.location)
       this.call(this.profile.location, "removeView", this.profile);
     super.deactivate();
@@ -47,7 +46,12 @@ export class ViewPlugin extends ViewReactPlugin {
 
   initMethods = () => {
     this.methods.forEach(name => {
-      this[name] = (...a) => this.ref.current[name](...a);
+      this[name] = (...a) => {
+        if (!this.ref.current) {
+          return console.warn("debug method not implemented in component");
+        }
+        this.ref.current[name](...a);
+      };
     });
   };
 }

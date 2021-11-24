@@ -53,8 +53,8 @@ const Explorer = props => {
     const updateDocs = (docManager, { action, documentName, documentType }) => {
       const updateByActionMap = {
         delete: () => {
-          setData(oldData => {
-            const newData = [...oldData];
+          setData(prevState => {
+            const newData = [...prevState];
             // TODO: optimize time
             const typeIndex = newData.findIndex(
               type => type.name === documentType
@@ -71,8 +71,8 @@ const Explorer = props => {
           });
         },
         update: () => {
-          setData(oldData => {
-            const newData = [...oldData];
+          setData(prevState => {
+            const newData = [...prevState];
             // TODO: optimize time
             const typeIndex = newData.findIndex(
               type => type.name === documentType
@@ -142,7 +142,6 @@ const Explorer = props => {
         });
       },
       1: () => {
-        console.log("debug node", node);
         const tabName = `${node.name}.conf`;
         call("tabs", "openEditor", {
           id: node.url,

@@ -53,6 +53,7 @@ class DocManager extends IDEPlugin {
         "getDocPlugin",
         "getDocsFromType",
         "getDocFromNameType",
+        "checkDocumentExists",
         "create",
         "read",
         "save"
@@ -109,9 +110,31 @@ class DocManager extends IDEPlugin {
   }
 
   /**
+   * Check if document already exists
+   * @param {{name: String, scope: String}} modelKey
+   * @returns {Promise<{result: Boolean, error: String}>}
+   */
+  checkDocumentExists({ name, scope, workspace = "global", version = "-" }) {
+    // Check if document name already exists
+    return Document.exists({
+      name,
+      scope,
+      workspace,
+      version
+    })
+      .then(docExists => {
+        const type = workspace === "global" ? "Document" : "Version";
+        const error = docExists ? `${type} already exists` : "";
+        return { result: !docExists, error };
+      })
+      .catch(err => {
+        return { result: false, error: `${scope} already exists` };
+      });
+  }
+
+  /**
    * Read model from DB
    * @param {{name: String, scope: String}} modelKey
-   *
    * @returns {Promise<Model>}
    */
   read(modelKey) {
@@ -126,16 +149,18 @@ class DocManager extends IDEPlugin {
   }
 
   /**
-   *
-   * @param {*} modelKey
+   * Update existing document
+   * @param {{name: String, scope: String}} modelKey
+   * @returns {Promise<Model>}
    */
   save(modelKey) {
     console.log("debug docManager save", modelKey);
   }
 
   /**
-   *
-   * @param {*} modelKey
+   * Create new document
+   * @param {{name: String, scope: String}} modelKey
+   * @returns {Promise<Model>}
    */
   create(modelKey) {
     console.log("debug docManager create", modelKey);

@@ -29,7 +29,9 @@ export function withEditorPlugin(ReactComponent, methods = []) {
     const {
       id,
       on,
+      call,
       addKeyBind,
+      scope,
       data,
       save,
       create,
@@ -43,12 +45,16 @@ export function withEditorPlugin(ReactComponent, methods = []) {
      */
     const saveDocument = React.useCallback(() => {
       if (data.isNew) {
-        // open new widget modal passing create as callback
-        create();
+        // open new widget modal passing create as submit callback
+        call("formDialog", "newDocument", {
+          scope: scope,
+          onSubmit: create,
+          title: `New ${scope}`
+        });
       } else {
         save();
       }
-    }, [save, data, create]);
+    }, [call, save, data, create, scope]);
 
     /**
      *
@@ -66,7 +72,12 @@ export function withEditorPlugin(ReactComponent, methods = []) {
 
     return (
       <div onFocus={activateEditor} style={{ height: "100%" }}>
-        <RefComponent {...props} activateEditor={activateEditor} ref={ref} />
+        <RefComponent
+          {...props}
+          activateEditor={activateEditor}
+          saveDocument={saveDocument}
+          ref={ref}
+        />
       </div>
     );
   });

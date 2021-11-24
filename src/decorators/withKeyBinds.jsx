@@ -5,6 +5,11 @@ hotkeys("ctrl+s", event => {
   event.preventDefault();
 });
 
+/**
+ * Manage Key binds
+ * @param {*} Component
+ * @returns
+ */
 const withKeyBinds = Component => {
   return (props, ref) => {
     // Props
@@ -13,14 +18,15 @@ const withKeyBinds = Component => {
     const scopeRef = React.useRef();
 
     /**
-     *
+     * Activate scope shortcuts.
+     * This will automatically deactivate all other scopes
      */
     const activateKeyBind = () => {
       hotkeys.setScope(scopeRef.current);
     };
 
     /**
-     *
+     * Add Key bind to its scope
      * @param {*} keys
      * @param {*} callback
      */
@@ -32,7 +38,7 @@ const withKeyBinds = Component => {
     };
 
     /**
-     *
+     * Remove key bind from scope
      * @param {*} key
      */
     const removeKeyBind = keys => {
