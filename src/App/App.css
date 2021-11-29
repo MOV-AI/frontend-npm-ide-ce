@@ -1,7 +1,14 @@
 .App {
-  text-align: center;
   display: flex;
   height: 100%;
+}
+
+/* Center titles */
+h1,
+h2,
+h3,
+h4 {
+  text-align: center;
 }
 
 /* Scrollbar */

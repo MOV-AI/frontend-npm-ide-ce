@@ -1,0 +1,11 @@
+Source: movai-ide-ce
+Maintainer: Maintainer <maintainer@mov.ai>
+Section: unknown
+Priority: optional
+Build-Depends: unzip, debhelper (>= 7.4.3)
+Standards-Version: 3.9.1
+
+Package: movai-ide-ce
+Architecture: all
+Depends: ${misc:Depends}
+Description: Frontend application

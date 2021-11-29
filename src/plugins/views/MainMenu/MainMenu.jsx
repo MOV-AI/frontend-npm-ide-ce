@@ -1,19 +1,23 @@
+import React from "react";
 import PropTypes from "prop-types";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import { VerticalBar, ProfileMenu } from "@mov-ai/mov-fe-lib-react";
+import { Authentication } from "@mov-ai/mov-fe-lib-core";
 import BugReportIcon from "@material-ui/icons/BugReport";
 import CompareIcon from "@material-ui/icons/Compare";
 import TextSnippetIcon from "@material-ui/icons/Description";
-import { Tooltip } from "@material-ui/core";
 import AndroidIcon from "@material-ui/icons/Android";
-import { makeStyles } from "@material-ui/core/styles";
-import React from "react";
+import { Tooltip } from "@material-ui/core";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { MainContext } from "../../../main-context";
+import { VERSION } from "../../../utils/Constants";
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(theme => ({
   icon: {
-    color: "primary",
-    "&:hover": {
-      cursor: "pointer"
+    color: theme.palette.primary.main,
+    cursor: "pointer",
+    "& svg": {
+      color: theme.palette.primary.main
     }
   }
 }));
@@ -23,8 +27,10 @@ const MENUS = [
     name: "explorer",
     icon: props => <TextSnippetIcon {...props}></TextSnippetIcon>,
     title: "Explorer",
+    isActive: true,
     getOnClick: (call, emit) => () => {
-      emit("toggle-leftDrawer");
+      // Toggle left drawer
+      call("leftDrawer", "toggle");
     }
   },
   {
@@ -32,7 +38,8 @@ const MENUS = [
     icon: props => <AndroidIcon {...props}></AndroidIcon>,
     title: "Fleet",
     getOnClick: (call, emit) => () => {
-      console.log("debug");
+      // TODO: Open Fleet tab
+      console.log("debug open Fleet");
     }
   },
   {
@@ -40,7 +47,8 @@ const MENUS = [
     icon: props => <BugReportIcon {...props}></BugReportIcon>,
     title: "Debug",
     getOnClick: (call, emit) => () => {
-      console.log("debug");
+      // TODO: Open Debug options
+      console.log("debug open Debug");
     }
   },
   {
@@ -48,37 +56,44 @@ const MENUS = [
     icon: props => <CompareIcon {...props}></CompareIcon>,
     title: "Diff tool",
     getOnClick: (call, emit) => () => {
-      console.log("debug");
+      // TODO: Open DiffTool
+      console.log("debug open Diff Tool");
     }
   }
 ];
 
-const MainMenu = ({ profile, call, emit }) => {
+const MainMenu = ({ call, emit }) => {
   const classes = useStyles();
+  const theme = useTheme();
+
   return (
-    <VerticalBar
-      unsetAccountAreaPadding={true}
-      navigationList={MENUS.map(menu => (
-        <div>
-          <Tooltip title={menu.title}>
-            {menu.icon({
-              onClick: menu.getOnClick(call, emit),
-              color: "primary",
-              className: classes.icon
-            })}
-          </Tooltip>
-        </div>
-      ))}
-      lowerElement={
-        <ProfileMenu
-          version={"1.2.3"}
-          userName={"movai"}
-          isDarkTheme={true}
-          handleLogout={() => {}}
-          handleToggleTheme={() => {}}
-        />
-      }
-    ></VerticalBar>
+    <MainContext.Consumer>
+      {({ isDarkTheme, handleLogOut, handleToggleTheme }) => (
+        <VerticalBar
+          unsetAccountAreaPadding={true}
+          backgroundColor={theme.palette.background.default}
+          navigationList={MENUS.map(menu => (
+            <div>
+              <Tooltip title={menu.title}>
+                {menu.icon({
+                  className: classes.icon,
+                  onClick: menu.getOnClick(call, emit)
+                })}
+              </Tooltip>
+            </div>
+          ))}
+          lowerElement={
+            <ProfileMenu
+              version={VERSION}
+              userName={Authentication.getTokenData().message.name || ""}
+              isDarkTheme={isDarkTheme}
+              handleLogout={handleLogOut}
+              handleToggleTheme={handleToggleTheme}
+            />
+          }
+        ></VerticalBar>
+      )}
+    </MainContext.Consumer>
   );
 };
 

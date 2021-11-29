@@ -1,0 +1,10 @@
+{
+    "Callback": {
+        "backend.getPortsData": {
+            "Label": "backend.getPortsData",
+            "User": "joao",
+            "Code": "# Will send to NodeEditor the Packages and Messages options (for the 2nd and 3rd selectors)\nresponse = Message.fetch_portdata_api()",
+            "VersionDelta": {}
+        }
+    }
+}

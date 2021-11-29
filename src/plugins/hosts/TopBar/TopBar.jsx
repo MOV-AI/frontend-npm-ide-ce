@@ -2,14 +2,14 @@ import PropTypes from "prop-types";
 import * as React from "react";
 import { withHostReactPlugin } from "../../../engine/ReactPlugin/HostReactPlugin";
 
-function TopBar(props) {
-  const { viewPlugins, hostName, style } = props;
+const TopBar = props => {
+  const { viewPlugins, hostName, style, className } = props;
   return (
-    <div id={hostName} style={{ ...style }}>
+    <div id={hostName} style={{ ...style }} className={className}>
       {viewPlugins}
     </div>
   );
-}
+};
 
 export default withHostReactPlugin(TopBar);
 
