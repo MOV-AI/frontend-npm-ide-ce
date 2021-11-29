@@ -12,8 +12,8 @@ import {
   withViewPlugin,
   usePluginMethods
 } from "../../../../engine/ReactPlugin/ViewReactPlugin";
-import _debounce from "lodash/debounce";
 import { makeStyles } from "@material-ui/styles";
+import useNewDocument from "./hooks/useNewDocument";
 
 function useTranslation() {
   return { t: s => s };
@@ -31,6 +31,7 @@ const useStyles = makeStyles(theme => ({
 
 const FormDialog = (props, ref) => {
   const DEFAULT_DATA = {
+    type: "",
     open: false,
     scope: "",
     title: "",
@@ -41,21 +42,14 @@ const FormDialog = (props, ref) => {
     error: false,
     helperText: "",
     maxLength: 40,
-    validateExistence: false,
-    onValidation: () => {
-      return { result: true, error: "" };
-    },
     onSubmit: () => {}
   };
-  // Props
-  const { call } = props;
-  // State hooks
-  const [isLoading, setLoading] = React.useState(false);
-  const [state, setState] = React.useState(DEFAULT_DATA);
-  // Style hook
-  const classes = useStyles();
-  // Translation hook
-  const { t } = useTranslation();
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                Component's methods                                   *
+   *                                                                                      */
+  //========================================================================================
 
   /**
    * Handle dialog close
@@ -65,6 +59,7 @@ const FormDialog = (props, ref) => {
    */
   const handleClose = (_, reason) => {
     if (reason === "backdropClick") return;
+    setMethods({ onChange, onValidation });
     setState(prevState => {
       return {
         ...prevState,
@@ -77,7 +72,7 @@ const FormDialog = (props, ref) => {
    * Handle form submit
    */
   const handleSubmit = () => {
-    const validation = onChange(state.inputValue);
+    const validation = methods.onChange(state.inputValue);
     if (validation.error) return;
     const result = state.onSubmit(state.inputValue);
     if (result instanceof Promise) {
@@ -90,28 +85,12 @@ const FormDialog = (props, ref) => {
   };
 
   /**
-   * Async validation to check if document already exists
-   */
-  const postValidation = _debounce(name => {
-    call("docManager", "checkDocumentExists", {
-      scope: state.scope,
-      name
-    }).then(res => {
-      if (!res.result) {
-        setState(prevState => {
-          return { ...prevState, error: !res.result, helperText: res.error };
-        });
-      }
-    });
-  }, 100);
-
-  /**
    * On change TextField value
    * @param {String} _value : New value
    * @returns {ValidationResult}
    */
   const onChange = _value => {
-    const res = state.onValidation(_value);
+    const res = methods.onValidation(_value);
     // Set state
     setState(prevState => {
       return {
@@ -121,17 +100,41 @@ const FormDialog = (props, ref) => {
         helperText: res.error
       };
     });
-    // Run post-validation - if any applicable
-    if (state.validateExistence && res.result) {
-      postValidation(_value);
-    }
     // Return validation result
     return res;
   };
 
+  /**
+   * Default on Validation method
+   * @returns Validation result
+   */
+  const onValidation = () => ({ result: true, error: "" });
+
   //========================================================================================
   /*                                                                                      *
-   *                                    Public Methods                                   *
+   *                                Initiate Component                                    *
+   *                                                                                      */
+  //========================================================================================
+
+  // Props
+  const { call } = props;
+  // State hooks
+  const [isLoading, setLoading] = React.useState(false);
+  const [state, setState] = React.useState(DEFAULT_DATA);
+  const [methods, setMethods] = React.useState({
+    onChange,
+    onValidation
+  });
+  // Style hook
+  const classes = useStyles();
+  // Forms hook
+  const documentFunctions = useNewDocument({ call, state, setState });
+  // Translation hook
+  const { t } = useTranslation();
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Public Methods                                    *
    *                                                                                      */
   //========================================================================================
 
@@ -139,27 +142,23 @@ const FormDialog = (props, ref) => {
    * Open modal to enter new document name
    * @param {*} data
    */
-  const newDocument = React.useCallback(data => {
-    setState(prevState => {
-      return {
-        ...prevState,
-        open: true,
-        message: "",
-        title: data.title,
-        scope: data.scope,
-        submitText: "Create",
-        validateExistence: true,
-        onValidation: value => {
-          const isEmpty = !value;
-          return {
-            result: !isEmpty,
-            error: isEmpty ? "Document name is required" : ""
-          };
-        },
-        onSubmit: data.onSubmit
-      };
-    });
-  }, []);
+  const newDocument = React.useCallback(
+    data => {
+      setMethods(documentFunctions);
+      setState(prevState => {
+        return {
+          ...prevState,
+          open: true,
+          message: "",
+          title: data.title,
+          scope: data.scope,
+          submitText: "Create",
+          onSubmit: data.onSubmit
+        };
+      });
+    },
+    [documentFunctions]
+  );
 
   React.useEffect(() => {
     setLoading(false);
@@ -201,7 +200,7 @@ const FormDialog = (props, ref) => {
                 .trim()
                 .replace(/(\r\n|\n|\r)/gm, "");
               // Validate pasted text
-              onChange(pastedText);
+              methods.onChange(pastedText);
               // Set text in input field
               event.target.value = pastedText;
             }}
@@ -209,7 +208,7 @@ const FormDialog = (props, ref) => {
               let isEnter = event.key === "Enter";
               if (isEnter) event.preventDefault();
             }}
-            onChange={event => onChange(event.target.value)}
+            onChange={event => methods.onChange(event.target.value)}
             inputProps={{ maxLength: state.maxLength }} // limit of characters here
             margin="normal"
           />

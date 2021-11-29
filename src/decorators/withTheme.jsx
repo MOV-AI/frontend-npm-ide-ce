@@ -11,6 +11,7 @@ export function withTheme(Component) {
      */
     const handleToggleTheme = () => {
       const newTheme = theme === "dark" ? "light" : "dark";
+      document.body.classList.remove(theme);
       ApplicationTheme.setTheme(newTheme);
       setTheme(newTheme);
     };
@@ -21,6 +22,8 @@ export function withTheme(Component) {
     React.useEffect(() => {
       const currentTheme = ApplicationTheme.getTheme();
       setTheme(currentTheme);
+      // Add new theme class in body
+      document.body.classList.add(currentTheme);
       // Set body background color
       document.body.style.backgroundColor =
         ApplicationTheme[currentTheme].background;

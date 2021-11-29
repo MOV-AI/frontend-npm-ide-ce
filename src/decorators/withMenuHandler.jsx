@@ -31,7 +31,7 @@ const withMenuHandler = Component => {
       // Render (or close) right menu details
       updateRightMenu();
       updateRightMenuRef.current = updateRightMenu;
-      if (editorRef.renderRightMenu) call("rightDrawer", "open");
+      // if (editorRef.renderRightMenu) call("rightDrawer", "open");
     };
 
     /**
