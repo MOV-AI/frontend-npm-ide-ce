@@ -3,6 +3,7 @@ import { MasterDB, Document } from "@mov-ai/mov-fe-lib-core";
 import { MODELS_CLASS_BY_NAME } from "../../models";
 import { Maybe } from "monet";
 import Configuration from "../views/editors/Configuration/Configuration";
+import storesBuilder from "./stores";
 
 const INITIAL_DOCS_MAP = {
   Callback: {
@@ -61,6 +62,8 @@ class DocManager extends IDEPlugin {
     );
     super({ ...profile, methods });
     this.docsMap = INITIAL_DOCS_MAP;
+    this.stores = storesBuilder("global");
+    window.DocManager = this;
   }
 
   activate() {
@@ -77,6 +80,17 @@ class DocManager extends IDEPlugin {
       title: type.title,
       scope: type.scope
     }));
+  }
+  /**
+   *
+   * @returns {Array} List of stores
+   */
+  getStores() {
+    return Object.values(this.stores).map(i => i.store);
+  }
+
+  getStore(name) {
+    return this.stores[name]?.store;
   }
 
   /**
@@ -139,13 +153,8 @@ class DocManager extends IDEPlugin {
    */
   read(modelKey) {
     const { name, scope } = modelKey;
-    return new Document(Document.parsePath(name, scope)).read().then(file => {
-      this.addDoc(scope, {
-        name: file.Label,
-        content: file
-      });
-      return this.getDocFromNameType(name, scope);
-    });
+
+    return this.getStore(scope)?.readDoc(name) || Promise.reject();
   }
 
   /**
@@ -154,7 +163,8 @@ class DocManager extends IDEPlugin {
    * @returns {Promise<Model>}
    */
   save(modelKey) {
-    console.log("debug docManager save", modelKey);
+    const { name, scope } = modelKey;
+    return this.getStore(scope).saveDoc(name);
   }
 
   /**
@@ -163,7 +173,9 @@ class DocManager extends IDEPlugin {
    * @returns {Promise<Model>}
    */
   create(modelKey) {
-    console.log("debug docManager create", modelKey);
+    const { name, scope } = modelKey;
+
+    return this.getStore(scope)?.newDoc(name);
   }
 
   //========================================================================================
@@ -240,6 +252,7 @@ class DocManager extends IDEPlugin {
 
   getRetrieveDoc(document) {
     return data => {
+      console.log("debug data", data);
       const docType = document.name;
       Object.values(data.value[docType])
         .map(doc => ({

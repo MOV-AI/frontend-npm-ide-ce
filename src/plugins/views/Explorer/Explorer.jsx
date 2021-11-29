@@ -27,26 +27,25 @@ const Explorer = props => {
   /* eslint-disable react-hooks/exhaustive-deps */
   React.useEffect(() => {
     const loadDocs = docManager => {
-      setData(_ => {
-        return docManager.getDocTypes().map((docType, id) => {
+      return setData(_ =>
+        docManager.getStores().map((store, id) => {
+          const { name, title, scope } = store;
           return {
             id,
-            name: docType.name,
-            title: docType.title,
-            children: docManager
-              .getDocsFromType(docType.scope)
-              .map((docFromType, innerId) => {
-                return {
-                  id: innerId,
-                  name: docFromType.name,
-                  title: docFromType.name,
-                  scope: docType.scope,
-                  url: docFromType.url
-                };
-              })
+            name,
+            title,
+            children: store.getDocs().map((doc, childId) => {
+              return {
+                id: childId,
+                name: doc.getName(),
+                title: doc.getName(),
+                scope,
+                url: doc.getUrl()
+              };
+            })
           };
-        });
-      });
+        })
+      );
     };
     on("docManager", "loadDocs", loadDocs);
 

@@ -1,6 +1,7 @@
-import Model from "../Model/Model";
+import BaseModel from "../Model/Model";
+import schema from "./schema";
 
-export default class Configuration extends Model {
+export default class Configuration extends BaseModel {
   /**
    * This should be private
    * @param {*} name
@@ -9,7 +10,7 @@ export default class Configuration extends Model {
    * @param {*} details
    */
   constructor(name, extension, code, details) {
-    super(name, details);
+    super({ schema, name, details });
     this.extension = extension || "yaml";
     this.code = code || "";
   }
@@ -34,6 +35,15 @@ export default class Configuration extends Model {
 
   getScope() {
     return Configuration.SCOPE;
+  }
+
+  serialize() {
+    return {
+      Label: this.getName(),
+      Yaml: this.getCode(),
+      Type: this.getExtension(),
+      LastUpdate: this.getDetails()
+    };
   }
 
   static SCOPE = "Configuration";
