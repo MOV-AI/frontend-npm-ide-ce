@@ -47,14 +47,21 @@ class BaseStore {
 
   loadDoc(name) {
     const { scope } = this;
-    return new Document(Document.parsePath(name, scope)).read().then(file => {
-      const obj = this.addDoc({
-        name: file.Label,
-        content: file
+    return new Document(Document.parsePath(name, scope))
+      .read()
+      .then(file => {
+        const obj = this.addDoc({
+          name: file.Label,
+          content: file
+        });
+        obj.setIsLoaded(true);
+        return obj;
+      })
+      .catch(err => {
+        if (err.status === 404) {
+          return this.newDoc(name);
+        }
       });
-      obj.setIsLoaded(true);
-      return obj;
-    });
   }
 
   deleteDocFromStore(name) {

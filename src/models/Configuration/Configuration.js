@@ -46,6 +46,10 @@ export default class Configuration extends BaseModel {
     };
   }
 
+  getFileExtension() {
+    return ".conf";
+  }
+
   static SCOPE = "Configuration";
 
   static ofJSON(json) {

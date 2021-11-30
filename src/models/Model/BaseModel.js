@@ -63,8 +63,12 @@ export default class Model {
     return this;
   }
 
+  validate() {
+    return this.schema.validate(this.serialize());
+  }
+
   /**
-   * Method to be implemented in its sub-classes
+   * Methods to be implemented in its sub-classes
    */
   getScope() {
     throw new Error("Not implemented");
@@ -74,7 +78,7 @@ export default class Model {
     throw new Error("Not implemented");
   }
 
-  validate() {
-    return this.schema.validate(this.serialize());
+  getFileExtension() {
+    throw new Error("Not implemented");
   }
 }

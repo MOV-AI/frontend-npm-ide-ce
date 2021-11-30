@@ -1,14 +1,18 @@
 export default class Callback {
   constructor(name) {
     this.name = name;
-    this.url = `global/${this.getType()}/${this.name}`;
+    this.url = `global/${this.getScope()}/${this.name}`;
   }
 
-  getType() {
-    return Callback.TYPE;
+  getScope() {
+    return Callback.SCOPE;
   }
 
-  static TYPE = "Callback";
+  getFileExtension() {
+    return ".cb";
+  }
+
+  static SCOPE = "Callback";
 
   static ofJSON(json) {
     return new Callback(json.Label);

@@ -1,8 +1,10 @@
 import React from "react";
 
 const MESSAGES = {
-  saveSucess: "Saved successfully",
-  createSuccess: "Saved successfully"
+  save: {
+    success: "Saved successfully",
+    error: "Failed to save"
+  }
 };
 
 const DataHandler = props => {
@@ -10,15 +12,13 @@ const DataHandler = props => {
   const [data, setData] = React.useState();
   const { t } = useTranslation();
 
-  const save = () => {
-    call("docManager", "save", { scope, name }).then(res => {
-      alert({ message: t(MESSAGES.saveSucess), severity: "success" });
-    });
-  };
-
-  const create = () => {
-    call("docManager", "create", { scope, name }).then(res => {
-      alert({ message: t(MESSAGES.createSuccess), severity: "success" });
+  const save = newName => {
+    call("docManager", "save", { scope, name }, newName).then(res => {
+      if (res.success) {
+        alert({ message: t(MESSAGES.save.success), severity: "success" });
+      } else {
+        alert({ message: t(MESSAGES.save.error), severity: "error" });
+      }
     });
   };
 
@@ -28,7 +28,7 @@ const DataHandler = props => {
   }, [call, id, scope, name]);
 
   return React.Children.map(children, el =>
-    React.cloneElement(el, { data, setData, save, create })
+    React.cloneElement(el, { data, setData, save })
   );
 };
 

@@ -1,14 +1,18 @@
 export default class Flow {
   constructor(name) {
     this.name = name;
-    this.url = `global/${this.getType()}/${this.name}`;
+    this.url = `global/${this.getScope()}/${this.name}`;
   }
 
-  getType() {
-    return Flow.TYPE;
+  getScope() {
+    return Flow.SCOPE;
   }
 
-  static TYPE = "Flow";
+  getFileExtension() {
+    return ".flo";
+  }
+
+  static SCOPE = "Flow";
 
   static ofJSON(json) {
     return new Flow(json.Label);

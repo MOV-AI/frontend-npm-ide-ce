@@ -55,6 +55,8 @@ class DocManager extends IDEPlugin {
         "getDocsFromType",
         "getDocFromNameType",
         "checkDocumentExists",
+        "copy",
+        "delete",
         "create",
         "read",
         "save"
@@ -153,18 +155,18 @@ class DocManager extends IDEPlugin {
    */
   read(modelKey) {
     const { name, scope } = modelKey;
-
     return this.getStore(scope)?.readDoc(name) || Promise.reject();
   }
 
   /**
    * Update existing document
    * @param {{name: String, scope: String}} modelKey
+   * @param {String} newName : Used in document creation, where we need to replace "untitled" by newName
    * @returns {Promise<Model>}
    */
-  save(modelKey) {
+  save(modelKey, newName) {
     const { name, scope } = modelKey;
-    return this.getStore(scope).saveDoc(name);
+    return this.getStore(scope).saveDoc(name, newName);
   }
 
   /**
@@ -174,8 +176,23 @@ class DocManager extends IDEPlugin {
    */
   create(modelKey) {
     const { name, scope } = modelKey;
-
     return this.getStore(scope)?.newDoc(name);
+  }
+
+  /**
+   * Create copy of document
+   * @param {{name: String, scope: String}} modelKey
+   */
+  copy(modelKey) {
+    console.log("debug copy document", modelKey);
+  }
+
+  /**
+   * Delete document from DB
+   * @param {{name: String, scope: String}} modelKey
+   */
+  delete(modelKey) {
+    console.log("debug delete document", modelKey);
   }
 
   //========================================================================================
@@ -206,7 +223,9 @@ class DocManager extends IDEPlugin {
    * @param {String} docType
    * @param {{name: String, content:Object}} doc
    */
-  updateDoc(docType, doc) {}
+  updateDoc(docType, doc) {
+    console.log("debug TO BE IMPLEMENTED updateDoc", docType, doc);
+  }
 
   /**
    * Delete document

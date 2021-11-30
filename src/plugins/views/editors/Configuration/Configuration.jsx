@@ -30,14 +30,16 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+const DEFAULT_FUNCTION = name => console.log(`${name} not implemented`);
+
 const Configuration = (props, ref) => {
   const {
     id,
     name,
     call,
-    setData = () => {},
-    activateEditor = () => {},
-    saveDocument = () => {},
+    setData,
+    activateEditor = () => DEFAULT_FUNCTION("activateEditor"),
+    saveDocument = () => DEFAULT_FUNCTION("saveDocument"),
     data = ConfigurationModel.EMPTY,
     editable = true
   } = props;

@@ -1,8 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import { ProfileMenu, ContextMenu } from "@mov-ai/mov-fe-lib-react";
-import VerticalBar from "./VerticalBar";
+import { VerticalBar, ProfileMenu, ContextMenu } from "@mov-ai/mov-fe-lib-react";
 import { Authentication } from "@mov-ai/mov-fe-lib-core";
 import AppsIcon from "@material-ui/icons/Apps";
 import AddBoxIcon from "@material-ui/icons/AddBox";
@@ -72,8 +71,8 @@ const MainMenu = props => {
   const theme = useTheme();
 
   React.useEffect(() => {
-    call("docManager", "getDocTypes").then(docTypes => {
-      setDocTypes(docTypes);
+    call("docManager", "getDocTypes").then(_docTypes => {
+      setDocTypes(_docTypes);
     });
   }, [call]);
 
@@ -81,6 +80,7 @@ const MainMenu = props => {
     <MainContext.Consumer>
       {({ isDarkTheme, handleLogOut, handleToggleTheme }) => (
         <VerticalBar
+          useDividers={true}
           unsetAccountAreaPadding={true}
           backgroundColor={theme.palette.background.default}
           upperElement={
@@ -97,7 +97,18 @@ const MainMenu = props => {
               }
               menuList={docTypes.map(docType => ({
                 onClick: () =>
-                  call("docManager", "create", { scope: docType.scope }),
+                  call("docManager", "create", { scope: docType.scope }).then(
+                    document => {
+                      const tabName =
+                        document.name + document.getFileExtension();
+                      call("tabs", "openEditor", {
+                        id: document.url,
+                        title: tabName,
+                        name: document.name,
+                        scope: docType.scope
+                      });
+                    }
+                  ),
                 element: docType.scope,
                 onClose: true
               }))}

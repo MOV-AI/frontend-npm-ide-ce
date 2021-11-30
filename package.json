@@ -18,7 +18,7 @@
     "@material-ui/styles": "^4.11.4",
     "@mov-ai/mov-fe-lib-code-editor": "^1.0.3",
     "@mov-ai/mov-fe-lib-core": "^1.0.32",
-    "@mov-ai/mov-fe-lib-react": "^1.0.30",
+    "@mov-ai/mov-fe-lib-react": "^1.0.32",
     "@remixproject/engine": "^0.3.19",
     "@remixproject/engine-web": "^0.3.19",
     "@testing-library/jest-dom": "^5.14.1",

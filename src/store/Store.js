@@ -13,10 +13,10 @@ class Store extends BaseStore {
 
   newDoc(name) {
     const newName = name || this.generateName();
-    const obj = new this.model({ name: newName });
+    const obj = new this.model(newName);
     obj.setIsNew(true);
-
-    return this.data.set(newName, obj);
+    this.data.set(newName, obj);
+    return obj;
   }
 
   deleteDoc(name) {
@@ -29,14 +29,28 @@ class Store extends BaseStore {
     });
   }
 
-  saveDoc(name) {
+  saveDoc(name, newName) {
     const { scope } = this;
     const doc = this.data.get(name);
+    if (newName) doc.setName(newName);
     const data = doc.serialize();
     const obj = new Document(Document.parsePath(name, scope));
-    console.log("debug ", doc, data);
 
-    return doc.isNew ? obj.create(data) : obj.overwrite(data);
+    // If is a new document => create document in DB
+    // If is not a new document => update in DB
+    const saveMethodByState = {
+      true: _data => {
+        const payload = {
+          type: scope,
+          name: _data.Label,
+          body: _data
+        };
+        return Document.create(payload);
+      },
+      false: _data => obj.overwrite(_data)
+    };
+
+    return saveMethodByState[Boolean(doc.isNew).toString()](data);
   }
 
   checkDocExists(name) {
