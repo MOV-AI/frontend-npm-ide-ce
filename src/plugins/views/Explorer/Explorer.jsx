@@ -103,10 +103,10 @@ const Explorer = props => {
             );
             if (document) {
               _pushSorted(newData[typeIndex].children, {
-                name: document.name,
-                title: document.name,
+                name: document.getName(),
+                title: document.getName(),
                 scope: document.getScope(),
-                url: document.url
+                url: document.getUrl()
               });
             }
           }
@@ -130,7 +130,7 @@ const Explorer = props => {
   const loadDocs = React.useCallback(docManager => {
     return setData(_ =>
       docManager.getStores().map((store, id) => {
-        const { name, title, scope } = store;
+        const { name, title } = store;
         return {
           id,
           name,
@@ -140,7 +140,7 @@ const Explorer = props => {
               id: childId,
               name: doc.getName(),
               title: doc.getName(),
-              scope,
+              scope: doc.getScope(),
               url: doc.getUrl()
             };
           })
@@ -239,7 +239,17 @@ const Explorer = props => {
             console.log("debug handle change", nodes);
           }}
           handleCopyClick={node => {
-            call("docManager", "copy", node);
+            call("formDialog", "copyDocument", {
+              scope: node.scope,
+              name: node.name,
+              onSubmit: newName =>
+                new Promise((resolve, reject) => {
+                  call("docManager", "copy", node, newName).then(() =>
+                    resolve()
+                  );
+                }),
+              title: `Copy "${node.name}" to`
+            });
           }}
           handleDeleteClick={node => {
             call("docManager", "delete", node);

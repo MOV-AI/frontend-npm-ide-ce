@@ -39,10 +39,11 @@ const FormDialog = (props, ref) => {
     inputValue: "",
     inputLabel: "Name",
     submitText: "Submit",
+    loadingMessage: "",
     error: false,
     helperText: "",
     maxLength: 40,
-    onSubmit: () => {}
+    onSubmit: () => console.log("submit not implemented")
   };
 
   //========================================================================================
@@ -149,10 +150,31 @@ const FormDialog = (props, ref) => {
         return {
           ...prevState,
           open: true,
-          message: "",
           title: data.title,
           scope: data.scope,
           submitText: "Create",
+          onSubmit: data.onSubmit
+        };
+      });
+    },
+    [documentFunctions]
+  );
+
+  /**
+   * Open modal to enter copy name
+   * @param {*} data
+   */
+  const copyDocument = React.useCallback(
+    data => {
+      setMethods(documentFunctions);
+      setState(prevState => {
+        return {
+          ...prevState,
+          open: true,
+          title: data.title,
+          scope: data.scope,
+          loadingMessage: "Copying document",
+          submitText: "Copy",
           onSubmit: data.onSubmit
         };
       });
@@ -165,7 +187,8 @@ const FormDialog = (props, ref) => {
   }, []);
 
   usePluginMethods(ref, {
-    newDocument
+    newDocument,
+    copyDocument
   });
 
   //========================================================================================
@@ -176,8 +199,10 @@ const FormDialog = (props, ref) => {
 
   return (
     <Dialog open={state.open} onClose={handleClose}>
-      <DialogTitle>{state.title}</DialogTitle>
-      <DialogContent>
+      <DialogTitle>
+        {state.loadingMessage && isLoading ? state.loadingMessage : state.title}
+      </DialogTitle>
+      <DialogContent style={{ minWidth: 450 }}>
         <DialogContentText>{state.message}</DialogContentText>
         {isLoading ? (
           <div className={classes.loadingContainer}>
@@ -188,7 +213,7 @@ const FormDialog = (props, ref) => {
             autoFocus={true}
             error={state.error}
             helperText={state.helperText}
-            style={{ width: "100%", minWidth: 450 }}
+            style={{ width: "100%" }}
             label={t(state.inputLabel)}
             InputLabelProps={{ shrink: true }}
             defaultValue={state.inputValue}
@@ -226,7 +251,7 @@ const FormDialog = (props, ref) => {
   );
 };
 
-FormDialog.pluginMethods = ["newDocument"];
+FormDialog.pluginMethods = ["newDocument", "copyDocument"];
 
 export default withViewPlugin(FormDialog, FormDialog.pluginMethods);
 

@@ -181,10 +181,11 @@ class DocManager extends IDEPlugin {
 
   /**
    * Create copy of document
-   * @param {{name: String, scope: String}} modelKey
+   * @param {{name: String, scope: String}} modelKey : Reference model
+   * @param {String} newName : Copy name
    */
-  copy(modelKey) {
-    console.log("debug copy document", modelKey);
+  copy(modelKey, newName) {
+    console.log("debug copy document", newName, modelKey);
   }
 
   /**

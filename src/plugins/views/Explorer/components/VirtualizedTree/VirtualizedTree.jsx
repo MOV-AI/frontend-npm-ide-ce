@@ -66,6 +66,7 @@ const styles = theme => ({
 });
 
 const EXPANDED = "EXPANDED";
+const DEFAULT_FUNCTION = name => console.log(name, "not implemented");
 
 const CustomTooltip = withStyles(theme => ({
   tooltip: {
@@ -126,17 +127,6 @@ class VirtualizedTree extends Component {
     this.setState({ selectedGroup });
   };
 
-  // open: true -> expand
-  //       false -> collapse
-  handleExpansion = (evt, nodes, node, open) => {
-    // const treeData = _cloneDeep(nodes);
-    // _set(treeData, [node.id, "state"], {
-    //   expanded: open
-    // });
-    // evt.stopPropagation();
-    // this.props.handleChange(treeData);
-  };
-
   handleTooltipOpen = _debounce((target, node) => {
     if (!target) return;
     const nodeTooltip = this.state.nodeTooltip;
@@ -192,21 +182,9 @@ class VirtualizedTree extends Component {
                     <Box p={1} className={classes.inlineFlex}>
                       <Grid alignContent={"space-between"} container>
                         {_get(node, `children`, false) &&
-                          node.state?.expanded && (
-                            <ExpandMoreIcon
-                              onClick={evt =>
-                                this.handleExpansion(evt, nodes, node, false)
-                              }
-                            />
-                          )}
+                          node.state?.expanded && <ExpandMoreIcon />}
                         {_get(node, `children`, false) &&
-                          !node.state?.expanded && (
-                            <ChevronRightIcon
-                              onClick={evt =>
-                                this.handleExpansion(evt, nodes, node, true)
-                              }
-                            />
-                          )}
+                          !node.state?.expanded && <ChevronRightIcon />}
 
                         <div
                           className={
@@ -259,7 +237,6 @@ class VirtualizedTree extends Component {
                                     onClick: evt => {
                                       this.props.handleCopyClick({
                                         ...node,
-                                        scope: nodes[node.parents[0]].scope,
                                         scopeTitle: removePlural(
                                           nodes[node.parents[0]].name
                                         )
@@ -270,10 +247,7 @@ class VirtualizedTree extends Component {
                                   },
                                   {
                                     onClick: () => {
-                                      this.props.handleDeleteClick({
-                                        ...node,
-                                        scope: nodes[node.parents[0]].scope
-                                      });
+                                      this.props.handleDeleteClick({ ...node });
                                     },
                                     icon: <DeleteIcon fontSize="small" />,
                                     label: t("Delete")
@@ -321,12 +295,12 @@ VirtualizedTree.propTypes = {
 VirtualizedTree.defaultProps = {
   data: [],
   showIcons: false,
-  onClickNode: () => {},
-  onDoubleClickNode: () => {},
-  handleChange: () => {},
-  handleCopyClick: () => {},
-  handleDeleteClick: () => {},
-  handleCompareClick: () => {},
+  onClickNode: () => DEFAULT_FUNCTION("onClickNode"),
+  onDoubleClickNode: () => DEFAULT_FUNCTION("onDoubleClickNode"),
+  handleChange: () => DEFAULT_FUNCTION("handleChange"),
+  handleCopyClick: () => DEFAULT_FUNCTION("handleCopyClick"),
+  handleDeleteClick: () => DEFAULT_FUNCTION("handleDeleteClick"),
+  handleCompareClick: () => DEFAULT_FUNCTION("handleCompareClick"),
   height: 700
 };
 
