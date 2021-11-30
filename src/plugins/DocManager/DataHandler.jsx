@@ -1,17 +1,25 @@
 import React from "react";
 
+const MESSAGES = {
+  saveSucess: "Saved successfully",
+  createSuccess: "Saved successfully"
+};
+
 const DataHandler = props => {
-  const { children, call, scope, name, id } = props;
+  const { children, call, scope, name, id, alert } = props;
   const [data, setData] = React.useState();
+  const { t } = useTranslation();
 
   const save = () => {
-    console.log("debug SAVE", data.name, data);
-    call("docManager", "save", { scope, name });
+    call("docManager", "save", { scope, name }).then(res => {
+      alert({ message: t(MESSAGES.saveSucess), severity: "success" });
+    });
   };
 
   const create = () => {
-    console.log("debug CREATE", data.name, data);
-    call("docManager", "create", { scope, name });
+    call("docManager", "create", { scope, name }).then(res => {
+      alert({ message: t(MESSAGES.createSuccess), severity: "success" });
+    });
   };
 
   React.useEffect(() => {
@@ -37,3 +45,7 @@ const withDataHandler = Component => {
 export default DataHandler;
 
 export { withDataHandler };
+
+function useTranslation() {
+  return { t: s => s };
+}

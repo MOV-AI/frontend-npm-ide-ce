@@ -1,4 +1,5 @@
 import React from "react";
+import withAlerts from "../../decorators/withAlerts";
 import withKeyBinds from "../../decorators/withKeyBinds";
 import withMenuHandler from "../../decorators/withMenuHandler";
 import { withDataHandler } from "../../plugins/DocManager/DataHandler";
@@ -85,7 +86,8 @@ export function withEditorPlugin(ReactComponent, methods = []) {
   const DecoratedEditorComponent = composeDecorators(EditorComponent, [
     withMenuHandler,
     withKeyBinds,
-    withDataHandler
+    withDataHandler,
+    withAlerts
   ]);
 
   const WithEditorPlugin = class extends ViewPlugin {
