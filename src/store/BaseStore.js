@@ -57,6 +57,12 @@ class BaseStore {
     });
   }
 
+  deleteDocFromStore(name) {
+    this.data.get(name).destroy();
+    this.data.delete(name);
+    return this;
+  }
+
   generateName(next = 1) {
     const name = `untitled-${next}`;
     return this.data.has(name) ? this.generateName(next + 1) : name;
@@ -67,7 +73,7 @@ class BaseStore {
 
     const event2actionMap = {
       del: updateDoc => {
-        this.delDoc(updateDoc.name);
+        this.deleteDocFromStore(updateDoc.name);
       },
       set: updateDoc => {
         this.addDoc(updateDoc);

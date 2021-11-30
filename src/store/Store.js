@@ -25,7 +25,7 @@ class Store extends BaseStore {
       type: this.scope,
       body: {}
     }).then(() => {
-      return this.data.delete(name);
+      return this.deleteDocFromStore(name);
     });
   }
 
