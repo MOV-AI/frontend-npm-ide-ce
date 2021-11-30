@@ -11,6 +11,18 @@ import {
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 
 const useStyles = makeStyles(theme => ({
+  "@global": {
+    ".dock-dropdown-menu": {
+      background: theme.palette.background.default
+    },
+    ".dock-dropdown-menu-item": {
+      color: theme.palette.text.primary,
+      background: theme.palette.background.default
+    },
+    ".dock-dropdown-menu-item-active:hover": {
+      background: theme.palette.background.primary
+    }
+  },
   root: {
     position: "relative",
     width: "100%",
@@ -24,6 +36,9 @@ const useStyles = makeStyles(theme => ({
         "& .dock-bar": {
           borderColor: theme.background,
           background: theme.palette.background.primary,
+          "& .dock-nav-more": {
+            color: theme.palette.text.primary
+          },
           "& .dock-tab": {
             borderTopLeftRadius: 5,
             borderTopRightRadius: 5,
@@ -81,28 +96,30 @@ const useLayout = (props, dockRef) => {
 
   const getTabData = React.useCallback(
     async docData => {
-      return props.call("docManager", "getDocPlugin", docData.scope).then(plugin => {
-        try {
-          const viewPlugin = new plugin(
-            { name: docData.id },
-            { id: docData.id, name: docData.name, scope: docData.scope }
-          );
-          return PluginManagerIDE.install(docData.id, viewPlugin).then(() => {
-            // Create and return tab data
-            const tabData = {
-              id: docData.id,
-              name: docData.name,
-              title: docData.title,
-              scope: docData.scope,
-              content: viewPlugin.render()
-            };
-            return tabData;
-          });
-        } catch (err) {
-          console.log("can't open tab", err);
-          return docData;
-        }
-      });
+      return props
+        .call("docManager", "getDocPlugin", docData.scope)
+        .then(plugin => {
+          try {
+            const viewPlugin = new plugin(
+              { name: docData.id },
+              { id: docData.id, name: docData.name, scope: docData.scope }
+            );
+            return PluginManagerIDE.install(docData.id, viewPlugin).then(() => {
+              // Create and return tab data
+              const tabData = {
+                id: docData.id,
+                name: docData.name,
+                title: docData.title,
+                scope: docData.scope,
+                content: viewPlugin.render()
+              };
+              return tabData;
+            });
+          } catch (err) {
+            console.log("can't open tab", err);
+            return docData;
+          }
+        });
     },
     [props]
   );

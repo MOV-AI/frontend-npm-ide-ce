@@ -1,8 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import { VerticalBar, ProfileMenu } from "@mov-ai/mov-fe-lib-react";
+import { ProfileMenu, ContextMenu } from "@mov-ai/mov-fe-lib-react";
+import VerticalBar from "./VerticalBar";
 import { Authentication } from "@mov-ai/mov-fe-lib-core";
+import AppsIcon from "@material-ui/icons/Apps";
+import AddBoxIcon from "@material-ui/icons/AddBox";
 import BugReportIcon from "@material-ui/icons/BugReport";
 import CompareIcon from "@material-ui/icons/Compare";
 import TextSnippetIcon from "@material-ui/icons/Description";
@@ -62,9 +65,17 @@ const MENUS = [
   }
 ];
 
-const MainMenu = ({ call, emit }) => {
+const MainMenu = props => {
+  const { call, emit } = props;
+  const [docTypes, setDocTypes] = React.useState([]);
   const classes = useStyles();
   const theme = useTheme();
+
+  React.useEffect(() => {
+    call("docManager", "getDocTypes").then(docTypes => {
+      setDocTypes(docTypes);
+    });
+  }, [call]);
 
   return (
     <MainContext.Consumer>
@@ -72,6 +83,26 @@ const MainMenu = ({ call, emit }) => {
         <VerticalBar
           unsetAccountAreaPadding={true}
           backgroundColor={theme.palette.background.default}
+          upperElement={
+            <Tooltip title="Apps" placement="right">
+              <AppsIcon className={classes.icon}></AppsIcon>
+            </Tooltip>
+          }
+          creatorElement={
+            <ContextMenu
+              element={
+                <Tooltip title="Create new document" placement="right">
+                  <AddBoxIcon className={classes.icon}></AddBoxIcon>
+                </Tooltip>
+              }
+              menuList={docTypes.map(docType => ({
+                onClick: () =>
+                  call("docManager", "create", { scope: docType.scope }),
+                element: docType.scope,
+                onClose: true
+              }))}
+            ></ContextMenu>
+          }
           navigationList={MENUS.map(menu => (
             <div>
               <Tooltip title={menu.title}>
