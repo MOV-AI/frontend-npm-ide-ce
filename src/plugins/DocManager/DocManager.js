@@ -185,7 +185,8 @@ class DocManager extends IDEPlugin {
    * @param {String} newName : Copy name
    */
   copy(modelKey, newName) {
-    console.log("debug copy document", newName, modelKey);
+    const { name, scope } = modelKey;
+    return this.getStore(scope).copyDoc(name, newName);
   }
 
   /**
@@ -286,6 +287,7 @@ class DocManager extends IDEPlugin {
   }
 
   docsSubscribe() {
+    console.log("debug docsSubscribe was called");
     Object.values(this.docsMap).forEach(doc => {
       MasterDB.subscribe(
         { Scope: doc.scope, Name: "*", Label: "*" },

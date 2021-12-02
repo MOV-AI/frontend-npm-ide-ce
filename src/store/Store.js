@@ -53,6 +53,18 @@ class Store extends BaseStore {
     return saveMethodByState[Boolean(doc.isNew).toString()](data);
   }
 
+  copyDoc(name, newName) {
+    return this.readDoc(name).then(doc => {
+      const newObj = this.model
+        .ofJSON(doc.serialize())
+        .setIsNew(true)
+        .setName(newName);
+
+      this.data.set(newName, newObj);
+      this.saveDoc(newName);
+    });
+  }
+
   checkDocExists(name) {
     return this.data.has(name);
   }
