@@ -2,8 +2,12 @@
  * Abstract class of a Model
  */
 export default class Model {
-  name;
-  details; // model details
+  /**
+   * Should be private
+   * @param {String} name
+   * @param {{user: String, date: String}} details
+   * @returns
+   */
   constructor(
     name = "__placeholder__",
     details = { user: "N/A", date: "N/A" }
@@ -11,8 +15,8 @@ export default class Model {
     this.name = name;
     this.details = details;
     this.url = `global/${this.getScope()}/${this.name}`;
-    this.isNew = true;
-    this.isDirty = true;
+    this._isNew = true;
+    this._isDirty = false;
   }
 
   getName() {
@@ -21,6 +25,7 @@ export default class Model {
 
   setName(name) {
     this.name = name;
+    return this;
   }
 
   getDetails() {
@@ -29,6 +34,15 @@ export default class Model {
 
   setDetails(details) {
     this.details = details;
+    return this;
+  }
+
+  isDirty() {
+    return this._isDirty;
+  }
+
+  isNew() {
+    return this._isNew;
   }
 
   /**

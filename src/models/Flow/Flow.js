@@ -1,16 +1,16 @@
-export default class Flow {
-  constructor(name) {
-    this.name = name;
-    this.url = `global/${this.getType()}/${this.name}`;
+import Model from "../Model/Model";
+
+export default class Flow extends Model {
+  getScope() {
+    return Flow.SCOPE;
   }
 
-  getType() {
-    return Flow.TYPE;
-  }
-
-  static TYPE = "Flow";
+  static SCOPE = "Flow";
 
   static ofJSON(json) {
-    return new Flow(json.Label);
+    const { Label: name, LastUpdate: details } = json;
+    return new Flow(name, details);
   }
+
+  static EMPTY = new Flow();
 }

@@ -1,16 +1,16 @@
-export default class Node {
-  constructor(name) {
-    this.name = name;
-    this.url = `global/${this.getType()}/${this.name}`;
+import Model from "../Model/Model";
+
+export default class Node extends Model {
+  getScope() {
+    return Node.SCOPE;
   }
 
-  getType() {
-    return Node.TYPE;
-  }
-
-  static TYPE = "Node";
+  static SCOPE = "Node";
 
   static ofJSON(json) {
-    return new Node(json.Label);
+    const { Label: name, LastUpdate: details } = json;
+    return new Node(name, details);
   }
+
+  static EMPTY = new Node();
 }

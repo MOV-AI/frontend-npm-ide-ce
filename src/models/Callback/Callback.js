@@ -1,16 +1,16 @@
-export default class Callback {
-  constructor(name) {
-    this.name = name;
-    this.url = `global/${this.getType()}/${this.name}`;
+import Model from "../Model/Model";
+
+export default class Callback extends Model {
+  getScope() {
+    return Callback.SCOPE;
   }
 
-  getType() {
-    return Callback.TYPE;
-  }
-
-  static TYPE = "Callback";
+  static SCOPE = "Callback";
 
   static ofJSON(json) {
-    return new Callback(json.Label);
+    const { Label: name, LastUpdate: details } = json;
+    return new Callback(name, details);
   }
+
+  static EMPTY = new Callback();
 }

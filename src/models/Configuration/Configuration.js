@@ -1,17 +1,21 @@
 import Model from "../Model/Model";
 
 export default class Configuration extends Model {
+  extension;
+  code;
   /**
    * This should be private
-   * @param {*} name
-   * @param {*} extension
-   * @param {*} code
-   * @param {*} details
+   * @param {String} name
+   * @param {String} extension
+   * @param {String} code
+   * @param {{user: String, date: String}} details
    */
   constructor(name, extension, code, details) {
     super(name, details);
     this.extension = extension || "yaml";
     this.code = code || "";
+
+    console.log("debug config constructor", this);
   }
 
   getCode() {
