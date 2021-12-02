@@ -12,14 +12,14 @@ export default class Model {
     this.name = name;
     this.details = details;
     this.workspace = workspace;
-    this.url = `${this.workspace}/${this.getScope()}/${this.getName()}`;
+    this.url = this.getUrl();
     this.isNew = false;
     this.isLoaded = false;
     this.isDirty = true;
   }
 
   getUrl() {
-    return this.url;
+    return `${this.workspace}/${this.getScope()}/${this.getName()}`;
   }
 
   getName() {
@@ -28,6 +28,7 @@ export default class Model {
 
   setName(name) {
     this.name = name;
+    this.url = this.getUrl();
     return this;
   }
 

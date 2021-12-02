@@ -34,7 +34,7 @@ class Store extends BaseStore {
     const doc = this.data.get(name);
     if (newName) doc.setName(newName);
     const data = doc.serialize();
-    const obj = new Document(Document.parsePath(name, scope));
+    const document = new Document(Document.parsePath(name, scope));
 
     // If is a new document => create document in DB
     // If is not a new document => update in DB
@@ -45,9 +45,12 @@ class Store extends BaseStore {
           name: _data.Label,
           body: _data
         };
-        return Document.create(payload);
+        return Document.create(payload).then(res => {
+          if (res.success) doc.setIsNew(false);
+          return res;
+        });
       },
-      false: _data => obj.overwrite(_data)
+      false: _data => document.overwrite(_data)
     };
 
     return saveMethodByState[Boolean(doc.isNew).toString()](data);
