@@ -193,7 +193,8 @@ class DocManager extends IDEPlugin {
    * @param {{name: String, scope: String}} modelKey
    */
   delete(modelKey) {
-    console.log("debug delete document", modelKey);
+    const { name, scope } = modelKey;
+    return this.getStore(scope)?.deleteDoc(name);
   }
 
   //========================================================================================

@@ -82,4 +82,9 @@ export default class Model {
   getFileExtension() {
     throw new Error("Not implemented");
   }
+
+  destroy() {
+    //TODO: cleanup the instance
+    console.log("Destroy Not implemented");
+  }
 }
