@@ -16,6 +16,15 @@ const DataHandler = props => {
     call("docManager", "save", { scope, name }, newName).then(res => {
       if (res.success) {
         alert({ message: t(MESSAGES.save.success), severity: "success" });
+        if (newName) {
+          const newTabData = {
+            id: data.getUrl(),
+            title: newName + data?.getFileExtension(),
+            name: newName,
+            scope: scope
+          };
+          call("tabs", "updateTabId", id, newTabData);
+        }
       } else {
         alert({ message: t(MESSAGES.save.error), severity: "error" });
       }

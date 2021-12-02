@@ -65,7 +65,7 @@ class BaseStore {
   }
 
   deleteDocFromStore(name) {
-    this.data.get(name).destroy();
+    this.data.get(name)?.destroy();
     this.data.delete(name);
     return this;
   }
