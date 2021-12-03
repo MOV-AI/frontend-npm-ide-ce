@@ -71,7 +71,6 @@ const useLayout = (props, dockRef) => {
         tabsById.current.set(tabData.id, tabData);
         workspaceManager.setTabs(tabsById.current);
         workspaceManager.setLayout(newLayout);
-        console.log("debug FIND tab");
       }
       return { newLayout, box };
     },

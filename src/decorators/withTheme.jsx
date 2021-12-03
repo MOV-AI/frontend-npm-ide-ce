@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ApplicationTheme } from "../themes";
-import { ThemeProvider } from "@material-ui/styles";
+import { ThemeProvider } from "@material-ui/core/styles";
 
 export function withTheme(Component) {
   return function (props) {

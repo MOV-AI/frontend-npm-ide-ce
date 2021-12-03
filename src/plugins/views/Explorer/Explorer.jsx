@@ -239,20 +239,25 @@ const Explorer = props => {
             console.log("debug handle change", nodes);
           }}
           handleCopyClick={node => {
-            call("formDialog", "copyDocument", {
-              scope: node.scope,
-              name: node.name,
+            const { name, scope } = node;
+            call("dialog", "copyDocument", {
+              scope,
+              name,
               onSubmit: newName =>
                 new Promise((resolve, reject) => {
-                  call("docManager", "copy", node, newName).then(() =>
-                    resolve()
+                  call("docManager", "copy", { name, scope }, newName).then(
+                    () => resolve()
                   );
-                }),
-              title: `Copy "${node.name}" to`
+                })
             });
           }}
           handleDeleteClick={node => {
-            call("docManager", "delete", node);
+            const { name, scope } = node;
+            call("dialog", "confirmation", {
+              title: t("Confirm to delete"),
+              onSubmit: () => call("docManager", "delete", { name, scope }),
+              message: `Are you sure you want to delete the document "${name}"?`
+            });
           }}
           handleCompareClick={node => {
             console.log("debug compare click", node);

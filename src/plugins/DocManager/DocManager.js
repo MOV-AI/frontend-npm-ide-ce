@@ -1,5 +1,5 @@
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
-import { MasterDB, Document } from "@mov-ai/mov-fe-lib-core";
+import { MasterDB } from "@mov-ai/mov-fe-lib-core";
 import { MODELS_CLASS_BY_NAME } from "../../models";
 import { Maybe } from "monet";
 import Configuration from "../views/editors/Configuration/Configuration";
@@ -130,22 +130,9 @@ class DocManager extends IDEPlugin {
    * @param {{name: String, scope: String}} modelKey
    * @returns {Promise<{result: Boolean, error: String}>}
    */
-  checkDocumentExists({ name, scope, workspace = "global", version = "-" }) {
-    // Check if document name already exists
-    return Document.exists({
-      name,
-      scope,
-      workspace,
-      version
-    })
-      .then(docExists => {
-        const type = workspace === "global" ? "Document" : "Version";
-        const error = docExists ? `${type} already exists` : "";
-        return { result: !docExists, error };
-      })
-      .catch(err => {
-        return { result: false, error: `${scope} already exists` };
-      });
+  checkDocumentExists(modelKey) {
+    const { name, scope } = modelKey;
+    return this.getStore(scope)?.checkDocExists(name);
   }
 
   /**
@@ -199,7 +186,7 @@ class DocManager extends IDEPlugin {
 
   //========================================================================================
   /*                                                                                      *
-   *                                    PRIVATE METHODS                                   *
+   *                                    Private Methods                                   *
    *                                                                                      */
   //========================================================================================
 

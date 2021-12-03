@@ -55,13 +55,11 @@ export function withEditorPlugin(ReactComponent, methods = []) {
      *  else => Update document in DB
      */
     const saveDocument = React.useCallback(() => {
-      console.log("debug saveDocument", data);
       if (data.isNew) {
         // open new widget modal passing create as submit callback
-        call("formDialog", "newDocument", {
+        call("dialog", "newDocument", {
           scope: scope,
-          onSubmit: newName => save(newName),
-          title: `New ${scope}`
+          onSubmit: newName => save(newName)
         });
       } else {
         save();
