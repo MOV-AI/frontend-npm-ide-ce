@@ -65,6 +65,7 @@ class DocManager extends IDEPlugin {
     super({ ...profile, methods });
     this.docsMap = INITIAL_DOCS_MAP;
     this.stores = storesBuilder("global");
+    window.onbeforeunload = this.beforeUnload;
     window.DocManager = this;
   }
 
@@ -293,6 +294,16 @@ class DocManager extends IDEPlugin {
       );
     });
   }
+
+  beforeUnload = event => {
+    const hasDirties = this.hasDirties();
+    if (hasDirties) {
+      event.preventDefault();
+      event.returnValue = "";
+    } else {
+      delete event["returnValue"];
+    }
+  };
 }
 
 export default DocManager;
