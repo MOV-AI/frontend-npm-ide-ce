@@ -172,7 +172,8 @@ class DocManager extends IDEPlugin {
    * @param {String} newName : Copy name
    */
   copy(modelKey, newName) {
-    console.log("debug copy document", newName, modelKey);
+    const { name, scope } = modelKey;
+    return this.getStore(scope).copyDoc(name, newName);
   }
 
   /**
@@ -182,6 +183,18 @@ class DocManager extends IDEPlugin {
   delete(modelKey) {
     const { name, scope } = modelKey;
     return this.getStore(scope)?.deleteDoc(name);
+  }
+
+  hasDirties() {
+    return this.getStores().some(store => store.hasDirties());
+  }
+
+  saveDirties() {
+    const promises = [];
+    this.getStores().forEach(store => {
+      promises.push(store.saveDirties());
+    });
+    return Promise.allSettled(promises);
   }
 
   //========================================================================================
@@ -273,6 +286,7 @@ class DocManager extends IDEPlugin {
   }
 
   docsSubscribe() {
+    console.log("debug docsSubscribe was called");
     Object.values(this.docsMap).forEach(doc => {
       MasterDB.subscribe(
         { Scope: doc.scope, Name: "*", Label: "*" },
