@@ -6,6 +6,7 @@ import BuildIcon from "@material-ui/icons/Build";
 import CodeIcon from "@material-ui/icons/Code";
 import DescriptionIcon from "@material-ui/icons/Description";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
+import { Tooltip } from "@material-ui/core";
 
 const DEFAULT_LAYOUT = {
   dockbox: {
@@ -101,16 +102,18 @@ const useLayout = (props, dockRef) => {
     };
 
     return (
-      <div>
-        {getIconByScope[docData.scope || "Default"]({
-          fontSize: 12,
-          marginTop: 2,
-          marginRight: 10,
-          marginLeft: 0
-        })}
-        {docData.title}
-        {isDirty && " *"}
-      </div>
+      <Tooltip title={docData.name}>
+        <div onAuxClick={() => console.log("debug close document", docData)}>
+          {getIconByScope[docData.scope || "Default"]({
+            fontSize: 12,
+            marginTop: 2,
+            marginRight: 10,
+            marginLeft: 0
+          })}
+          {docData.name + docData.extension}
+          {isDirty && " *"}
+        </div>
+      </Tooltip>
     );
   }, []);
 
@@ -131,6 +134,8 @@ const useLayout = (props, dockRef) => {
             );
             return PluginManagerIDE.install(docData.id, viewPlugin).then(() => {
               // Create and return tab data
+              // TODO: get correct document extension
+              docData.extension = ".conf";
               return {
                 id: docData.id,
                 name: docData.name,
