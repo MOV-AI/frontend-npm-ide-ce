@@ -65,7 +65,7 @@ const AppDialog = props => {
    */
   const handleClose = () => {
     setOpen(false);
-    if (onClose) onClose();
+    onClose();
   };
 
   /**
@@ -84,11 +84,13 @@ const AppDialog = props => {
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="default">
-          {t("Cancel")}
+          {onSubmit ? t("Cancel") : t("Ok")}
         </Button>
-        <Button onClick={handleSubmit} color="primary">
-          {submitText}
-        </Button>
+        {onSubmit && (
+          <Button onClick={handleSubmit} color="primary">
+            {submitText}
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );
@@ -104,7 +106,6 @@ AppDialog.propTypes = {
 AppDialog.defaultProps = {
   title: "Are you sure?",
   submitText: "Submit",
-  onSubmit: () => console.log("Not Implemented"),
   onClose: () => console.log("Not Implemented")
 };
 

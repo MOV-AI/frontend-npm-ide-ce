@@ -2,6 +2,7 @@ import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
 import ReactDOM from "react-dom";
 import ConfirmationDialog from "./components/ConfirmationDialog/ConfirmationDialog";
 import NewDocumentDialog from "./components/FormDialog/NewDocumentDialog";
+import AlertDialog from "./components/AlertDialog/AlertDialog";
 
 class Dialog extends IDEPlugin {
   constructor(profile = {}) {
@@ -9,6 +10,7 @@ class Dialog extends IDEPlugin {
     const methods = Array.from(
       new Set([
         ...(profile.methods || []),
+        "alert",
         "confirmation",
         "newDocument",
         "copyDocument"
@@ -22,6 +24,18 @@ class Dialog extends IDEPlugin {
    *                                     Public Methods                                   *
    *                                                                                      */
   //========================================================================================
+
+  alert(data) {
+    const targetElement = this._handleDialogOpen();
+    ReactDOM.render(
+      <AlertDialog
+        title={data.title}
+        message={data.message}
+        onClose={this._handleDialogClose}
+      />,
+      targetElement
+    );
+  }
 
   /**
    * Show confirmation alert before action

@@ -3,6 +3,7 @@ import "./App.css";
 import PluginManagerIDE from "../engine/PluginManagerIDE/PluginManagerIDE";
 import DocManager from "../plugins/DocManager/DocManager";
 import Dialog from "../plugins/Dialog/Dialog";
+import Alerts from "../plugins/Alerts/Alerts";
 import BottomBar from "../plugins/hosts/BottomBar/BottomBar";
 import CentralPanel from "../plugins/hosts/CentralPanel/CentralPanel";
 import DrawerPanel from "../plugins/hosts/DrawerPanel/DrawerPanel";
@@ -73,6 +74,10 @@ function installAppPlugins() {
     {
       profile: { name: "dialog" },
       factory: profile => new Dialog(profile)
+    },
+    {
+      profile: { name: "alert" },
+      factory: profile => new Alerts(profile)
     }
   ];
   plugins.forEach(pluginDescription => {

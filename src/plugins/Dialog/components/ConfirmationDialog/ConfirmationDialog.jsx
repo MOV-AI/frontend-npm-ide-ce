@@ -21,8 +21,8 @@ ConfirmationDialog.propTypes = {
 };
 
 ConfirmationDialog.defaultProps = {
-  title: "Are you sure?",
-  message: "Do want to continue",
+  title: "Confirmation",
+  message: "Are you sure do you want to continue?",
   onSubmit: () => console.log("Not Implemented"),
   onClose: () => console.log("Not Implemented")
 };
