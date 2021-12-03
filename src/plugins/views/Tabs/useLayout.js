@@ -1,6 +1,11 @@
 import React from "react";
 import Workspace from "../../../utils/Workspace";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
+import AccountTreeIcon from "@material-ui/icons/AccountTree";
+import BuildIcon from "@material-ui/icons/Build";
+import CodeIcon from "@material-ui/icons/Code";
+import DescriptionIcon from "@material-ui/icons/Description";
+import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 
 const DEFAULT_LAYOUT = {
   dockbox: {
@@ -78,6 +83,38 @@ const useLayout = (props, dockRef) => {
   );
 
   /**
+   * Get tab to render
+   * @param {{title: String, scope: String}} docData : Document data
+   * @param {Boolean} isDirty : Document dirty state
+   * @returns {Element} Tab element to render
+   */
+  const _getCustomTab = React.useCallback((docData, isDirty) => {
+    const getIconByScope = {
+      Callback: style => <CodeIcon style={{ ...style }} />,
+      Layout: style => <i className={`icon-Layouts`} style={{ ...style }}></i>,
+      Flow: style => <AccountTreeIcon style={{ ...style }} />,
+      Annotation: style => <DescriptionIcon style={{ ...style }} />,
+      GraphicScene: style => <DeviceHubIcon style={{ ...style }} />,
+      Node: style => <i className={`icon-Nodes`} style={{ ...style }}></i>,
+      Configuration: style => <BuildIcon style={{ ...style }} />,
+      Default: <></>
+    };
+
+    return (
+      <div>
+        {getIconByScope[docData.scope || "Default"]({
+          fontSize: 12,
+          marginTop: 2,
+          marginRight: 10,
+          marginLeft: 0
+        })}
+        {docData.title}
+        {isDirty && " *"}
+      </div>
+    );
+  }, []);
+
+  /**
    * Get tab data based in document data
    * @param {{id: String, title: String, name: String, scope: String}} docData : document basic data
    * @returns {TabData} Tab data to be set in Layout
@@ -97,7 +134,7 @@ const useLayout = (props, dockRef) => {
               return {
                 id: docData.id,
                 name: docData.name,
-                title: docData.title,
+                title: _getCustomTab(docData),
                 scope: docData.scope,
                 content: viewPlugin.render()
               };
@@ -108,7 +145,7 @@ const useLayout = (props, dockRef) => {
           }
         });
     },
-    [props]
+    [props, _getCustomTab]
   );
 
   //========================================================================================

@@ -46,6 +46,9 @@ const useStyles = makeStyles(theme => ({
             padding: "0 10px",
             "& .dock-tab-close-btn": {
               right: "1px"
+            },
+            "& > div": {
+              padding: "4px 15px 4px 5px"
             }
           },
           "& .dock-ink-bar": {

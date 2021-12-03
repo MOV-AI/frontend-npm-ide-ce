@@ -47,11 +47,15 @@ class Store extends BaseStore {
           body: _data
         };
         return Document.create(payload).then(res => {
-          if (res.success) doc.setIsNew(false);
+          if (res.success) doc.setIsNew(false).setDirty(false);
           return res;
         });
       },
-      false: _data => document.overwrite(_data)
+      false: _data =>
+        document.overwrite(_data).then(res => {
+          if (res.success) doc.setDirty(false);
+          return res;
+        })
     };
 
     return saveMethodByState[Boolean(doc.isNew).toString()](data);
