@@ -14,8 +14,6 @@ class BaseStore {
 
     this.data = new Map();
 
-    console.log(`Store ${this.name} initializing`, this);
-
     this.enableSubscriber();
   }
 

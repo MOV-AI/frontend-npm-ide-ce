@@ -12,10 +12,22 @@ export default class Model {
     this.name = name;
     this.details = details;
     this.workspace = workspace;
-    this.url = this.getUrl();
     this.isNew = false;
     this.isLoaded = false;
-    this.isDirty = true;
+    this.isDirty = false;
+
+    // methods to decorate with the decorator
+    this.toDecorate = [];
+    this.decorator = this.withSetDirty;
+
+    return new Proxy(this, {
+      get(target, prop, receiver) {
+        if (target.toDecorate.includes(prop)) {
+          return target.decorator(Reflect.get(...arguments));
+        }
+        return Reflect.get(...arguments);
+      }
+    });
   }
 
   getUrl() {
@@ -28,7 +40,6 @@ export default class Model {
 
   setName(name) {
     this.name = name;
-    this.url = this.getUrl();
     return this;
   }
 
@@ -50,9 +61,20 @@ export default class Model {
     return this;
   }
 
-  setIsDirty(value) {
+  getDirty() {
+    return this.isDirty;
+  }
+
+  setDirty(value) {
     this.isDirty = Boolean(value);
     return this;
+  }
+
+  withSetDirty(fn) {
+    return function () {
+      this.setDirty(true);
+      return fn.call(this, ...arguments);
+    };
   }
 
   getIsNew() {
@@ -64,27 +86,22 @@ export default class Model {
     return this;
   }
 
-  validate() {
-    return this.schema.validate(this.serialize());
-  }
-
   /**
-   * Methods to be implemented in its sub-classes
+   * Methods to be implemented in the extended class
    */
   getScope() {
-    throw new Error("Not implemented");
+    return "NA";
   }
 
   serialize() {
-    throw new Error("Not implemented");
+    return {};
   }
 
   getFileExtension() {
-    throw new Error("Not implemented");
+    return ".NA";
   }
 
   destroy() {
-    //TODO: cleanup the instance
-    console.log("Destroy Not implemented");
+    // TODO: cleanup the instance
   }
 }

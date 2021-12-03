@@ -198,6 +198,18 @@ class DocManager extends IDEPlugin {
     return this.getStore(scope)?.deleteDoc(name);
   }
 
+  hasDirties() {
+    return this.getStores().some(store => store.hasDirties());
+  }
+
+  saveDirties() {
+    const promises = [];
+    this.getStores().forEach(store => {
+      promises.push(store.saveDirties());
+    });
+    return Promise.allSettled(promises);
+  }
+
   //========================================================================================
   /*                                                                                      *
    *                                    PRIVATE METHODS                                   *

@@ -11,6 +11,9 @@ export default class Configuration extends BaseModel {
    */
   constructor(name, extension, code, details) {
     super({ schema, name, details });
+
+    this.toDecorate = ["setCode", "setExtension"];
+
     this.extension = extension || "yaml";
     this.code = code || "";
   }

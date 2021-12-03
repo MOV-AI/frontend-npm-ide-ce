@@ -71,6 +71,22 @@ class Store extends BaseStore {
   checkDocExists(name) {
     return this.data.has(name);
   }
+
+  hasDirties() {
+    return Array.from(this.data.values).some(obj => obj.getDirty());
+  }
+
+  saveDirties() {
+    const promises = [];
+
+    Array.from(this.data.values)
+      .filter(obj => obj.getDirty())
+      .forEach(obj => {
+        promises.push(this.saveDoc(obj.getName()));
+      });
+
+    return Promise.allSettled(promises);
+  }
 }
 
 export default Store;
