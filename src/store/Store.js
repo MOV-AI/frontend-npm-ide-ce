@@ -15,6 +15,7 @@ class Store extends BaseStore {
     const newName = name || this.generateName();
     const obj = new this.model(newName);
     obj.setIsNew(true);
+    obj.setIsLoaded(true);
     this.data.set(newName, obj);
     return obj;
   }

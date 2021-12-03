@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import ConfigurationModel from "../../../../models/Configuration/Configuration";
+import Model from "../../../../models/Configuration/Configuration";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
 import {
@@ -40,7 +40,7 @@ const Configuration = (props, ref) => {
     setData,
     activateEditor = () => DEFAULT_FUNCTION("activateEditor"),
     saveDocument = () => DEFAULT_FUNCTION("saveDocument"),
-    data = ConfigurationModel.EMPTY,
+    data = Model.serialize(),
     editable = true
   } = props;
   // Style Hooks
@@ -57,7 +57,7 @@ const Configuration = (props, ref) => {
   //========================================================================================
 
   const renderRightMenu = React.useCallback(() => {
-    const details = data.details || {};
+    const details = data.LastUpdate || {};
     const menuName = `${id}-detail-menu`;
     // add bookmark
     call("rightDrawer", "setBookmark", {
@@ -67,7 +67,7 @@ const Configuration = (props, ref) => {
         view: <Menu id={id} name={name} details={details}></Menu>
       }
     });
-  }, [call, id, name, data.details]);
+  }, [call, id, name, data.LastUpdate]);
 
   usePluginMethods(ref, {
     renderRightMenu
@@ -82,12 +82,9 @@ const Configuration = (props, ref) => {
   // Render right menu
   React.useEffect(() => {
     // Reset editor undoManager after first load
-    if (
-      editorRef.current &&
-      previousData?.name === ConfigurationModel.EMPTY.name
-    ) {
+    if (editorRef.current && previousData?.Label === null) {
       const editorModel = editorRef.current.getModel();
-      const loadedCode = data?.code || "";
+      const loadedCode = data?.Yaml || "";
       editorModel.setValue(loadedCode);
     }
   }, [data, previousData]);
@@ -100,15 +97,14 @@ const Configuration = (props, ref) => {
 
   const updateConfigExtension = configExtension => {
     setData(prevState => {
-      return (prevState || ConfigurationModel.EMPTY).setExtension(
-        configExtension
-      );
+      return { ...prevState, Type: configExtension };
     });
   };
 
   const updateConfigCode = configCode => {
     setData(prevState => {
-      return (prevState || ConfigurationModel.EMPTY).setCode(configCode);
+      if (prevState.Yaml === configCode) return prevState;
+      return { ...prevState, Yaml: configCode };
     });
   };
 
@@ -127,8 +123,8 @@ const Configuration = (props, ref) => {
         <MonacoCodeEditor
           ref={editorRef}
           style={{ flexGrow: 1, height: "100%", width: "100%" }}
-          value={data.code}
-          language={data.extension}
+          value={data.Yaml}
+          language={data.Type}
           theme={theme.codeEditor.theme}
           options={{ readOnly: !editable }}
           onChange={updateConfigCode}
@@ -148,10 +144,11 @@ const Configuration = (props, ref) => {
           <ToggleButtonGroup
             size="small"
             exclusive
-            value={data.extension}
-            onChange={(event, newExtension) =>
-              updateConfigExtension(newExtension)
-            }
+            value={data.Type}
+            onChange={(event, newExtension) => {
+              event.stopPropagation();
+              updateConfigExtension(newExtension);
+            }}
           >
             <ToggleButton value="xml">XML</ToggleButton>
             <ToggleButton value="yaml">YAML</ToggleButton>

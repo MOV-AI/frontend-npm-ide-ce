@@ -1,7 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import { VerticalBar, ProfileMenu, ContextMenu } from "@mov-ai/mov-fe-lib-react";
+import {
+  VerticalBar,
+  ProfileMenu,
+  ContextMenu
+} from "@mov-ai/mov-fe-lib-react";
 import { Authentication } from "@mov-ai/mov-fe-lib-core";
 import AppsIcon from "@material-ui/icons/Apps";
 import AddBoxIcon from "@material-ui/icons/AddBox";
@@ -102,9 +106,9 @@ const MainMenu = props => {
                       const tabName =
                         document.name + document.getFileExtension();
                       call("tabs", "openEditor", {
-                        id: document.url,
+                        id: document.getUrl(),
                         title: tabName,
-                        name: document.name,
+                        name: document.getName(),
                         scope: docType.scope
                       });
                     }

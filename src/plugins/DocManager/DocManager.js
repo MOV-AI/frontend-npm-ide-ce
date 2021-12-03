@@ -273,7 +273,6 @@ class DocManager extends IDEPlugin {
 
   getRetrieveDoc(document) {
     return data => {
-      console.log("debug data", data);
       const docType = document.name;
       Object.values(data.value[docType])
         .map(doc => ({
@@ -286,7 +285,6 @@ class DocManager extends IDEPlugin {
   }
 
   docsSubscribe() {
-    console.log("debug docsSubscribe was called");
     Object.values(this.docsMap).forEach(doc => {
       MasterDB.subscribe(
         { Scope: doc.scope, Name: "*", Label: "*" },

@@ -49,6 +49,11 @@ export default class Configuration extends BaseModel {
     };
   }
 
+  setData(data) {
+    this.code = data.Yaml;
+    this.extension = data.Type;
+  }
+
   getFileExtension() {
     return ".conf";
   }
@@ -66,4 +71,13 @@ export default class Configuration extends BaseModel {
   }
 
   static EMPTY = new Configuration();
+
+  static serialize() {
+    return {
+      Label: null,
+      Yaml: "",
+      Type: "yaml",
+      LastUpdate: { user: "N/A", lastUpdate: "N/A" }
+    };
+  }
 }

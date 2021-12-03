@@ -86,6 +86,10 @@ export default class Model {
     return this;
   }
 
+  destroy() {
+    // TODO: cleanup the instance
+  }
+
   /**
    * Methods to be implemented in the extended class
    */
@@ -97,11 +101,11 @@ export default class Model {
     return {};
   }
 
-  getFileExtension() {
-    return ".NA";
+  setData() {
+    return;
   }
 
-  destroy() {
-    // TODO: cleanup the instance
+  getFileExtension() {
+    return ".NA";
   }
 }
