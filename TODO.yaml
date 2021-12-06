@@ -3,10 +3,10 @@
 - confirmation dialog on close dirty
 - - rm
 - delete from store on close new document
-- - store method: mj
+- - store method: mj - done
 - - components: rm
 - close tab on delete
-- - event: mj
+- - event: mj - done
 - - components: rm
 
 docmanager
@@ -23,6 +23,7 @@ theme bug
 editors
 
 - callbacks
+- - model: mj - Done
 - nodes
 - !!!! flows
 
