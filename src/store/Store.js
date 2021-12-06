@@ -27,7 +27,7 @@ class Store extends BaseStore {
    */
   newDoc(name) {
     const newName = name || this.generateName();
-    const obj = new this.model(newName);
+    const obj = new this.model({ name: newName });
     obj.setIsNew(true);
     obj.setIsLoaded(true);
     this.data.set(newName, obj);
