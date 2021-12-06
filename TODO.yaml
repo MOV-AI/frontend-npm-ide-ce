@@ -1,0 +1,35 @@
+- update tab dirty state
+- - rm
+- confirmation dialog on close dirty
+- - rm
+- delete from store on close new document
+- - store method: mj
+- - components: rm
+- close tab on delete
+- - event: mj
+- - components: rm
+
+docmanager
+
+- !!!! redis subscribers
+- tests
+- versioning
+- undo/redo
+- copy tem bug
+- delete nao remove da lista
+
+theme bug
+
+editors
+
+- callbacks
+- nodes
+- !!!! flows
+
+Tools
+
+- logs
+- diff tool
+- home tab
+- quick access menu
+- language server

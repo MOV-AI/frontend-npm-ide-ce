@@ -24,6 +24,8 @@ class DocManager extends IDEPlugin {
     );
     super({ ...profile, methods });
     window.DocManager = this;
+
+    window.onbeforeunload = this.onBeforeUnload;
   }
 
   activate() {
@@ -31,7 +33,8 @@ class DocManager extends IDEPlugin {
       onLoad: store => this.onStoreLoad(store),
       onUpdate: (store, doc) => this.onStoreUpdate(store, doc),
       onDocumentDirty: (store, instance, value) =>
-        this.onDocumentDirty(store, instance, value)
+        this.onDocumentDirty(store, instance, value),
+      onDocumentDeleted: (store, name) => this.onDocumentDeleted(store, name)
     };
 
     this.docsMap = docsFactory("global", observer);
@@ -181,11 +184,6 @@ class DocManager extends IDEPlugin {
     });
   }
 
-  /**
-   * Emits an event when a document is set to dirty
-   * @param {string} store : The name of the store firing the event
-   * @param {object<{documentName, documentType, isDirty}>} doc
-   */
   onDocumentDirty(store, instance, value) {
     this.emit(TOPICS.updateDocDirty, this, {
       instance,
@@ -193,7 +191,11 @@ class DocManager extends IDEPlugin {
     });
   }
 
-  beforeUnload = event => {
+  onDocumentDeleted(store, name) {
+    this.emit(TOPICS.deleteDoc, store, name);
+  }
+
+  onBeforeUnload = event => {
     const hasDirties = this.hasDirties();
     if (hasDirties) {
       event.preventDefault();

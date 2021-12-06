@@ -223,6 +223,9 @@ const Explorer = props => {
   React.useEffect(() => {
     on("docManager", "loadDocs", loadDocs);
     on("docManager", "updateDocs", updateDocs);
+    on("docManager", "deleteDoc", (store, name) =>
+      console.log("Delete event", store, name)
+    );
   }, [on, loadDocs, updateDocs]);
 
   //========================================================================================
@@ -256,11 +259,17 @@ const Explorer = props => {
                 })
             });
           }}
+          // TODO: fire a snackbar on error
           handleDeleteClick={node => {
             const { name, scope } = node;
             call("dialog", "confirmation", {
               title: t("Confirm to delete"),
-              onSubmit: () => call("docManager", "delete", { name, scope }),
+              onSubmit: () =>
+                call("docManager", "delete", { name, scope }).catch(error =>
+                  console.log(
+                    `Could not delete ${name} \n ${error.statusText || error}`
+                  )
+                ),
               message: `Are you sure you want to delete the document "${name}"?`
             });
           }}

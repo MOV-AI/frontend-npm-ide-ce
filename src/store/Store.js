@@ -37,16 +37,27 @@ class Store extends BaseStore {
   /**
    * Deletes the document from the store and the database
    * @param {string} name The name of the document to delete
-   * @returns {Promise<>}
+   * @returns {Promise<any>}
    */
   deleteDoc(name) {
+    // A new document only exists in the store
+    if (this.data.get(name).getIsNew()) {
+      return Promise.resolve(this.deleteDocFromStore(name));
+    }
+
     return new Document.delete({
       name,
       type: this.scope,
       body: {}
-    }).then(() => {
-      return this.deleteDocFromStore(name);
-    });
+    })
+      .then(a => {
+        // delete only if successfully deleted from the database
+        return this.deleteDocFromStore(name);
+      })
+      .then(res => {
+        this.observer.onDocumentDeleted(this.name, name);
+        return res;
+      });
   }
 
   /**
