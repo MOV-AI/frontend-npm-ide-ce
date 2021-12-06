@@ -42,8 +42,8 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       call,
       addKeyBind,
       scope,
-      data,
       save,
+      instance,
       activateKeyBind,
       initRightMenu,
       updateRightMenu
@@ -55,7 +55,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
      *  else => Update document in DB
      */
     const saveDocument = React.useCallback(() => {
-      if (data.isNew) {
+      if (instance.current.isNew) {
         // open new widget modal passing create as submit callback
         call("dialog", "newDocument", {
           scope: scope,
@@ -64,7 +64,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       } else {
         save();
       }
-    }, [call, save, data, scope]);
+    }, [call, save, instance, scope]);
 
     /**
      * Activate editor : activate editor's keybinds and update right menu

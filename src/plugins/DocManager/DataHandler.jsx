@@ -25,7 +25,7 @@ const DataHandler = props => {
           alert({ message: t(MESSAGES.save.success), severity: "success" });
           if (newName) {
             const newTabData = {
-              id: data.getUrl(),
+              id: modelRef.current.getUrl(),
               name: newName,
               scope: scope
             };
@@ -35,9 +35,10 @@ const DataHandler = props => {
           alert({ message: t(MESSAGES.save.error), severity: "error" });
         }
       })
-      .catch(error =>
-        alert({ message: t(MESSAGES.save.error), severity: "error" })
-      );
+      .catch(error => {
+        console.log("Failed to save: error", error);
+        alert({ message: t(MESSAGES.save.error), severity: "error" });
+      });
   };
 
   /**
