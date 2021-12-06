@@ -1,5 +1,4 @@
 import React from "react";
-import { usePrevious } from "../../engine/ReactPlugin/ViewReactPlugin";
 
 const MESSAGES = {
   save: {
@@ -11,7 +10,6 @@ const MESSAGES = {
 const DataHandler = props => {
   const { children, call, scope, name, id, alert } = props;
   const [data, setData] = React.useState();
-  const previousData = usePrevious(data);
   const modelRef = React.useRef();
 
   const { t } = useTranslation();
@@ -27,7 +25,6 @@ const DataHandler = props => {
         if (newName) {
           const newTabData = {
             id: data.getUrl(),
-            title: newName + data?.getFileExtension(),
             name: newName,
             scope: scope
           };
@@ -46,19 +43,16 @@ const DataHandler = props => {
     call("docManager", "read", { scope, name }).then(model => {
       setData(model.serialize());
       modelRef.current = model;
+      model.subscribe((key, value) => {
+        setData(prevState => {
+          return { ...prevState, [key]: value };
+        });
+      });
     });
   }, [call, scope, name]);
 
-  /**
-   * On change of data (from editor)
-   */
-  React.useEffect(() => {
-    if (!modelRef.current || !previousData) return;
-    modelRef.current.setData(data);
-  }, [data, previousData]);
-
   return React.Children.map(children, el =>
-    React.cloneElement(el, { data, setData, save })
+    React.cloneElement(el, { data, save, instance: modelRef })
   );
 };
 

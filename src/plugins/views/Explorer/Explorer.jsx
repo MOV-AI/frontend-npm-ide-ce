@@ -118,6 +118,51 @@ const Explorer = props => {
     [_pushSorted]
   );
 
+  /**
+   * Expand tree or open document depending on the node deepness
+   *  0 : collapse others and expand tree node
+   *  1 : open document node
+   * @param {{id: String, deepness: String, url: String, name: String, scope: String}} node : Clicked node
+   */
+  const _requestScopeVersions = node => {
+    const deepnessToAction = {
+      0: () => {
+        // Toggle the expansion of the clicked panel
+        setData(prevData => {
+          const nextData = [...prevData];
+          const isExpanded = _get(
+            prevData,
+            [node.id, "state", "expanded"],
+            false
+          );
+          _set(nextData, [node.id, "state"], {
+            expanded: !isExpanded
+          });
+
+          // Close other panels
+          prevData
+            .filter(elem => elem.id !== node.id)
+            .forEach(panel => {
+              _set(nextData, [panel.id, "state"], {
+                expanded: false
+              });
+            });
+          return nextData;
+        });
+      },
+      1: () => {
+        call("tabs", "openEditor", {
+          id: node.url,
+          name: node.name,
+          scope: node.scope
+        });
+      }
+    };
+    _get(deepnessToAction, node.deepness, () => {
+      console.log("action not implemented");
+    })();
+  };
+
   //========================================================================================
   /*                                                                                      *
    *                                   React callbacks                                    *
@@ -180,52 +225,11 @@ const Explorer = props => {
     on("docManager", "updateDocs", updateDocs);
   }, [on, loadDocs, updateDocs]);
 
-  /**
-   * Expand tree or open document depending on the node deepness
-   *  0 : collapse others and expand tree node
-   *  1 : open document node
-   * @param {{id: String, deepness: String, url: String, name: String, scope: String}} node : Clicked node
-   */
-  const _requestScopeVersions = node => {
-    const deepnessToAction = {
-      0: () => {
-        // Toggle the expansion of the clicked panel
-        setData(prevData => {
-          const nextData = [...prevData];
-          const isExpanded = _get(
-            prevData,
-            [node.id, "state", "expanded"],
-            false
-          );
-          _set(nextData, [node.id, "state"], {
-            expanded: !isExpanded
-          });
-
-          // Close other panels
-          prevData
-            .filter(elem => elem.id !== node.id)
-            .forEach(panel => {
-              _set(nextData, [panel.id, "state"], {
-                expanded: false
-              });
-            });
-          return nextData;
-        });
-      },
-      1: () => {
-        const tabName = `${node.name}.conf`;
-        call("tabs", "openEditor", {
-          id: node.url,
-          title: tabName,
-          name: node.name,
-          scope: node.scope
-        });
-      }
-    };
-    _get(deepnessToAction, node.deepness, () => {
-      console.log("action not implemented");
-    })();
-  };
+  //========================================================================================
+  /*                                                                                      *
+   *                                       Render                                         *
+   *                                                                                      */
+  //========================================================================================
 
   return (
     <Typography component="div">

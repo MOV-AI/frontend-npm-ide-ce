@@ -103,11 +103,8 @@ const MainMenu = props => {
                 onClick: () =>
                   call("docManager", "create", { scope: docType.scope }).then(
                     document => {
-                      const tabName =
-                        document.name + document.getFileExtension();
                       call("tabs", "openEditor", {
                         id: document.getUrl(),
-                        title: tabName,
                         name: document.getName(),
                         scope: docType.scope
                       });

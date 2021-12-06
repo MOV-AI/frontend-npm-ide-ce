@@ -37,7 +37,7 @@ const Configuration = (props, ref) => {
     id,
     name,
     call,
-    setData,
+    instance,
     activateEditor = () => DEFAULT_FUNCTION("activateEditor"),
     saveDocument = () => DEFAULT_FUNCTION("saveDocument"),
     data = new Model({}).serialize(),
@@ -95,17 +95,13 @@ const Configuration = (props, ref) => {
    *                                                                                      */
   //========================================================================================
 
-  const updateConfigExtension = configExtension => {
-    setData(prevState => {
-      return { ...prevState, extension: configExtension };
-    });
+  const updateConfigExtension = value => {
+    if (instance.current) instance.current.setExtension(value);
   };
 
-  const updateConfigCode = configCode => {
-    setData(prevState => {
-      if (prevState.code === configCode) return prevState;
-      return { ...prevState, code: configCode };
-    });
+  const updateConfigCode = value => {
+    if (value === instance.current.code) return;
+    if (instance.current) instance.current.setCode(value);
   };
 
   //========================================================================================

@@ -36,6 +36,10 @@ export default class Configuration extends Model {
     return Configuration.SCOPE;
   }
 
+  getFileExtension() {
+    return Configuration.EXTENSION;
+  }
+
   serialize() {
     return {
       ...super.serialize(),
@@ -53,10 +57,6 @@ export default class Configuration extends Model {
       Type: extension,
       LastUpdate: details
     };
-  }
-
-  getFileExtension() {
-    return ".conf";
   }
 
   static ofJSON(json) {
@@ -81,6 +81,8 @@ export default class Configuration extends Model {
   }
 
   static SCOPE = "Configuration";
+
+  static EXTENSION = ".conf";
 
   static EMPTY = new Configuration({});
 }

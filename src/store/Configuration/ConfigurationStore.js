@@ -1,4 +1,5 @@
 import Model from "../../models/Configuration/Configuration";
+import Configuration from "../../plugins/views/editors/Configuration/Configuration";
 import Store from "../Store";
 
 class ConfigurationStore extends Store {
@@ -6,6 +7,7 @@ class ConfigurationStore extends Store {
     super({
       workspace,
       model: Model,
+      plugin: Configuration,
       name: "Configuration",
       title: "Configurations",
       observer

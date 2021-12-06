@@ -124,31 +124,29 @@ const useLayout = (props, dockRef) => {
    */
   const _getTabData = React.useCallback(
     async docData => {
-      return props
-        .call("docManager", "getDocPlugin", docData.scope)
-        .then(plugin => {
-          try {
-            const viewPlugin = new plugin(
-              { name: docData.id },
-              { id: docData.id, name: docData.name, scope: docData.scope }
-            );
-            return PluginManagerIDE.install(docData.id, viewPlugin).then(() => {
-              // Create and return tab data
-              // TODO: get correct document extension
-              docData.extension = ".conf";
-              return {
-                id: docData.id,
-                name: docData.name,
-                title: _getCustomTab(docData),
-                scope: docData.scope,
-                content: viewPlugin.render()
-              };
-            });
-          } catch (err) {
-            console.log("debug can't open tab", err);
-            return docData;
-          }
-        });
+      return props.call("docManager", "getStore", docData.scope).then(store => {
+        try {
+          const Plugin = store.plugin;
+          const viewPlugin = new Plugin(
+            { name: docData.id },
+            { id: docData.id, name: docData.name, scope: docData.scope }
+          );
+          return PluginManagerIDE.install(docData.id, viewPlugin).then(() => {
+            // Create and return tab data
+            docData.extension = store.model.EXTENSION || "";
+            return {
+              id: docData.id,
+              name: docData.name,
+              title: _getCustomTab(docData),
+              scope: docData.scope,
+              content: viewPlugin.render()
+            };
+          });
+        } catch (err) {
+          console.log("debug can't open tab", err);
+          return docData;
+        }
+      });
     },
     [props, _getCustomTab]
   );

@@ -16,7 +16,7 @@ class DocManager extends IDEPlugin {
       new Set([
         ...(profile.methods || []),
         "getDocTypes",
-        "getDocPlugin",
+        "getStore",
         "getDocFromNameType",
         "checkDocumentExists",
         "copy",
@@ -40,14 +40,14 @@ class DocManager extends IDEPlugin {
   }
 
   /**
-   * Returns array of document types
+   * Returns document available
    * @returns {Array<{name: String, title: String, scope: String}>}
    */
   getDocTypes() {
-    return Object.values(this.docsMap).map(type => ({
-      name: type.name,
-      title: type.title,
-      scope: type.scope
+    return Object.values(this.docsMap).map(docFactory => ({
+      name: docFactory.store.name,
+      title: docFactory.store.title,
+      scope: docFactory.store.scope
     }));
   }
   /**
@@ -65,15 +65,6 @@ class DocManager extends IDEPlugin {
    */
   getStore(name) {
     return this.docsMap[name]?.store;
-  }
-
-  /**
-   * Returns Type object
-   * @param {String} type
-   * @returns {DocCollection}
-   */
-  getDocPlugin(type) {
-    return this.docsMap[type]?.plugin;
   }
 
   /**

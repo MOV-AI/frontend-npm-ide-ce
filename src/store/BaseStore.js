@@ -3,9 +3,10 @@ import Subscriber from "../subscriber/Subscriber";
 
 class BaseStore {
   constructor(args) {
-    const { workspace, model, name, title, pattern, observer } = args;
+    const { workspace, model, plugin, name, title, pattern, observer } = args;
 
     this._workspace = workspace || "global";
+    this._plugin = plugin;
     this._model = model;
     this._scope = model.SCOPE;
     this._name = name || "Store";
@@ -25,6 +26,10 @@ class BaseStore {
 
   get name() {
     return this._name;
+  }
+
+  get plugin() {
+    return this._plugin;
   }
 
   get model() {
