@@ -31,7 +31,7 @@ test("create document of JSON", () => {
     version: "0.0.1",
     LastUpdate: { user: "mj", date: "20/04/1981" },
     Yaml: "varA: 1",
-    Type: ""
+    Type: "yaml"
   };
 
   const expected = {
@@ -57,7 +57,7 @@ test("serialize to database", () => {
     version: "0.0.1",
     LastUpdate: { user: "mj", date: "20/04/1981" },
     Yaml: "varA: 1",
-    Type: ""
+    Type: "yaml"
   };
 
   const expected = {
@@ -65,6 +65,31 @@ test("serialize to database", () => {
     Yaml: json.Yaml,
     Type: json.Type,
     LastUpdate: json.LastUpdate
+  };
+
+  const obj = Configuration.ofJSON(json);
+
+  expect(obj.serializeToDB()).toMatchObject(expected);
+  expect(obj.getIsNew()).toBe(false);
+  expect(obj.getIsLoaded()).toBe(false);
+  expect(obj.getDirty()).toBe(false);
+});
+
+test("verify serialize defaults to DB", () => {
+  const json = {
+    workspace: "myworkspace",
+    Label: "test",
+    version: "0.0.1",
+    LastUpdate: undefined,
+    Yaml: undefined,
+    Type: undefined
+  };
+
+  const expected = {
+    Label: json.Label,
+    Yaml: "",
+    Type: "yaml",
+    LastUpdate: { user: "N/A", date: "N/A" }
   };
 
   const obj = Configuration.ofJSON(json);

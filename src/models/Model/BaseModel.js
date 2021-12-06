@@ -94,7 +94,7 @@ export default class Model extends Observable {
 
   setData(json) {
     Object.entries(json).forEach(([key, value]) => {
-      if (Reflect.has(this, key)) {
+      if (Reflect.has(this, key) && value !== undefined) {
         Reflect.set(this, key, value);
       }
     });
