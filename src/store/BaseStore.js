@@ -114,10 +114,15 @@ class BaseStore {
     const docType = this.scope;
 
     Object.values(data.value[docType])
-      .map(doc => ({
-        name: doc.Label,
-        content: { ...doc }
-      }))
+      .map(doc => {
+        // get previously loaded data
+        const prevLoaded = this.data.get(doc.Label)?.serializeToDB() || {};
+
+        return {
+          name: doc.Label,
+          content: { ...prevLoaded, ...doc }
+        };
+      })
       .forEach(doc => this.addDoc(doc));
 
     if (typeof this.observer?.onLoad === "function") {

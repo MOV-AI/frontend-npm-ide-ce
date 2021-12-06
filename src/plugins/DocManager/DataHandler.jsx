@@ -19,21 +19,25 @@ const DataHandler = props => {
    * @param {String} newName : Document name (used to set document name when creating a new document)
    */
   const save = newName => {
-    call("docManager", "save", { scope, name }, newName).then(res => {
-      if (res.success) {
-        alert({ message: t(MESSAGES.save.success), severity: "success" });
-        if (newName) {
-          const newTabData = {
-            id: data.getUrl(),
-            name: newName,
-            scope: scope
-          };
-          call("tabs", "updateTabId", id, newTabData);
+    call("docManager", "save", { scope, name }, newName)
+      .then(res => {
+        if (res.success) {
+          alert({ message: t(MESSAGES.save.success), severity: "success" });
+          if (newName) {
+            const newTabData = {
+              id: data.getUrl(),
+              name: newName,
+              scope: scope
+            };
+            call("tabs", "updateTabId", id, newTabData);
+          }
+        } else {
+          alert({ message: t(MESSAGES.save.error), severity: "error" });
         }
-      } else {
-        alert({ message: t(MESSAGES.save.error), severity: "error" });
-      }
-    });
+      })
+      .catch(error =>
+        alert({ message: t(MESSAGES.save.error), severity: "error" })
+      );
   };
 
   /**
