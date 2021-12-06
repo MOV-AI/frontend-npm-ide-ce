@@ -97,18 +97,19 @@ const Explorer = props => {
             doc => doc.name === documentName
           );
           if (documentIndex < 0) {
-            const document = docManager.getDocFromNameType(
-              documentName,
-              documentType
-            );
-            if (document) {
-              _pushSorted(newData[typeIndex].children, {
-                name: document.getName(),
-                title: document.getName(),
-                scope: document.getScope(),
-                url: document.getUrl()
-              });
-            }
+            docManager
+              .getDocFromNameType(documentName, documentType)
+              .then(document => {
+                if (document) {
+                  _pushSorted(newData[typeIndex].children, {
+                    name: document.getName(),
+                    title: document.getName(),
+                    scope: document.getScope(),
+                    url: document.getUrl()
+                  });
+                }
+              })
+              .catch(error => console.log(error));
           }
         }
         return newData;

@@ -2,10 +2,11 @@ import BaseModel from "./BaseModel";
 import Schema from "./Schema";
 
 class Model extends BaseModel {
-  constructor({ schema, name, details, isNew }) {
-    super({ name, details, isNew });
+  constructor() {
+    const { schema, ...otherArgs } = arguments[0];
+    super({ ...otherArgs });
 
-    this.schema = new Schema(schema);
+    this.schema = new Schema(schema || {});
   }
 
   validate() {

@@ -2,8 +2,8 @@ import { Document } from "@mov-ai/mov-fe-lib-core";
 import Subscriber from "../subscriber/Subscriber";
 
 class BaseStore {
-  constructor(profile) {
-    const { workspace, model, name, title, pattern } = profile;
+  constructor(args) {
+    const { workspace, model, name, title, pattern, observer } = args;
 
     this._workspace = workspace || "global";
     this._model = model;
@@ -11,11 +11,13 @@ class BaseStore {
     this._name = name || "Store";
     this._title = title || "Generic Store";
     this.pattern = pattern || { Scope: this.scope, Name: "*", Label: "*" };
-
-    this.data = new Map();
+    this.observer = observer;
 
     this.enableSubscriber();
   }
+
+  // Data store
+  data = new Map();
 
   get workspace() {
     return this._workspace;
@@ -81,20 +83,29 @@ class BaseStore {
         this.deleteDocFromStore(updateDoc.name);
       },
       set: updateDoc => {
+        console.log("debug set", updateDoc);
         this.addDoc(updateDoc);
       }
     };
 
     return data => {
+      console.log("debug updateddoc ", data);
       if (data.event in event2actionMap) {
         const docName = Object.keys(data.key[docType])[0];
         const docContent = Object.values(data.key[docType])[0];
         event2actionMap[data.event]({ name: docName, content: docContent });
+
+        if (typeof this.observer?.onLoad === "function") {
+          this.observer.onUpdate(this.name, {
+            documentName: docName,
+            documentType: docType
+          });
+        }
       }
     };
   }
 
-  getRetrieveDoc(data) {
+  loadDocs(data) {
     const docType = this.scope;
 
     Object.values(data.value[docType])
@@ -103,15 +114,17 @@ class BaseStore {
         content: { ...doc }
       }))
       .forEach(doc => this.addDoc(doc));
+
+    if (typeof this.observer?.onLoad === "function") {
+      this.observer.onLoad(this.name);
+    }
   }
 
   enableSubscriber() {
     this.subscriber = new Subscriber({
       pattern: this.pattern
     });
-    this.subscriber.subscribe(this.getUpdateDoc(), data =>
-      this.getRetrieveDoc(data)
-    );
+    this.subscriber.subscribe(this.getUpdateDoc(), data => this.loadDocs(data));
   }
 
   destroy() {

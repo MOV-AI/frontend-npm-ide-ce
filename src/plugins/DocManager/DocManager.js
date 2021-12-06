@@ -1,40 +1,5 @@
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
-import { MasterDB } from "@mov-ai/mov-fe-lib-core";
-import { MODELS_CLASS_BY_NAME } from "../../models";
-import { Maybe } from "monet";
-import Configuration from "../views/editors/Configuration/Configuration";
-import storesBuilder from "./stores";
-
-const INITIAL_DOCS_MAP = {
-  Callback: {
-    name: "Callback",
-    title: "Callbacks",
-    scope: "Callback",
-    plugin: {},
-    docs: {}
-  },
-  Configuration: {
-    name: "Configuration",
-    title: "Configurations",
-    scope: "Configuration",
-    plugin: Configuration,
-    docs: {}
-  },
-  Flow: {
-    name: "Flow",
-    title: "Flows",
-    scope: "Flow",
-    plugin: {},
-    docs: {}
-  },
-  Node: {
-    name: "Node",
-    title: "Nodes",
-    scope: "Node",
-    plugin: {},
-    docs: {}
-  }
-};
+import docsFactory from "./docs";
 
 const TOPICS = {
   updateDocs: "updateDocs",
@@ -52,7 +17,6 @@ class DocManager extends IDEPlugin {
         ...(profile.methods || []),
         "getDocTypes",
         "getDocPlugin",
-        "getDocsFromType",
         "getDocFromNameType",
         "checkDocumentExists",
         "copy",
@@ -63,14 +27,16 @@ class DocManager extends IDEPlugin {
       ])
     );
     super({ ...profile, methods });
-    this.docsMap = INITIAL_DOCS_MAP;
-    this.stores = storesBuilder("global");
-    window.onbeforeunload = this.beforeUnload;
     window.DocManager = this;
   }
 
   activate() {
-    this.docsSubscribe();
+    const observer = {
+      onLoad: store => this.onStoreLoad(store),
+      onUpdate: (store, doc) => this.onStoreUpdate(store, doc)
+    };
+
+    this.docsMap = docsFactory("global", observer);
   }
 
   /**
@@ -85,15 +51,20 @@ class DocManager extends IDEPlugin {
     }));
   }
   /**
-   *
-   * @returns {Array} List of stores
+   * Returns a list of the stores available
+   * @returns {Array<Store>} List of stores
    */
   getStores() {
-    return Object.values(this.stores).map(i => i.store);
+    return Object.values(this.docsMap).map(i => i.store);
   }
 
+  /**
+   * Returns the store object or undefined
+   * @param {string} name The name of the store
+   * @returns {Object<Store>}
+   */
   getStore(name) {
-    return this.stores[name]?.store;
+    return this.docsMap[name]?.store;
   }
 
   /**
@@ -102,28 +73,17 @@ class DocManager extends IDEPlugin {
    * @returns {DocCollection}
    */
   getDocPlugin(type) {
-    return this.docsMap[type].plugin;
-  }
-
-  /**
-   * Returns array of data models from type
-   * @param {String} type
-   * @returns {Array<Model>} Array<model: Model>
-   */
-  getDocsFromType(type) {
-    const answer = this.docsMap[type]?.docs;
-    if (!answer) return [];
-    return Object.values(answer);
+    return this.docsMap[type]?.plugin;
   }
 
   /**
    * Returns data model from name and type
    * @param {String} name
-   * @param {String} type
+   * @param {String} scope
    * @returns {Model || undefined}
    */
-  getDocFromNameType(name, type) {
-    return this.docsMap?.[type]?.docs[name];
+  getDocFromNameType(name, scope) {
+    return this.read({ name, scope });
   }
 
   /**
@@ -160,7 +120,7 @@ class DocManager extends IDEPlugin {
   /**
    * Create new document
    * @param {{name: String, scope: String}} modelKey
-   * @returns {Promise<Model>}
+   * @returns {Object<Model>}
    */
   create(modelKey) {
     const { name, scope } = modelKey;
@@ -174,7 +134,7 @@ class DocManager extends IDEPlugin {
    */
   copy(modelKey, newName) {
     const { name, scope } = modelKey;
-    return this.getStore(scope).copyDoc(name, newName);
+    return this.getStore(scope)?.copyDoc(name, newName);
   }
 
   /**
@@ -186,112 +146,49 @@ class DocManager extends IDEPlugin {
     return this.getStore(scope)?.deleteDoc(name);
   }
 
+  /**
+   * Verifies if at least a store has one or more documents changed
+   * @returns {Boolean}
+   */
   hasDirties() {
     return this.getStores().some(store => store.hasDirties());
   }
 
+  /**
+   * Saves all the changed documents
+   * @returns {Promise<Array>}
+   */
   saveDirties() {
-    const promises = [];
-    this.getStores().forEach(store => {
-      promises.push(store.saveDirties());
+    const promises = this.getStores().map(store => {
+      return store.saveDirties();
     });
+
     return Promise.allSettled(promises);
   }
 
   //========================================================================================
   /*                                                                                      *
-   *                                    Private Methods                                   *
+   *                                        Events                                        *
    *                                                                                      */
   //========================================================================================
 
   /**
-   * Add document
-   * @param {String} docType
-   * @param {{name:String, content:Object}} doc,
-   * @returns {DocManager}
+   * Emits an event when a store fires an onLoad event
+   * @param {string} store : The name of the store firing the event
    */
-  addDoc(docType, doc) {
-    if (docType in this.docsMap) {
-      const documentsOfType = this.docsMap[docType].docs;
-      const docName = doc.name;
-      documentsOfType[docName] = MODELS_CLASS_BY_NAME[docType].ofJSON(
-        doc.content
-      );
-    }
-    return this;
+  onStoreLoad(store) {
+    this.emit(TOPICS.loadDocs, this);
   }
 
   /**
-   * update doc
-   * @param {String} docType
-   * @param {{name: String, content:Object}} doc
+   * Emits an eent when a store fires an onUpdate event
+   * @param {string} store : The name of the store firing the event
+   * @param {object<{documentName, documentType}>} doc
    */
-  updateDoc(docType, doc) {
-    console.log("debug TO BE IMPLEMENTED updateDoc", docType, doc);
-  }
-
-  /**
-   * Delete document
-   * @param {String} docType
-   * @param {{name:String, content:Object}} doc
-   * @returns {DocManager}
-   */
-  delDoc(docType, doc) {
-    Maybe.fromNull(this.docsMap[docType]).forEach(
-      ({ docs }) => delete docs[doc.name]
-    );
-    return this;
-  }
-
-  getUpdateDoc(document) {
-    const docType = document.name;
-    const event2actionMap = {
-      del: updateDoc => {
-        this.delDoc(docType, { name: updateDoc.name });
-        this.emit(TOPICS.updateDocs, this, {
-          action: "delete",
-          documentName: updateDoc.name,
-          documentType: docType
-        });
-      },
-      set: updateDoc => {
-        this.addDoc(docType, updateDoc);
-        this.emit(TOPICS.updateDocs, this, {
-          action: "update",
-          documentName: updateDoc.name,
-          documentType: docType
-        });
-      }
-    };
-    return data => {
-      if (data.event in event2actionMap) {
-        const docName = Object.keys(data.key[docType])[0];
-        const docContent = Object.values(data.key[docType])[0];
-        event2actionMap[data.event]({ name: docName, content: docContent });
-      }
-    };
-  }
-
-  getRetrieveDoc(document) {
-    return data => {
-      const docType = document.name;
-      Object.values(data.value[docType])
-        .map(doc => ({
-          name: doc.Label,
-          content: { ...doc }
-        }))
-        .forEach(doc => this.addDoc(docType, doc));
-      this.emit(TOPICS.loadDocs, this);
-    };
-  }
-
-  docsSubscribe() {
-    Object.values(this.docsMap).forEach(doc => {
-      MasterDB.subscribe(
-        { Scope: doc.scope, Name: "*", Label: "*" },
-        this.getUpdateDoc(doc),
-        this.getRetrieveDoc(doc)
-      );
+  onStoreUpdate(store, doc) {
+    this.emit(TOPICS.updateDocs, this, {
+      action: "update",
+      ...doc
     });
   }
 

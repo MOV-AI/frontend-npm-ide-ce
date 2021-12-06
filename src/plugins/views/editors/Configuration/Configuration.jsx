@@ -40,7 +40,7 @@ const Configuration = (props, ref) => {
     setData,
     activateEditor = () => DEFAULT_FUNCTION("activateEditor"),
     saveDocument = () => DEFAULT_FUNCTION("saveDocument"),
-    data = Model.serialize(),
+    data = new Model({}).serialize(),
     editable = true
   } = props;
   // Style Hooks

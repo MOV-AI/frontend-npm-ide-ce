@@ -1,54 +1,55 @@
+import Observable from "./Observable";
+
 /**
  * Abstract class of a Model
  */
-export default class Model {
-  name;
-  details; // model details
-  constructor({
-    name = null,
-    details = { user: "N/A", date: "N/A" },
-    workspace = "global"
-  }) {
+export default class Model extends Observable {
+  constructor({ id, name, version, workspace = "global" }) {
+    super();
+    this.id = id || name;
     this.name = name;
-    this.details = details;
+    this.version = version;
     this.workspace = workspace;
-    this.isNew = false;
-    this.isLoaded = false;
-    this.isDirty = false;
+  }
 
-    // methods to decorate with the decorator
-    this.toDecorate = [];
-    this.decorator = this.withSetDirty;
+  details = { user: "N/A", date: "N/A" };
+  isNew = true;
+  isLoaded = false;
+  isDirty = false;
 
-    return new Proxy(this, {
-      get(target, prop, receiver) {
-        if (target.toDecorate.includes(prop)) {
-          return target.decorator(Reflect.get(...arguments));
-        }
-        return Reflect.get(...arguments);
-      }
-    });
+  observables = ["name", "details"];
+
+  getId() {
+    return this.id;
+  }
+
+  getWorkspace() {
+    return this.workspace;
   }
 
   getUrl() {
-    return `${this.workspace}/${this.getScope()}/${this.getName()}`;
+    return `${this.getWorkspace()}/${this.getScope()}/${this.getName()}`;
   }
 
   getName() {
     return this.name;
   }
 
-  setName(name) {
-    this.name = name;
+  setName(value) {
+    this.name = value;
     return this;
+  }
+
+  getVersion() {
+    return this.version;
   }
 
   getDetails() {
     return this.details;
   }
 
-  setDetails(details) {
-    this.details = details;
+  setDetails(value) {
+    this.details = value;
     return this;
   }
 
@@ -70,13 +71,6 @@ export default class Model {
     return this;
   }
 
-  withSetDirty(fn) {
-    return function () {
-      this.setDirty(true);
-      return fn.call(this, ...arguments);
-    };
-  }
-
   getIsNew() {
     return this.isNew;
   }
@@ -86,8 +80,29 @@ export default class Model {
     return this;
   }
 
+  dispatch(prop, value, callbacks) {
+    this.setDirty(true);
+
+    try {
+      for (const fn of callbacks) {
+        setTimeout(() => fn.call(this, prop, value), 0);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  setData(json) {
+    Object.entries(json).forEach(([key, value]) => {
+      if (Reflect.has(this, key)) {
+        Reflect.set(this, key, value);
+      }
+    });
+    return this;
+  }
+
   destroy() {
-    // TODO: cleanup the instance
+    super.destroy();
   }
 
   /**
@@ -98,14 +113,29 @@ export default class Model {
   }
 
   serialize() {
-    return {};
+    return {
+      id: this.getId(),
+      name: this.getName(),
+      workspace: this.getWorkspace(),
+      details: this.getDetails(),
+      version: this.getVersion()
+    };
   }
 
-  setData() {
-    return;
+  serializeToDB() {
+    return this.serialize();
   }
 
   getFileExtension() {
     return ".NA";
+  }
+
+  static ofJSON(json) {
+    const { id, name, workspace, version, ...others } = json;
+
+    return new this({ id, name, workspace, version })
+      .setData({ ...others })
+      .setDirty(false)
+      .setIsNew(false);
   }
 }

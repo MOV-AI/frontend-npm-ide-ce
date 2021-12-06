@@ -1,22 +1,18 @@
-import BaseModel from "../Model/Model";
+import Model from "../Model/Model";
 import schema from "./schema";
 
-export default class Configuration extends BaseModel {
-  /**
-   * This should be private
-   * @param {*} name
-   * @param {*} extension
-   * @param {*} code
-   * @param {*} details
-   */
-  constructor(name, extension, code, details) {
-    super({ schema, name, details });
-
-    this.toDecorate = ["setCode", "setExtension"];
-
-    this.extension = extension || "yaml";
-    this.code = code || "";
+export default class Configuration extends Model {
+  constructor() {
+    // inject imported schema and forward constructor arguments
+    super({ schema, ...arguments[0] });
   }
+
+  // Extend Model properties and assign defaults
+  code = "";
+  extension = "yaml";
+
+  // Define observable properties
+  observables = ["name", "details", "code", "extension"];
 
   getCode() {
     return this.code;
@@ -42,42 +38,49 @@ export default class Configuration extends BaseModel {
 
   serialize() {
     return {
-      Label: this.getName(),
-      Yaml: this.getCode(),
-      Type: this.getExtension(),
-      LastUpdate: this.getDetails()
+      ...super.serialize(),
+      code: this.getCode(),
+      extension: this.getExtension()
     };
   }
 
-  setData(data) {
-    this.code = data.Yaml;
-    this.extension = data.Type;
+  serializeToDB() {
+    const { name, code, extension, details } = this.serialize();
+
+    return {
+      Label: name,
+      Yaml: code,
+      Type: extension,
+      LastUpdate: details
+    };
   }
 
   getFileExtension() {
     return ".conf";
   }
 
-  static SCOPE = "Configuration";
-
   static ofJSON(json) {
     const {
+      Label: id,
       Label: name,
       Yaml: code,
       Type: extension,
-      LastUpdate: details
+      LastUpdate: details,
+      workspace,
+      version
     } = json;
-    return new Configuration(name, extension, code, details);
+
+    return new this({ id, name, workspace, version })
+      .setData({
+        code,
+        extension,
+        details
+      })
+      .setDirty(false)
+      .setIsNew(false);
   }
 
-  static EMPTY = new Configuration();
+  static SCOPE = "Configuration";
 
-  static serialize() {
-    return {
-      Label: null,
-      Yaml: "",
-      Type: "yaml",
-      LastUpdate: { user: "N/A", lastUpdate: "N/A" }
-    };
-  }
+  static EMPTY = new Configuration({});
 }
