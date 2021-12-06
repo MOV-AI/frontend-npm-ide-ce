@@ -48,7 +48,7 @@ const DataHandler = props => {
     call("docManager", "read", { scope, name }).then(model => {
       setData(model.serialize());
       modelRef.current = model;
-      model.subscribe((key, value) => {
+      model.subscribe((instance, key, value) => {
         setData(prevState => {
           return { ...prevState, [key]: value };
         });

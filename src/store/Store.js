@@ -76,21 +76,21 @@ class Store extends BaseStore {
           name: _data.Label,
           body: _data
         };
-        return Document.create(payload).then(res => {
-          if (res.success) doc.setIsNew(false).setDirty(false);
-          return res;
-        });
+        return Document.create(payload);
       },
       false: _data => {
         const document = new Document(Document.parsePath(name, scope));
-        return document.overwrite(_data).then(res => {
-          if (res.success) doc.setDirty(false);
-          return res;
-        });
+        return document.overwrite(_data);
       }
     };
 
-    return saveMethodByIsNew[doc.isNew](data);
+    return saveMethodByIsNew[doc.isNew](data).then(res => {
+      if (res.success) {
+        doc.setIsNew(false).setDirty(false);
+        this.observer.onDocumentDirty(this.name, doc, doc.getDirty());
+      }
+      return res;
+    });
   }
 
   /**

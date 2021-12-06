@@ -1,10 +1,6 @@
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
 import docsFactory from "./docs";
-
-const TOPICS = {
-  updateDocs: "updateDocs",
-  loadDocs: "loadDocs"
-};
+import TOPICS from "./topics";
 
 /**
  * Document Manager plugin to handle requests, subscribers and more
@@ -33,7 +29,9 @@ class DocManager extends IDEPlugin {
   activate() {
     const observer = {
       onLoad: store => this.onStoreLoad(store),
-      onUpdate: (store, doc) => this.onStoreUpdate(store, doc)
+      onUpdate: (store, doc) => this.onStoreUpdate(store, doc),
+      onDocumentDirty: (store, instance, value) =>
+        this.onDocumentDirty(store, instance, value)
     };
 
     this.docsMap = docsFactory("global", observer);
@@ -172,7 +170,7 @@ class DocManager extends IDEPlugin {
   }
 
   /**
-   * Emits an eent when a store fires an onUpdate event
+   * Emits an event when a store fires an onUpdate event
    * @param {string} store : The name of the store firing the event
    * @param {object<{documentName, documentType}>} doc
    */
@@ -180,6 +178,18 @@ class DocManager extends IDEPlugin {
     this.emit(TOPICS.updateDocs, this, {
       action: "update",
       ...doc
+    });
+  }
+
+  /**
+   * Emits an event when a document is set to dirty
+   * @param {string} store : The name of the store firing the event
+   * @param {object<{documentName, documentType, isDirty}>} doc
+   */
+  onDocumentDirty(store, instance, value) {
+    this.emit(TOPICS.updateDocDirty, this, {
+      instance,
+      value
     });
   }
 

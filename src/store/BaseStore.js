@@ -45,9 +45,15 @@ class BaseStore {
   }
 
   addDoc(doc) {
-    return this.data
+    const obj = this.data
       .set(doc.name, this.model.ofJSON(doc.content))
       .get(doc.name);
+
+    obj.subscribe((instance, prop, value) =>
+      this.onDocumentUpdate(instance, prop, value)
+    );
+
+    return obj;
   }
 
   loadDoc(name) {
@@ -80,6 +86,12 @@ class BaseStore {
     return this.data.has(name) ? this.generateName(next + 1) : name;
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                       //Events                                       *
+   *                                                                                      */
+  //========================================================================================
+
   getUpdateDoc() {
     const docType = this.scope;
 
@@ -98,7 +110,7 @@ class BaseStore {
         const docContent = Object.values(data.key[docType])[0];
         event2actionMap[data.event]({ name: docName, content: docContent });
 
-        if (typeof this.observer?.onLoad === "function") {
+        if (typeof this.observer?.onUpdate === "function") {
           this.observer.onUpdate(this.name, {
             documentName: docName,
             documentType: docType
@@ -125,6 +137,12 @@ class BaseStore {
 
     if (typeof this.observer?.onLoad === "function") {
       this.observer.onLoad(this.name);
+    }
+  }
+
+  onDocumentUpdate(instance, prop, value) {
+    if (typeof this.observer.onDocumentDirty === "function") {
+      this.observer.onDocumentDirty(this.name, instance, instance.getDirty());
     }
   }
 

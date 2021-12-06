@@ -64,7 +64,7 @@ class Observable {
   dispatch(prop, value, callbacks) {
     try {
       for (const fn of callbacks) {
-        setTimeout(() => fn.call(this, prop, value), 0);
+        setTimeout(() => fn.call(this, this, prop, value), 0);
       }
     } catch (error) {
       console.error(error);
