@@ -57,7 +57,7 @@ const Configuration = (props, ref) => {
   //========================================================================================
 
   const renderRightMenu = React.useCallback(() => {
-    const details = data.LastUpdate || {};
+    const details = data.details || {};
     const menuName = `${id}-detail-menu`;
     // add bookmark
     call("rightDrawer", "setBookmark", {
@@ -67,7 +67,7 @@ const Configuration = (props, ref) => {
         view: <Menu id={id} name={name} details={details}></Menu>
       }
     });
-  }, [call, id, name, data.LastUpdate]);
+  }, [call, id, name, data.details]);
 
   usePluginMethods(ref, {
     renderRightMenu
@@ -82,9 +82,9 @@ const Configuration = (props, ref) => {
   // Render right menu
   React.useEffect(() => {
     // Reset editor undoManager after first load
-    if (editorRef.current && previousData?.Label === null) {
+    if (editorRef.current && previousData && !previousData?.name) {
       const editorModel = editorRef.current.getModel();
-      const loadedCode = data?.Yaml || "";
+      const loadedCode = data?.code || "";
       editorModel.setValue(loadedCode);
     }
   }, [data, previousData]);
@@ -97,14 +97,14 @@ const Configuration = (props, ref) => {
 
   const updateConfigExtension = configExtension => {
     setData(prevState => {
-      return { ...prevState, Type: configExtension };
+      return { ...prevState, extension: configExtension };
     });
   };
 
   const updateConfigCode = configCode => {
     setData(prevState => {
-      if (prevState.Yaml === configCode) return prevState;
-      return { ...prevState, Yaml: configCode };
+      if (prevState.code === configCode) return prevState;
+      return { ...prevState, code: configCode };
     });
   };
 
@@ -123,8 +123,8 @@ const Configuration = (props, ref) => {
         <MonacoCodeEditor
           ref={editorRef}
           style={{ flexGrow: 1, height: "100%", width: "100%" }}
-          value={data.Yaml}
-          language={data.Type}
+          value={data.code}
+          language={data.extension}
           theme={theme.codeEditor.theme}
           options={{ readOnly: !editable }}
           onChange={updateConfigCode}
@@ -144,7 +144,7 @@ const Configuration = (props, ref) => {
           <ToggleButtonGroup
             size="small"
             exclusive
-            value={data.Type}
+            value={data.extension}
             onChange={(event, newExtension) => {
               event.stopPropagation();
               updateConfigExtension(newExtension);
