@@ -88,13 +88,11 @@ class BaseStore {
         this.deleteDocFromStore(updateDoc.name);
       },
       set: updateDoc => {
-        console.log("debug set", updateDoc);
         this.addDoc(updateDoc);
       }
     };
 
     return data => {
-      console.log("debug updateddoc ", data);
       if (data.event in event2actionMap) {
         const docName = Object.keys(data.key[docType])[0];
         const docContent = Object.values(data.key[docType])[0];

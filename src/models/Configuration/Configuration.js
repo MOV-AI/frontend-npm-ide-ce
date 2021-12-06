@@ -70,10 +70,12 @@ export default class Configuration extends Model {
       version
     } = json;
 
-    return new this({ id, name, workspace, version })
+    const obj = new this({ id, name, workspace, version });
+
+    return obj
       .setData({
         code,
-        extension,
+        extension: extension || this.extension,
         details
       })
       .setDirty(false)
