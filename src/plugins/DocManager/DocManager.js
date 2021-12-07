@@ -15,6 +15,7 @@ class DocManager extends IDEPlugin {
         "getDocFactory",
         "getDocFromNameType",
         "checkDocumentExists",
+        "discardDocChanges",
         "copy",
         "delete",
         "create",
@@ -97,6 +98,15 @@ class DocManager extends IDEPlugin {
   checkDocumentExists(modelKey) {
     const { name, scope } = modelKey;
     return this.getStore(scope)?.checkDocExists(name);
+  }
+
+  /**
+   * Discard document changes
+   * @param {{name: String, scope: String}} modelKey
+   */
+  discardDocChanges(modelKey) {
+    const { name, scope } = modelKey;
+    return this.getStore(scope)?.discardDocChanges(name);
   }
 
   /**

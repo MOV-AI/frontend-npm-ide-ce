@@ -155,6 +155,87 @@ const useLayout = (props, dockRef) => {
     [props, _getCustomTab]
   );
 
+  /**
+   * Apply layout and save changes
+   * @param {LayoutData} layout
+   */
+  const _applyLayout = React.useCallback(
+    _layout => {
+      setLayout(_layout);
+      workspaceManager.setLayout(_layout);
+    },
+    [workspaceManager]
+  );
+
+  /**
+   * Save document and apply layout
+   * @param {{name: string, scope: string}} docData
+   * @param {LayoutData} newLayout : New layout to apply (optional)
+   */
+  const _saveDoc = React.useCallback(
+    (docData, newLayout) => {
+      const { name, scope } = docData;
+      call("docManager", "save", { name, scope })
+        .then(res => {
+          if (res.success) {
+            if (newLayout) _applyLayout(newLayout);
+            call("alert", "show", {
+              message: "Saved successfully",
+              severity: "success"
+            });
+          }
+        })
+        .catch(err => {
+          console.log("failed to save", err);
+          call("alert", "show", {
+            message: "Failed to save",
+            severity: "error"
+          });
+        });
+    },
+    [call, _applyLayout]
+  );
+
+  /**
+   * Discard changes and apply layout
+   * @param {{name: string, scope: string}} docData
+   * @param {LayoutData} newLayout : New layout to apply (optional)
+   */
+  const _discardChanges = React.useCallback(
+    (docData, newLayout) => {
+      const { name, scope } = docData;
+      call("docManager", "discardDocChanges", { name, scope }).then(() => {
+        if (newLayout) _applyLayout(newLayout);
+      });
+    },
+    [call, _applyLayout]
+  );
+
+  /**
+   * Open dialog before closing tab in dirty state
+   * @param {string} name : Document name
+   * @param {string} scope : Document scope
+   * @param {LayoutData} newLayout : New layout
+   */
+  const _closeDirtyTab = React.useCallback(
+    (name, scope, newLayout) => {
+      call("dialog", "closeDirtyDocument", {
+        name,
+        scope,
+        onSubmit: action => {
+          const triggerAction = {
+            // Save changes and close document
+            save: () => _saveDoc({ name, scope }, newLayout),
+            // Discard changes and close document
+            dontSave: () => _discardChanges({ name, scope }, newLayout)
+          };
+          return action in triggerAction ? triggerAction[action]() : false;
+        }
+      });
+    },
+    [call, _saveDoc, _discardChanges]
+  );
+
   //========================================================================================
   /*                                                                                      *
    *                                   React lifecycles                                   *
@@ -175,10 +256,7 @@ const useLayout = (props, dockRef) => {
       const currentTab = dockRef.current.find(tabId);
       dockRef.current.updateTab(tabId, currentTab);
     });
-    return () => {
-      workspaceManager.destroy();
-    };
-  }, [on, workspaceManager, dockRef]);
+  }, [on, dockRef]);
 
   React.useEffect(() => {
     const lastTabs = workspaceManager.getTabs();
@@ -195,6 +273,10 @@ const useLayout = (props, dockRef) => {
       _tabs.forEach(tab => tabsById.current.set(tab.id, tab));
       setLayout(lastLayout);
     });
+    // Destroy local workspace manager instance on unmount
+    return () => {
+      workspaceManager.destroy();
+    };
   }, [workspaceManager, _getTabData]);
 
   //========================================================================================
@@ -296,18 +378,39 @@ const useLayout = (props, dockRef) => {
       const firstContainer = _getFirstContainer(newLayout.dockbox);
       const newActiveTab =
         direction !== "remove" ? tabId : firstContainer.activeId;
-      setLayout(newLayout);
-      // Remove tab from local list when it's removed
+      // Attempt to close tab
       if (direction === "remove") {
-        tabsById.current.delete(tabId);
-        workspaceManager.setTabs(tabsById.current);
+        const { name, scope, isDirty } = tabsById.current.get(tabId);
+        if (isDirty) {
+          _closeDirtyTab(name, scope, newLayout);
+        } else {
+          call("docManager", "read", { name, scope }).then(doc => {
+            // Remove doc locally if is new and not dirty
+            if (doc.getIsNew())
+              call("docManager", "discardDocChanges", { name, scope });
+            // Remove tab and apply new layout
+            tabsById.current.delete(tabId);
+            workspaceManager.setTabs(tabsById.current);
+            _applyLayout(newLayout);
+          });
+        }
+      } else {
+        // Update layout
+        _applyLayout(newLayout);
       }
-      workspaceManager.setLayout(newLayout);
+      // Emit new active tab id
       if (!tabId) return;
       if (newActiveTab) emit(`${newActiveTab}-active`);
       else call("rightDrawer", "resetBookmarks");
     },
-    [_getFirstContainer, emit, call, workspaceManager]
+    [
+      emit,
+      call,
+      workspaceManager,
+      _getFirstContainer,
+      _applyLayout,
+      _closeDirtyTab
+    ]
   );
 
   /**
