@@ -32,7 +32,7 @@ class DocManager extends IDEPlugin {
   activate() {
     const observer = {
       onLoad: store => this.onStoreLoad(store),
-      onUpdate: (store, doc) => this.onStoreUpdate(store, doc),
+      onUpdate: (store, doc, action) => this.onStoreUpdate(store, doc, action),
       onDocumentDirty: (store, instance, value) =>
         this.onDocumentDirty(store, instance, value),
       onDocumentDeleted: (store, name) => this.onDocumentDeleted(store, name)
@@ -188,9 +188,9 @@ class DocManager extends IDEPlugin {
    * @param {string} store : The name of the store firing the event
    * @param {object<{documentName, documentType}>} doc
    */
-  onStoreUpdate(store, doc) {
+  onStoreUpdate(store, doc, action = "set") {
     this.emit(TOPICS.updateDocs, this, {
-      action: "update",
+      action,
       ...doc
     });
   }

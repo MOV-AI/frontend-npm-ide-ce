@@ -118,10 +118,15 @@ class BaseStore {
         event2actionMap[data.event]({ name: docName, content: docContent });
 
         if (typeof this.observer?.onUpdate === "function") {
-          this.observer.onUpdate(this.name, {
-            documentName: docName,
-            documentType: docType
-          });
+          this.observer.onUpdate(
+            this.name,
+            {
+              document: this.data.get(docName),
+              documentName: docName,
+              documentType: docType
+            },
+            data.event
+          );
         }
       }
     };
