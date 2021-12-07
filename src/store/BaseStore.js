@@ -65,8 +65,7 @@ class BaseStore {
           name: file.Label,
           content: file
         });
-        obj.setIsLoaded(true);
-        return obj;
+        return obj.setIsLoaded(true);
       })
       .catch(err => {
         if (err.status === 404) {
@@ -75,8 +74,16 @@ class BaseStore {
       });
   }
 
+  getDoc(name) {
+    return this.data.get(name);
+  }
+
+  setDoc(name, value) {
+    return this.data.set(name, value);
+  }
+
   deleteDocFromStore(name) {
-    this.data.get(name)?.destroy();
+    this.getDoc(name)?.destroy();
     this.data.delete(name);
     return this;
   }
@@ -88,7 +95,7 @@ class BaseStore {
 
   //========================================================================================
   /*                                                                                      *
-   *                                       //Events                                       *
+   *                                         Events                                       *
    *                                                                                      */
   //========================================================================================
 
@@ -126,7 +133,7 @@ class BaseStore {
     Object.values(data.value[docType])
       .map(doc => {
         // get previously loaded data
-        const prevLoaded = this.data.get(doc.Label)?.serializeToDB() || {};
+        const prevLoaded = this.getDoc(doc.Label)?.serializeToDB() || {};
 
         return {
           name: doc.Label,

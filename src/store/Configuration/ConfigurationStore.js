@@ -7,7 +7,7 @@ class ConfigurationStore extends Store {
     super({
       workspace,
       model: Model,
-      plugin: Configuration,
+      plugin: Configuration, // TODO: remove
       name: "Configuration",
       title: "Configurations",
       observer
