@@ -12,6 +12,7 @@ class DocManager extends IDEPlugin {
       new Set([
         ...(profile.methods || []),
         "getDocTypes",
+        "getDocFactory",
         "getStore",
         "getDocFromNameType",
         "checkDocumentExists",
@@ -41,6 +42,15 @@ class DocManager extends IDEPlugin {
   }
 
   /**
+   * Returns the factory of the documents
+   * @param {string} name The name of the factory
+   * @returns {object} The factory of the documents
+   */
+  getDocFactory(name) {
+    return this.docsMap[name];
+  }
+
+  /**
    * Returns document available
    * @returns {Array<{name: String, title: String, scope: String}>}
    */
@@ -51,6 +61,7 @@ class DocManager extends IDEPlugin {
       scope: docFactory.store.scope
     }));
   }
+
   /**
    * Returns a list of the stores available
    * @returns {Array<Store>} List of stores
