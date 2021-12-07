@@ -23,8 +23,9 @@ class DocManager extends IDEPlugin {
       ])
     );
     super({ ...profile, methods });
+    // Used to debug docManager in console
     window.DocManager = this;
-
+    // Add before unload event
     window.onbeforeunload = this.onBeforeUnload;
   }
 
@@ -184,8 +185,14 @@ class DocManager extends IDEPlugin {
     });
   }
 
+  /**
+   * Emits an event when a document is set to dirty
+   * @param {string} store : The name of the store firing the event
+   * @param {model} instance : Document model instance
+   * @param {boolean} value : Document Dirty state
+   */
   onDocumentDirty(store, instance, value) {
-    this.emit(TOPICS.updateDocDirty, this, {
+    this.emit(TOPICS.updateDocDirty, {
       instance,
       value
     });
@@ -195,11 +202,15 @@ class DocManager extends IDEPlugin {
     this.emit(TOPICS.deleteDoc, store, name);
   }
 
+  /**
+   * Event triggered before unloading app (before close or before refreshing)
+   * @param {Event} event
+   */
   onBeforeUnload = event => {
     const hasDirties = this.hasDirties();
     if (hasDirties) {
       event.preventDefault();
-      event.returnValue = "";
+      return "test vai sair doido?";
     } else {
       delete event["returnValue"];
     }

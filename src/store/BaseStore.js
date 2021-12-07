@@ -142,6 +142,7 @@ class BaseStore {
 
   onDocumentUpdate(instance, prop, value) {
     if (typeof this.observer.onDocumentDirty === "function") {
+      this.data.set(instance.getName(), instance);
       this.observer.onDocumentDirty(this.name, instance, instance.getDirty());
     }
   }
