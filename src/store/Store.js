@@ -113,7 +113,7 @@ class Store extends BaseStore {
   copyDoc(name, newName) {
     return this.readDoc(name).then(doc => {
       const newObj = this.model
-        .ofJSON(doc.serialize())
+        .ofJSON(doc.serializeToDB())
         .setIsNew(true)
         .setName(newName);
 
