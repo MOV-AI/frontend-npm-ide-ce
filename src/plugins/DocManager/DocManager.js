@@ -13,7 +13,6 @@ class DocManager extends IDEPlugin {
         ...(profile.methods || []),
         "getDocTypes",
         "getDocFactory",
-        "getStore",
         "getDocFromNameType",
         "checkDocumentExists",
         "copy",
@@ -209,6 +208,11 @@ class DocManager extends IDEPlugin {
     });
   }
 
+  /**
+   * Emits an event when a document is deleted
+   * @param {string} store : The name of the store firing the event
+   * @param {string} name : Deleted document name
+   */
   onDocumentDeleted(store, name) {
     this.emit(TOPICS.deleteDoc, store, name);
   }
