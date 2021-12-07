@@ -16,7 +16,7 @@ class Store extends BaseStore {
    * @returns {Promise<{<Model>}}
    */
   readDoc(name) {
-    const doc = this.data.get(name);
+    const doc = this.getDoc(name);
     return doc?.isLoaded ? Promise.resolve(doc) : this.loadDoc(name);
   }
 
@@ -30,7 +30,7 @@ class Store extends BaseStore {
     const obj = new this.model({ name: newName });
     obj.setIsNew(true);
     obj.setIsLoaded(true);
-    this.data.set(newName, obj);
+    this.setDoc(newName, obj);
     return obj;
   }
 
@@ -41,7 +41,7 @@ class Store extends BaseStore {
    */
   deleteDoc(name) {
     // A new document only exists in the store
-    if (this.data.get(name).getIsNew()) {
+    if (this.getDoc(name).getIsNew()) {
       return Promise.resolve(this.deleteDocFromStore(name));
     }
 
@@ -70,7 +70,7 @@ class Store extends BaseStore {
     const { scope } = this;
 
     // get document from store
-    const doc = this.data.get(name);
+    const doc = this.getDoc(name);
 
     // rename the document
     if (newName) doc.setName(newName);
@@ -117,7 +117,7 @@ class Store extends BaseStore {
         .setIsNew(true)
         .setName(newName);
 
-      this.data.set(newName, newObj);
+      this.setDoc(newName, newObj);
       this.saveDoc(newName);
     });
   }
