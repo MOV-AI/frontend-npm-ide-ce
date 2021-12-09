@@ -257,7 +257,7 @@ const Explorer = props => {
               onSubmit: () =>
                 call("docManager", "delete", { name, scope }).catch(error =>
                   console.log(
-                    `Could not delete ${name} \n ${error.statusText || error}`
+                    `Could not delete ${name} \n ${error.statusText ?? error}`
                   )
                 ),
               message: `Are you sure you want to delete the document "${name}"?`

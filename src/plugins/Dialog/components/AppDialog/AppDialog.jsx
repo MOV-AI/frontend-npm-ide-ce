@@ -103,7 +103,7 @@ const AppDialog = props => {
       <DialogContent dividers style={{ minWidth: 450 }}>
         {props.children}
       </DialogContent>
-      {actions || getDefaultActions()}
+      {actions ?? getDefaultActions()}
     </Dialog>
   );
 };

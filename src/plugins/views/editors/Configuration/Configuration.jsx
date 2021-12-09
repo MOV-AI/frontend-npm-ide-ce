@@ -57,7 +57,7 @@ const Configuration = (props, ref) => {
   //========================================================================================
 
   const renderRightMenu = React.useCallback(() => {
-    const details = data.details || {};
+    const details = data.details ?? {};
     const menuName = `${id}-detail-menu`;
     // add bookmark
     call("rightDrawer", "setBookmark", {
@@ -84,7 +84,7 @@ const Configuration = (props, ref) => {
     // Reset editor undoManager after first load
     if (editorRef.current && previousData && !previousData?.name) {
       const editorModel = editorRef.current.getModel();
-      const loadedCode = data?.code || "";
+      const loadedCode = data?.code ?? "";
       editorModel.setValue(loadedCode);
     }
   }, [data, previousData]);

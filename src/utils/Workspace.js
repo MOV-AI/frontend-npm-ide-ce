@@ -6,7 +6,7 @@ class Workspace {
     if (instance) return instance;
     instance = this;
     this.storage = new LocalStorage();
-    const userName = Authentication.getTokenData().message.name || "";
+    const userName = Authentication.getTokenData().message.name ?? "";
     const APP_NAME = "movai-ide-ce";
     this.TABS_KEY = `movai.${userName}.${APP_NAME}.tabs`;
     this.LAYOUT_KEY = `movai.${userName}.${APP_NAME}.layout`;
@@ -24,7 +24,7 @@ class Workspace {
   }
 
   getLayout(defaultLayout) {
-    return this.storage.get(this.LAYOUT_KEY) || defaultLayout;
+    return this.storage.get(this.LAYOUT_KEY) ?? defaultLayout;
   }
 
   setTabs(tabs) {
@@ -34,7 +34,7 @@ class Workspace {
   }
 
   getTabs() {
-    const storedTabs = this.storage.get(this.TABS_KEY) || {};
+    const storedTabs = this.storage.get(this.TABS_KEY) ?? {};
     return new Map(Object.entries(storedTabs));
   }
 }

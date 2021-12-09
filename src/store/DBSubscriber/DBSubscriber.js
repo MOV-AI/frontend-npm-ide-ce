@@ -26,13 +26,11 @@ class DBSubscriber extends StoreAbstractPlugin {
   [symbols.subscribers] = new Map();
 
   get scope() {
-    console.log("this is scope", this.iStore.scope);
     return this.iStore.scope;
   }
 
   subscribe(docName) {
     this.docName = docName;
-    console.log("debug subscribe to ", this.getPattern(docName));
 
     const subscriber = new Subscriber({
       pattern: this.getPattern(docName)

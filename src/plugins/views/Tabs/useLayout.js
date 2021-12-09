@@ -302,7 +302,7 @@ const useLayout = (props, dockRef) => {
             );
             return PluginManagerIDE.install(docData.id, viewPlugin).then(() => {
               // Create and return tab data
-              const extension = docFactory.store.model.EXTENSION || "";
+              const extension = docFactory.store.model.EXTENSION ?? "";
               // Return TabData
               return {
                 id: docData.id,
@@ -430,7 +430,7 @@ const useLayout = (props, dockRef) => {
       const tabFromMemory = tabsById.current.get(data.id);
       if (!tabFromMemory && !data.content) return;
       const { id, content, scope, name, extension, isDirty } =
-        tabFromMemory || data;
+        tabFromMemory ?? data;
       tabsById.current.set(id, {
         id,
         scope,

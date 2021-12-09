@@ -4,7 +4,7 @@ import { snackbar } from "@mov-ai/mov-fe-lib-react";
 class Alerts extends IDEPlugin {
   constructor(profile = {}) {
     // Remove duplicated if needed
-    const methods = Array.from(new Set([...(profile.methods || []), "show"]));
+    const methods = Array.from(new Set([...(profile.methods ?? []), "show"]));
     super({ ...profile, methods });
   }
 

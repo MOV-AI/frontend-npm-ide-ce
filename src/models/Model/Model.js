@@ -6,7 +6,7 @@ class Model extends BaseModel {
     const { schema, ...otherArgs } = arguments[0];
     super({ ...otherArgs });
 
-    this.schema = new Schema(schema || {});
+    this.schema = new Schema(schema ?? {});
   }
 
   validate() {

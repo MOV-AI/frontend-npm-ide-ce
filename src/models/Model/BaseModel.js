@@ -6,7 +6,7 @@ import Observable from "./Observable";
 export default class Model extends Observable {
   constructor({ id, name, version, workspace = "global" }) {
     super();
-    this.id = id || name;
+    this.id = id ?? name;
     this.name = name;
     this.version = version;
     this.workspace = workspace;

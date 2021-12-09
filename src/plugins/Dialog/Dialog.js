@@ -10,7 +10,7 @@ class Dialog extends IDEPlugin {
     // Remove duplicated if needed
     const methods = Array.from(
       new Set([
-        ...(profile.methods || []),
+        ...(profile.methods ?? []),
         "alert",
         "confirmation",
         "newDocument",

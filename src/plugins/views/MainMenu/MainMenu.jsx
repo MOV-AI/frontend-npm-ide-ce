@@ -128,7 +128,7 @@ const MainMenu = props => {
           lowerElement={
             <ProfileMenu
               version={VERSION}
-              userName={Authentication.getTokenData().message.name || ""}
+              userName={Authentication.getTokenData().message.name ?? ""}
               isDarkTheme={isDarkTheme}
               handleLogout={handleLogOut}
               handleToggleTheme={handleToggleTheme}

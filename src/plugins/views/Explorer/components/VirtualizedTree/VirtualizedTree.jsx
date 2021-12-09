@@ -96,7 +96,7 @@ class VirtualizedTree extends Component {
       .map(node => {
         return {
           ...node,
-          children: (node?.children || []).filter(
+          children: (node?.children ?? []).filter(
             ch =>
               ch.name &&
               !ch.name.includes("@SM") &&
@@ -131,7 +131,7 @@ class VirtualizedTree extends Component {
     if (!target) return;
     const nodeTooltip = this.state.nodeTooltip;
     const hasOverflow = target.offsetWidth < target.scrollWidth;
-    const nodeUrl = node.url || node.name;
+    const nodeUrl = node.url ?? node.name;
     if (hasOverflow && nodeTooltip !== nodeUrl) {
       setImmediate(() => {
         this.setState({ nodeTooltip: nodeUrl });
@@ -210,7 +210,7 @@ class VirtualizedTree extends Component {
                             disableHoverListener
                             disableTouchListener
                             placement="right-start"
-                            open={(node.url || node.name) === nodeTooltip}
+                            open={(node.url ?? node.name) === nodeTooltip}
                           >
                             <div
                               className={classes.ellipsis}

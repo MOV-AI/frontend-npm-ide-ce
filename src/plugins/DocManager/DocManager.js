@@ -10,7 +10,7 @@ class DocManager extends IDEPlugin {
     // Remove duplicated if needed
     const methods = Array.from(
       new Set([
-        ...(profile.methods || []),
+        ...(profile.methods ?? []),
         "getDocTypes",
         "getDocFactory",
         "getDocFromNameType",
@@ -126,7 +126,7 @@ class DocManager extends IDEPlugin {
    */
   read(modelKey) {
     const { name, scope } = modelKey;
-    return this.getStore(scope)?.readDoc(name) || Promise.reject();
+    return this.getStore(scope)?.readDoc(name) ?? Promise.reject();
   }
 
   /**
