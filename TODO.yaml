@@ -1,10 +1,3 @@
-- update tab dirty state
-- - rm
-- confirmation dialog on close dirty
-- - rm
-- delete from store on close new document
-- - store method: mj - done
-- - components: rm
 - close tab on delete
 - - event: mj - done
 - - components: rm
@@ -17,8 +10,6 @@ docmanager
 - tests
 - versioning
 - undo/redo
-- copy tem bug
-- delete nao remove da lista
 
 theme bug
 

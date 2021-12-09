@@ -19,7 +19,7 @@ const DEFAULT_LAYOUT = {
 };
 
 const useLayout = (props, dockRef) => {
-  const { emit, call } = props;
+  const { emit, call, on } = props;
   const workspaceManager = React.useMemo(() => new Workspace(), []);
   const tabsById = React.useRef(new Map());
   const [layout, setLayout] = React.useState({ ...DEFAULT_LAYOUT });
@@ -85,7 +85,7 @@ const useLayout = (props, dockRef) => {
 
   /**
    * Get tab to render
-   * @param {{title: String, scope: String}} docData : Document data
+   * @param {{id: String, name: String, scope: String, extension: String}} docData : Document data
    * @param {Boolean} isDirty : Document dirty state
    * @returns {Element} Tab element to render
    */
@@ -102,7 +102,7 @@ const useLayout = (props, dockRef) => {
     };
 
     return (
-      <Tooltip title={docData.name}>
+      <Tooltip title={docData.id}>
         <div onAuxClick={() => console.log("debug close document", docData)}>
           {getIconByScope[docData.scope || "Default"]({
             fontSize: 12,
@@ -124,31 +124,116 @@ const useLayout = (props, dockRef) => {
    */
   const _getTabData = React.useCallback(
     async docData => {
-      return props.call("docManager", "getStore", docData.scope).then(store => {
-        try {
-          const Plugin = store.plugin;
-          const viewPlugin = new Plugin(
-            { name: docData.id },
-            { id: docData.id, name: docData.name, scope: docData.scope }
-          );
-          return PluginManagerIDE.install(docData.id, viewPlugin).then(() => {
-            // Create and return tab data
-            docData.extension = store.model.EXTENSION || "";
-            return {
-              id: docData.id,
-              name: docData.name,
-              title: _getCustomTab(docData),
-              scope: docData.scope,
-              content: viewPlugin.render()
-            };
+      return props
+        .call("docManager", "getDocFactory", docData.scope)
+        .then(docFactory => {
+          try {
+            const Plugin = docFactory.plugin;
+            const viewPlugin = new Plugin(
+              { name: docData.id },
+              { id: docData.id, name: docData.name, scope: docData.scope }
+            );
+            return PluginManagerIDE.install(docData.id, viewPlugin).then(() => {
+              // Create and return tab data
+              const extension = docFactory.store.model.EXTENSION || "";
+              // Return TabData
+              return {
+                id: docData.id,
+                name: docData.name,
+                title: _getCustomTab(docData),
+                extension: extension,
+                scope: docData.scope,
+                content: viewPlugin.render()
+              };
+            });
+          } catch (err) {
+            console.log("debug can't open tab", err);
+            return docData;
+          }
+        });
+    },
+    [props, _getCustomTab]
+  );
+
+  /**
+   * Apply layout and save changes
+   * @param {LayoutData} layout
+   */
+  const _applyLayout = React.useCallback(
+    _layout => {
+      setLayout(_layout);
+      workspaceManager.setLayout(_layout);
+    },
+    [workspaceManager]
+  );
+
+  /**
+   * Save document and apply layout
+   * @param {{name: string, scope: string}} docData
+   * @param {LayoutData} newLayout : New layout to apply (optional)
+   */
+  const _saveDoc = React.useCallback(
+    (docData, newLayout) => {
+      const { name, scope } = docData;
+      call("docManager", "save", { name, scope })
+        .then(res => {
+          if (res.success) {
+            if (newLayout) _applyLayout(newLayout);
+            call("alert", "show", {
+              message: "Saved successfully",
+              severity: "success"
+            });
+          }
+        })
+        .catch(err => {
+          console.log("failed to save", err);
+          call("alert", "show", {
+            message: "Failed to save",
+            severity: "error"
           });
-        } catch (err) {
-          console.log("debug can't open tab", err);
-          return docData;
+        });
+    },
+    [call, _applyLayout]
+  );
+
+  /**
+   * Discard changes and apply layout
+   * @param {{name: string, scope: string}} docData
+   * @param {LayoutData} newLayout : New layout to apply (optional)
+   */
+  const _discardChanges = React.useCallback(
+    (docData, newLayout) => {
+      const { name, scope } = docData;
+      call("docManager", "discardDocChanges", { name, scope }).then(() => {
+        if (newLayout) _applyLayout(newLayout);
+      });
+    },
+    [call, _applyLayout]
+  );
+
+  /**
+   * Open dialog before closing tab in dirty state
+   * @param {string} name : Document name
+   * @param {string} scope : Document scope
+   * @param {LayoutData} newLayout : New layout
+   */
+  const _closeDirtyTab = React.useCallback(
+    (name, scope, newLayout) => {
+      call("dialog", "closeDirtyDocument", {
+        name,
+        scope,
+        onSubmit: action => {
+          const triggerAction = {
+            // Save changes and close document
+            save: () => _saveDoc({ name, scope }, newLayout),
+            // Discard changes and close document
+            dontSave: () => _discardChanges({ name, scope }, newLayout)
+          };
+          return action in triggerAction ? triggerAction[action]() : false;
         }
       });
     },
-    [props, _getCustomTab]
+    [call, _saveDoc, _discardChanges]
   );
 
   //========================================================================================
@@ -158,10 +243,20 @@ const useLayout = (props, dockRef) => {
   //========================================================================================
 
   React.useEffect(() => {
-    return () => {
-      workspaceManager.destroy();
-    };
-  }, [workspaceManager]);
+    on("docManager", "updateDocDirty", data => {
+      const { instance: model, value: isDirty } = data;
+      const tabId = model.getUrl();
+      const currentTabData = tabsById.current.get(tabId);
+      // Doesn't trigger update if dirty state didn't change
+      if (!currentTabData || currentTabData.isDirty === isDirty) return;
+      // Set new dirty state
+      const newTabData = { ...currentTabData, isDirty: isDirty };
+      tabsById.current.set(tabId, newTabData);
+      // Trigger tab update
+      const currentTab = dockRef.current.find(tabId);
+      dockRef.current.updateTab(tabId, currentTab);
+    });
+  }, [on, dockRef]);
 
   React.useEffect(() => {
     const lastTabs = workspaceManager.getTabs();
@@ -170,15 +265,19 @@ const useLayout = (props, dockRef) => {
     tabsById.current = lastTabs;
     // Install current tabs plugins
     [...lastTabs.keys()].forEach(tabId => {
-      const { id, name, title, scope } = lastTabs.get(tabId);
-      tabs.push(_getTabData({ id, name, title, scope }));
+      const { id, name, scope } = lastTabs.get(tabId);
+      tabs.push(_getTabData({ id, name, scope }));
     });
     // after all plugins are installed
     Promise.all(tabs).then(_tabs => {
       _tabs.forEach(tab => tabsById.current.set(tab.id, tab));
       setLayout(lastLayout);
     });
-  }, [dockRef, workspaceManager, _getTabData]);
+    // Destroy local workspace manager instance on unmount
+    return () => {
+      workspaceManager.destroy();
+    };
+  }, [workspaceManager, _getTabData]);
 
   //========================================================================================
   /*                                                                                      *
@@ -243,18 +342,30 @@ const useLayout = (props, dockRef) => {
    * @param {TabData} data : Tab data to load in Layout (might be missing information)
    * @returns {TabData} Complete tab data
    */
-  const loadTab = React.useCallback(data => {
-    const tabFromMemory = tabsById.current.get(data.id);
-    if (!tabFromMemory && !data.title && !data.content) return;
-    const { id, title, content, scope, name } = tabFromMemory || data;
-    tabsById.current.set(id, { id, title, scope, name, content });
-    return {
-      id: id,
-      title: title,
-      content: content,
-      closable: true
-    };
-  }, []);
+  const loadTab = React.useCallback(
+    data => {
+      const tabFromMemory = tabsById.current.get(data.id);
+      if (!tabFromMemory && !data.content) return;
+      const { id, content, scope, name, extension, isDirty } =
+        tabFromMemory || data;
+      tabsById.current.set(id, {
+        id,
+        scope,
+        name,
+        content,
+        extension,
+        isDirty
+      });
+      const tabData = { id, scope, name, extension };
+      return {
+        id: id,
+        title: _getCustomTab(tabData, isDirty),
+        content: content,
+        closable: true
+      };
+    },
+    [_getCustomTab]
+  );
 
   /**
    * Triggered at any manual layout/active tab change
@@ -267,19 +378,45 @@ const useLayout = (props, dockRef) => {
       const firstContainer = _getFirstContainer(newLayout.dockbox);
       const newActiveTab =
         direction !== "remove" ? tabId : firstContainer.activeId;
-      setLayout(newLayout);
-      workspaceManager.setLayout(newLayout);
+      // Attempt to close tab
+      if (direction === "remove") {
+        const { name, scope, isDirty } = tabsById.current.get(tabId);
+        if (isDirty) {
+          _closeDirtyTab(name, scope, newLayout);
+        } else {
+          call("docManager", "read", { name, scope }).then(doc => {
+            // Remove doc locally if is new and not dirty
+            if (doc.getIsNew())
+              call("docManager", "discardDocChanges", { name, scope });
+            // Remove tab and apply new layout
+            tabsById.current.delete(tabId);
+            workspaceManager.setTabs(tabsById.current);
+            _applyLayout(newLayout);
+          });
+        }
+      } else {
+        // Update layout
+        _applyLayout(newLayout);
+      }
+      // Emit new active tab id
       if (!tabId) return;
       if (newActiveTab) emit(`${newActiveTab}-active`);
       else call("rightDrawer", "resetBookmarks");
     },
-    [_getFirstContainer, emit, call, workspaceManager]
+    [
+      emit,
+      call,
+      workspaceManager,
+      _getFirstContainer,
+      _applyLayout,
+      _closeDirtyTab
+    ]
   );
 
   /**
    * Update tab ID and data
    * @param {String} prevTabId : Old tab ID
-   * @param {{id: String, title: String, name: String, scope: String}} docData : document basic data
+   * @param {{id: String, name: String, scope: String}} docData : document basic data
    */
   const updateTabId = React.useCallback(
     (prevTabId, newTabData) => {
@@ -297,7 +434,6 @@ const useLayout = (props, dockRef) => {
           // look for tab in dockbox
           const d = _setTabInLayout(prevState, prevTabId, "dockbox", tabData);
           if (d.box) return d.newLayout;
-          console.log("debug can't find tab");
           return prevState;
         });
       });

@@ -1,5 +1,6 @@
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
 import ReactDOM from "react-dom";
+import CloseDirtyDocument from "./components/CloseDirtyDocument/CloseDirtyDocument";
 import ConfirmationDialog from "./components/ConfirmationDialog/ConfirmationDialog";
 import NewDocumentDialog from "./components/FormDialog/NewDocumentDialog";
 import AlertDialog from "./components/AlertDialog/AlertDialog";
@@ -13,7 +14,8 @@ class Dialog extends IDEPlugin {
         "alert",
         "confirmation",
         "newDocument",
-        "copyDocument"
+        "copyDocument",
+        "closeDirtyDocument"
       ])
     );
     super({ ...profile, methods });
@@ -25,6 +27,10 @@ class Dialog extends IDEPlugin {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   *
+   * @param {*} data
+   */
   alert(data) {
     const targetElement = this._handleDialogOpen();
     ReactDOM.render(
@@ -86,6 +92,26 @@ class Dialog extends IDEPlugin {
         title={`Copy "${data.name}" to`}
         loadingMessage={"Copying document"}
         submitText={"Copy"}
+        onSubmit={data.onSubmit}
+        onClose={this._handleDialogClose}
+      />,
+      targetElement
+    );
+  }
+
+  /**
+   * Open Modal to confirm desired action : save, dontSave or cancel
+   *  save: close and save
+   *  dontSave: close and discard changes
+   *  cancel: doesn't close tab
+   * @param {{name: string, scope: string, onSubmit: function}} data
+   */
+  closeDirtyDocument(data) {
+    const targetElement = this._handleDialogOpen();
+    ReactDOM.render(
+      <CloseDirtyDocument
+        name={data.name}
+        scope={data.scope}
         onSubmit={data.onSubmit}
         onClose={this._handleDialogClose}
       />,

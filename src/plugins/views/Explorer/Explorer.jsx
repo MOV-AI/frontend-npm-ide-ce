@@ -87,7 +87,7 @@ const Explorer = props => {
    */
   const _addDocument = React.useCallback(
     (docManager, docData) => {
-      const { documentName, documentType } = docData;
+      const { documentName, documentType, document } = docData;
       setData(prevState => {
         // TODO: optimize time
         const newData = [...prevState];
@@ -97,19 +97,12 @@ const Explorer = props => {
             doc => doc.name === documentName
           );
           if (documentIndex < 0) {
-            docManager
-              .getDocFromNameType(documentName, documentType)
-              .then(document => {
-                if (document) {
-                  _pushSorted(newData[typeIndex].children, {
-                    name: document.getName(),
-                    title: document.getName(),
-                    scope: document.getScope(),
-                    url: document.getUrl()
-                  });
-                }
-              })
-              .catch(error => console.log(error));
+            _pushSorted(newData[typeIndex].children, {
+              name: document.getName(),
+              title: document.getName(),
+              scope: document.getScope(),
+              url: document.getUrl()
+            });
           }
         }
         return newData;
@@ -204,8 +197,8 @@ const Explorer = props => {
     (docManager, docData) => {
       const { action } = docData;
       const updateByActionMap = {
-        delete: () => _deleteDocument(docData),
-        update: () => _addDocument(docManager, docData)
+        del: () => _deleteDocument(docData),
+        set: () => _addDocument(docManager, docData)
       };
       Maybe.fromNull(updateByActionMap[action]).forEach(updateAction =>
         updateAction()
@@ -223,9 +216,6 @@ const Explorer = props => {
   React.useEffect(() => {
     on("docManager", "loadDocs", loadDocs);
     on("docManager", "updateDocs", updateDocs);
-    on("docManager", "deleteDoc", (store, name) =>
-      console.log("Delete event", store, name)
-    );
   }, [on, loadDocs, updateDocs]);
 
   //========================================================================================

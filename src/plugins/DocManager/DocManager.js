@@ -13,9 +13,9 @@ class DocManager extends IDEPlugin {
         ...(profile.methods || []),
         "getDocTypes",
         "getDocFactory",
-        "getStore",
         "getDocFromNameType",
         "checkDocumentExists",
+        "discardDocChanges",
         "copy",
         "delete",
         "create",
@@ -24,15 +24,16 @@ class DocManager extends IDEPlugin {
       ])
     );
     super({ ...profile, methods });
+    // Used to debug docManager in console
     window.DocManager = this;
-
+    // Add before unload event
     window.onbeforeunload = this.onBeforeUnload;
   }
 
   activate() {
     const observer = {
       onLoad: store => this.onStoreLoad(store),
-      onUpdate: (store, doc) => this.onStoreUpdate(store, doc),
+      onUpdate: (store, doc, action) => this.onStoreUpdate(store, doc, action),
       onDocumentDirty: (store, instance, value) =>
         this.onDocumentDirty(store, instance, value),
       onDocumentDeleted: (store, name) => this.onDocumentDeleted(store, name)
@@ -97,6 +98,15 @@ class DocManager extends IDEPlugin {
   checkDocumentExists(modelKey) {
     const { name, scope } = modelKey;
     return this.getStore(scope)?.checkDocExists(name);
+  }
+
+  /**
+   * Discard document changes
+   * @param {{name: String, scope: String}} modelKey
+   */
+  discardDocChanges(modelKey) {
+    const { name, scope } = modelKey;
+    return this.getStore(scope)?.discardDocChanges(name);
   }
 
   /**
@@ -188,30 +198,44 @@ class DocManager extends IDEPlugin {
    * @param {string} store : The name of the store firing the event
    * @param {object<{documentName, documentType}>} doc
    */
-  onStoreUpdate(store, doc) {
+  onStoreUpdate(store, doc, action = "set") {
     this.emit(TOPICS.updateDocs, this, {
-      action: "update",
+      action,
       ...doc
     });
   }
 
+  /**
+   * Emits an event when a document is set to dirty
+   * @param {string} store : The name of the store firing the event
+   * @param {model} instance : Document model instance
+   * @param {boolean} value : Document Dirty state
+   */
   onDocumentDirty(store, instance, value) {
-    console.log("debug docmanager emit updateDocDirty...");
-    this.emit(TOPICS.updateDocDirty, this, {
+    this.emit(TOPICS.updateDocDirty, {
       instance,
       value
     });
   }
 
+  /**
+   * Emits an event when a document is deleted
+   * @param {string} store : The name of the store firing the event
+   * @param {string} name : Deleted document name
+   */
   onDocumentDeleted(store, name) {
     this.emit(TOPICS.deleteDoc, store, name);
   }
 
+  /**
+   * Event triggered before unloading app (before close or before refreshing)
+   * @param {Event} event
+   */
   onBeforeUnload = event => {
     const hasDirties = this.hasDirties();
     if (hasDirties) {
       event.preventDefault();
-      event.returnValue = "";
+      return "test vai sair doido?";
     } else {
       delete event["returnValue"];
     }

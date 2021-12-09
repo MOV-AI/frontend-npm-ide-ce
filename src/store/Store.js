@@ -44,11 +44,6 @@ class Store extends BaseStore {
    * @returns {Promise<any>}
    */
   deleteDoc(name) {
-    // A new document only exists in the store
-    if (this.getDoc(name).getIsNew()) {
-      return Promise.resolve(this.deleteDocFromStore(name));
-    }
-
     return new Document.delete({
       name,
       type: this.scope,
@@ -117,7 +112,7 @@ class Store extends BaseStore {
   copyDoc(name, newName) {
     return this.readDoc(name).then(doc => {
       const newObj = this.model
-        .ofJSON(doc.serialize())
+        .ofJSON(doc.serializeToDB())
         .setIsNew(true)
         .setName(newName);
 
@@ -133,6 +128,25 @@ class Store extends BaseStore {
    */
   checkDocExists(name) {
     return this.data.has(name);
+  }
+
+  /**
+   * Discard document changes
+   * @param {string} name The name of the document to perform action
+   */
+  discardDocChanges(name) {
+    // A new document only exists in the store
+    //  so discarding its changes means removing it from the store
+    if (this.getDoc(name).getIsNew()) {
+      return Promise.resolve(this.deleteDocFromStore(name));
+    }
+    // Set isLoaded flag to false,
+    //  so the next time the user tries to read it:
+    //  it will load the doc from redis again
+    else {
+      const doc = this.getDoc(name).setIsLoaded(false);
+      this.setDoc(name, doc);
+    }
   }
 
   /**

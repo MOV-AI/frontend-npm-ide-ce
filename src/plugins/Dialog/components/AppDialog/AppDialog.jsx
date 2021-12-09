@@ -33,11 +33,11 @@ const useStyles = makeStyles(theme => ({
  */
 const DialogTitle = props => {
   const classes = useStyles();
-  const { children, onClose, ...other } = props;
+  const { children, onClose, hasCloseButton, ...other } = props;
   return (
     <MuiDialogTitle disableTypography className={classes.root} {...other}>
       <Typography variant="h6">{children}</Typography>
-      {onClose ? (
+      {hasCloseButton ? (
         <IconButton
           aria-label="close"
           className={classes.closeButton}
@@ -58,12 +58,18 @@ const DialogTitle = props => {
 const AppDialog = props => {
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(true);
-  const { title, onSubmit, onClose, submitText } = props;
+  const { title, actions, onSubmit, onClose, submitText, closeOnBackdrop } =
+    props;
 
   /**
    * Handle Dialog close
    */
-  const handleClose = () => {
+  const handleClose = (_, reason) => {
+    if (
+      !closeOnBackdrop &&
+      (reason === "backdropClick" || reason === "escapeKeyDown")
+    )
+      return;
     setOpen(false);
     onClose();
   };
@@ -76,12 +82,8 @@ const AppDialog = props => {
     handleClose();
   };
 
-  return (
-    <Dialog open={open} onClose={handleClose}>
-      <DialogTitle onClose={handleClose}>{title}</DialogTitle>
-      <DialogContent dividers style={{ minWidth: 450 }}>
-        {props.children}
-      </DialogContent>
+  const getDefaultActions = () => {
+    return (
       <DialogActions>
         <Button onClick={handleClose} color="default">
           {onSubmit ? t("Cancel") : t("Ok")}
@@ -92,6 +94,16 @@ const AppDialog = props => {
           </Button>
         )}
       </DialogActions>
+    );
+  };
+
+  return (
+    <Dialog open={open} onClose={handleClose}>
+      <DialogTitle onClose={handleClose}>{title}</DialogTitle>
+      <DialogContent dividers style={{ minWidth: 450 }}>
+        {props.children}
+      </DialogContent>
+      {actions || getDefaultActions()}
     </Dialog>
   );
 };
@@ -100,13 +112,18 @@ AppDialog.propTypes = {
   title: PropTypes.string,
   submitText: PropTypes.string,
   onSubmit: PropTypes.func,
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
+  actions: PropTypes.element,
+  hasCloseButton: PropTypes.bool,
+  closeOnBackdrop: PropTypes.bool
 };
 
 AppDialog.defaultProps = {
   title: "Are you sure?",
   submitText: "Submit",
-  onClose: () => console.log("Not Implemented")
+  onClose: () => console.log("Not Implemented"),
+  hasCloseButton: true,
+  closeOnBackdrop: true
 };
 
 export default AppDialog;
