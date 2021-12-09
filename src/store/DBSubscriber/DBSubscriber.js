@@ -139,7 +139,7 @@ class DBSubscriber extends StoreAbstractPlugin {
    * @param {object} data The data to overwrite the document
    */
   overwriteDoc(data) {
-    console.log("debug overwriting doc");
+    console.log("debug overwriting doc", data);
     const doc = this.getDoc(this.docName);
 
     // get the static method

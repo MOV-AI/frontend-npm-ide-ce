@@ -61,12 +61,8 @@ class BaseStore extends StorePluginManager {
       .then(file => {
         // get or create document
         const obj = this.getDoc(name) || this.newDoc(name).setIsNew(false);
+
         const data = obj.constructor.serializeOfDB(file);
-
-        obj.subscribe((instance, prop, value) =>
-          this.onDocumentUpdate(instance, prop, value)
-        );
-
         return obj.setData(data).setIsLoaded(true).setDirty(false);
       })
       .catch(error => {
@@ -166,7 +162,6 @@ class BaseStore extends StorePluginManager {
 
   onDocumentUpdate(instance, prop, value) {
     if (typeof this.observer.onDocumentDirty === "function") {
-      this.data.set(instance.getName(), instance);
       this.observer.onDocumentDirty(this.name, instance, instance.getDirty());
     }
   }

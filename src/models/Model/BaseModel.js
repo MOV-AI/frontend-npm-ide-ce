@@ -16,7 +16,7 @@ export default class Model extends Observable {
   isNew = true;
   isLoaded = false;
   isDirty = false;
-  outdated = false;
+  isOutdated = false;
 
   observables = ["name", "details"];
 
@@ -82,11 +82,11 @@ export default class Model extends Observable {
   }
 
   getOutdated() {
-    return this.outdated;
+    return this.isOutdated;
   }
 
   setOutdated(value) {
-    this.outdated = value;
+    this.isOutdated = value;
     return this;
   }
 
@@ -131,6 +131,7 @@ export default class Model extends Observable {
     return {
       id: this.getId(),
       name: this.getName(),
+      scope: this.getScope(),
       workspace: this.getWorkspace(),
       details: this.getDetails(),
       version: this.getVersion()

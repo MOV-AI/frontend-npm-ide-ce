@@ -33,6 +33,11 @@ class Store extends BaseStore {
     doc.setIsNew(true);
     doc.setIsLoaded(true);
 
+    // Add changes subscriber
+    doc.subscribe((instance, prop, value) =>
+      this.onDocumentUpdate(instance, prop, value)
+    );
+
     // store the document
     this.setDoc(name, doc);
     return doc;
