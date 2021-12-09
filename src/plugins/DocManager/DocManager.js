@@ -220,11 +220,10 @@ class DocManager extends IDEPlugin {
 
   /**
    * Emits an event when a document is deleted
-   * @param {string} store : The name of the store firing the event
-   * @param {string} name : Deleted document name
+   * @param {{url: string, name: string}} data : Document data
    */
-  onDocumentDeleted(store, name) {
-    this.emit(TOPICS.deleteDoc, store, name);
+  onDocumentDeleted(store, data) {
+    this.emit(TOPICS.deleteDoc, { ...data, scope: store });
   }
 
   /**

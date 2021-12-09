@@ -43,6 +43,7 @@ class Store extends BaseStore {
    * @returns {Promise<any>}
    */
   deleteDoc(name) {
+    const docUrl = this.data.get(name).getUrl();
     return new Document.delete({
       name,
       type: this.scope,
@@ -53,7 +54,7 @@ class Store extends BaseStore {
         return this.deleteDocFromStore(name);
       })
       .then(res => {
-        this.observer.onDocumentDeleted(this.name, name);
+        this.observer.onDocumentDeleted(this.name, { name, url: docUrl });
         return res;
       });
   }

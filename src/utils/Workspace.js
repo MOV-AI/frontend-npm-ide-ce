@@ -35,8 +35,7 @@ class Workspace {
 
   getTabs() {
     const storedTabs = this.storage.get(this.TABS_KEY) || {};
-    const tabsMap = new Map(Object.entries(storedTabs));
-    return tabsMap;
+    return new Map(Object.entries(storedTabs));
   }
 }
 
