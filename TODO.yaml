@@ -9,6 +9,8 @@
 - - event: mj - done
 - - components: rm
 
+- save is not working
+
 docmanager
 
 - !!!! redis subscribers
@@ -34,3 +36,25 @@ Tools
 - home tab
 - quick access menu
 - language server
+
+
+- on server update (Redis) x
+- - debounce changes 1500ms x
+- - - fetch doc x
+- - - - compare data x
+- - - - - is different x
+- - - - - - not dirty 
+ - - - - - - - replace the content
+- - - - - - is dirty
+- - - - - - - set flag new version available
+- - - - - - - - emit event
+- - - - - - - - popup confirmation if the user tries to save
+
+
+
+- loadDocs
+- - - for each Label
+- - - - instance already exists?
+- - - - - skip
+- - - - else
+- - - - - create instance

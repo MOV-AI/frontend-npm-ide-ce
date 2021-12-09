@@ -49,6 +49,7 @@ test("create new document", () => {
   expect(obj.getIsNew()).toBe(true);
   expect(obj.getIsLoaded()).toBe(false);
   expect(obj.getDirty()).toBe(true);
+  expect(obj.getOutdated()).toBe(false);
 });
 
 test("create document of JSON", () => {
@@ -65,4 +66,5 @@ test("create document of JSON", () => {
   expect(obj.getIsNew()).toBe(false);
   expect(obj.getIsLoaded()).toBe(false);
   expect(obj.getDirty()).toBe(false);
+  expect(obj.getOutdated()).toBe(false);
 });

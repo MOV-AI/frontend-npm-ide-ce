@@ -28,7 +28,7 @@ export default class Configuration extends Model {
   }
 
   setExtension(extension) {
-    this.extension = extension;
+    this.extension = extension || this.extension;
     return this;
   }
 
@@ -48,6 +48,10 @@ export default class Configuration extends Model {
     };
   }
 
+  /**
+   * Serialize model properties to database format
+   * @returns {object} Database data
+   */
   serializeToDB() {
     const { name, code, extension, details } = this.serialize();
 
@@ -59,7 +63,12 @@ export default class Configuration extends Model {
     };
   }
 
-  static ofJSON(json) {
+  /**
+   * Serialize database data to model properties
+   * @param {object} json : The data received from the database
+   * @returns {object} Model properties
+   */
+  static serializeOfDB(json) {
     const {
       Label: id,
       Label: name,
@@ -70,16 +79,15 @@ export default class Configuration extends Model {
       version
     } = json;
 
-    const obj = new this({ id, name, workspace, version });
-
-    return obj
-      .setData({
-        code,
-        extension: extension || this.extension,
-        details
-      })
-      .setDirty(false)
-      .setIsNew(false);
+    return {
+      id,
+      name,
+      code,
+      extension,
+      details,
+      workspace,
+      version
+    };
   }
 
   static SCOPE = "Configuration";

@@ -196,6 +196,7 @@ class DocManager extends IDEPlugin {
   }
 
   onDocumentDirty(store, instance, value) {
+    console.log("debug docmanager emit updateDocDirty...");
     this.emit(TOPICS.updateDocDirty, this, {
       instance,
       value
