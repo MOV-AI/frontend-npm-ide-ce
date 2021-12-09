@@ -25,16 +25,17 @@ class Store extends BaseStore {
    * @param {string} name The name of the document to create
    * @returns {Object<Model>}
    */
-  newDoc(name) {
-    const newName = name || this.generateName();
-    const obj = new this.model({ name: newName });
-    obj.setIsNew(true);
-    obj.setIsLoaded(true);
-    obj.subscribe((instance, prop, value) =>
-      this.onDocumentUpdate(instance, prop, value)
-    );
-    this.setDoc(newName, obj);
-    return obj;
+  newDoc(docName) {
+    const name = docName || this.generateName();
+
+    // create the document instance
+    const doc = new this.model({ name });
+    doc.setIsNew(true);
+    doc.setIsLoaded(true);
+
+    // store the document
+    this.setDoc(name, doc);
+    return doc;
   }
 
   /**

@@ -16,6 +16,7 @@ export default class Model extends Observable {
   isNew = true;
   isLoaded = false;
   isDirty = false;
+  outdated = false;
 
   observables = ["name", "details"];
 
@@ -80,6 +81,15 @@ export default class Model extends Observable {
     return this;
   }
 
+  getOutdated() {
+    return this.outdated;
+  }
+
+  setOutdated(value) {
+    this.outdated = value;
+    return this;
+  }
+
   dispatch(prop, value, callbacks) {
     this.setDirty(true);
 
@@ -98,6 +108,7 @@ export default class Model extends Observable {
         Reflect.set(this, key, value);
       }
     });
+    this.setOutdated(false);
     return this;
   }
 
@@ -110,6 +121,10 @@ export default class Model extends Observable {
    */
   getScope() {
     return "NA";
+  }
+
+  getFileExtension() {
+    return ".NA";
   }
 
   serialize() {
@@ -126,16 +141,15 @@ export default class Model extends Observable {
     return this.serialize();
   }
 
-  getFileExtension() {
-    return ".NA";
+  static serializeOfDB(args) {
+    return args;
   }
 
   static ofJSON(json) {
-    const { id, name, workspace, version, ...others } = json;
+    const data = this.serializeOfDB(json);
 
-    return new this({ id, name, workspace, version })
-      .setData({ ...others })
-      .setDirty(false)
-      .setIsNew(false);
+    const obj = new this(data);
+
+    return obj.setData(data).setDirty(false).setIsNew(false);
   }
 }

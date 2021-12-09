@@ -100,7 +100,7 @@ const Configuration = (props, ref) => {
   };
 
   const updateConfigCode = value => {
-    if (value === instance.current.code) return;
+    if (value === instance.current.getCode()) return;
     if (instance.current) instance.current.setCode(value);
   };
 

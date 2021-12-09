@@ -1,9 +1,21 @@
 import { Document } from "@mov-ai/mov-fe-lib-core";
+import { StorePluginManager } from "./plugins";
 import Subscriber from "../subscriber/Subscriber";
 
-class BaseStore {
+class BaseStore extends StorePluginManager {
   constructor(args) {
-    const { workspace, model, plugin, name, title, pattern, observer } = args;
+    const {
+      workspace,
+      model,
+      plugin,
+      name,
+      title,
+      pattern,
+      observer,
+      plugins
+    } = args;
+
+    super(plugins);
 
     this._workspace = workspace || "global";
     this._plugin = plugin;
@@ -44,34 +56,29 @@ class BaseStore {
     return this._title;
   }
 
-  addDoc(doc) {
-    const obj = this.data
-      .set(doc.name, this.model.ofJSON(doc.content))
-      .get(doc.name);
-
-    obj.subscribe((instance, prop, value) =>
-      this.onDocumentUpdate(instance, prop, value)
-    );
-
-    return obj;
-  }
-
   loadDoc(name) {
-    const { scope } = this;
-    return new Document(Document.parsePath(name, scope))
-      .read()
+    return this.fetchDoc(name)
       .then(file => {
-        const obj = this.addDoc({
-          name: file.Label,
-          content: file
-        });
-        return obj.setIsLoaded(true);
+        // get or create document
+        const obj = this.getDoc(name) || this.newDoc(name).setIsNew(false);
+        const data = obj.constructor.serializeOfDB(file);
+
+        obj.subscribe((instance, prop, value) =>
+          this.onDocumentUpdate(instance, prop, value)
+        );
+
+        return obj.setData(data).setIsLoaded(true).setDirty(false);
       })
-      .catch(err => {
-        if (err.status === 404) {
+      .catch(error => {
+        if (error.status === 404) {
           return this.newDoc(name);
         }
       });
+  }
+
+  fetchDoc(name) {
+    const { scope } = this;
+    return new Document(Document.parsePath(name, scope)).read();
   }
 
   getDoc(name) {
@@ -107,7 +114,9 @@ class BaseStore {
         this.deleteDocFromStore(updateDoc.name);
       },
       set: updateDoc => {
-        this.addDoc(updateDoc);
+        if (!this.getDoc(updateDoc.name)) {
+          this.newDoc(updateDoc.name);
+        }
       }
     };
 
@@ -132,21 +141,24 @@ class BaseStore {
     };
   }
 
+  /**
+   * Creates the instances for the documents without any content
+   * Content is only loaded when the user opens the document
+   * @param {object} data Object with the list of existing documents
+   */
   loadDocs(data) {
     const docType = this.scope;
 
-    Object.values(data.value[docType])
-      .map(doc => {
-        // get previously loaded data
-        const prevLoaded = this.getDoc(doc.Label)?.serializeToDB() || {};
+    Object.values(data.value[docType]).forEach(doc => {
+      const name = doc.Label;
 
-        return {
-          name: doc.Label,
-          content: { ...prevLoaded, ...doc }
-        };
-      })
-      .forEach(doc => this.addDoc(doc));
+      // create only if the instance does not exist yet
+      if (!this.getDoc(name)) {
+        this.newDoc(name).setIsNew(false).setIsLoaded(false);
+      }
+    });
 
+    // fire subject onLoad
     if (typeof this.observer?.onLoad === "function") {
       this.observer.onLoad(this.name);
     }
