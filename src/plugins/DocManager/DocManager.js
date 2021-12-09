@@ -16,6 +16,7 @@ class DocManager extends IDEPlugin {
         "getDocFromNameType",
         "checkDocumentExists",
         "discardDocChanges",
+        "reloadDoc",
         "copy",
         "delete",
         "create",
@@ -107,6 +108,15 @@ class DocManager extends IDEPlugin {
   discardDocChanges(modelKey) {
     const { name, scope } = modelKey;
     return this.getStore(scope)?.discardDocChanges(name);
+  }
+
+  /**
+   * Reload document data
+   * @param {{name: String, scope: String}} modelKey
+   */
+  reloadDoc(modelKey) {
+    const { name, scope } = modelKey;
+    return this.getStore(scope)?.loadDoc(name);
   }
 
   /**

@@ -112,8 +112,6 @@ class DBSubscriber extends StoreAbstractPlugin {
           // getDirty is false:
           //    can overwrite because the local document was not changed
 
-          console.log("debug is dirty", doc.getDirty());
-
           doc.getDirty()
             ? doc.setOutdated(true)
             : this.overwriteDoc(filteredData);
@@ -129,9 +127,7 @@ class DBSubscriber extends StoreAbstractPlugin {
    * @returns {boolean} : True if objects are different
    */
   shouldUpdate(objOne, objTwo) {
-    const res = !_isEqual(objOne, objTwo);
-    console.log("debug should update", res);
-    return res;
+    return !_isEqual(objOne, objTwo);
   }
 
   /**
@@ -139,7 +135,6 @@ class DBSubscriber extends StoreAbstractPlugin {
    * @param {object} data The data to overwrite the document
    */
   overwriteDoc(data) {
-    console.log("debug overwriting doc", data);
     const doc = this.getDoc(this.docName);
 
     // get the static method

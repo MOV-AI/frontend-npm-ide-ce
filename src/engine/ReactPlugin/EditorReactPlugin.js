@@ -41,7 +41,6 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       on,
       call,
       addKeyBind,
-      scope,
       save,
       instance,
       activateKeyBind,
@@ -50,21 +49,48 @@ export function withEditorPlugin(ReactComponent, methods = []) {
     } = props;
 
     /**
+     * Handle submit action on save outdated document
+     * @param {string} action : One of options ("cancel", "updateDoc", "overwriteDoc")
+     */
+    const _handleOutdatedSave = React.useCallback(
+      action => {
+        const getSaveByAction = {
+          updateDoc: () => {
+            const { scope, name } = instance.current.serialize();
+            call("docManager", "reloadDoc", { scope, name });
+          },
+          overwriteDoc: save
+        };
+        return action in getSaveByAction ? getSaveByAction[action]() : false;
+      },
+      [instance, call, save]
+    );
+
+    /**
      * Save document :
-     *  if document is not in DB yet => Show new Document modal
-     *  else => Update document in DB
+     *  if document is outdated => prompt alert to the user before saving
+     *  else => Proceed with saving document
+     *    if doc is new => Create document in DB
+     *    else => Update document in DB
      */
     const saveDocument = React.useCallback(() => {
-      if (instance.current.isNew) {
-        // open new widget modal passing create as submit callback
-        call("dialog", "newDocument", {
-          scope: scope,
-          onSubmit: newName => save(newName)
+      // If document is outdated
+      const { scope, name } = instance.current.serialize();
+      if (instance.current.getOutdated()) {
+        call("dialog", "saveOutdatedDocument", {
+          name,
+          scope,
+          onSubmit: _handleOutdatedSave
         });
       } else {
-        save();
+        instance.current.getIsNew()
+          ? call("dialog", "newDocument", {
+              scope,
+              onSubmit: newName => save(newName)
+            })
+          : save();
       }
-    }, [call, save, instance, scope]);
+    }, [call, instance, save, _handleOutdatedSave]);
 
     /**
      * Activate editor : activate editor's keybinds and update right menu

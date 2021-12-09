@@ -1,9 +1,9 @@
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
 import ReactDOM from "react-dom";
-import CloseDirtyDocument from "./components/CloseDirtyDocument/CloseDirtyDocument";
 import ConfirmationDialog from "./components/ConfirmationDialog/ConfirmationDialog";
 import NewDocumentDialog from "./components/FormDialog/NewDocumentDialog";
 import AlertDialog from "./components/AlertDialog/AlertDialog";
+import AlertBeforeAction from "./components/AlertDialog/AlertBeforeAction";
 
 class Dialog extends IDEPlugin {
   constructor(profile = {}) {
@@ -15,7 +15,8 @@ class Dialog extends IDEPlugin {
         "confirmation",
         "newDocument",
         "copyDocument",
-        "closeDirtyDocument"
+        "closeDirtyDocument",
+        "saveOutdatedDocument"
       ])
     );
     super({ ...profile, methods });
@@ -108,10 +109,43 @@ class Dialog extends IDEPlugin {
    */
   closeDirtyDocument(data) {
     const targetElement = this._handleDialogOpen();
+    const title = "Do you want to save the changes?";
+    const message = `Your changes to the ${data.scope} "${data.name}" will be lost if you don't save them.`;
+    const actions = {
+      dontSave: { label: "Don't Save" },
+      cancel: { label: "Cancel" },
+      save: { label: "Save" }
+    };
     ReactDOM.render(
-      <CloseDirtyDocument
-        name={data.name}
-        scope={data.scope}
+      <AlertBeforeAction
+        title={title}
+        message={message}
+        actions={actions}
+        onSubmit={data.onSubmit}
+        onClose={this._handleDialogClose}
+      />,
+      targetElement
+    );
+  }
+
+  saveOutdatedDocument(data) {
+    const targetElement = this._handleDialogOpen();
+    // Set dialog message
+    const title = "The document is outdated";
+    const message =
+      "This document has recent updates in the Database. The version you are working is outdated.\n\nIf you update document your changes will be lost.";
+    // Set dialog actions
+    const actions = {
+      updateDoc: { label: "Update document" },
+      overwriteDoc: { label: "Overwrite document" },
+      cancel: { label: "Cancel" }
+    };
+    // Show dialog
+    ReactDOM.render(
+      <AlertBeforeAction
+        title={title}
+        message={message}
+        actions={actions}
         onSubmit={data.onSubmit}
         onClose={this._handleDialogClose}
       />,
