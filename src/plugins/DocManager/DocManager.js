@@ -244,7 +244,7 @@ class DocManager extends IDEPlugin {
     const hasDirties = this.hasDirties();
     if (hasDirties) {
       event.preventDefault();
-      return "test vai sair doido?";
+      return "You have unsaved documents. Are you sure you want to quit?";
     } else {
       delete event["returnValue"];
     }

@@ -1,12 +1,6 @@
-- close tab on delete
-- - event: mj - done
-- - components: rm
-
-- save is not working
 
 docmanager
 
-- !!!! redis subscribers
 - tests
 - versioning
 - undo/redo
@@ -15,10 +9,14 @@ theme bug
 
 editors
 
+- configuration
+  - !! update code on subscribe changes
 - callbacks
 - - model: mj - Done
 - nodes
 - !!!! flows
+
+- fix beforeunload
 
 Tools
 
