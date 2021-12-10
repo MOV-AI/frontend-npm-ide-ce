@@ -9,6 +9,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { CircularProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { withTheme } from "../../../../decorators/withTheme";
 
 function useTranslation() {
   return { t: s => s };
@@ -160,7 +161,7 @@ const FormDialog = props => {
   );
 };
 
-export default FormDialog;
+export default withTheme(FormDialog);
 
 FormDialog.propTypes = {
   onValidation: PropTypes.func,

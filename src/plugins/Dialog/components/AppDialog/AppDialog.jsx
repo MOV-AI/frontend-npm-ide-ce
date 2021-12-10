@@ -8,6 +8,7 @@ import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import { makeStyles } from "@material-ui/core/styles";
 import { IconButton, Typography } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
+import { withTheme } from "../../../../decorators/withTheme";
 
 function useTranslation() {
   return { t: s => s };
@@ -126,4 +127,4 @@ AppDialog.defaultProps = {
   closeOnBackdrop: true
 };
 
-export default AppDialog;
+export default withTheme(AppDialog);
