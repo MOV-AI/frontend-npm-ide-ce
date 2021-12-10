@@ -205,19 +205,16 @@ const useLayout = (props, dockRef) => {
    */
   const _onLayoutRemoveTab = React.useCallback(
     (newLayout, tabId) => {
-      const { name, scope, isDirty } = tabsById.current.get(tabId);
+      const { name, scope, isNew, isDirty } = tabsById.current.get(tabId);
       if (isDirty) {
         _closeDirtyTab(name, scope, newLayout);
       } else {
-        call("docManager", "read", { name, scope }).then(doc => {
-          // Remove doc locally if is new and not dirty
-          if (doc.getIsNew())
-            call("docManager", "discardDocChanges", { name, scope });
-          // Remove tab and apply new layout
-          tabsById.current.delete(tabId);
-          workspaceManager.setTabs(tabsById.current);
-          _applyLayout(newLayout);
-        });
+        // Remove doc locally if is new and not dirty
+        if (isNew) call("docManager", "discardDocChanges", { name, scope });
+        // Remove tab and apply new layout
+        tabsById.current.delete(tabId);
+        workspaceManager.setTabs(tabsById.current);
+        _applyLayout(newLayout);
       }
     },
     [call, workspaceManager, _applyLayout, _closeDirtyTab]
@@ -307,6 +304,7 @@ const useLayout = (props, dockRef) => {
               return {
                 id: docData.id,
                 name: docData.name,
+                isNew: docData.isNew,
                 title: _getCustomTab(docData, _closeTab),
                 extension: extension,
                 scope: docData.scope,
@@ -429,7 +427,7 @@ const useLayout = (props, dockRef) => {
     data => {
       const tabFromMemory = tabsById.current.get(data.id);
       if (!tabFromMemory && !data.content) return;
-      const { id, content, scope, name, extension, isDirty } =
+      const { id, content, scope, name, extension, isDirty, isNew } =
         tabFromMemory ?? data;
       tabsById.current.set(id, {
         id,
@@ -437,6 +435,7 @@ const useLayout = (props, dockRef) => {
         name,
         content,
         extension,
+        isNew,
         isDirty
       });
       const tabData = { id, scope, name, extension };

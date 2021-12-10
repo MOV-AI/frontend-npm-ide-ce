@@ -153,11 +153,19 @@ class Store extends BaseStore {
   }
 
   /**
+   * Get all dirty documents
+   * @returns {Array} Names of dirty documents from store
+   */
+  getDirties() {
+    return Array.from(this.data.values()).filter(obj => obj.getDirty());
+  }
+
+  /**
    * Checks if the store has any documents changed (dirty)
    * @returns {Boolean}
    */
   hasDirties() {
-    return Array.from(this.data.values()).some(obj => obj.getDirty());
+    return this.getDirties().length > 0;
   }
 
   /**
@@ -165,11 +173,9 @@ class Store extends BaseStore {
    * @returns {Promise<>}
    */
   saveDirties() {
-    const promises = Array.from(this.data.values)
-      .filter(obj => obj.getDirty())
-      .map(obj => {
-        return this.saveDoc(obj.getName());
-      });
+    const promises = this.getDirties().map(obj => {
+      return this.saveDoc(obj.getName());
+    });
 
     return Promise.allSettled(promises);
   }

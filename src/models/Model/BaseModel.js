@@ -132,6 +132,7 @@ export default class Model extends Observable {
   serialize() {
     return {
       id: this.getId(),
+      url: this.getUrl(),
       name: this.getName(),
       scope: this.getScope(),
       workspace: this.getWorkspace(),

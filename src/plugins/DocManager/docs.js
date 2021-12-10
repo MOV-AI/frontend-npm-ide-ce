@@ -1,4 +1,3 @@
-import CallbackStore from "../../store/Callback/CallbackStore";
 import ConfigurationStore from "../../store/Configuration/ConfigurationStore";
 import Configuration from "../views/editors/Configuration/Configuration";
 
@@ -10,10 +9,10 @@ import Configuration from "../views/editors/Configuration/Configuration";
 
 const factory = (workspace, observer) => {
   return {
-    [CallbackStore.SCOPE]: {
-      store: new CallbackStore(workspace, observer),
-      plugin: Configuration
-    },
+    // [CallbackStore.SCOPE]: {
+    //   store: new CallbackStore(workspace, observer),
+    //   plugin: Configuration
+    // },
     [ConfigurationStore.SCOPE]: {
       store: new ConfigurationStore(workspace, observer),
       plugin: Configuration

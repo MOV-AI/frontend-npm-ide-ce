@@ -27,8 +27,9 @@ class DocManager extends IDEPlugin {
     super({ ...profile, methods });
     // Used to debug docManager in console
     window.DocManager = this;
-    // Add before unload event
+    // Add unload events
     window.onbeforeunload = this.onBeforeUnload;
+    window.onunload = this.onUnload;
   }
 
   activate() {
@@ -245,6 +246,25 @@ class DocManager extends IDEPlugin {
       event.preventDefault();
       return "You have unsaved documents. Are you sure you want to quit?";
     }
+  };
+
+  /**
+   * Event triggered when app unloads (user did close or refreshed page)
+   *  Discard changes
+   *  Remove subscribers
+   * @param {Event} event
+   */
+  onUnload = event => {
+    this.getStores().forEach(store => {
+      const dirtyDocs = store.getDirties();
+      dirtyDocs.forEach(doc => {
+        const { url, name, scope } = doc.serialize();
+        this.discardDocChanges({ scope, name });
+        if (doc.getIsNew()) this.emit(TOPICS.deleteDoc, { url, name, scope });
+      });
+      // Destroy store to kill subscribers
+      store.destroy();
+    });
   };
 }
 
