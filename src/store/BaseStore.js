@@ -150,7 +150,7 @@ class BaseStore extends StorePluginManager {
 
       // create only if the instance does not exist yet
       if (!this.getDoc(name)) {
-        this.newDoc(name).setIsNew(false).setIsLoaded(false);
+        this.newDoc(name).setIsNew(false).setIsLoaded(false).setDirty(false);
       }
     });
 

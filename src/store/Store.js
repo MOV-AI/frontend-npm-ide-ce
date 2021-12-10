@@ -160,7 +160,7 @@ class Store extends BaseStore {
    * @returns {Boolean}
    */
   hasDirties() {
-    return Array.from(this.data.values).some(obj => obj.getDirty());
+    return Array.from(this.data.values()).some(obj => obj.getDirty());
   }
 
   /**
