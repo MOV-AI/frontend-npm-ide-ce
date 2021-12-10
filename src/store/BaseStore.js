@@ -173,6 +173,7 @@ class BaseStore extends StorePluginManager {
   }
 
   destroy() {
+    super.destroy();
     if (this.subscriber) this.subscriber.destroy();
   }
 }

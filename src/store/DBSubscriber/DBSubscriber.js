@@ -146,7 +146,7 @@ class DBSubscriber extends StoreAbstractPlugin {
    */
   destroy() {
     for (const i of this[symbols.subscribers].values()) {
-      i.destroy();
+      i.unsubscribe();
     }
     this[symbols.subscribers].clear();
   }

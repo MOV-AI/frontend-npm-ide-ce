@@ -15,6 +15,7 @@ class Subscriber {
 
   destroy() {
     this.unsubscribe();
+    MasterDB.close();
   }
 }
 
