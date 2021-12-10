@@ -3,10 +3,7 @@ import PropTypes from "prop-types";
 import Model from "../../../../models/Configuration/Configuration";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
-import {
-  usePluginMethods,
-  usePrevious
-} from "../../../../engine/ReactPlugin/ViewReactPlugin";
+import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { AppBar, Toolbar } from "@material-ui/core";
@@ -48,7 +45,6 @@ const Configuration = (props, ref) => {
   const theme = useTheme();
   // Refs
   const editorRef = React.useRef();
-  const previousData = usePrevious(data);
 
   //========================================================================================
   /*                                                                                      *
@@ -72,22 +68,6 @@ const Configuration = (props, ref) => {
   usePluginMethods(ref, {
     renderRightMenu
   });
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                   React lifecycles                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  // Render right menu
-  React.useEffect(() => {
-    // Reset editor undoManager after first load
-    if (editorRef.current && previousData && !previousData?.name) {
-      const editorModel = editorRef.current.getModel();
-      const loadedCode = data?.code ?? "";
-      editorModel.setValue(loadedCode);
-    }
-  }, [data, previousData]);
 
   //========================================================================================
   /*                                                                                      *

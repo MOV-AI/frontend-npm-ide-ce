@@ -257,9 +257,12 @@ class DocManager extends IDEPlugin {
   onUnload = event => {
     this.getStores().forEach(store => {
       const dirtyDocs = store.getDirties();
+
       dirtyDocs.forEach(doc => {
         const { url, name, scope } = doc.serialize();
+        // Discard dirty document changes
         this.discardDocChanges({ scope, name });
+        // Emit event to close untitled tabs
         if (doc.getIsNew()) this.emit(TOPICS.deleteDoc, { url, name, scope });
       });
       // Destroy store to kill subscribers
