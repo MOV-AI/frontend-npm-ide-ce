@@ -215,6 +215,8 @@ const useLayout = (props, dockRef) => {
         tabsById.current.delete(tabId);
         workspaceManager.setTabs(tabsById.current);
         _applyLayout(newLayout);
+        // Reset bookmarks
+        call("rightDrawer", "resetBookmarks");
       }
     },
     [call, workspaceManager, _applyLayout, _closeDirtyTab]
