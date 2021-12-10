@@ -14,6 +14,9 @@ const useStyles = makeStyles(theme => ({
     overflowX: "hidden",
     justifyContent: "center",
     width: "100%"
+  },
+  header: {
+    marginBottom: 6
   }
 }));
 
@@ -24,98 +27,97 @@ const Explorer = props => {
 
   const { t } = useTranslation();
 
-  /* eslint-disable react-hooks/exhaustive-deps */
-  React.useEffect(() => {
-    const loadDocs = docManager => {
-      setData(_ => {
-        return docManager.getDocTypes().map((docType, id) => {
-          return {
-            id,
-            name: docType.name,
-            title: docType.title,
-            children: docManager
-              .getDocsFromType(docType.scope)
-              .map((docFromType, innerId) => {
-                return {
-                  id: innerId,
-                  name: docFromType.name,
-                  title: docFromType.name,
-                  scope: docType.scope,
-                  url: docFromType.url
-                };
-              })
-          };
-        });
-      });
-    };
-    on("docManager", "loadDocs", loadDocs);
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
 
-    const updateDocs = (docManager, { action, documentName, documentType }) => {
-      const updateByActionMap = {
-        delete: () => {
-          setData(prevState => {
-            const newData = [...prevState];
-            // TODO: optimize time
-            const typeIndex = newData.findIndex(
-              type => type.name === documentType
-            );
-            if (typeIndex >= 0) {
-              const documentIndex = newData[typeIndex].children.findIndex(
-                doc => doc.name === documentName
-              );
-              if (documentIndex >= 0) {
-                newData[typeIndex].children.splice(documentIndex, 1);
-              }
-            }
-            return newData;
-          });
-        },
-        update: () => {
-          setData(prevState => {
-            const newData = [...prevState];
-            // TODO: optimize time
-            const typeIndex = newData.findIndex(
-              type => type.name === documentType
-            );
-            if (typeIndex >= 0) {
-              const documentIndex = newData[typeIndex].children.findIndex(
-                doc => doc.name === documentName
-              );
-              if (documentIndex < 0) {
-                const document = docManager.getDocFromNameType(
-                  documentName,
-                  documentType
-                );
-                if (document) {
-                  pushSorted(
-                    newData[typeIndex].children,
-                    {
-                      name: document.name,
-                      title: document.name,
-                      scope: document.getScope(),
-                      url: document.url
-                    },
-                    (a, b) => {
-                      const nameA = a.name.toLowerCase();
-                      const nameB = b.name.toLowerCase();
-                      return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
-                    }
-                  );
-                }
-              }
-            }
-            return newData;
-          });
+  /**
+   * Push element into list in correct position
+   * @param {Array} list
+   * @param {TreeNode} element
+   */
+  const _pushSorted = React.useCallback((list, element) => {
+    /**
+     * Compare objects' name property to sort
+     * @param {*} a
+     * @param {*} b
+     * @returns
+     */
+    const compareByName = (a, b) => {
+      const nameA = a.name.toLowerCase();
+      const nameB = b.name.toLowerCase();
+      if (nameA < nameB) return -1;
+      if (nameA > nameB) return 1;
+      return 0;
+    };
+    // Insert element
+    list.push(element);
+    // Return sorted list
+    return list.sort(compareByName).map((x, i) => ({ ...x, id: i }));
+  }, []);
+
+  /**
+   * Delete document from local list
+   * @param {{documentName: String, documentType: String}} docData
+   */
+  const _deleteDocument = React.useCallback(docData => {
+    const { documentName, documentType } = docData;
+    setData(prevState => {
+      const newData = [...prevState];
+      // TODO: optimize time
+      const typeIndex = newData.findIndex(type => type.name === documentType);
+      if (typeIndex >= 0) {
+        const documentIndex = newData[typeIndex].children.findIndex(
+          doc => doc.name === documentName
+        );
+        if (documentIndex >= 0) {
+          newData[typeIndex].children.splice(documentIndex, 1);
         }
-      };
-      Maybe.fromNull(updateByActionMap[action]).forEach(updateAction =>
-        updateAction()
-      );
-    };
-    on("docManager", "updateDocs", updateDocs);
-  }, [on]);
+      }
+      return newData;
+    });
+  }, []);
 
-  const requestScopeVersions = node => {
+  /**
+   * Insert newly created document
+   * @param {DocManager} docManager
+   * @param {{documentName: String, documentType: String}} docData
+   */
+  const _addDocument = React.useCallback(
+    (docManager, docData) => {
+      const { documentName, documentType, document } = docData;
+      setData(prevState => {
+        // TODO: optimize time
+        const newData = [...prevState];
+        const typeIndex = newData.findIndex(type => type.name === documentType);
+        if (typeIndex >= 0) {
+          const documentIndex = newData[typeIndex].children.findIndex(
+            doc => doc.name === documentName
+          );
+          if (documentIndex < 0) {
+            _pushSorted(newData[typeIndex].children, {
+              name: document.getName(),
+              title: document.getName(),
+              scope: document.getScope(),
+              url: document.getUrl()
+            });
+          }
+        }
+        return newData;
+      });
+    },
+    [_pushSorted]
+  );
+
+  /**
+   * Expand tree or open document depending on the node deepness
+   *  0 : collapse others and expand tree node
+   *  1 : open document node
+   * @param {{id: String, deepness: String, url: String, name: String, scope: String}} node : Clicked node
+   */
+  const _requestScopeVersions = node => {
     const deepnessToAction = {
       0: () => {
         // Toggle the expansion of the clicked panel
@@ -142,35 +144,125 @@ const Explorer = props => {
         });
       },
       1: () => {
-        const tabName = `${node.name}.conf`;
         call("tabs", "openEditor", {
           id: node.url,
-          title: tabName,
           name: node.name,
           scope: node.scope
         });
       }
     };
-    _get(deepnessToAction, node.deepness, () => {})();
+    _get(deepnessToAction, node.deepness, () => {
+      console.log("action not implemented");
+    })();
   };
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                   React callbacks                                    *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Load documents
+   * @param {DocManager} docManager
+   */
+  const loadDocs = React.useCallback(docManager => {
+    return setData(_ =>
+      docManager.getStores().map((store, id) => {
+        const { name, title } = store;
+        return {
+          id,
+          name,
+          title,
+          children: store.getDocs().map((doc, childId) => {
+            return {
+              id: childId,
+              name: doc.getName(),
+              title: doc.getName(),
+              scope: doc.getScope(),
+              url: doc.getUrl()
+            };
+          })
+        };
+      })
+    );
+  }, []);
+
+  /**
+   *
+   * @param {DocManager} docManager
+   * @param {{action: String, documentName: String, documentType: String}} docData
+   */
+  const updateDocs = React.useCallback(
+    (docManager, docData) => {
+      const { action } = docData;
+      const updateByActionMap = {
+        del: () => _deleteDocument(docData),
+        set: () => _addDocument(docManager, docData)
+      };
+      Maybe.fromNull(updateByActionMap[action]).forEach(updateAction =>
+        updateAction()
+      );
+    },
+    [_deleteDocument, _addDocument]
+  );
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                   React lifecycles                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  React.useEffect(() => {
+    on("docManager", "loadDocs", loadDocs);
+    on("docManager", "updateDocs", updateDocs);
+  }, [on, loadDocs, updateDocs]);
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                       Render                                         *
+   *                                                                                      */
+  //========================================================================================
 
   return (
     <Typography component="div">
-      <h1>{t("Explorer")}</h1>
+      <h1 className={classes.header}>{t("Explorer")}</h1>
       <Typography component="div" className={classes.typography}>
         <VirtualizedTree
           onClickNode={async node => {
-            requestScopeVersions(node);
+            _requestScopeVersions(node);
           }}
           data={data}
           handleChange={nodes => {
             console.log("debug handle change", nodes);
           }}
           handleCopyClick={node => {
-            console.log("debug copy node", node);
+            const { name, scope } = node;
+            call("dialog", "copyDocument", {
+              scope,
+              name,
+              onSubmit: newName =>
+                new Promise((resolve, reject) => {
+                  call("docManager", "copy", { name, scope }, newName).then(
+                    () => resolve()
+                  );
+                })
+            });
           }}
+          // TODO: fire a snackbar on error
           handleDeleteClick={node => {
-            console.log("debug delete node", node);
+            const { name, scope } = node;
+            call("dialog", "confirmation", {
+              submitText: "Delete",
+              title: t("Confirm to delete"),
+              onSubmit: () =>
+                call("docManager", "delete", { name, scope }).catch(error =>
+                  console.log(
+                    `Could not delete ${name} \n ${error.statusText ?? error}`
+                  )
+                ),
+              message: `Are you sure you want to delete the document "${name}"?`
+            });
           }}
           handleCompareClick={node => {
             console.log("debug compare click", node);
@@ -196,9 +288,4 @@ Explorer.defaultProps = {
 
 function useTranslation() {
   return { t: s => s };
-}
-
-function pushSorted(list, elem, comparator) {
-  list.push(elem);
-  return list.sort(comparator).map((x, i) => ({ ...x, id: i }));
 }

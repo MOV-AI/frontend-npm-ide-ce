@@ -25,19 +25,19 @@ const withMenuHandler = Component => {
       // render component menus (if any)
       const editorRef = ref?.current;
       if (!editorRef) return;
-      const updateRightMenu = editorRef.renderRightMenu
+      const _updateRightMenu = editorRef.renderRightMenu
         ? editorRef.renderRightMenu
         : resetRightMenu;
       // Render (or close) right menu details
-      updateRightMenu();
-      updateRightMenuRef.current = updateRightMenu;
-      if (editorRef.renderRightMenu) call("rightDrawer", "open");
+      _updateRightMenu();
+      updateRightMenuRef.current = _updateRightMenu;
     };
 
     /**
      *
      */
     const updateRightMenu = () => {
+      if (!updateRightMenuRef.current) initRightMenu();
       updateRightMenuRef.current();
     };
 

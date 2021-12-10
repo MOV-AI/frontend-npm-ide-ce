@@ -7,7 +7,6 @@ import "react-virtualized-tree/lib/main.css";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import DeleteIcon from "@material-ui/icons/DeleteOutline";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
-import CompareIcon from "@material-ui/icons/Compare";
 import IconButton from "@material-ui/core/IconButton";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
@@ -66,6 +65,7 @@ const styles = theme => ({
 });
 
 const EXPANDED = "EXPANDED";
+const DEFAULT_FUNCTION = name => console.log(name, "not implemented");
 
 const CustomTooltip = withStyles(theme => ({
   tooltip: {
@@ -95,7 +95,7 @@ class VirtualizedTree extends Component {
       .map(node => {
         return {
           ...node,
-          children: (node?.children || []).filter(
+          children: (node?.children ?? []).filter(
             ch =>
               ch.name &&
               !ch.name.includes("@SM") &&
@@ -126,22 +126,11 @@ class VirtualizedTree extends Component {
     this.setState({ selectedGroup });
   };
 
-  // open: true -> expand
-  //       false -> collapse
-  handleExpansion = (evt, nodes, node, open) => {
-    // const treeData = _cloneDeep(nodes);
-    // _set(treeData, [node.id, "state"], {
-    //   expanded: open
-    // });
-    // evt.stopPropagation();
-    // this.props.handleChange(treeData);
-  };
-
   handleTooltipOpen = _debounce((target, node) => {
     if (!target) return;
     const nodeTooltip = this.state.nodeTooltip;
     const hasOverflow = target.offsetWidth < target.scrollWidth;
-    const nodeUrl = node.url || node.name;
+    const nodeUrl = node.url ?? node.name;
     if (hasOverflow && nodeTooltip !== nodeUrl) {
       setImmediate(() => {
         this.setState({ nodeTooltip: nodeUrl });
@@ -192,21 +181,9 @@ class VirtualizedTree extends Component {
                     <Box p={1} className={classes.inlineFlex}>
                       <Grid alignContent={"space-between"} container>
                         {_get(node, `children`, false) &&
-                          node.state?.expanded && (
-                            <ExpandMoreIcon
-                              onClick={evt =>
-                                this.handleExpansion(evt, nodes, node, false)
-                              }
-                            />
-                          )}
+                          node.state?.expanded && <ExpandMoreIcon />}
                         {_get(node, `children`, false) &&
-                          !node.state?.expanded && (
-                            <ChevronRightIcon
-                              onClick={evt =>
-                                this.handleExpansion(evt, nodes, node, true)
-                              }
-                            />
-                          )}
+                          !node.state?.expanded && <ChevronRightIcon />}
 
                         <div
                           className={
@@ -232,7 +209,7 @@ class VirtualizedTree extends Component {
                             disableHoverListener
                             disableTouchListener
                             placement="right-start"
-                            open={(node.url || node.name) === nodeTooltip}
+                            open={(node.url ?? node.name) === nodeTooltip}
                           >
                             <div
                               className={classes.ellipsis}
@@ -259,7 +236,6 @@ class VirtualizedTree extends Component {
                                     onClick: evt => {
                                       this.props.handleCopyClick({
                                         ...node,
-                                        scope: nodes[node.parents[0]].scope,
                                         scopeTitle: removePlural(
                                           nodes[node.parents[0]].name
                                         )
@@ -270,24 +246,21 @@ class VirtualizedTree extends Component {
                                   },
                                   {
                                     onClick: () => {
-                                      this.props.handleDeleteClick({
-                                        ...node,
-                                        scope: nodes[node.parents[0]].scope
-                                      });
+                                      this.props.handleDeleteClick({ ...node });
                                     },
                                     icon: <DeleteIcon fontSize="small" />,
                                     label: t("Delete")
-                                  },
-                                  {
-                                    onClick: () => {
-                                      this.props.handleCompareClick({
-                                        ...node,
-                                        scope: nodes[node.parents[0]].scope
-                                      });
-                                    },
-                                    icon: <CompareIcon fontSize="small" />,
-                                    label: t("Compare")
                                   }
+                                  // {
+                                  //   onClick: () => {
+                                  //     this.props.handleCompareClick({
+                                  //       ...node,
+                                  //       scope: nodes[node.parents[0]].scope
+                                  //     });
+                                  //   },
+                                  //   icon: <CompareIcon fontSize="small" />,
+                                  //   label: t("Compare")
+                                  // }
                                 ]}
                               ></ContextMenu>
                             </div>
@@ -321,12 +294,12 @@ VirtualizedTree.propTypes = {
 VirtualizedTree.defaultProps = {
   data: [],
   showIcons: false,
-  onClickNode: () => {},
-  onDoubleClickNode: () => {},
-  handleChange: () => {},
-  handleCopyClick: () => {},
-  handleDeleteClick: () => {},
-  handleCompareClick: () => {},
+  onClickNode: () => DEFAULT_FUNCTION("onClickNode"),
+  onDoubleClickNode: () => DEFAULT_FUNCTION("onDoubleClickNode"),
+  handleChange: () => DEFAULT_FUNCTION("handleChange"),
+  handleCopyClick: () => DEFAULT_FUNCTION("handleCopyClick"),
+  handleDeleteClick: () => DEFAULT_FUNCTION("handleDeleteClick"),
+  handleCompareClick: () => DEFAULT_FUNCTION("handleCompareClick"),
   height: 700
 };
 

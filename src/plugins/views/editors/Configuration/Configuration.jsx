@@ -1,12 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
-import ConfigurationModel from "../../../../models/Configuration/Configuration";
+import Model from "../../../../models/Configuration/Configuration";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
-import {
-  usePluginMethods,
-  usePrevious
-} from "../../../../engine/ReactPlugin/ViewReactPlugin";
+import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { AppBar, Toolbar } from "@material-ui/core";
@@ -30,15 +27,17 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+const DEFAULT_FUNCTION = name => console.log(`${name} not implemented`);
+
 const Configuration = (props, ref) => {
   const {
     id,
     name,
     call,
-    setData = () => {},
-    activateEditor = () => {},
-    saveDocument = () => {},
-    data = ConfigurationModel.EMPTY,
+    instance,
+    activateEditor = () => DEFAULT_FUNCTION("activateEditor"),
+    saveDocument = () => DEFAULT_FUNCTION("saveDocument"),
+    data = new Model({}).serialize(),
     editable = true
   } = props;
   // Style Hooks
@@ -46,7 +45,6 @@ const Configuration = (props, ref) => {
   const theme = useTheme();
   // Refs
   const editorRef = React.useRef();
-  const previousData = usePrevious(data);
 
   //========================================================================================
   /*                                                                                      *
@@ -55,7 +53,7 @@ const Configuration = (props, ref) => {
   //========================================================================================
 
   const renderRightMenu = React.useCallback(() => {
-    const details = data.details || {};
+    const details = data.details ?? {};
     const menuName = `${id}-detail-menu`;
     // add bookmark
     call("rightDrawer", "setBookmark", {
@@ -73,41 +71,17 @@ const Configuration = (props, ref) => {
 
   //========================================================================================
   /*                                                                                      *
-   *                                   React lifecycles                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  // Render right menu
-  React.useEffect(() => {
-    // Reset editor undoManager after first load
-    if (
-      editorRef.current &&
-      previousData?.name === ConfigurationModel.EMPTY.name
-    ) {
-      const editorModel = editorRef.current.getModel();
-      const loadedCode = data?.code || "";
-      editorModel.setValue(loadedCode);
-    }
-  }, [data, previousData]);
-
-  //========================================================================================
-  /*                                                                                      *
    *                                 Document Functions                                   *
    *                                                                                      */
   //========================================================================================
 
-  const updateConfigExtension = configExtension => {
-    setData(prevState => {
-      return (prevState || ConfigurationModel.EMPTY).setExtension(
-        configExtension
-      );
-    });
+  const updateConfigExtension = value => {
+    if (instance.current) instance.current.setExtension(value);
   };
 
-  const updateConfigCode = configCode => {
-    setData(prevState => {
-      return (prevState || ConfigurationModel.EMPTY).setCode(configCode);
-    });
+  const updateConfigCode = value => {
+    if (value === instance.current.getCode()) return;
+    if (instance.current) instance.current.setCode(value);
   };
 
   //========================================================================================
@@ -147,9 +121,10 @@ const Configuration = (props, ref) => {
             size="small"
             exclusive
             value={data.extension}
-            onChange={(event, newExtension) =>
-              updateConfigExtension(newExtension)
-            }
+            onChange={(event, newExtension) => {
+              event.stopPropagation();
+              updateConfigExtension(newExtension);
+            }}
           >
             <ToggleButton value="xml">XML</ToggleButton>
             <ToggleButton value="yaml">YAML</ToggleButton>

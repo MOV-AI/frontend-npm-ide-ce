@@ -1,14 +1,18 @@
 export default class Node {
   constructor(name) {
     this.name = name;
-    this.url = `global/${this.getType()}/${this.name}`;
+    this.url = `global/${this.getScope()}/${this.name}`;
   }
 
-  getType() {
-    return Node.TYPE;
+  getScope() {
+    return Node.SCOPE;
   }
 
-  static TYPE = "Node";
+  getFileExtension() {
+    return ".nd";
+  }
+
+  static SCOPE = "Node";
 
   static ofJSON(json) {
     return new Node(json.Label);

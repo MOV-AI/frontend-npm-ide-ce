@@ -43,7 +43,7 @@ const Configuration = props => {
 
   const updateConfigExtension = configExtension => {
     setData(prevState => {
-      return (prevState || ConfigurationModel.EMPTY).setExtension(
+      return (prevState ?? ConfigurationModel.EMPTY).setExtension(
         configExtension
       );
     });
@@ -51,7 +51,7 @@ const Configuration = props => {
 
   const updateConfigCode = configCode => {
     setData(prevState => {
-      return (prevState || ConfigurationModel.EMPTY).setCode(configCode);
+      return (prevState ?? ConfigurationModel.EMPTY).setCode(configCode);
     });
   };
 

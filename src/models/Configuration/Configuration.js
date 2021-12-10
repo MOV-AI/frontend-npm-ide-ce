@@ -1,18 +1,18 @@
 import Model from "../Model/Model";
+import schema from "./schema";
 
 export default class Configuration extends Model {
-  /**
-   * This should be private
-   * @param {*} name
-   * @param {*} extension
-   * @param {*} code
-   * @param {*} details
-   */
-  constructor(name, extension, code, details) {
-    super(name, details);
-    this.extension = extension || "yaml";
-    this.code = code || "";
+  constructor() {
+    // inject imported schema and forward constructor arguments
+    super({ schema, ...arguments[0] });
   }
+
+  // Extend Model properties and assign defaults
+  code = "";
+  extension = "yaml";
+
+  // Define observable properties
+  observables = ["name", "details", "code", "extension"];
 
   getCode() {
     return this.code;
@@ -28,7 +28,7 @@ export default class Configuration extends Model {
   }
 
   setExtension(extension) {
-    this.extension = extension;
+    this.extension = extension || this.extension;
     return this;
   }
 
@@ -36,17 +36,63 @@ export default class Configuration extends Model {
     return Configuration.SCOPE;
   }
 
-  static SCOPE = "Configuration";
+  getFileExtension() {
+    return Configuration.EXTENSION;
+  }
 
-  static ofJSON(json) {
-    const {
+  serialize() {
+    return {
+      ...super.serialize(),
+      code: this.getCode(),
+      extension: this.getExtension()
+    };
+  }
+
+  /**
+   * Serialize model properties to database format
+   * @returns {object} Database data
+   */
+  serializeToDB() {
+    const { name, code, extension, details } = this.serialize();
+
+    return {
       Label: name,
       Yaml: code,
       Type: extension,
       LastUpdate: details
-    } = json;
-    return new Configuration(name, extension, code, details);
+    };
   }
 
-  static EMPTY = new Configuration();
+  /**
+   * Serialize database data to model properties
+   * @param {object} json : The data received from the database
+   * @returns {object} Model properties
+   */
+  static serializeOfDB(json) {
+    const {
+      Label: id,
+      Label: name,
+      Yaml: code,
+      Type: extension,
+      LastUpdate: details,
+      workspace,
+      version
+    } = json;
+
+    return {
+      id,
+      name,
+      code,
+      extension,
+      details,
+      workspace,
+      version
+    };
+  }
+
+  static SCOPE = "Configuration";
+
+  static EXTENSION = ".conf";
+
+  static EMPTY = new Configuration({});
 }

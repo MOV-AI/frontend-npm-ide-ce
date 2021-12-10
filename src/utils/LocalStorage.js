@@ -5,7 +5,6 @@ class LocalStorage {
   }
 
   set(key, value) {
-    console.log("debug setting key", key, value);
     localStorage[key] = JSON.stringify(value);
     return this;
   }
