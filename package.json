@@ -16,7 +16,7 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.60",
     "@material-ui/styles": "^4.11.4",
-    "@mov-ai/mov-fe-lib-code-editor": "^1.0.4",
+    "@mov-ai/mov-fe-lib-code-editor": "^1.0.5",
     "@mov-ai/mov-fe-lib-core": "^1.0.33",
     "@mov-ai/mov-fe-lib-react": "^1.0.33",
     "@remixproject/engine": "^0.3.19",
