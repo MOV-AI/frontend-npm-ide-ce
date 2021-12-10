@@ -7,7 +7,7 @@ export class HostReactPlugin extends IDEPlugin {
   constructor(profile) {
     // Remove duplicated if needed
     const methods = Array.from(
-      new Set([...(profile.methods || []), "addView", "removeView", "update"])
+      new Set([...(profile.methods ?? []), "addView", "removeView", "update"])
     );
     super({ ...profile, methods });
   }

@@ -65,7 +65,7 @@ export function withViewPlugin(ReactComponent, methods = []) {
   const RefComponent = React.forwardRef((props, ref) =>
     ReactComponent(props, ref)
   );
-  const WithPlugin = class extends ViewPlugin {
+  return class extends ViewPlugin {
     constructor(profile, props = {}) {
       super(profile, props, methods);
     }
@@ -84,7 +84,6 @@ export function withViewPlugin(ReactComponent, methods = []) {
       );
     }
   };
-  return WithPlugin;
 }
 
 //========================================================================================

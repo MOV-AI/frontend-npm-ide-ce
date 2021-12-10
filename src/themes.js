@@ -95,7 +95,7 @@ const overrideTheme = {
 // add common component overrides for all themes
 Object.keys(overrideTheme).forEach(theme => {
   overrideTheme[theme].overrides = {
-    ...(overrideTheme[theme].overrides || {}),
+    ...(overrideTheme[theme].overrides ?? {}),
     ...overrides
   };
 });

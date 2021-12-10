@@ -1,34 +1,68 @@
 import React from "react";
 
 const MESSAGES = {
-  saveSucess: "Saved successfully",
-  createSuccess: "Saved successfully"
+  save: {
+    success: "Saved successfully",
+    error: "Failed to save"
+  }
 };
 
 const DataHandler = props => {
   const { children, call, scope, name, id, alert } = props;
   const [data, setData] = React.useState();
+  const modelRef = React.useRef();
+  const subscriberRef = React.useRef();
+
   const { t } = useTranslation();
 
-  const save = () => {
-    call("docManager", "save", { scope, name }).then(res => {
-      alert({ message: t(MESSAGES.saveSucess), severity: "success" });
-    });
+  /**
+   * Save document
+   * @param {String} newName : Document name (used to set document name when creating a new document)
+   */
+  const save = newName => {
+    call("docManager", "save", { scope, name }, newName)
+      .then(res => {
+        if (res.success) {
+          alert({ message: t(MESSAGES.save.success), severity: "success" });
+          if (newName) {
+            const newTabData = {
+              id: modelRef.current.getUrl(),
+              name: newName,
+              scope: scope
+            };
+            call("tabs", "updateTabId", id, newTabData);
+          }
+        } else {
+          alert({ message: t(MESSAGES.save.error), severity: "error" });
+        }
+      })
+      .catch(error => {
+        console.log("Failed to save: error", error);
+        alert({ message: t(MESSAGES.save.error), severity: "error" });
+      });
   };
 
-  const create = () => {
-    call("docManager", "create", { scope, name }).then(res => {
-      alert({ message: t(MESSAGES.createSuccess), severity: "success" });
-    });
-  };
-
+  /**
+   * On Load : read data and set model in modelRef
+   */
   React.useEffect(() => {
-    if (!id) return;
-    call("docManager", "read", { scope, name }).then(model => setData(model));
-  }, [call, id, scope, name]);
+    call("docManager", "read", { scope, name }).then(model => {
+      setData(model.serialize());
+      modelRef.current = model;
+      subscriberRef.current = model.subscribe((instance, key, value) => {
+        setData(prevState => {
+          return { ...prevState, [key]: value };
+        });
+      });
+    });
+    // on component unmount : unsubscribe
+    return () => {
+      modelRef.current.unsubscribe(subscriberRef.current);
+    };
+  }, [call, scope, name]);
 
   return React.Children.map(children, el =>
-    React.cloneElement(el, { data, setData, save, create })
+    React.cloneElement(el, { data, save, instance: modelRef })
   );
 };
 

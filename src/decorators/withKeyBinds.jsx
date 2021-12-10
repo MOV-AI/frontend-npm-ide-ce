@@ -51,6 +51,10 @@ const withKeyBinds = Component => {
      */
     React.useEffect(() => {
       scopeRef.current = `${name}-${Math.random()}`;
+      // Delete scope to unbind keys when component is unmounted
+      return () => {
+        hotkeys.deleteScope(scopeRef.current);
+      };
     }, [name]);
 
     return (

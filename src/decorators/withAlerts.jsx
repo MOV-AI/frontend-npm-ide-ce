@@ -1,5 +1,4 @@
 import React from "react";
-import { snackbar } from "@mov-ai/mov-fe-lib-react";
 
 /**
  * Pass snackbar alerts to components
@@ -8,12 +7,15 @@ import { snackbar } from "@mov-ai/mov-fe-lib-react";
  */
 const withAlerts = Component => {
   return (props, ref) => {
+    // Props
+    const { call } = props;
+
     /**
      * Create snackbar alert
      * @param {{message: String, severity: String}} alertData
      */
-    const alert = ({ message, severity = "success" }) => {
-      snackbar({ message, severity });
+    const alert = ({ title, message, location, severity = "success" }) => {
+      call("alert", "show", { title, message, severity, location });
     };
 
     return <Component {...props} ref={ref} alert={alert} />;

@@ -2,6 +2,8 @@ import React from "react";
 import "./App.css";
 import PluginManagerIDE from "../engine/PluginManagerIDE/PluginManagerIDE";
 import DocManager from "../plugins/DocManager/DocManager";
+import Dialog from "../plugins/Dialog/Dialog";
+import Alerts from "../plugins/Alerts/Alerts";
 import BottomBar from "../plugins/hosts/BottomBar/BottomBar";
 import CentralPanel from "../plugins/hosts/CentralPanel/CentralPanel";
 import DrawerPanel from "../plugins/hosts/DrawerPanel/DrawerPanel";
@@ -12,7 +14,6 @@ import Explorer from "../plugins/views/Explorer/Explorer";
 import MainMenu from "../plugins/views/MainMenu/MainMenu";
 import Tabs from "../plugins/views/Tabs/Tabs";
 import Placeholder from "../plugins/views/Placeholder/Placeholder";
-import FormDialog from "../plugins/views/dialog/FormDialog/FormDialog";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
 import { withAuthentication, Style } from "@mov-ai/mov-fe-lib-react";
@@ -69,6 +70,14 @@ function installAppPlugins() {
     {
       profile: { name: "docManager" },
       factory: profile => new DocManager(profile)
+    },
+    {
+      profile: { name: "dialog" },
+      factory: profile => new Dialog(profile)
+    },
+    {
+      profile: { name: "alert" },
+      factory: profile => new Alerts(profile)
     }
   ];
   plugins.forEach(pluginDescription => {
@@ -94,10 +103,6 @@ function installViewPlugins() {
     {
       profile: { name: "placeholder", location: "rightDrawer" },
       factory: profile => new Placeholder(profile)
-    },
-    {
-      profile: { name: "formDialog", location: "formDialogPanel" },
-      factory: profile => new FormDialog(profile)
     }
   ];
   plugins.forEach(pluginDescription => {
@@ -140,7 +145,7 @@ function getHostedPlugins(classes) {
           className={classes.bottomBar}
         ></BottomBar>
       </Grid>
-      <AlertPanel hostName="formDialogPanel" />
+      <AlertPanel hostName="alertPanel" />
     </Grid>
   );
 }

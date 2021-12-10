@@ -42,7 +42,7 @@ export default class PluginManagerIDE {
    * @param {Function} lambda : Function to be called on topic emitted
    */
   addTopic(name, plugin, lambda) {
-    const pluginTopics = this.topics[plugin.profile.name] || { topics: {} };
+    const pluginTopics = this.topics[plugin.profile.name] ?? { topics: {} };
     pluginTopics.plugin = plugin;
     pluginTopics.topics = { ...pluginTopics.topics, [name]: lambda };
     this.topics[plugin.profile.name] = pluginTopics;
