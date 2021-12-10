@@ -241,12 +241,9 @@ class DocManager extends IDEPlugin {
    * @param {Event} event
    */
   onBeforeUnload = event => {
-    const hasDirties = this.hasDirties();
-    if (hasDirties) {
+    if (this.hasDirties()) {
       event.preventDefault();
       return "You have unsaved documents. Are you sure you want to quit?";
-    } else {
-      delete event["returnValue"];
     }
   };
 }
