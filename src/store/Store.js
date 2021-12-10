@@ -137,22 +137,19 @@ class Store extends BaseStore {
   }
 
   /**
-   * Discard document changes
-   * @param {string} name The name of the document to perform action
+   * Returns true if successfully discarded changes
+   * @param {string} name The name of the document
+   * @returns {boolean}
    */
   discardDocChanges(name) {
     // A new document only exists in the store
     //  so discarding its changes means removing it from the store
-    if (this.getDoc(name).getIsNew()) {
-      return Promise.resolve(this.deleteDocFromStore(name));
-    }
-    // Set isLoaded flag to false,
+    // Otherwise set isLoaded flag to false,
     //  so the next time the user tries to read it:
     //  it will load the doc from redis again
-    else {
-      const doc = this.getDoc(name).setIsLoaded(false);
-      this.setDoc(name, doc);
-    }
+    return this.getDoc(name).getIsNew()
+      ? this.deleteDocFromStore(name)
+      : Boolean(this.getDoc(name)?.setIsLoaded(false).setDirty(false));
   }
 
   /**

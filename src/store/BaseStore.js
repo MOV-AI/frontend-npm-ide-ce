@@ -87,8 +87,7 @@ class BaseStore extends StorePluginManager {
 
   deleteDocFromStore(name) {
     this.getDoc(name)?.destroy();
-    this.data.delete(name);
-    return this;
+    return this.data.delete(name);
   }
 
   generateName(next = 1) {

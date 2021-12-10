@@ -17,6 +17,9 @@ class Model {
   subscribe() {
     return this;
   }
+  destroy() {
+    return this;
+  }
 }
 
 test("store should have dirties", () => {
@@ -43,4 +46,14 @@ test("store should have one doc", () => {
   store.newDoc(docName);
 
   expect(Array.from(store.getDocs()).length).toBe(1);
+});
+
+test("should delete doc from store", () => {
+  const docName = "test";
+  const store = new Store({ name: "MyStore", model: Model });
+
+  store.newDoc(docName);
+
+  expect(store.deleteDocFromStore("test")).toBe(true);
+  expect(store.deleteDocFromStore("nodocname")).toBe(false);
 });
