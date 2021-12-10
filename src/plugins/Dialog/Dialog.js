@@ -55,6 +55,7 @@ class Dialog extends IDEPlugin {
         title={data.title}
         onSubmit={data.onSubmit}
         message={data.message}
+        submitText={data.submitText}
         onClose={this._handleDialogClose}
       />,
       targetElement

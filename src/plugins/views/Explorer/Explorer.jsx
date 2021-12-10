@@ -253,6 +253,7 @@ const Explorer = props => {
           handleDeleteClick={node => {
             const { name, scope } = node;
             call("dialog", "confirmation", {
+              submitText: "Delete",
               title: t("Confirm to delete"),
               onSubmit: () =>
                 call("docManager", "delete", { name, scope }).catch(error =>
