@@ -1,6 +1,7 @@
 const symbols = {
   timer: Symbol(),
-  callbacks: Symbol()
+  callbacks: Symbol(),
+  enabled: Symbol()
 };
 
 class Observable {
@@ -13,7 +14,7 @@ class Observable {
     return new Proxy(this, {
       set(target, prop, value) {
         // check if the property should be trapped
-        if (target.observables.includes(prop)) {
+        if (target.observables.includes(prop) && target[symbols.enabled]) {
           // set the property
           const res = Reflect.set(...arguments);
 
@@ -29,11 +30,22 @@ class Observable {
     });
   }
 
+  [symbols.enabled] = false;
+
   // List of porpeties to observe
   observables = [];
 
   // List of callbacks to execute on update
   [symbols.callbacks] = new Map();
+
+  /**
+   * Enable observables
+   * @returns
+   */
+  enableObservables() {
+    this[symbols.enabled] = true;
+    return this;
+  }
 
   /**
    * Subscribe to updates

@@ -10,12 +10,14 @@ export default class Model extends Observable {
     this.name = name;
     this.version = version;
     this.workspace = workspace;
+
+    this.enableObservables();
   }
 
   details = { user: "N/A", date: "N/A" };
   isNew = true;
   isLoaded = false;
-  isDirty = false;
+  isDirty = true;
   isOutdated = false;
 
   observables = ["name", "details"];
