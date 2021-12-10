@@ -7,7 +7,6 @@ import "react-virtualized-tree/lib/main.css";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import DeleteIcon from "@material-ui/icons/DeleteOutline";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
-import CompareIcon from "@material-ui/icons/Compare";
 import IconButton from "@material-ui/core/IconButton";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
@@ -251,17 +250,17 @@ class VirtualizedTree extends Component {
                                     },
                                     icon: <DeleteIcon fontSize="small" />,
                                     label: t("Delete")
-                                  },
-                                  {
-                                    onClick: () => {
-                                      this.props.handleCompareClick({
-                                        ...node,
-                                        scope: nodes[node.parents[0]].scope
-                                      });
-                                    },
-                                    icon: <CompareIcon fontSize="small" />,
-                                    label: t("Compare")
                                   }
+                                  // {
+                                  //   onClick: () => {
+                                  //     this.props.handleCompareClick({
+                                  //       ...node,
+                                  //       scope: nodes[node.parents[0]].scope
+                                  //     });
+                                  //   },
+                                  //   icon: <CompareIcon fontSize="small" />,
+                                  //   label: t("Compare")
+                                  // }
                                 ]}
                               ></ContextMenu>
                             </div>

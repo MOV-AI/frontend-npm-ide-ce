@@ -11,6 +11,7 @@ const DataHandler = props => {
   const { children, call, scope, name, id, alert } = props;
   const [data, setData] = React.useState();
   const modelRef = React.useRef();
+  const subscriberRef = React.useRef();
 
   const { t } = useTranslation();
 
@@ -48,12 +49,16 @@ const DataHandler = props => {
     call("docManager", "read", { scope, name }).then(model => {
       setData(model.serialize());
       modelRef.current = model;
-      model.subscribe((instance, key, value) => {
+      subscriberRef.current = model.subscribe((instance, key, value) => {
         setData(prevState => {
           return { ...prevState, [key]: value };
         });
       });
     });
+    // on component unmount : unsubscribe
+    return () => {
+      modelRef.current.unsubscribe(subscriberRef.current);
+    };
   }, [call, scope, name]);
 
   return React.Children.map(children, el =>
