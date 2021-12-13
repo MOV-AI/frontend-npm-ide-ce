@@ -21,6 +21,7 @@ class DBSubscriber extends StoreAbstractPlugin {
     this.iStore = iStore;
   }
 
+  name = "DBSubscriber";
   docName = null;
   [symbols.timer] = null;
   [symbols.subscribers] = new Map();
