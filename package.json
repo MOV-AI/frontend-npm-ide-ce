@@ -41,7 +41,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "clean": "rm -r node_modules; rm package-lock.json",
-    "deploy": "./scripts/deployApp.sh mov-fe-app-ide",
+    "deploy": "./scripts/deployApp.sh mov-fe-app-ide-ce",
     "coverage": "npm test -- --coverage"
   },
   "eslintConfig": {
