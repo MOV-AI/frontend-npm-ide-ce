@@ -23,11 +23,10 @@ class StorePluginManager {
 
     plugins.forEach(plugin => {
       const instance = new plugin(this);
-      console.log(
-        `${this.constructor.name} initialized plugin ${instance.constructor.name}`
-      );
 
-      this[symbols.plugins].set(instance.constructor.name, instance);
+      console.log(`${instance.getName()} initialized plugin`);
+
+      this[symbols.plugins].set(instance.getName(), instance);
     });
   }
 
