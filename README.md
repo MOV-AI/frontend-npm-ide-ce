@@ -1,4 +1,41 @@
-# Plugin Demo
+# MOVAI-IDE-CE
+
+![Movai](https://www.mov.ai/wp-content/uploads/2021/06/MOV.AI-logo-3.png)
+
+MOVAI-IDE-CE is an integrated development environment offering multiple editors for the robotics developer.
+
+**main branch:**
+
+[![Deploy - On branch main/release Push](https://github.com/MOV-AI/frontend-npm-ide-ce/actions/workflows/DeployOnMergeMain.yml/badge.svg?branch=dev)](https://github.com/MOV-AI/frontend-npm-ide-ce/actions/workflows/DeployOnMergeMain.yml)
+
+## Development
+
+Open the project in VS Code and then choose to reopen in container.
+Once the container is ready, open a new terminal inside VS Code and run
+
+```
+npm ci
+npm start
+```
+
+Note: ~/.npmrc must be previously configured with access to github
+
+## Proxy
+
+During development requests are proxied using http-proxy-middleware.
+Edit src/setupProxy.js to add more endpoints.
+
+## Installation
+
+Add the package "movai-adminboard" to the robot's configuration file.
+Then apply the changes and update the frontend.
+
+```
+movai-cli apply robot.json
+movai-cli frontend <robot name>
+```
+
+# Plugin
 
 # Architecture
 
