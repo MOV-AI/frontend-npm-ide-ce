@@ -3,9 +3,17 @@ import Loader from "../../_shared/Loader/Loader";
 import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
 
 const AddImport = props => {
+  // Props
   const { call, scope, onSelectionChange } = props;
+  // State hooks
   const [loading, setLoading] = React.useState(false);
   const [pyLibs, setPyLibs] = React.useState();
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                  React Lifecycle                                     *
+   *                                                                                      */
+  //========================================================================================
 
   React.useEffect(() => {
     setLoading(true);
@@ -17,8 +25,14 @@ const AddImport = props => {
     });
   }, [call, scope]);
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                   Handle Events                                      *
+   *                                                                                      */
+  //========================================================================================
+
   /**
-   *
+   * On chage selected Lib
    * @param {*} selectedLibs
    */
   const onSelectLib = selectedLibs => {
@@ -35,19 +49,28 @@ const AddImport = props => {
     });
     // Return pyLibSelected
     onSelectionChange(pyLibSelected);
-    console.log("debug onSelect", pyLibSelected);
   };
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                       Render                                         *
+   *                                                                                      */
+  //========================================================================================
+
   /**
-   *
-   * @returns
+   * Render Material Tree to select python lib
+   * @returns {ReactElement}
    */
   const renderTree = () => {
     // Return loader if data is not ready
     if (loading) return <Loader />;
     // Return when data is ready or error message if not
     return pyLibs ? (
-      <MaterialTree data={pyLibs} onNodeSelect={onSelectLib}></MaterialTree>
+      <MaterialTree
+        data={pyLibs}
+        onNodeSelect={onSelectLib}
+        multiSelect={true}
+      ></MaterialTree>
     ) : (
       <h2>Something went wrong :(</h2>
     );

@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import PropTypes from "prop-types";
 import SvgIcon from "@material-ui/core/SvgIcon";
-import { alpha, makeStyles, withStyles } from "@material-ui/core/styles";
+import { alpha, withStyles } from "@material-ui/core/styles";
 import TreeView from "@material-ui/lab/TreeView";
 import TreeItem from "@material-ui/lab/TreeItem";
 import _isEqual from "lodash/isEqual";
@@ -46,41 +46,11 @@ const StyledTreeItem = withStyles(theme => ({
   }
 }))(props => <TreeItem {...props} />);
 
-const useStyles = makeStyles({
-  root: {
-    height: 500,
-    flexGrow: 1
-  }
-});
-
-const recursiveArrayTree = (array, id, onSelectItem, onClickFather) => {
-  return array.map((elem, elemIndex) => {
-    const elementId = id ? id + "/children/" + elemIndex : `${elemIndex}`;
-
-    return elem.children === undefined ? (
-      <StyledTreeItem
-        key={id + "/" + elemIndex}
-        nodeId={id + "/" + elemIndex}
-        label={elem.text}
-        onClick={() => onSelectItem(elem, elementId.split("/"))}
-      />
-    ) : (
-      <StyledTreeItem
-        key={id + "/" + elemIndex}
-        nodeId={id + "/" + elemIndex}
-        label={elem.text}
-        onClick={() => onClickFather(elem, elementId.split("/"))}
-      >
-        {recursiveArrayTree(
-          elem.children,
-          elementId,
-          onSelectItem,
-          onClickFather
-        )}
-      </StyledTreeItem>
-    );
-  });
-};
+//========================================================================================
+/*                                                                                      *
+ *                                  Private Methods                                     *
+ *                                                                                      */
+//========================================================================================
 
 /**
  * Get object tree item to be rendered
@@ -88,14 +58,7 @@ const recursiveArrayTree = (array, id, onSelectItem, onClickFather) => {
  *    Ternary operators should not be nested (javascript:S3358)
  * @returns {ReactElement} Element to be rendered
  */
-const _getObjectTreeItem = (
-  obj,
-  id,
-  key,
-  innerKey,
-  onSelectItem,
-  onClickFather
-) => {
+const _getObjectTreeItem = (obj, id, key, innerKey, onSelectItem) => {
   // Extracted element IDs to comply with rule:
   //  Ternary operators should not be nested (javascript:S3358)
   const parentElementId = id ? id + "." + key : key;
@@ -104,19 +67,53 @@ const _getObjectTreeItem = (
   // Return module item to be rendered
   return obj[key].modules !== undefined && innerKey === "modules" ? (
     <StyledTreeItem key={elementId} nodeId={elementId} label={innerKey}>
-      {recursiveObjectTree(
-        obj[key].modules,
-        parentElementId,
-        onSelectItem,
-        onClickFather
-      )}
+      {recursiveObjectTree(obj[key].modules, parentElementId, onSelectItem)}
     </StyledTreeItem>
   ) : (
     <div key={elementId}></div>
   );
 };
 
-const recursiveObjectTree = (obj, id, onSelectItem, onClickFather) => {
+//========================================================================================
+/*                                                                                      *
+ *                                      Render                                          *
+ *                                                                                      */
+//========================================================================================
+
+/**
+ *
+ * @param {*} array
+ * @param {*} id
+ * @param {*} onSelectItem
+ * @returns
+ */
+const recursiveArrayTree = (array, id, onSelectItem) => {
+  return array.map((elem, elemIndex) => {
+    const elementId = id ? `${id}/${elem.text}` : elem.text;
+
+    return elem.children === undefined ? (
+      <StyledTreeItem
+        key={elementId}
+        nodeId={elementId}
+        label={elem.text}
+        onClick={() => onSelectItem(elem, elementId.split("/"))}
+      />
+    ) : (
+      <StyledTreeItem key={elementId} nodeId={elementId} label={elem.text}>
+        {recursiveArrayTree(elem.children, elementId, onSelectItem)}
+      </StyledTreeItem>
+    );
+  });
+};
+
+/**
+ *
+ * @param {*} obj
+ * @param {*} id
+ * @param {*} onSelectItem
+ * @returns
+ */
+const recursiveObjectTree = (obj, id, onSelectItem) => {
   return Object.keys(obj)
     .sort()
     .map(key => {
@@ -148,14 +145,7 @@ const recursiveObjectTree = (obj, id, onSelectItem, onClickFather) => {
                 })}
               </StyledTreeItem>
             ) : (
-              _getObjectTreeItem(
-                obj,
-                id,
-                key,
-                innerKey,
-                onSelectItem,
-                onClickFather
-              )
+              _getObjectTreeItem(obj, id, key, innerKey, onSelectItem)
             );
           })}
         </StyledTreeItem>
@@ -164,31 +154,18 @@ const recursiveObjectTree = (obj, id, onSelectItem, onClickFather) => {
 };
 
 const MaterialTree = props => {
-  const classes = useStyles();
-
   return (
     <TreeView
-      multiSelect
+      multiSelect={props.multiSelect}
       onNodeSelect={(_, selectedNodes) => props.onNodeSelect(selectedNodes)}
-      className={classes.root}
       defaultExpanded={["1"]}
       defaultCollapseIcon={<MinusSquare />}
       defaultExpandIcon={<PlusSquare />}
       defaultEndIcon={<CloseSquare />}
     >
       {Array.isArray(props.data)
-        ? recursiveArrayTree(
-            props.data,
-            false,
-            props.onSelectItem,
-            props.onClickFather
-          )
-        : recursiveObjectTree(
-            props.data,
-            false,
-            props.onSelectItem,
-            props.onClickFather
-          )}
+        ? recursiveArrayTree(props.data, null, props.onSelectItem)
+        : recursiveObjectTree(props.data, null, props.onSelectItem)}
     </TreeView>
   );
 };
@@ -196,13 +173,15 @@ const MaterialTree = props => {
 MaterialTree.propTypes = {
   data: PropTypes.object,
   onNodeSelect: PropTypes.func,
-  onSelectItem: PropTypes.func
+  onSelectItem: PropTypes.func,
+  multiSelect: PropTypes.bool
 };
 
 MaterialTree.defaultProps = {
   data: {},
   onSelectItem: (elem, path) => console.log(elem, path),
-  onNodeSelect: (elem, path) => console.log(elem, path)
+  onNodeSelect: (elem, path) => console.log(elem, path),
+  multiSelect: false
 };
 
 //The function returns true when the compared props equal, preventing the component from re-rendering

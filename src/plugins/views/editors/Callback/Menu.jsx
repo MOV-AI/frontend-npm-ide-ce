@@ -1,6 +1,7 @@
 import React from "react";
 import DetailsMenu from "../_shared/DetailsMenu/DetailsMenu";
 import AddImport from "./dialogs/AddImport";
+import EditMessage from "./dialogs/EditMessage";
 import {
   Collapse,
   List,
@@ -53,9 +54,11 @@ const Menu = props => {
   } = props;
   // State hook
   const [activeItem, setActiveItem] = React.useState(0);
-  const [selectedLibs, setSelectedLibs] = React.useState();
   // Style hook
   const classes = useStyles();
+  //Refs
+  const selectedLibs = React.useRef();
+  const selectedMessage = React.useRef();
 
   //========================================================================================
   /*                                                                                      *
@@ -67,17 +70,34 @@ const Menu = props => {
     console.log("debug delete pyLib", pyLib);
   };
 
-  const addImports = React.useCallback(() => {
-    console.log("debug addImports", selectedLibs);
-  }, [selectedLibs]);
-
-  const setMessage = message => {
-    console.log("debug setMessage", message);
+  const addImports = () => {
+    console.log("debug addImports", selectedLibs.current);
   };
 
+  const setMessage = () => {
+    console.log("debug setMessage", selectedMessage.current);
+  };
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                 Private Methods                                      *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * On change libs selection
+   * @param {*} libs
+   */
   const _onSelectedLibs = libs => {
-    console.log("debug _onSelectedLibs", libs);
-    setSelectedLibs(libs);
+    selectedLibs.current = libs;
+  };
+
+  /**
+   * On change selected callback message
+   * @param {*} msg
+   */
+  const _onSelectedMessage = msg => {
+    selectedMessage.current = msg;
   };
 
   //========================================================================================
@@ -87,7 +107,18 @@ const Menu = props => {
   //========================================================================================
 
   const handleEditMessageClick = () => {
-    console.log("debug handleEditMessageClick", setMessage);
+    call(
+      "dialog",
+      "custom",
+      {
+        title: "Edit Message",
+        onSubmit: setMessage,
+        onSelectionChange: _onSelectedMessage,
+        scope: scope,
+        call: call
+      },
+      EditMessage
+    );
   };
 
   const handleAddImportsClick = () => {
