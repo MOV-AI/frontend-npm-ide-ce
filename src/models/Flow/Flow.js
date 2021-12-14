@@ -74,9 +74,7 @@ export default class Flow extends Model {
 
   serialize() {
     return {
-      ...super.serialize(),
-      code: this.getCode(),
-      extension: this.getExtension()
+      ...super.serialize()
     };
   }
 
@@ -88,10 +86,7 @@ export default class Flow extends Model {
     const { name, code, extension, details } = this.serialize();
 
     return {
-      Label: name,
-      Yaml: code,
-      Type: extension,
-      LastUpdate: details
+      Label: name
     };
   }
 
@@ -104,8 +99,6 @@ export default class Flow extends Model {
     const {
       Label: id,
       Label: name,
-      Yaml: code,
-      Type: extension,
       LastUpdate: details,
       workspace,
       version
@@ -114,8 +107,6 @@ export default class Flow extends Model {
     return {
       id,
       name,
-      code,
-      extension,
       details,
       workspace,
       version

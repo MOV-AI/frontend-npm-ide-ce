@@ -1,5 +1,7 @@
 import ConfigurationStore from "../../store/Configuration/ConfigurationStore";
 import Configuration from "../views/editors/Configuration/Configuration";
+import FlowStore from "../../store/Flow/FlowStore";
+import FlowPlugin from "../views/editors/Flow/FlowPlugin";
 
 /**
  * Returns a list of interfaces
@@ -16,6 +18,10 @@ const factory = (workspace, observer) => {
     [ConfigurationStore.SCOPE]: {
       store: new ConfigurationStore(workspace, observer),
       plugin: Configuration
+    },
+    [FlowStore.SCOPE]: {
+      store: new FlowStore(workspace, observer),
+      plugin: FlowPlugin
     }
   };
 };
