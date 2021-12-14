@@ -1,12 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Model from "../../../../models/Configuration/Configuration";
+import Model from "../../../../models/Callback/Callback";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
-import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
-import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
-import { AppBar, Toolbar } from "@material-ui/core";
+import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import InfoIcon from "@material-ui/icons/Info";
 import Menu from "./Menu";
 
@@ -17,26 +15,16 @@ const useStyles = makeStyles(theme => ({
     flexGrow: 1,
     height: "100%",
     maxHeight: "100%"
-  },
-  appBar: {
-    background: theme.palette.background.default,
-    color: theme.palette.text.primary,
-    "& button span": {
-      color: theme.palette.text.primary
-    }
   }
 }));
 
-const DEFAULT_FUNCTION = name => console.log(`${name} not implemented`);
-
-const Configuration = (props, ref) => {
+const Callback = (props, ref) => {
   const {
     id,
     name,
     call,
     instance,
-    activateEditor = () => DEFAULT_FUNCTION("activateEditor"),
-    saveDocument = () => DEFAULT_FUNCTION("saveDocument"),
+    saveDocument = () => console.log(`Not implemented`),
     data = new Model({}).serialize(),
     editable = true
   } = props;
@@ -58,10 +46,20 @@ const Configuration = (props, ref) => {
       [menuName]: {
         icon: <InfoIcon></InfoIcon>,
         name: menuName,
-        view: <Menu id={id} name={name} details={details}></Menu>
+        view: (
+          <Menu
+            id={id}
+            call={call}
+            name={name}
+            data={data}
+            details={details}
+            scope={instance.current?.getScope()}
+            isNew={instance.current?.getIsNew()}
+          ></Menu>
+        )
       }
     });
-  }, [call, id, name, data.details]);
+  }, [call, id, name, data, instance]);
 
   usePluginMethods(ref, {
     renderRightMenu
@@ -73,11 +71,7 @@ const Configuration = (props, ref) => {
    *                                                                                      */
   //========================================================================================
 
-  const updateConfigExtension = value => {
-    if (instance.current) instance.current.setExtension(value);
-  };
-
-  const updateConfigCode = value => {
+  const updateCallbackCode = value => {
     if (value === instance.current.getCode()) return;
     if (instance.current) instance.current.setCode(value);
   };
@@ -88,56 +82,29 @@ const Configuration = (props, ref) => {
    *                                                                                      */
   //========================================================================================
 
-  const renderEditor = () => {
-    return (
-      <div
-        className={classes.container}
-        style={{ maxHeight: "calc(100% - 48px)" }}
-      >
-        <MonacoCodeEditor
-          style={{ flexGrow: 1, height: "100%", width: "100%" }}
-          value={data.code}
-          language={data.extension}
-          theme={theme.codeEditor.theme}
-          options={{ readOnly: !editable }}
-          onChange={updateConfigCode}
-          onSave={saveDocument}
-          onLoad={editor => {
-            if (!id) editor.focus();
-          }}
-        />
-      </div>
-    );
-  };
-
   return (
     <div className={classes.container}>
-      <AppBar position="static" className={classes.appBar}>
-        <Toolbar variant="dense" onClick={activateEditor}>
-          <ToggleButtonGroup
-            size="small"
-            exclusive
-            value={data.extension}
-            onChange={(event, newExtension) => {
-              event.stopPropagation();
-              updateConfigExtension(newExtension);
-            }}
-          >
-            <ToggleButton value="xml">XML</ToggleButton>
-            <ToggleButton value="yaml">YAML</ToggleButton>
-          </ToggleButtonGroup>
-        </Toolbar>
-      </AppBar>
-      {renderEditor()}
+      <MonacoCodeEditor
+        style={{ flexGrow: 1, height: "100%", width: "100%" }}
+        value={data.code}
+        language={"python"}
+        theme={theme.codeEditor.theme}
+        options={{ readOnly: !editable }}
+        onChange={updateCallbackCode}
+        onSave={saveDocument}
+        onLoad={editor => {
+          if (!id) editor.focus();
+        }}
+      />
     </div>
   );
 };
 
-export default withEditorPlugin(Configuration);
+export default withEditorPlugin(Callback);
 
-Configuration.scope = "Configuration";
+Callback.scope = "Configuration";
 
-Configuration.propTypes = {
+Callback.propTypes = {
   profile: PropTypes.object.isRequired,
   data: PropTypes.object,
   editable: PropTypes.bool,

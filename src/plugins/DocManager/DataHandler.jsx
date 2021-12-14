@@ -57,7 +57,7 @@ const DataHandler = props => {
     });
     // on component unmount : unsubscribe
     return () => {
-      modelRef.current.unsubscribe(subscriberRef.current);
+      if (modelRef.current) modelRef.current.unsubscribe(subscriberRef.current);
     };
   }, [call, scope, name]);
 

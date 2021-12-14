@@ -124,7 +124,7 @@ AppDialog.defaultProps = {
   submitText: "Submit",
   onClose: () => console.log("Not Implemented"),
   hasCloseButton: true,
-  closeOnBackdrop: true
+  closeOnBackdrop: false
 };
 
 export default withTheme(AppDialog);

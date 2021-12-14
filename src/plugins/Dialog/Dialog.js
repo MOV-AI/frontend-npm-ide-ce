@@ -4,6 +4,7 @@ import ConfirmationDialog from "./components/ConfirmationDialog/ConfirmationDial
 import NewDocumentDialog from "./components/FormDialog/NewDocumentDialog";
 import AlertDialog from "./components/AlertDialog/AlertDialog";
 import AlertBeforeAction from "./components/AlertDialog/AlertBeforeAction";
+import AppDialog from "./components/AppDialog/AppDialog";
 
 class Dialog extends IDEPlugin {
   constructor(profile = {}) {
@@ -12,6 +13,7 @@ class Dialog extends IDEPlugin {
       new Set([
         ...(profile.methods ?? []),
         "alert",
+        "custom",
         "confirmation",
         "newDocument",
         "copyDocument",
@@ -150,6 +152,29 @@ class Dialog extends IDEPlugin {
         onSubmit={data.onSubmit}
         onClose={this._handleDialogClose}
       />,
+      targetElement
+    );
+  }
+
+  /**
+   * App dialog with Custom content
+   * @param {{title: string, message: string, actions: Array, onSubmit: function}} data : Data to AppDialog props and Component props
+   * @param {ReactComponent} Component : Component to render custom content in app dialog
+   */
+  custom(data, Component) {
+    const { title, actions, onSubmit, submitText, ...props } = data;
+    const targetElement = this._handleDialogOpen();
+    // Show dialog
+    ReactDOM.render(
+      <AppDialog
+        title={title}
+        actions={actions}
+        submitText={submitText}
+        onSubmit={onSubmit}
+        onClose={this._handleDialogClose}
+      >
+        <Component {...props} />
+      </AppDialog>,
       targetElement
     );
   }

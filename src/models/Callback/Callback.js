@@ -10,7 +10,7 @@ export default class Callback extends Model {
   // Extend Model properties and assign defaults
   code = "";
   message = "";
-  py3Lib = {}; // {<name: str>:{Module:<module name:str>, Class:<is class:boolean>}}
+  pyLibs = {}; // {<name: str>:{Module:<module name:str>, Class:<is class:boolean>}}
 
   // Define observable properties
   observables = ["name", "details", "code", "message", "py3Lib"];
@@ -33,12 +33,12 @@ export default class Callback extends Model {
     return this;
   }
 
-  getPy3Lib() {
-    return this.py3Lib;
+  getPythonLibs() {
+    return this.pyLibs;
   }
 
-  setPy3Lib(value) {
-    this.py3Lib = value;
+  setPythonLibs(value) {
+    this.pyLibs = value;
     return this;
   }
 
@@ -55,50 +55,52 @@ export default class Callback extends Model {
       ...super.serialize(),
       code: this.getCode(),
       message: this.getMessage(),
-      py3Lib: this.getPy3Lib()
+      pyLibs: this.getPythonLibs()
     };
   }
 
   serializeToDB() {
-    const { name, details, code, message, py3Lib } = this.serialize();
+    const { name, details, code, message, pyLibs } = this.serialize();
 
     return {
       Label: name,
       Code: code,
       Message: message,
       LastUpdate: details,
-      Py3Lib: py3Lib
+      Py3Lib: pyLibs
     };
   }
 
-  static ofJSON(json) {
+  /**
+   * Serialize database data to model properties
+   * @param {object} json : The data received from the database
+   * @returns {object} Model properties
+   */
+  static serializeOfDB(json) {
     const {
       Label: id,
       Label: name,
       Code: code,
       Message: message,
-      Py3Lib: py3Lib,
+      Py3Lib: pyLibs,
       LastUpdate: details,
       workspace,
       version
     } = json;
 
-    const obj = new this({ id, name, workspace, version });
-
-    return obj
-      .setData({
-        code,
-        message,
-        py3Lib,
-        details
-      })
-      .setDirty(false)
-      .setIsNew(false);
+    return {
+      id,
+      name,
+      code,
+      message,
+      pyLibs,
+      details,
+      workspace,
+      version
+    };
   }
 
   static SCOPE = "Callback";
 
   static EXTENSION = ".cb";
-
-  static EMPTY = new Callback();
 }
