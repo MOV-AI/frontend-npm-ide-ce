@@ -183,8 +183,8 @@ const Menu = props => {
 
     Object.keys(pyLibs).forEach(key => {
       const lib = pyLibs[key];
-      const libModule = lib.Module ? lib.Module : undefined;
-      const libClass = lib.Class ? lib.Class : undefined;
+      const libModule = lib.module ? lib.module : undefined;
+      const libClass = lib.libClass ? lib.libClass : undefined;
       const name_composed = _getComposedName(key, libClass, libModule);
       const obj = { name: name_composed, key: key };
       if (libModule) importList.push(obj);

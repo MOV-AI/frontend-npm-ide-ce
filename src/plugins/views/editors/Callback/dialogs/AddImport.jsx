@@ -67,9 +67,9 @@ const AddImportDialog = props => {
       const moduleName = path[0];
       const name = path[path.length - 1];
       if (name === libPath || path.length === 2) {
-        pyLibSelected[moduleName] = { Module: moduleName, Class: false };
+        pyLibSelected[moduleName] = { module: moduleName, libClass: false };
       } else {
-        pyLibSelected[name] = { Module: moduleName, Class: name };
+        pyLibSelected[name] = { module: moduleName, libClass: name };
       }
     });
     // Return pyLibSelected
