@@ -1,5 +1,6 @@
 import Model from "../Model/Model";
 import schema from "./schema";
+import PyLibManager from "./PyLib/PyLibManager";
 
 export default class Callback extends Model {
   constructor() {
@@ -10,10 +11,10 @@ export default class Callback extends Model {
   // Extend Model properties and assign defaults
   code = "";
   message = "";
-  pyLibs = {}; // {<name: str>:{Module:<module name:str>, Class:<is class:boolean>}}
+  pyLibs = new PyLibManager();
 
   // Define observable properties
-  observables = ["name", "details", "code", "message", "py3Lib"];
+  observables = ["name", "details", "code", "message", "pyLibs"];
 
   getCode() {
     return this.code;
@@ -33,13 +34,8 @@ export default class Callback extends Model {
     return this;
   }
 
-  getPythonLibs() {
+  getPyLibs() {
     return this.pyLibs;
-  }
-
-  setPythonLibs(value) {
-    this.pyLibs = value;
-    return this;
   }
 
   addPythonLibs(value) {
@@ -61,24 +57,34 @@ export default class Callback extends Model {
     return Callback.EXTENSION;
   }
 
+  setData(json) {
+    const { name, details, code, message, pyLibs } = json;
+
+    super.setData({ name, details, code, message });
+
+    this.pyLibs.setData(pyLibs);
+
+    return this;
+  }
+
   serialize() {
     return {
       ...super.serialize(),
       code: this.getCode(),
       message: this.getMessage(),
-      pyLibs: this.getPythonLibs()
+      pyLibs: this.getPyLibs().serialize()
     };
   }
 
   serializeToDB() {
-    const { name, details, code, message, pyLibs } = this.serialize();
+    const { name, details, code, message } = this.serialize();
 
     return {
       Label: name,
       Code: code,
       Message: message,
       LastUpdate: details,
-      Py3Lib: pyLibs
+      Py3Lib: this.pyLibs.serializeToDB()
     };
   }
 
@@ -104,10 +110,10 @@ export default class Callback extends Model {
       name,
       code,
       message,
-      pyLibs,
       details,
       workspace,
-      version
+      version,
+      pyLibs: PyLibManager.serializeOfDB(pyLibs)
     };
   }
 
