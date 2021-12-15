@@ -23,6 +23,7 @@ const Callback = (props, ref) => {
     id,
     name,
     call,
+    scope,
     instance,
     saveDocument = () => console.log(`Not implemented`),
     data = new Model({}).serialize(),
@@ -39,27 +40,16 @@ const Callback = (props, ref) => {
   //========================================================================================
 
   const renderRightMenu = React.useCallback(() => {
-    const details = data.details ?? {};
     const menuName = `${id}-detail-menu`;
     // add bookmark
     call("rightDrawer", "setBookmark", {
       [menuName]: {
         icon: <InfoIcon></InfoIcon>,
         name: menuName,
-        view: (
-          <Menu
-            id={id}
-            call={call}
-            name={name}
-            data={data}
-            details={details}
-            scope={instance.current?.getScope()}
-            isNew={instance.current?.getIsNew()}
-          ></Menu>
-        )
+        view: <Menu id={id} call={call} name={name} scope={scope} />
       }
     });
-  }, [call, id, name, data, instance]);
+  }, [call, id, name, scope]);
 
   usePluginMethods(ref, {
     renderRightMenu

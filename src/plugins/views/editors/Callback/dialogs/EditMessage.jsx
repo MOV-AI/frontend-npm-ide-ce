@@ -35,7 +35,7 @@ const EditMessageDialog = props => {
   const [loading, setLoading] = React.useState(false);
   const [messages, setMessages] = React.useState();
   const [filteredMsg, setFilteredMsg] = React.useState();
-  const [selectedMsg, setSelectedMsg] = React.useState();
+  const [selectedMsg, setSelectedMsg] = React.useState(selectedMessage);
   // Style hook
   const classes = useStyles();
 
@@ -157,20 +157,10 @@ const EditMessageDialog = props => {
         <TextField
           fullWidth
           label={"Message"}
-          value={selectedMessage}
+          value={selectedMsg}
           margin="normal"
           disabled
         />
-        {/* <Typography component="div" style={{ overflow: "hidden" }}>
-        <Grid container direction="row">
-          <Grid item xs={12} style={{ textAlign: "center" }}>
-          </Grid>
-          <Grid item xs={12}>
-          </Grid>
-          <Grid item xs={12} style={{ textAlign: "center" }}>
-          </Grid>
-        </Grid>
-      </Typography> */}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>

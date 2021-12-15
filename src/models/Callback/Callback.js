@@ -42,6 +42,17 @@ export default class Callback extends Model {
     return this;
   }
 
+  addPythonLibs(value) {
+    this.pyLibs = { ...this.pyLibs, ...value };
+    return this;
+  }
+
+  deletePythonLib(value) {
+    const { [value]: _, ...newPyLibs } = this.pyLibs;
+    this.pyLibs = { ...newPyLibs };
+    return this;
+  }
+
   getScope() {
     return Callback.SCOPE;
   }

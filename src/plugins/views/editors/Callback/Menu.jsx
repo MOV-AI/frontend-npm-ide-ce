@@ -2,6 +2,8 @@ import React from "react";
 import DetailsMenu from "../_shared/DetailsMenu/DetailsMenu";
 import AddImportDialog from "./dialogs/AddImport";
 import EditMessageDialog from "./dialogs/EditMessage";
+import Model from "../../../../models/Callback/Callback";
+import { withDataHandler } from "../../../DocManager/DataHandler";
 import {
   Collapse,
   List,
@@ -47,10 +49,9 @@ const Menu = props => {
     call,
     scope,
     name,
-    details,
-    data,
-    editable = true,
-    isNew = true
+    instance,
+    data = new Model({}).serialize(),
+    editable = true
   } = props;
   // State hook
   const [activeItem, setActiveItem] = React.useState(0);
@@ -63,16 +64,28 @@ const Menu = props => {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Delete import from model
+   * @param {*} pyLib
+   */
   const deleteImport = pyLib => {
-    console.log("debug delete pyLib", pyLib);
+    if (instance.current) instance.current.deletePythonLib(pyLib.key);
   };
 
-  const addImports = libs => {
-    console.log("debug addImports", libs);
+  /**
+   * Add Imports
+   * @param {*} pyLibs
+   */
+  const addImports = pyLibs => {
+    if (instance.current) instance.current.addPythonLibs(pyLibs);
   };
 
+  /**
+   * Set message
+   * @param {string} msg
+   */
   const setMessage = msg => {
-    console.log("debug setMessage", msg);
+    if (instance.current) instance.current.setMessage(msg);
   };
 
   //========================================================================================
@@ -90,6 +103,7 @@ const Menu = props => {
       "customDialog",
       {
         onSubmit: setMessage,
+        selectedMessage: data.message,
         scope: scope,
         call: call
       },
@@ -235,13 +249,13 @@ const Menu = props => {
 
   return (
     <div>
-      <DetailsMenu name={name} details={details}></DetailsMenu>
+      <DetailsMenu name={name} details={data.details}></DetailsMenu>
       <List>
         {/* ============ IMPORTS ============ */}
         <ListItem button onClick={() => handleExpandClick(ACTIVE_ITEM.imports)}>
           <ListItemText primary="Imports" />
           <IconButton
-            disabled={!editable || isNew}
+            disabled={!editable || instance?.current?.getIsNew()}
             onClick={e => {
               e.stopPropagation();
               handleAddImportsClick();
@@ -259,7 +273,7 @@ const Menu = props => {
         <ListItem button onClick={() => handleExpandClick(ACTIVE_ITEM.message)}>
           <ListItemText primary="Message" />
           <IconButton
-            disabled={!editable || isNew}
+            disabled={!editable || instance?.current?.getIsNew()}
             onClick={e => {
               e.stopPropagation();
               handleEditMessageClick();
@@ -278,4 +292,4 @@ const Menu = props => {
   );
 };
 
-export default Menu;
+export default withDataHandler(Menu);
