@@ -154,6 +154,6 @@ export default class Model extends Observable {
 
     const obj = new this(data);
 
-    return obj.setData(data).setDirty(false).setIsNew(false);
+    return obj.setData(data).setDirty(false);
   }
 }

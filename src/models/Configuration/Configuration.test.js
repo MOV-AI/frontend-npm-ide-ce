@@ -45,7 +45,7 @@ test("create document of JSON", () => {
   const obj = Configuration.ofJSON(json);
 
   expect(obj.serialize()).toMatchObject(expected);
-  expect(obj.getIsNew()).toBe(false);
+  expect(obj.getIsNew()).toBe(true);
   expect(obj.getIsLoaded()).toBe(false);
   expect(obj.getDirty()).toBe(false);
 });
@@ -70,7 +70,7 @@ test("serialize to database", () => {
   const obj = Configuration.ofJSON(json);
 
   expect(obj.serializeToDB()).toMatchObject(expected);
-  expect(obj.getIsNew()).toBe(false);
+  expect(obj.getIsNew()).toBe(true);
   expect(obj.getIsLoaded()).toBe(false);
   expect(obj.getDirty()).toBe(false);
 });
@@ -95,7 +95,7 @@ test("verify serialize defaults to DB", () => {
   const obj = Configuration.ofJSON(json);
 
   expect(obj.serializeToDB()).toMatchObject(expected);
-  expect(obj.getIsNew()).toBe(false);
+  expect(obj.getIsNew()).toBe(true);
   expect(obj.getIsLoaded()).toBe(false);
   expect(obj.getDirty()).toBe(false);
 });

@@ -63,7 +63,7 @@ test("create document of JSON", () => {
   const obj = BaseModel.ofJSON(json);
 
   expect(obj.serialize()).toMatchObject({ id: "test", ...json });
-  expect(obj.getIsNew()).toBe(false);
+  expect(obj.getIsNew()).toBe(true);
   expect(obj.getIsLoaded()).toBe(false);
   expect(obj.getDirty()).toBe(false);
   expect(obj.getOutdated()).toBe(false);

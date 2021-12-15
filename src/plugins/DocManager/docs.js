@@ -18,11 +18,11 @@ const factory = (workspace, observer) => {
     [ConfigurationStore.SCOPE]: {
       store: new ConfigurationStore(workspace, observer),
       plugin: Configuration
-    },
-    [FlowStore.SCOPE]: {
-      store: new FlowStore(workspace, observer),
-      plugin: FlowPlugin
     }
+    // [FlowStore.SCOPE]: {
+    //   store: new FlowStore(workspace, observer),
+    //   plugin: FlowPlugin
+    // }
   };
 };
 
