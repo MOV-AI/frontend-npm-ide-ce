@@ -4,20 +4,15 @@ import { TextField, InputAdornment } from "@material-ui/core";
 
 const Search = props => {
   const { onSearch } = props;
-  const [search, setSearch] = React.useState("");
-
-  React.useEffect(() => {
-    onSearch(search);
-  }, [onSearch, search]);
 
   return (
     <TextField
       fullWidth
       placeholder="Search"
-      value={search}
+      defaultValue={""}
       onChange={event => {
         const value = event.target.value;
-        setSearch(value);
+        onSearch(value);
       }}
       InputProps={{
         endAdornment: (

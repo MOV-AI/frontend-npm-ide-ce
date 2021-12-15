@@ -1,10 +1,19 @@
 import React from "react";
 import Loader from "../../_shared/Loader/Loader";
 import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
-import { Grid, Typography, TextField } from "@material-ui/core";
+import Search from "../../_shared/Search/Search";
+import {
+  Typography,
+  TextField,
+  Dialog,
+  DialogContent,
+  Button,
+  DialogActions
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { searchMessages } from "./utils";
-import Search from "../../_shared/Search/Search";
+import { withTheme } from "../../../../../decorators/withTheme";
+import { DialogTitle } from "../../../../Dialog/components/AppDialog/AppDialog";
 
 const useStyles = makeStyles(theme => ({
   treeRoot: {
@@ -13,16 +22,20 @@ const useStyles = makeStyles(theme => ({
     paddingLeft: 5,
     justifyContent: "center",
     width: "100%"
+  },
+  paper: {
+    minWidth: "40%"
   }
 }));
 
-const EditMessage = props => {
+const EditMessageDialog = props => {
   // Props
-  const { call, scope, selectedMessage, onSelectionChange } = props;
+  const { call, scope, selectedMessage, onClose, onSubmit } = props;
   // State hooks
   const [loading, setLoading] = React.useState(false);
   const [messages, setMessages] = React.useState();
   const [filteredMsg, setFilteredMsg] = React.useState();
+  const [selectedMsg, setSelectedMsg] = React.useState();
   // Style hook
   const classes = useStyles();
 
@@ -71,7 +84,7 @@ const EditMessage = props => {
     const messagePath = _selectedMessage.split("/");
     if (messagePath.length <= 1) return;
     // Return selectedMessage
-    onSelectionChange(_selectedMessage);
+    setSelectedMsg(_selectedMessage);
   };
 
   /**
@@ -132,28 +145,48 @@ const EditMessage = props => {
   };
 
   return (
-    <Typography component="div" style={{ overflow: "hidden" }}>
-      <Grid container direction="row">
-        <Grid item xs={12} style={{ textAlign: "center" }}>
-          <Search onSearch={onSearch} />
+    <Dialog open={true} onClose={onClose} classes={{ paper: classes.paper }}>
+      <DialogTitle onClose={onClose} hasCloseButton={true}>
+        Edit Message
+      </DialogTitle>
+      <DialogContent>
+        <Search onSearch={onSearch} />
+        <Typography component="div" className={classes.treeRoot}>
+          {renderTree()}
+        </Typography>
+        <TextField
+          fullWidth
+          label={"Message"}
+          value={selectedMessage}
+          margin="normal"
+          disabled
+        />
+        {/* <Typography component="div" style={{ overflow: "hidden" }}>
+        <Grid container direction="row">
+          <Grid item xs={12} style={{ textAlign: "center" }}>
+          </Grid>
+          <Grid item xs={12}>
+          </Grid>
+          <Grid item xs={12} style={{ textAlign: "center" }}>
+          </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <Typography component="div" className={classes.treeRoot}>
-            {renderTree()}
-          </Typography>
-        </Grid>
-        <Grid item xs={12} style={{ textAlign: "center" }}>
-          <TextField
-            fullWidth
-            label={"Message"}
-            value={selectedMessage}
-            margin="normal"
-            disabled
-          />
-        </Grid>
-      </Grid>
-    </Typography>
+      </Typography> */}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button
+          color="primary"
+          onClick={() => {
+            onSubmit(selectedMsg);
+            onClose();
+          }}
+          disabled={!selectedMsg}
+        >
+          Submit
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
-export default EditMessage;
+export default withTheme(EditMessageDialog);

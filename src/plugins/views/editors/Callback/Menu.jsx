@@ -1,7 +1,7 @@
 import React from "react";
 import DetailsMenu from "../_shared/DetailsMenu/DetailsMenu";
-import AddImport from "./dialogs/AddImport";
-import EditMessage from "./dialogs/EditMessage";
+import AddImportDialog from "./dialogs/AddImport";
+import EditMessageDialog from "./dialogs/EditMessage";
 import {
   Collapse,
   List,
@@ -56,9 +56,6 @@ const Menu = props => {
   const [activeItem, setActiveItem] = React.useState(0);
   // Style hook
   const classes = useStyles();
-  //Refs
-  const selectedLibs = React.useRef();
-  const selectedMessage = React.useRef();
 
   //========================================================================================
   /*                                                                                      *
@@ -70,34 +67,12 @@ const Menu = props => {
     console.log("debug delete pyLib", pyLib);
   };
 
-  const addImports = () => {
-    console.log("debug addImports", selectedLibs.current);
+  const addImports = libs => {
+    console.log("debug addImports", libs);
   };
 
-  const setMessage = () => {
-    console.log("debug setMessage", selectedMessage.current);
-  };
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                 Private Methods                                      *
-   *                                                                                      */
-  //========================================================================================
-
-  /**
-   * On change libs selection
-   * @param {*} libs
-   */
-  const _onSelectedLibs = libs => {
-    selectedLibs.current = libs;
-  };
-
-  /**
-   * On change selected callback message
-   * @param {*} msg
-   */
-  const _onSelectedMessage = msg => {
-    selectedMessage.current = msg;
+  const setMessage = msg => {
+    console.log("debug setMessage", msg);
   };
 
   //========================================================================================
@@ -106,34 +81,35 @@ const Menu = props => {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Open dialog to set callback message
+   */
   const handleEditMessageClick = () => {
     call(
       "dialog",
-      "custom",
+      "customDialog",
       {
-        title: "Edit Message",
         onSubmit: setMessage,
-        onSelectionChange: _onSelectedMessage,
         scope: scope,
         call: call
       },
-      EditMessage
+      EditMessageDialog
     );
   };
 
+  /**
+   * Open dialog to add imports
+   */
   const handleAddImportsClick = () => {
     call(
       "dialog",
-      "custom",
+      "customDialog",
       {
-        title: "Add import",
-        submitText: "Add",
         onSubmit: addImports,
-        onSelectionChange: _onSelectedLibs,
         scope: scope,
         call: call
       },
-      AddImport
+      AddImportDialog
     );
   };
 

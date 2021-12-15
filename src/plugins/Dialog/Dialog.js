@@ -14,6 +14,7 @@ class Dialog extends IDEPlugin {
         ...(profile.methods ?? []),
         "alert",
         "custom",
+        "customDialog",
         "confirmation",
         "newDocument",
         "copyDocument",
@@ -175,6 +176,20 @@ class Dialog extends IDEPlugin {
       >
         <Component {...props} />
       </AppDialog>,
+      targetElement
+    );
+  }
+
+  /**
+   * Show custom dialog component
+   * @param {*} props : Props to pass to DialogComponent
+   * @param {ReactComponent} DialogComponent : Custom dialog component
+   */
+  customDialog(props, DialogComponent) {
+    const targetElement = this._handleDialogOpen();
+    // Show dialog
+    ReactDOM.render(
+      <DialogComponent {...props} onClose={this._handleDialogClose} />,
       targetElement
     );
   }

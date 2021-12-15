@@ -3,15 +3,33 @@ import Loader from "../../_shared/Loader/Loader";
 import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
 import Search from "../../_shared/Search/Search";
 import _debounce from "lodash/debounce";
+import { makeStyles } from "@material-ui/core/styles";
 import { searchImports } from "./utils";
+import { withTheme } from "../../../../../decorators/withTheme";
+import { DialogTitle } from "../../../../Dialog/components/AppDialog/AppDialog";
+import {
+  Dialog,
+  DialogContent,
+  Button,
+  DialogActions
+} from "@material-ui/core";
 
-const AddImport = props => {
+const useStyles = makeStyles(theme => ({
+  paper: {
+    minWidth: "40%"
+  }
+}));
+
+const AddImportDialog = props => {
   // Props
-  const { call, scope, onSelectionChange } = props;
+  const { call, scope, onClose, onSubmit } = props;
   // State hooks
   const [loading, setLoading] = React.useState(false);
   const [pyLibs, setPyLibs] = React.useState();
   const [filteredLibs, setFilteredLibs] = React.useState();
+  const [selectedLibs, setSelectedLibs] = React.useState();
+  // Style hook
+  const classes = useStyles();
 
   //========================================================================================
   /*                                                                                      *
@@ -40,11 +58,11 @@ const AddImport = props => {
 
   /**
    * On chage selected Lib
-   * @param {*} selectedLibs
+   * @param {*} _selectedLibs
    */
-  const onSelectLib = selectedLibs => {
+  const onSelectLib = _selectedLibs => {
     const pyLibSelected = {};
-    selectedLibs.forEach(libPath => {
+    _selectedLibs.forEach(libPath => {
       const path = libPath.split(".");
       const moduleName = path[0];
       const name = path[path.length - 1];
@@ -55,7 +73,7 @@ const AddImport = props => {
       }
     });
     // Return pyLibSelected
-    onSelectionChange(pyLibSelected);
+    setSelectedLibs(pyLibSelected);
   };
 
   /**
@@ -82,14 +100,11 @@ const AddImport = props => {
     if (loading) return <Loader />;
     // Return when data is ready or error message if not
     return pyLibs ? (
-      <>
-        <Search onSearch={onSearch} />
-        <MaterialTree
-          data={filteredLibs}
-          onNodeSelect={onSelectLib}
-          multiSelect={true}
-        ></MaterialTree>
-      </>
+      <MaterialTree
+        data={filteredLibs}
+        onNodeSelect={onSelectLib}
+        multiSelect={true}
+      ></MaterialTree>
     ) : (
       <>
         <h2>Something went wrong :(</h2>
@@ -98,7 +113,30 @@ const AddImport = props => {
     );
   };
 
-  return renderTree();
+  return (
+    <Dialog open={true} onClose={onClose} classes={{ paper: classes.paper }}>
+      <DialogTitle onClose={onClose} hasCloseButton={true}>
+        Add Import
+      </DialogTitle>
+      <DialogContent>
+        <Search onSearch={onSearch} />
+        {renderTree()}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button
+          color="primary"
+          onClick={() => {
+            onSubmit(selectedLibs);
+            onClose();
+          }}
+          disabled={!selectedLibs}
+        >
+          Add
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 };
 
-export default AddImport;
+export default withTheme(AddImportDialog);

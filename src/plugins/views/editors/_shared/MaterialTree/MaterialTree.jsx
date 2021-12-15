@@ -46,127 +46,128 @@ const StyledTreeItem = withStyles(theme => ({
   }
 }))(props => <TreeItem {...props} />);
 
-//========================================================================================
-/*                                                                                      *
- *                                  Private Methods                                     *
- *                                                                                      */
-//========================================================================================
+const MaterialTree = props => {
+  // Props
+  const { data, multiSelect, onNodeSelect, onSelectItem } = props;
 
-/**
- * Get object tree item to be rendered
- *  This function is implemented to comply with SonarLint rule:
- *    Ternary operators should not be nested (javascript:S3358)
- * @returns {ReactElement} Element to be rendered
- */
-const _getObjectTreeItem = (obj, id, key, innerKey, onSelectItem) => {
-  // Extracted element IDs to comply with rule:
-  //  Ternary operators should not be nested (javascript:S3358)
-  const parentElementId = id ? id + "." + key : key;
-  const elementId = [parentElementId, innerKey].join(".");
+  //========================================================================================
+  /*                                                                                      *
+   *                                  Private Methods                                     *
+   *                                                                                      */
+  //========================================================================================
 
-  // Return module item to be rendered
-  return obj[key].modules !== undefined && innerKey === "modules" ? (
-    <StyledTreeItem key={elementId} nodeId={elementId} label={innerKey}>
-      {recursiveObjectTree(obj[key].modules, parentElementId, onSelectItem)}
-    </StyledTreeItem>
-  ) : (
-    <div key={elementId}></div>
-  );
-};
+  /**
+   * Get object tree item to be rendered
+   *  This function is implemented to comply with SonarLint rule:
+   *    Ternary operators should not be nested (javascript:S3358)
+   * @returns {ReactElement} Element to be rendered
+   */
+  const _getObjectTreeItem = (obj, id, key, innerKey) => {
+    // Extracted element IDs to comply with rule:
+    //  Ternary operators should not be nested (javascript:S3358)
+    const parentElementId = id ? id + "." + key : key;
+    const elementId = [parentElementId, innerKey].join(".");
 
-//========================================================================================
-/*                                                                                      *
- *                                      Render                                          *
- *                                                                                      */
-//========================================================================================
-
-/**
- *
- * @param {*} array
- * @param {*} id
- * @param {*} onSelectItem
- * @returns
- */
-const recursiveArrayTree = (array, id, onSelectItem) => {
-  return array.map((elem, elemIndex) => {
-    const elementId = id ? `${id}/${elem.text}` : elem.text;
-
-    return elem.children === undefined ? (
-      <StyledTreeItem
-        key={elementId}
-        nodeId={elementId}
-        label={elem.text}
-        onClick={() => onSelectItem(elem, elementId.split("/"))}
-      />
-    ) : (
-      <StyledTreeItem key={elementId} nodeId={elementId} label={elem.text}>
-        {recursiveArrayTree(elem.children, elementId, onSelectItem)}
+    // Return module item to be rendered
+    return obj[key].modules !== undefined && innerKey === "modules" ? (
+      <StyledTreeItem key={elementId} nodeId={elementId} label={innerKey}>
+        {recursiveObjectTree(obj[key].modules, parentElementId)}
       </StyledTreeItem>
+    ) : (
+      <div key={elementId}></div>
     );
-  });
-};
+  };
 
-/**
- *
- * @param {*} obj
- * @param {*} id
- * @param {*} onSelectItem
- * @returns
- */
-const recursiveObjectTree = (obj, id, onSelectItem) => {
-  return Object.keys(obj)
-    .sort()
-    .map(key => {
-      const elementId = id ? `${id}.${key}` : key;
-      return (
+  //========================================================================================
+  /*                                                                                      *
+   *                                      Render                                          *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Render tree in array format
+   * @param {array} array : Tree data
+   * @param {string} id : Parent ID
+   * @returns {ReactElement} Rendered Tree
+   */
+  const recursiveArrayTree = (array, id) => {
+    return array.map((elem, elemIndex) => {
+      const elementId = id ? `${id}/${elem.text}` : elem.text;
+
+      return elem.children === undefined ? (
         <StyledTreeItem
           key={elementId}
           nodeId={elementId}
-          label={key}
-          onClick={() => onSelectItem(key, id || key)}
-        >
-          {Object.keys(obj[key]).map(innerKey => {
-            return obj[key][innerKey].length > 0 ? (
-              <StyledTreeItem
-                key={elementId + "." + innerKey}
-                nodeId={elementId + "." + innerKey}
-                label={innerKey}
-                onClick={() => onSelectItem(key, id || key)}
-              >
-                {obj[key][innerKey].map((elem, elemIndex) => {
-                  return (
-                    <StyledTreeItem
-                      key={elementId + "." + innerKey + "." + elem}
-                      nodeId={elementId + "." + innerKey + "." + elem}
-                      label={elem}
-                      onClick={() => onSelectItem(elem, elementId + ".")}
-                    />
-                  );
-                })}
-              </StyledTreeItem>
-            ) : (
-              _getObjectTreeItem(obj, id, key, innerKey, onSelectItem)
-            );
-          })}
+          label={elem.text}
+          onClick={() => onSelectItem(elem, elementId.split("/"))}
+        />
+      ) : (
+        <StyledTreeItem key={elementId} nodeId={elementId} label={elem.text}>
+          {recursiveArrayTree(elem.children, elementId)}
         </StyledTreeItem>
       );
     });
-};
+  };
 
-const MaterialTree = props => {
+  /**
+   * Render tree in object format
+   * @param {object} obj : Tree data
+   * @param {string} id : Parent ID
+   * @returns {ReactElement} Rendered Tree
+   */
+  const recursiveObjectTree = (obj, id) => {
+    return Object.keys(obj)
+      .sort()
+      .map(key => {
+        const elementId = id ? `${id}.${key}` : key;
+        return (
+          <StyledTreeItem
+            key={elementId}
+            nodeId={elementId}
+            label={key}
+            onClick={() => onSelectItem(key, id || key)}
+          >
+            {Object.keys(obj[key]).map(innerKey => {
+              return obj[key][innerKey].length > 0 ? (
+                <StyledTreeItem
+                  key={elementId + "." + innerKey}
+                  nodeId={elementId + "." + innerKey}
+                  label={innerKey}
+                  onClick={() => onSelectItem(key, id || key)}
+                >
+                  {obj[key][innerKey].map((elem, elemIndex) => {
+                    return (
+                      <StyledTreeItem
+                        key={elementId + "." + innerKey + "." + elem}
+                        nodeId={elementId + "." + innerKey + "." + elem}
+                        label={elem}
+                        onClick={() => onSelectItem(elem, elementId + ".")}
+                      />
+                    );
+                  })}
+                </StyledTreeItem>
+              ) : (
+                _getObjectTreeItem(obj, id, key, innerKey)
+              );
+            })}
+          </StyledTreeItem>
+        );
+      });
+  };
+
   return (
     <TreeView
-      multiSelect={props.multiSelect}
+      multiSelect={multiSelect}
       style={{ marginTop: 15 }}
-      onNodeSelect={(_, selectedNodes) => props.onNodeSelect(selectedNodes)}
+      onNodeSelect={(_, selectedNodes) => onNodeSelect(selectedNodes)}
       defaultExpanded={["1"]}
       defaultCollapseIcon={<MinusSquare />}
       defaultExpandIcon={<PlusSquare />}
       defaultEndIcon={<CloseSquare />}
     >
-      {Array.isArray(props.data)
-        ? recursiveArrayTree(props.data, null, props.onSelectItem)
-        : recursiveObjectTree(props.data, null, props.onSelectItem)}
+      {Array.isArray(data)
+        ? recursiveArrayTree(data, null)
+        : recursiveObjectTree(data, null)}
     </TreeView>
   );
 };

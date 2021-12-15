@@ -5,9 +5,9 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
-import { makeStyles } from "@material-ui/core/styles";
-import { IconButton, Typography } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
+import { IconButton, Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 import { withTheme } from "../../../../decorators/withTheme";
 
 function useTranslation() {
@@ -32,7 +32,7 @@ const useStyles = makeStyles(theme => ({
  * @param {*} props : Component props
  * @returns {ReactComponent} DialogTitle Component
  */
-const DialogTitle = props => {
+export const DialogTitle = props => {
   const classes = useStyles();
   const { children, onClose, hasCloseButton, ...other } = props;
   return (
@@ -100,7 +100,9 @@ const AppDialog = props => {
 
   return (
     <Dialog open={open} onClose={handleClose}>
-      <DialogTitle onClose={handleClose}>{title}</DialogTitle>
+      <DialogTitle onClose={handleClose} {...props}>
+        {title}
+      </DialogTitle>
       <DialogContent dividers style={{ minWidth: 450 }}>
         {props.children}
       </DialogContent>
