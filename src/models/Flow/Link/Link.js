@@ -66,10 +66,7 @@ class Link extends Model {
     const content = Object.values(json)[0];
     const { From: from, To: to } = content;
 
-    const obj = new Link();
-    obj.setData({ name, from, to });
-
-    return obj;
+    return { name, from, to };
   }
 }
 

@@ -50,13 +50,11 @@ class Layer extends Model {
   }
 
   serializeToDB() {
-    const { id, name, enabled } = this.serialize();
+    const { name, enabled } = this.serialize();
 
     return {
-      [id]: {
-        name,
-        on: enabled
-      }
+      name,
+      on: enabled
     };
   }
 
@@ -65,10 +63,7 @@ class Layer extends Model {
     const content = Object.values(json)[0];
     const { name, on: enabled } = content;
 
-    const obj = new Layer();
-    obj.setData({ id, name, enabled });
-
-    return obj;
+    return { id, name, enabled };
   }
 }
 

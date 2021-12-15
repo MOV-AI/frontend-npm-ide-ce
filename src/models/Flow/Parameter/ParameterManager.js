@@ -16,8 +16,11 @@ class Parameters {
       throw new Error("Parameter already exists");
     }
 
-    // create the parameter and populate
-    const obj = Parameter.serializeOfDB({ [name]: { ...content } });
+    // create instance
+    const obj = new Parameter();
+
+    // populate instance
+    obj.setData({ name, ...content });
 
     // add instance to the nodes
     this.parameters.set(name, obj);
@@ -34,9 +37,10 @@ class Parameters {
     return this.parameters.delete(name);
   }
 
-  destroy() {
-    Array.from(this.parameters.values()).destroy();
-    this.parameters.clear();
+  setData(json) {
+    Object.entries(json ?? {}).forEach(([name, content]) => {
+      this.setParameter({ name, content });
+    });
   }
 
   serialize() {
@@ -64,13 +68,18 @@ class Parameters {
   }
 
   static serializeOfDB(json) {
-    const obj = new Parameters();
+    const output = {};
 
-    Object.entries(json).forEach(([name, content]) => {
-      obj.setParameter({ name, content });
+    Object.entries(json ?? {}).forEach(([name, content]) => {
+      output[name] = Parameter.serializeOfDB({ [name]: { ...content } });
     });
 
-    return obj;
+    return output;
+  }
+
+  destroy() {
+    Array.from(this.parameters.values()).destroy();
+    this.parameters.clear();
   }
 }
 

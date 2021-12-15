@@ -16,12 +16,13 @@ class LinkManager {
       throw new Error("Link already exists");
     }
 
-    // create the node
+    // create instance
     const obj = new Link();
-    // populate the node
-    obj.setData(Link.serializeOfDB(content));
 
-    // add instance to the nodes
+    // populate instance
+    obj.setData({ name, ...content });
+
+    // add instance to the links
     this.links.set(name, obj);
 
     return this;
@@ -34,6 +35,46 @@ class LinkManager {
   deleteLink(name) {
     this.getLink(name)?.destroy();
     return this.links.delete(name);
+  }
+
+  setData(json) {
+    Object.entries(json ?? {}).forEach(([name, content]) => {
+      this.setLink({ name, content });
+    });
+  }
+
+  serialize() {
+    const output = {};
+
+    for (const key of this.nodes.keys()) {
+      const obj = this.getLink(key);
+
+      output[obj.getName()] = obj.serialize();
+    }
+
+    return output;
+  }
+
+  serializeToDB() {
+    const output = {};
+
+    for (const key of this.links.keys()) {
+      const obj = this.getLink(key);
+
+      output[obj.getName()] = obj.serializeToDB();
+    }
+
+    return output;
+  }
+
+  static serializeOfDB(json) {
+    const output = {};
+
+    Object.entries(json ?? {}).forEach(([name, content]) => {
+      output[name] = Link.serializeOfDB({ [name]: { ...content } });
+    });
+
+    return output;
   }
 
   destroy() {

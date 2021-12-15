@@ -19,7 +19,7 @@ class LayerManager {
     // create the node
     const obj = new Layer();
     // populate the node
-    obj.setData(Layer.serializeOfDB(content));
+    obj.setData({ name, ...content });
 
     // add instance to the nodes
     this.layers.set(name, obj);
@@ -34,6 +34,46 @@ class LayerManager {
   deleteLayer(name) {
     this.getLayer(name)?.destroy();
     return this.layers.delete(name);
+  }
+
+  setData(json) {
+    Object.entries(json ?? {}).forEach(([name, content]) => {
+      this.setLayer({ name, content });
+    });
+  }
+
+  serialize() {
+    const output = {};
+
+    for (const key of this.layers.keys()) {
+      const obj = this.getLayer(key);
+
+      output[obj.getName()] = obj.serialize();
+    }
+
+    return output;
+  }
+
+  serializeToDB() {
+    const output = {};
+
+    for (const key of this.layers.keys()) {
+      const obj = this.getLayer(key);
+
+      output[obj.getId()] = obj.serializeToDB();
+    }
+
+    return output;
+  }
+
+  static serializeOfDB(json) {
+    const output = {};
+
+    Object.entries(json ?? {}).forEach(([name, content]) => {
+      output[name] = Layer.serializeOfDB({ [name]: { ...content } });
+    });
+
+    return output;
   }
 
   destroy() {

@@ -1,0 +1,88 @@
+import SubFlow from "./SubFlow";
+import Position from "./Position/Position";
+import ParameterManager from "../Parameter/ParameterManager";
+
+test("smoke test", () => {
+  const obj = new SubFlow();
+
+  expect(obj).toBeInstanceOf(SubFlow);
+  expect(obj.getName()).toBe("");
+  expect(obj.getTemplate()).toBe("");
+  expect(obj.getPosition()).toBeInstanceOf(Position);
+  expect(obj.getParameters()).toBeInstanceOf(ParameterManager);
+});
+
+test("serialize OF db", () => {
+  const data = {
+    ContainerLabel: "subflow",
+    ContainerFlow: "tugbot_actuators",
+    Visualization: [0.01, 0.02],
+    Parameter: { varA: { Value: "5", Type: "any" } }
+  };
+
+  const expected = {
+    name: data.ContainerLabel,
+    template: data.ContainerFlow,
+    position: { x: 0.01, y: 0.02 },
+    parameters: {
+      varA: { name: "varA", value: "5", type: "any" }
+    }
+  };
+
+  expect(SubFlow.serializeOfDB(data)).toMatchObject(expected);
+});
+
+test("serialize TO db", () => {
+  const obj = new SubFlow();
+
+  const data = {
+    template: "align_cart",
+    name: "align",
+    position: { x: 0.01, y: 0.03 },
+    parameters: {
+      camera: { name: "camera", value: "back1", type: "any" },
+      move_distance_to_car: {
+        name: "move_distance_to_car",
+        value: "0.30",
+        type: "number"
+      }
+    }
+  };
+
+  obj.setData(data);
+
+  const expected = {
+    ContainerFlow: "align_cart",
+    ContainerLabel: "align",
+    Visualization: [0.01, 0.03],
+    Parameter: {
+      camera: { Value: "back1", Type: "any" },
+      move_distance_to_car: { Value: "0.30", Type: "number" }
+    }
+  };
+
+  expect(obj.serializeToDB(data)).toMatchObject(expected);
+});
+
+test("create subflow", () => {
+  const content = {
+    template: "align_cart",
+    name: "align",
+    position: [0.01, 0.03],
+    parameters: {
+      camera: { name: "camera", value: "back1", type: "any" },
+      move_distance_to_car: {
+        name: "move_distance_to_car",
+        value: "0.30",
+        type: "number"
+      }
+    }
+  };
+
+  const obj = new SubFlow();
+  obj.setData(content);
+
+  expect(obj.getName()).toBe(content.name);
+  expect(obj.getTemplate()).toBe(content.template);
+  expect(obj.getPosition()).toBeInstanceOf(Position);
+});

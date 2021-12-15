@@ -1,8 +1,9 @@
 import Model from "../../Model/Model";
 import schema from "./schema";
 import Parameters from "../Parameter/ParameterManager";
+import Position from "./Position/Position";
 
-class Node extends Model {
+class SubFlow extends Model {
   constructor() {
     // inject imported schema and forward constructor arguments
     super({ schema, ...arguments[0] });
@@ -11,7 +12,7 @@ class Node extends Model {
   // Model properties
   name = "";
   template = "";
-  position = { x: 0, y: 0 };
+  position = new Position();
   parameters = new Parameters();
 
   observables = ["name", "template", "position"];
@@ -26,7 +27,6 @@ class Node extends Model {
   }
 
   getTemplate() {
-    // TODO: get the template instance
     return this.template;
   }
 
@@ -39,32 +39,34 @@ class Node extends Model {
     return this.position;
   }
 
-  setPosition(x, y) {
-    this.position = { x, y };
-  }
-
   getParameters() {
     return this.parameters;
+  }
+
+  setData(json) {
+    const { name, template, position, parameters } = json;
+    super.setData({ name, template });
+
+    this.position.setData(position);
+    this.parameters.setData(parameters);
   }
 
   serialize() {
     return {
       name: this.getName(),
       template: this.getTemplate(),
-      position: this.getPosition(),
+      position: this.getPosition().serialize(),
       parameters: this.getParameters().serialize()
     };
   }
 
   serializeToDB() {
-    const { name, template, position } = this.serialize();
+    const { name, template } = this.serialize();
 
     return {
       ContainerLabel: name,
       ContainerFlow: template,
-      Visualization: {
-        ...position
-      },
+      Visualization: this.getPosition().serializeToDB(),
       Parameter: this.getParameters().serializeToDB()
     };
   }
@@ -73,11 +75,17 @@ class Node extends Model {
     const {
       ContainerLabel: name,
       ContainerFlow: template,
-      Visualization: position
+      Visualization: position,
+      Parameter: parameters
     } = json;
 
-    return { name, template, position };
+    return {
+      name,
+      template,
+      position: Position.serializeOfDB(position),
+      parameters: Parameters.serializeOfDB(parameters)
+    };
   }
 }
 
-export default Node;
+export default SubFlow;

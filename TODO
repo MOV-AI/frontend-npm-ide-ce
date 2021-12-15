@@ -1,0 +1,10 @@
+
+Equals:
+- Nodemanager
+- ParameterManager
+
+Equals:
+- EnvVar
+- Commands
+
+ExposedPorts needs to be reviewed

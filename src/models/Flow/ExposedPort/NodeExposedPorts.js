@@ -60,7 +60,7 @@ class NodeExposedPorts extends Model {
   }
 
   serializeToDB() {
-    const { template, name, ports } = this.serialize();
+    const { name, ports } = this.serialize();
 
     return {
       [name]: ports
@@ -73,10 +73,7 @@ class NodeExposedPorts extends Model {
     const name = Object.keys(content)[0];
     const ports = Object.values(content)[0];
 
-    const obj = new NodeExposedPorts();
-    obj.setData({ name, template, ports });
-
-    return obj;
+    return { name, template, ports };
   }
 }
 

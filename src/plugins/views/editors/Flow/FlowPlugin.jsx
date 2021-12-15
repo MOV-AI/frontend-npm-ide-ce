@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import InfoIcon from "@material-ui/icons/Info";
-import Flow from "./Flow";
+//import Flow from "./Flow";
 
 const FlowPlugin = (props, ref) => {
   const { call } = props;
@@ -28,7 +28,7 @@ const FlowPlugin = (props, ref) => {
     renderRightMenu
   });
 
-  return <Flow></Flow>;
+  return <div>it works!</div>;
 };
 
 export default withEditorPlugin(FlowPlugin);

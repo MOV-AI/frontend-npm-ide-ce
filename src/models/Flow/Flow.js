@@ -72,9 +72,46 @@ export default class Flow extends Model {
     return Flow.SCOPE;
   }
 
+  setData(json) {
+    const {
+      info,
+      description,
+      name,
+      details,
+      nodeInstances,
+      subFlows,
+      exposedPorts,
+      links,
+      layers,
+      parameters
+    } = json;
+
+    super.setData({ info, description, name, details });
+
+    this.nodeInstances.setData(
+      NodeInstances.serializeOfDB(nodeInstances ?? {})
+    );
+
+    this.subFlows.setData(SubFlows.serializeOfDB(subFlows ?? {}));
+    this.exposedPorts.setData(ExposedPorts.serializeOfDB(exposedPorts ?? {}));
+    this.links.setData(Links.serializeOfDB(links ?? {}));
+    this.layers.setData(Layers.serializeOfDB(layers ?? {}));
+    this.parameters.setData(Parameters.serializeOfDB(parameters ?? {}));
+
+    return this;
+  }
+
   serialize() {
     return {
-      ...super.serialize()
+      ...super.serialize(),
+      info: this.getInfo(),
+      description: this.getDescription(),
+      nodeInstances: this.nodeInstances.serialize(),
+      subFlows: this.subFlows.serialize(),
+      exposedPorts: this.exposedPorts.serialize(),
+      links: this.links.serialize(),
+      layers: this.layers.serialize(),
+      parameters: this.parameters.serialize()
     };
   }
 
@@ -83,10 +120,19 @@ export default class Flow extends Model {
    * @returns {object} Database data
    */
   serializeToDB() {
-    const { name, code, extension, details } = this.serialize();
+    const { info, name, description, details } = this.serialize();
 
     return {
-      Label: name
+      Info: info,
+      Label: name,
+      Description: description,
+      LastUpdate: details,
+      NodeInst: this.nodeInstances.serializeToDB(),
+      Container: this.subFlows.serializeToDB(),
+      ExposedPorts: this.exposedPorts.serializeToDB(),
+      Links: this.links.serializeToDB(),
+      Layers: this.layers.serializeToDB(),
+      Parameter: this.parameters.serializeToDB()
     };
   }
 
@@ -101,7 +147,15 @@ export default class Flow extends Model {
       Label: name,
       LastUpdate: details,
       workspace,
-      version
+      version,
+      Info: info,
+      Description: description,
+      NodeInst: nodeInstances,
+      Container: subFlows,
+      ExposedPorts: exposedPorts,
+      Links: links,
+      Layers: layers,
+      Parameters: parameters
     } = json;
 
     return {
@@ -109,7 +163,15 @@ export default class Flow extends Model {
       name,
       details,
       workspace,
-      version
+      version,
+      info,
+      description,
+      nodeInstances: NodeInstances.serializeOfDB(nodeInstances),
+      subFlows: SubFlows.serializeOfDB(subFlows),
+      exposedPorts: ExposedPorts.serializeOfDB(exposedPorts),
+      links: Links.serializeOfDB(links),
+      layers: Layers.serializeOfDB(layers),
+      parameters: Parameters.serializeOfDB(parameters)
     };
   }
 

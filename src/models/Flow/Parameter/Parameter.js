@@ -10,9 +10,10 @@ class Parameter extends Model {
   // Model properties
   name = "";
   value = "";
+  type = "any";
   description = "";
 
-  observables = ["name", "value", "description"];
+  observables = ["name", "value", "type", "description"];
 
   getName() {
     return this.name;
@@ -32,6 +33,15 @@ class Parameter extends Model {
     return this;
   }
 
+  getType() {
+    return this.type;
+  }
+
+  setType(value) {
+    this.type = value;
+    return this;
+  }
+
   getDescription() {
     return this.description;
   }
@@ -45,15 +55,17 @@ class Parameter extends Model {
     return {
       name: this.getName(),
       value: this.getValue(),
+      type: this.getType(),
       description: this.getDescription()
     };
   }
 
   serializeToDB() {
-    const { value, description } = this.serialize();
+    const { value, description, type } = this.serialize();
 
     return {
       Value: value,
+      Type: type,
       Description: description
     };
   }
@@ -61,12 +73,9 @@ class Parameter extends Model {
   static serializeOfDB(json) {
     const name = Object.keys(json)[0];
     const content = Object.values(json)[0];
-    const { Value: value, Description: description } = content;
+    const { Value: value, Type: type, Description: description } = content;
 
-    const obj = new Parameter();
-    obj.setData({ name, value, description });
-
-    return obj;
+    return { name, value, type, description };
   }
 }
 
