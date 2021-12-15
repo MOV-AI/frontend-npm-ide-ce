@@ -1,6 +1,9 @@
 import React from "react";
 import Loader from "../../_shared/Loader/Loader";
 import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
+import Search from "../../_shared/Search/Search";
+import _debounce from "lodash/debounce";
+import { searchImports } from "./utils";
 
 const AddImport = props => {
   // Props
@@ -8,6 +11,7 @@ const AddImport = props => {
   // State hooks
   const [loading, setLoading] = React.useState(false);
   const [pyLibs, setPyLibs] = React.useState();
+  const [filteredLibs, setFilteredLibs] = React.useState();
 
   //========================================================================================
   /*                                                                                      *
@@ -19,7 +23,10 @@ const AddImport = props => {
     setLoading(true);
     call("docManager", "getStore", scope).then(store => {
       store.helper.getAllLibraries().then(libs => {
-        if (libs) setPyLibs(libs);
+        if (libs) {
+          setPyLibs(libs);
+          setFilteredLibs(libs);
+        }
         setLoading(false);
       });
     });
@@ -51,6 +58,15 @@ const AddImport = props => {
     onSelectionChange(pyLibSelected);
   };
 
+  /**
+   * On search imports
+   * @param {*} value
+   */
+  const onSearch = _debounce(value => {
+    const result = searchImports(value, pyLibs);
+    setFilteredLibs(result);
+  }, 500);
+
   //========================================================================================
   /*                                                                                      *
    *                                       Render                                         *
@@ -66,13 +82,19 @@ const AddImport = props => {
     if (loading) return <Loader />;
     // Return when data is ready or error message if not
     return pyLibs ? (
-      <MaterialTree
-        data={pyLibs}
-        onNodeSelect={onSelectLib}
-        multiSelect={true}
-      ></MaterialTree>
+      <>
+        <Search onSearch={onSearch} />
+        <MaterialTree
+          data={filteredLibs}
+          onNodeSelect={onSelectLib}
+          multiSelect={true}
+        ></MaterialTree>
+      </>
     ) : (
-      <h2>Something went wrong :(</h2>
+      <>
+        <h2>Something went wrong :(</h2>
+        <h3>Failed to load libraries</h3>
+      </>
     );
   };
 

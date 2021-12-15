@@ -2,7 +2,19 @@ import React from "react";
 import Loader from "../../_shared/Loader/Loader";
 import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
 import { Grid, Typography, TextField } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import { searchMessages } from "./utils";
 import Search from "../../_shared/Search/Search";
+
+const useStyles = makeStyles(theme => ({
+  treeRoot: {
+    overflowY: "auto",
+    overflowX: "hidden",
+    paddingLeft: 5,
+    justifyContent: "center",
+    width: "100%"
+  }
+}));
 
 const EditMessage = props => {
   // Props
@@ -11,6 +23,8 @@ const EditMessage = props => {
   const [loading, setLoading] = React.useState(false);
   const [messages, setMessages] = React.useState();
   const [filteredMsg, setFilteredMsg] = React.useState();
+  // Style hook
+  const classes = useStyles();
 
   //========================================================================================
   /*                                                                                      *
@@ -43,13 +57,6 @@ const EditMessage = props => {
     setFilteredMsg(messagesStruct);
   }, []);
 
-  const _normalizeString = str => {
-    return str
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
-  };
-
   //========================================================================================
   /*                                                                                      *
    *                                   Handle Events                                      *
@@ -72,30 +79,8 @@ const EditMessage = props => {
    */
   const onSearch = React.useCallback(
     value => {
-      if (!value) setFilteredMsg(messages);
-      else {
-        let result = [];
-        value = _normalizeString(value);
-        messages.forEach(elem => {
-          if (_normalizeString(elem.text).includes(value)) {
-            result.push(elem);
-          } else {
-            // If has children
-            if (elem.children !== undefined) {
-              const children_ = elem.children.filter(el =>
-                _normalizeString(el.text).includes(value)
-              );
-              if (children_.length > 0) {
-                result.push({
-                  text: elem.text,
-                  children: children_
-                });
-              }
-            }
-          }
-        });
-        setFilteredMsg(result);
-      }
+      const result = searchMessages(value, messages);
+      setFilteredMsg(result);
     },
     [messages]
   );
@@ -139,7 +124,10 @@ const EditMessage = props => {
         onNodeSelect={onSelectMessage}
       ></MaterialTree>
     ) : (
-      <h2>Something went wrong :(</h2>
+      <>
+        <h2>Something went wrong :(</h2>
+        <h3>Failed to load messages</h3>
+      </>
     );
   };
 
@@ -150,17 +138,7 @@ const EditMessage = props => {
           <Search onSearch={onSearch} />
         </Grid>
         <Grid item xs={12}>
-          <Typography
-            component="div"
-            style={{
-              overflowY: "auto",
-              overflowX: "hidden",
-              paddingTop: 15,
-              paddingLeft: 15,
-              justifyContent: "center",
-              width: "100%"
-            }}
-          >
+          <Typography component="div" className={classes.treeRoot}>
             {renderTree()}
           </Typography>
         </Grid>

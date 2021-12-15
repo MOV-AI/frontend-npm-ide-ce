@@ -157,6 +157,7 @@ const MaterialTree = props => {
   return (
     <TreeView
       multiSelect={props.multiSelect}
+      style={{ marginTop: 15 }}
       onNodeSelect={(_, selectedNodes) => props.onNodeSelect(selectedNodes)}
       defaultExpanded={["1"]}
       defaultCollapseIcon={<MinusSquare />}
