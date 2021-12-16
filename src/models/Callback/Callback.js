@@ -11,10 +11,12 @@ export default class Callback extends Model {
   // Extend Model properties and assign defaults
   code = "";
   message = "";
-  pyLibs = new PyLibManager();
+  pyLibs = new PyLibManager("pyLibs", {
+    onAny: (event, name, value) => this.pyLibUpdated(event, name, value)
+  });
 
   // Define observable properties
-  observables = ["name", "details", "code", "message", "pyLibs"];
+  observables = ["name", "details", "code", "message"];
 
   getCode() {
     return this.code;
@@ -55,6 +57,11 @@ export default class Callback extends Model {
 
   getFileExtension() {
     return Callback.EXTENSION;
+  }
+
+  pyLibUpdated(event, prop, value) {
+    // force dispatch
+    this.dispatch(prop, value);
   }
 
   setData(json) {

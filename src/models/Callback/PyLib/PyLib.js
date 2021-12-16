@@ -12,7 +12,7 @@ class PyLib extends Model {
   module = "";
   libClass = "";
 
-  observables = ["name", "module", "class"];
+  observables = ["name", "module", "libClass"];
 
   getName() {
     return this.name;
