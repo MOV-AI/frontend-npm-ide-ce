@@ -45,7 +45,6 @@ const AlertBeforeAction = props => {
 
   return (
     <AppDialog
-      closeOnBackdrop={false}
       hasCloseButton={false}
       title={title}
       onClose={onClose}

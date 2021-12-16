@@ -92,11 +92,11 @@ export default class Model extends Observable {
     return this;
   }
 
-  dispatch(prop, value, callbacks) {
+  dispatch(prop, value) {
     this.setDirty(true);
 
     try {
-      for (const fn of callbacks) {
+      for (const fn of this.subscribers.values()) {
         setTimeout(() => fn.call(this, this, prop, value), 0);
       }
     } catch (error) {
@@ -105,7 +105,7 @@ export default class Model extends Observable {
   }
 
   setData(json) {
-    Object.entries(json).forEach(([key, value]) => {
+    Object.entries(json ?? {}).forEach(([key, value]) => {
       if (Reflect.has(this, key) && value !== undefined) {
         Reflect.set(this, key, value);
       }
@@ -154,6 +154,6 @@ export default class Model extends Observable {
 
     const obj = new this(data);
 
-    return obj.setData(data).setDirty(false).setIsNew(false);
+    return obj.setData(data).setDirty(false);
   }
 }
