@@ -1,6 +1,5 @@
 const symbols = {
   timer: Symbol(),
-  callbacks: Symbol(),
   enabled: Symbol()
 };
 
@@ -19,7 +18,7 @@ class Observable {
           const res = Reflect.set(...arguments);
 
           // dispatch update
-          target.dispatch(prop, value, target[symbols.callbacks].values());
+          target.dispatch(prop, value);
 
           return res;
         }
@@ -36,7 +35,7 @@ class Observable {
   observables = [];
 
   // List of callbacks to execute on update
-  [symbols.callbacks] = new Map();
+  subscribers = new Map();
 
   /**
    * Enable observables
@@ -54,7 +53,7 @@ class Observable {
    */
   subscribe(callback) {
     const id = Symbol();
-    this[symbols.callbacks].set(id, callback);
+    this.subscribers.set(id, callback);
     return id;
   }
 
@@ -64,18 +63,18 @@ class Observable {
    * @returns {boolean} : true if an element in the Map object existed and has been removed, or false if the element does not exist.
    */
   unsubscribe(id) {
-    return this[symbols.callbacks].delete(id);
+    return this.subscribers.delete(id);
   }
 
   /**
-   * Execute callbacks from subscribers
+   * Execute  subscribers
    * @param {string} prop : The name of the changing property
    * @param {any} value : The value of the property
    * @returns  {any}
    */
-  dispatch(prop, value, callbacks) {
+  dispatch(prop, value) {
     try {
-      for (const fn of callbacks) {
+      for (const fn of this.subscribers.values()) {
         setTimeout(() => fn.call(this, this, prop, value), 0);
       }
     } catch (error) {
@@ -87,7 +86,7 @@ class Observable {
    * Clean up the instance
    */
   destroy() {
-    this[symbols.callbacks].clear();
+    this.subscribers.clear();
   }
 }
 

@@ -146,3 +146,16 @@ test("delete import", () => {
 
   expect(obj.getPyLibs().getPyLib("math")).toBe(undefined);
 });
+
+test("update import", () => {
+  const data = { math: { module: "math", libClass: false } };
+
+  const obj = new Callback();
+
+  obj.getPyLibs().setData(data);
+
+  // update pylib
+  obj.getPyLibs().updatePyLib({ name: "math", content: { module: "math1" } });
+
+  expect(obj.getPyLibs().getPyLib("math").getModule()).toBe("math1");
+});

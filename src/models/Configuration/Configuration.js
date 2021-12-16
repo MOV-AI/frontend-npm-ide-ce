@@ -93,6 +93,4 @@ export default class Configuration extends Model {
   static SCOPE = "Configuration";
 
   static EXTENSION = ".conf";
-
-  static EMPTY = new Configuration({});
 }

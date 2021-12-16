@@ -1,7 +1,9 @@
 import ConfigurationStore from "../../store/Configuration/ConfigurationStore";
+import CallbackStore from "../../store/Callback/CallbackStore";
 import Configuration from "../views/editors/Configuration/Configuration";
 import FlowStore from "../../store/Flow/FlowStore";
 import FlowPlugin from "../views/editors/Flow/FlowPlugin";
+import Callback from "../views/editors/Callback/Callback";
 
 /**
  * Returns a list of interfaces
@@ -11,10 +13,10 @@ import FlowPlugin from "../views/editors/Flow/FlowPlugin";
 
 const factory = (workspace, observer) => {
   return {
-    // [CallbackStore.SCOPE]: {
-    //   store: new CallbackStore(workspace, observer),
-    //   plugin: Configuration
-    // },
+    [CallbackStore.SCOPE]: {
+      store: new CallbackStore(workspace, observer),
+      plugin: Callback
+    },
     [ConfigurationStore.SCOPE]: {
       store: new ConfigurationStore(workspace, observer),
       plugin: Configuration

@@ -11,6 +11,7 @@ class DocManager extends IDEPlugin {
     const methods = Array.from(
       new Set([
         ...(profile.methods ?? []),
+        "getStore",
         "getDocTypes",
         "getDocFactory",
         "getDocFromNameType",

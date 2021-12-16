@@ -1,5 +1,6 @@
 import Model from "../../models/Callback/Callback";
 import Store from "../Store";
+import Helper from "./CallbackHelper";
 
 class CallbackStore extends Store {
   constructor(workspace, observer) {
@@ -11,6 +12,9 @@ class CallbackStore extends Store {
       observer
     });
   }
+
+  // Set helper object with cloudFunction
+  helper = Helper;
 
   static SCOPE = Model.SCOPE;
 }

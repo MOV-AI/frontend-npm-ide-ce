@@ -92,11 +92,11 @@ export default class Model extends Observable {
     return this;
   }
 
-  dispatch(prop, value, callbacks) {
+  dispatch(prop, value) {
     this.setDirty(true);
 
     try {
-      for (const fn of callbacks) {
+      for (const fn of this.subscribers.values()) {
         setTimeout(() => fn.call(this, this, prop, value), 0);
       }
     } catch (error) {

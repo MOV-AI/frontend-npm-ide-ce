@@ -1,6 +1,22 @@
 import PyLib from "./PyLib";
 
+const EVENTS = {
+  UPDATE: "onUpdate",
+  CREATE: "onCreate",
+  DELETE: "onDelete",
+  ANY: "onAny"
+};
+
 class PyLibManager {
+  constructor(name, events) {
+    // events {object} : {<event name>: <callback>}
+    // available events:
+    // setPyLib -> onCreate
+    // updatePyLib -> onUpdate
+    // deletePyLib -> onDelete
+    this.events = events ?? {};
+    this.name = name;
+  }
   pylibs = new Map();
 
   checkExists(name) {
@@ -25,16 +41,24 @@ class PyLibManager {
     // add instance to the nodes
     this.pylibs.set(name, obj);
 
-    return this;
+    this.emit(EVENTS.CREATE);
   }
 
   updatePyLib({ name, content }) {
-    return this.getPyLib(name)?.setData(content);
+    const res = this.getPyLib(name)?.setData(content);
+
+    this.emit(EVENTS.UPDATE);
+
+    return res;
   }
 
   deletePyLib(name) {
     this.getPyLib(name)?.destroy();
-    return this.pylibs.delete(name);
+    const res = this.pylibs.delete(name);
+
+    this.emit(EVENTS.DELETE);
+
+    return res;
   }
 
   setData(json) {
@@ -75,6 +99,25 @@ class PyLibManager {
     });
 
     return output;
+  }
+
+  emit(event) {
+    const { name } = this;
+    const value = this.serialize();
+
+    // Execute on specific event
+    const fn = this.events[event];
+
+    if (typeof fn === "function") {
+      fn.call(this, event, name, value);
+    }
+
+    // Execute for any of the events
+    const anyFn = this.events[EVENTS.ANY];
+
+    if (typeof anyFn === "function") {
+      anyFn.call(this, event, name, value);
+    }
   }
 
   destroy() {
