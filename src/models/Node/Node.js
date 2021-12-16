@@ -1,59 +1,52 @@
 import Model from "../Model/Model";
 import schema from "./schema";
+import ParameterManager from "../subModels/Parameter/ParameterManager";
+import EnvVarManager from "../subModels/EnvVar/EnvVarManager";
+import CommandManager from "../subModels/Command/CommandManager";
 
-export default class Node extends Model {
+class Node extends Model {
   constructor() {
     // inject imported schema and forward constructor arguments
     super({ schema, ...arguments[0] });
   }
 
+  // Model properties
   description = "";
-  type = "";
   path = "";
+  type = "";
   persistent = false;
-  remappable = true;
   launch = true;
+  remappable = true;
+  packageDep = "";
+  parameters = new ParameterManager();
+  envVars = new EnvVarManager();
+  commands = new CommandManager();
+  //TODO: add ports
+  // ports = new PortsManager();
 
-  // Define observable properties
   observables = [
     "name",
     "details",
     "description",
-    "type",
     "path",
+    "type",
     "persistent",
+    "launch",
     "remappable",
-    "launch"
+    "packageDep"
   ];
+
+  getDescription() {
+    return this.description;
+  }
 
   setDescription(value) {
     this.description = value;
     return this;
   }
 
-  getDescription() {
-    return this.description;
-  }
-
-  setType(value) {
-    this.type = value;
-    return this;
-  }
-
-  getType() {
-    return this.type;
-  }
-
-  setExecutionParameter(parameter, value) {
-    this[parameter] = value;
-  }
-
-  getExecutionParameters() {
-    return {
-      persistent: this.persistent,
-      remappable: this.remappable,
-      launch: this.launch
-    };
+  getPath() {
+    return this.path;
   }
 
   setPath(value) {
@@ -61,8 +54,61 @@ export default class Node extends Model {
     return this;
   }
 
-  getPath() {
-    return this.path;
+  getType() {
+    return this.type;
+  }
+
+  setType(value) {
+    this.type = value;
+    return this;
+  }
+
+  getPersistent() {
+    return this.persistent;
+  }
+
+  setPersistent(value) {
+    this.persistent = value;
+    return this;
+  }
+
+  getLaunch() {
+    return this.launch;
+  }
+
+  setLaunch(value) {
+    this.launch = value;
+    return this;
+  }
+
+  getRemappable() {
+    return this.remappable;
+  }
+
+  setRemappable(value) {
+    this.remappable = value;
+    return this;
+  }
+
+  getPackageDep() {
+    return this.packageDep;
+  }
+
+  setPackageDep(value) {
+    this.packageDep = value;
+    return this;
+  }
+
+  getParameters() {
+    return this.parameters;
+  }
+
+  getEnvVars() {
+    return this.envVars;
+  }
+
+  getCommands() {
+    return this.commands;
   }
 
   getScope() {
@@ -73,56 +119,138 @@ export default class Node extends Model {
     return Node.EXTENSION;
   }
 
+  setData(json) {
+    const {
+      name,
+      details,
+      description,
+      path,
+      type,
+      persistent,
+      packageDep,
+      launch,
+      remappable,
+      parameters,
+      envVars,
+      commands
+    } = json;
+
+    super.setData({
+      name,
+      details,
+      description,
+      path,
+      type,
+      persistent,
+      packageDep,
+      launch,
+      remappable
+    });
+
+    this.parameters.setData(parameters);
+    this.envVars.setData(envVars);
+    this.commands.setData(commands);
+
+    return this;
+  }
+
   serialize() {
     return {
       ...super.serialize(),
-      type: this.getType(),
+      name: this.getName(),
+      details: this.getDetails(),
       description: this.getDescription(),
       path: this.getPath(),
-      ...this.getExecutionParameters()
+      type: this.getType(),
+      persistent: this.getPersistent(),
+      packageDep: this.getPackageDep(),
+      launch: this.getLaunch(),
+      remappable: this.getRemappable(),
+      parameters: this.getParameters().serialize(),
+      envvars: this.getEnvVars().serialize(),
+      commands: this.getCommands().serialize()
     };
   }
 
-  /**
-   * Serialize database data to model properties
-   * @param {object} json : The data received from the database
-   * @returns {object} Model properties
-   */
-  static serializeOfDB(json) {
-    console.log("debug serializeOfDB", json);
+  serializeToDB() {
     const {
-      Label: id,
+      name,
+      details,
+      description,
+      path,
+      type,
+      persistent,
+      packageDep,
+      launch,
+      remappable
+    } = this.serialize();
+
+    return {
       Label: name,
       Info: description,
       Path: path,
-      Persistent: persistent,
-      Remappable: remappable,
-      Launch: launch,
       Type: type,
+      Persistent: persistent,
+      Launch: launch,
+      Remappable: remappable,
+      LastUpdate: details,
+      PackageDepends: packageDep,
+      Parameter: this.getParameters().serializeToDB(),
+      EnvVar: this.getEnvVars().serializeToDB(),
+      CmdLine: this.getCommands().serializeToDB()
+    };
+  }
+
+  static serializeOfDB(json) {
+    const {
+      Label: id,
+      Label: name,
       LastUpdate: details,
       workspace,
-      version
+      version,
+      Info: description,
+      Path: path,
+      Type: type,
+      Persistent: persistent,
+      Launch: launch,
+      Remappable: remappable,
+      PackageDepends: packageDep,
+      Parameter: parameters,
+      EnvVar: envVars,
+      CmdLine: commands
     } = json;
 
     return {
       id,
       name,
-      description,
-      type,
-      persistent: persistent === "" ? false : persistent,
-      remappable: remappable === "" ? true : remappable,
-      launch: launch === "" ? true : launch,
-      path,
       details,
       workspace,
-      version
+      version,
+      description,
+      path,
+      type,
+      persistent,
+      launch,
+      remappable,
+      packageDep,
+      parameters: ParameterManager.serializeOfDB(parameters),
+      envVars: EnvVarManager.serializeOfDB(envVars),
+      commands: CommandManager.serializeOfDB(commands)
     };
   }
-
   static SCOPE = "Node";
-  static EXTENSION = ".nd";
 
-  static ofJSON(json) {
-    return new Node(json.Label);
-  }
+  static EXTENSION = ".nd";
 }
+
+Node.defaults = {
+  description: "",
+  path: "",
+  type: "",
+  persistent: false,
+  launch: true,
+  remappable: true,
+  packageDep: ""
+};
+
+export default Node;
