@@ -13,6 +13,7 @@
     "eamodio.gitlens",
     "dbaeumer.vscode-eslint",
     "burkeholland.simple-react-snippets",
+    "Makogan.hermes-comments",
     "SonarSource.sonarlint-vscode"
   ],
   "postCreateCommand": "npm ci",
