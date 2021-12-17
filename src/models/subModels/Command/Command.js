@@ -10,8 +10,9 @@ class Command extends Model {
   // Model properties
   name = "";
   value = "";
+  description = "";
 
-  observables = ["name", "value"];
+  observables = ["name", "value", "description"];
 
   getName() {
     return this.name;
@@ -28,6 +29,15 @@ class Command extends Model {
 
   setValue(value) {
     this.value = value;
+    return this;
+  }
+
+  getDescription() {
+    return this.description;
+  }
+
+  setDescription(value) {
+    this.description = value;
     return this;
   }
 
