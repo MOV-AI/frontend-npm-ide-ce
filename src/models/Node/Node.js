@@ -74,6 +74,11 @@ class Node extends Model {
     return this;
   }
 
+  setExecutionParameter(parameter, value) {
+    super.setData({ [parameter]: value });
+    return this;
+  }
+
   getPersistent() {
     return this.persistent;
   }
