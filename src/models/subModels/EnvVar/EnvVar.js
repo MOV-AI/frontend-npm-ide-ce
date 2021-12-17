@@ -44,24 +44,26 @@ class EnvVar extends Model {
   serialize() {
     return {
       name: this.getName(),
-      value: this.getValue()
+      value: this.getValue(),
+      description: this.getDescription()
     };
   }
 
   serializeToDB() {
-    const { value } = this.serialize();
+    const { value, description } = this.serialize();
 
     return {
-      Value: value
+      Value: value,
+      Description: description
     };
   }
 
   static serializeOfDB(json) {
     const name = Object.keys(json)[0];
     const content = Object.values(json)[0];
-    const { Value: value } = content;
+    const { Value: value, Description: description } = content;
 
-    return { name, value };
+    return { name, value, description };
   }
 }
 
