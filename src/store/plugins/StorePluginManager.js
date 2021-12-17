@@ -24,8 +24,6 @@ class StorePluginManager {
     plugins.forEach(plugin => {
       const instance = new plugin(this);
 
-      console.log(`${instance.getName()} initialized plugin`);
-
       this[symbols.plugins].set(instance.getName(), instance);
     });
   }
