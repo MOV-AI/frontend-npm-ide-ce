@@ -23,7 +23,6 @@ class Node extends Model {
   parameters = new Manager("parameters", Parameter, this.events);
   envVars = new Manager("envVars", EnvVar, this.events);
   commands = new Manager("commands", Command, this.events);
-
   ports = new Manager("ports", Port, this.events);
 
   observables = [

@@ -14,10 +14,19 @@ class Port extends Model {
   template = "";
   msgPackage = "";
   message = "";
-  portIn = new Manager("portIn", PortType, {});
-  portOut = new Manager("portOut", PortType, {});
+  events = {
+    onAny: (event, name, value) => this.propsUpdate(event, name, value)
+  };
+  portIn = new Manager("portIn", PortType, this.events);
+  portOut = new Manager("portOut", PortType, this.events);
 
   observables = ["name", "description", "template", "msgPackage", "message"];
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                     Data Handlers                                    *
+   *                                                                                      */
+  //========================================================================================
 
   getDescription() {
     return this.description;
@@ -89,6 +98,23 @@ class Port extends Model {
 
     return this;
   }
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Events                                        *
+   *                                                                                      */
+  //========================================================================================
+
+  propsUpdate(event, prop, value) {
+    // force dispatch
+    this.dispatch(prop, value);
+  }
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                      Serializers                                     *
+   *                                                                                      */
+  //========================================================================================
 
   serialize() {
     return {
