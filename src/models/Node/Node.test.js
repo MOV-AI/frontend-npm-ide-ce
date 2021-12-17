@@ -1,4 +1,5 @@
 import Node from "./Node";
+import { Port } from "../subModels";
 
 test("smoke test", () => {
   const obj = new Node();
@@ -196,4 +197,101 @@ test("serialize TO db", () => {
   };
 
   expect(obj.serializeToDB(data)).toMatchObject(expected);
+});
+
+test("add ports", () => {
+  const data = {
+    tag_tf: {
+      name: "tag_tf",
+      description: "some info",
+      template: "ROS1/TFPublisher",
+      message: "TF",
+      msgPackage: "movai_msgs",
+      portOut: {
+        out: {
+          name: "out",
+          message: "movai_msgs/TF",
+          parameters: {
+            Child: "camera_link",
+            Parent: "tag"
+          }
+        }
+      }
+    }
+  };
+
+  const obj = new Node();
+
+  obj.getPorts().setData(data);
+
+  expect(obj.getPorts().getItem("tag_tf")).toBeInstanceOf(Port);
+  expect(obj.getPorts().getItem("tag_tf").getTemplate()).toBe(
+    "ROS1/TFPublisher"
+  );
+  expect(obj.getPorts().getItem("tag_tf").getMessage()).toBe("TF");
+});
+
+test("delete a port", () => {
+  const data = {
+    tag_tf: {
+      name: "tag_tf",
+      description: "some info",
+      template: "ROS1/TFPublisher",
+      message: "TF",
+      msgPackage: "movai_msgs",
+      portOut: {
+        out: {
+          name: "out",
+          message: "movai_msgs/TF",
+          parameters: {
+            Child: "camera_link",
+            Parent: "tag"
+          }
+        }
+      }
+    }
+  };
+
+  const obj = new Node();
+
+  obj.getPorts().setData(data);
+
+  obj.getPorts().deleteItem("tag_tf");
+
+  expect(obj.getPorts().getItem("tag_tf")).toBe(undefined);
+});
+
+test("update port", () => {
+  const data = {
+    tag_tf: {
+      name: "tag_tf",
+      description: "some info",
+      template: "ROS1/TFPublisher",
+      message: "TF",
+      msgPackage: "movai_msgs",
+      portOut: {
+        out: {
+          name: "out",
+          message: "movai_msgs/TF",
+          parameters: {
+            Child: "camera_link",
+            Parent: "tag"
+          }
+        }
+      }
+    }
+  };
+
+  const obj = new Node();
+
+  obj.getPorts().setData(data);
+
+  obj.getPorts().updateItem({
+    name: "tag_tf",
+    content: { description: "new description" }
+  });
+
+  expect(obj.getPorts().getItem("tag_tf").getDescription()).toBe(
+    "new description"
+  );
 });
