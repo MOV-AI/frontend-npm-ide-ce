@@ -1,5 +1,5 @@
 import Node from "./Node";
-import { Port } from "../subModels";
+import { Command, EnvVar, Parameter, Port } from "../subModels";
 
 test("smoke test", () => {
   const obj = new Node();
@@ -200,9 +200,10 @@ test("serialize TO db", () => {
 });
 
 test("add ports", () => {
+  const name = "tag_tf";
   const data = {
-    tag_tf: {
-      name: "tag_tf",
+    [name]: {
+      name,
       description: "some info",
       template: "ROS1/TFPublisher",
       message: "TF",
@@ -224,17 +225,16 @@ test("add ports", () => {
 
   obj.getPorts().setData(data);
 
-  expect(obj.getPorts().getItem("tag_tf")).toBeInstanceOf(Port);
-  expect(obj.getPorts().getItem("tag_tf").getTemplate()).toBe(
-    "ROS1/TFPublisher"
-  );
-  expect(obj.getPorts().getItem("tag_tf").getMessage()).toBe("TF");
+  expect(obj.getPorts().getItem(name)).toBeInstanceOf(Port);
+  expect(obj.getPorts().getItem(name).getTemplate()).toBe("ROS1/TFPublisher");
+  expect(obj.getPorts().getItem(name).getMessage()).toBe("TF");
 });
 
 test("delete a port", () => {
+  const name = "tag_tf";
   const data = {
-    tag_tf: {
-      name: "tag_tf",
+    [name]: {
+      name,
       description: "some info",
       template: "ROS1/TFPublisher",
       message: "TF",
@@ -256,15 +256,16 @@ test("delete a port", () => {
 
   obj.getPorts().setData(data);
 
-  obj.getPorts().deleteItem("tag_tf");
+  obj.getPorts().deleteItem(name);
 
-  expect(obj.getPorts().getItem("tag_tf")).toBe(undefined);
+  expect(obj.getPorts().getItem(name)).toBe(undefined);
 });
 
 test("update port", () => {
+  const name = "tag_tf";
   const data = {
-    tag_tf: {
-      name: "tag_tf",
+    [name]: {
+      name,
       description: "some info",
       template: "ROS1/TFPublisher",
       message: "TF",
@@ -287,11 +288,136 @@ test("update port", () => {
   obj.getPorts().setData(data);
 
   obj.getPorts().updateItem({
-    name: "tag_tf",
+    name,
     content: { description: "new description" }
   });
 
-  expect(obj.getPorts().getItem("tag_tf").getDescription()).toBe(
-    "new description"
-  );
+  expect(obj.getPorts().getItem(name).getDescription()).toBe("new description");
+});
+
+test("add parameter", () => {
+  const name = "param1";
+  const data = {
+    [name]: { name, value: 1981, description: "max speed" }
+  };
+
+  const obj = new Node();
+
+  obj.getParameters().setData(data);
+
+  expect(obj.getParameters().getItem(name)).toBeInstanceOf(Parameter);
+  expect(obj.getParameters().getItem(name).getDescription()).toBe("max speed");
+  expect(obj.getParameters().getItem(name).getValue()).toBe(1981);
+});
+
+test("delete parameter", () => {
+  const name = "param1";
+  const data = {
+    [name]: { name, value: 1981, description: "max speed" }
+  };
+
+  const obj = new Node();
+
+  obj.getParameters().setData(data);
+  obj.getParameters().deleteItem(name);
+
+  expect(obj.getParameters().getItem(name)).toBe(undefined);
+});
+
+test("update parameter", () => {
+  const name = "param1";
+  const data = {
+    [name]: { name, value: 1981, description: "max speed" }
+  };
+
+  const obj = new Node();
+
+  obj.getParameters().setData(data);
+  obj.getParameters().updateItem({
+    name: "param1",
+    content: { description: "min speed" }
+  });
+
+  expect(obj.getParameters().getItem(name).getDescription()).toBe("min speed");
+});
+
+test("add envvar", () => {
+  const name = "param1";
+  const data = { [name]: { name, value: "/opt/movai" } };
+
+  const obj = new Node();
+
+  obj.getEnvVars().setData(data);
+
+  expect(obj.getEnvVars().getItem(name)).toBeInstanceOf(EnvVar);
+  expect(obj.getEnvVars().getItem(name).getValue()).toBe("/opt/movai");
+});
+
+test("update envvar", () => {
+  const name = "param1";
+  const data = { [name]: { name, value: "/opt/movai" } };
+
+  const obj = new Node();
+
+  obj.getEnvVars().setData(data);
+  obj.getEnvVars().updateItem({ name, content: { value: "/opt/user" } });
+
+  expect(obj.getEnvVars().getItem(name)).toBeInstanceOf(EnvVar);
+
+  expect(obj.getEnvVars().getItem(name).getValue()).toBe("/opt/user");
+});
+
+test("delete envvar", () => {
+  const name = "param1";
+  const data = { [name]: { name, value: "/opt/movai" } };
+
+  const obj = new Node();
+
+  obj.getEnvVars().setData(data);
+
+  expect(obj.getEnvVars().getItem(name)).toBeInstanceOf(EnvVar);
+
+  obj.getEnvVars().deleteItem(name);
+
+  expect(obj.getEnvVars().getItem(name)).toBe(undefined);
+});
+
+test("add command", () => {
+  const name = "cmd1";
+  const data = { [name]: { name, value: "file.sh" } };
+  const obj = new Node();
+
+  obj.getCommands().setData(data);
+
+  expect(obj.getCommands().getItem(name)).toBeInstanceOf(Command);
+  expect(obj.getCommands().getItem(name).getValue()).toBe("file.sh");
+});
+
+test("update command", () => {
+  const name = "cmd1";
+  const data = { [name]: { name, value: "file.sh" } };
+
+  const obj = new Node();
+
+  obj.getCommands().setData(data);
+  obj.getCommands().updateItem({ name, content: { value: "updated.sh" } });
+
+  expect(obj.getCommands().getItem(name)).toBeInstanceOf(Command);
+
+  expect(obj.getCommands().getItem(name).getValue()).toBe("updated.sh");
+});
+
+test("delete command", () => {
+  const name = "cmd1";
+  const data = { [name]: { name, value: "file.sh" } };
+
+  const obj = new Node();
+
+  obj.getCommands().setData(data);
+
+  expect(obj.getCommands().getItem(name)).toBeInstanceOf(Command);
+
+  obj.getCommands().deleteItem(name);
+
+  expect(obj.getCommands().getItem(name)).toBe(undefined);
 });

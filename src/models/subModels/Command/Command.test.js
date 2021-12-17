@@ -8,14 +8,14 @@ test("smoke test", () => {
 });
 
 test("serialize to DB", () => {
-  const envvar = new Command();
+  const cmd = new Command();
 
   const data = { name: "cmd1", value: "file.sh" };
-  envvar.setData(data);
+  cmd.setData(data);
 
   const expected = { Value: data.value };
 
-  expect(envvar.serializeToDB()).toMatchObject(expected);
+  expect(cmd.serializeToDB()).toMatchObject(expected);
 });
 
 test("serialize OF db", () => {
