@@ -69,7 +69,7 @@ const Menu = props => {
    * @param {*} pyLib
    */
   const deleteImport = pyLib => {
-    if (instance.current) instance.current.getPyLibs().deletePyLib(pyLib.key);
+    if (instance.current) instance.current.getPyLibs().deleteItem(pyLib.key);
   };
 
   /**

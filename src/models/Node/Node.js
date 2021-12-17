@@ -1,8 +1,7 @@
 import Model from "../Model/Model";
 import schema from "./schema";
-import ParameterManager from "../subModels/Parameter/ParameterManager";
-import EnvVarManager from "../subModels/EnvVar/EnvVarManager";
-import CommandManager from "../subModels/Command/CommandManager";
+import { Command, EnvVar, Parameter } from "../subModels";
+import Manager from "../Manager";
 
 class Node extends Model {
   constructor() {
@@ -18,9 +17,15 @@ class Node extends Model {
   launch = true;
   remappable = true;
   packageDep = "";
-  parameters = new ParameterManager();
-  envVars = new EnvVarManager();
-  commands = new CommandManager();
+  parameters = new Manager("parameters", Parameter, {
+    onAny: (event, name, value) => this.propsUpdate(event, name, value)
+  });
+  envVars = new Manager("envVars", EnvVar, {
+    onAny: (event, name, value) => this.propsUpdate(event, name, value)
+  });
+  commands = new Manager("commands", Command, {
+    onAny: (event, name, value) => this.propsUpdate(event, name, value)
+  });
   //TODO: add ports
   // ports = new PortsManager();
 
@@ -35,6 +40,12 @@ class Node extends Model {
     "remappable",
     "packageDep"
   ];
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                     Data Handlers                                    *
+   *                                                                                      */
+  //========================================================================================
 
   getDescription() {
     return this.description;
@@ -154,6 +165,23 @@ class Node extends Model {
     return this;
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Events                                        *
+   *                                                                                      */
+  //========================================================================================
+
+  propsUpdate(event, prop, value) {
+    // force dispatch
+    this.dispatch(prop, value);
+  }
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                      Serializers                                     *
+   *                                                                                      */
+  //========================================================================================
+
   serialize() {
     return {
       ...super.serialize(),
@@ -233,9 +261,9 @@ class Node extends Model {
       launch,
       remappable,
       packageDep,
-      parameters: ParameterManager.serializeOfDB(parameters),
-      envVars: EnvVarManager.serializeOfDB(envVars),
-      commands: CommandManager.serializeOfDB(commands)
+      parameters: Manager.serializeOfDB(parameters, Parameter),
+      envVars: Manager.serializeOfDB(envVars, EnvVar),
+      commands: Manager.serializeOfDB(commands, Command)
     };
   }
   static SCOPE = "Node";

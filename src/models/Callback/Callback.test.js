@@ -119,9 +119,9 @@ test("add single import", () => {
 
   const obj = new Callback();
 
-  obj.getPyLibs().setPyLib({ name, content });
+  obj.getPyLibs().setItem({ name, content });
 
-  expect(obj.getPyLibs().getPyLib("math")).toBeInstanceOf(PyLib);
+  expect(obj.getPyLibs().getItem("math")).toBeInstanceOf(PyLib);
 });
 
 test("add imports", () => {
@@ -131,7 +131,7 @@ test("add imports", () => {
 
   obj.getPyLibs().setData(data);
 
-  expect(obj.getPyLibs().getPyLib("math")).toBeInstanceOf(PyLib);
+  expect(obj.getPyLibs().getItem("math")).toBeInstanceOf(PyLib);
 });
 
 test("delete import", () => {
@@ -142,9 +142,9 @@ test("delete import", () => {
   obj.getPyLibs().setData(data);
 
   // delete pylib
-  obj.getPyLibs().deletePyLib("math");
+  obj.getPyLibs().deleteItem("math");
 
-  expect(obj.getPyLibs().getPyLib("math")).toBe(undefined);
+  expect(obj.getPyLibs().getItem("math")).toBe(undefined);
 });
 
 test("update import", () => {
@@ -155,7 +155,7 @@ test("update import", () => {
   obj.getPyLibs().setData(data);
 
   // update pylib
-  obj.getPyLibs().updatePyLib({ name: "math", content: { module: "math1" } });
+  obj.getPyLibs().updateItem({ name: "math", content: { module: "math1" } });
 
-  expect(obj.getPyLibs().getPyLib("math").getModule()).toBe("math1");
+  expect(obj.getPyLibs().getItem("math").getModule()).toBe("math1");
 });
