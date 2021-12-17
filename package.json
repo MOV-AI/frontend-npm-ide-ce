@@ -83,7 +83,7 @@
   ],
   "movai": {
     "name": "mov-fe-app-ide-ce",
-    "Label": "IDE-CE",
+    "Label": "MOV.AI - IDE-CE",
     "Type": "application",
     "Package": "mov-fe-app-ide-ce",
     "EntryPoint": "index.html",

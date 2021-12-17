@@ -1,5 +1,6 @@
 import Model from "../Model/Model";
 import schema from "./schema";
+import PyLibManager from "./PyLib/PyLibManager";
 
 export default class Callback extends Model {
   constructor() {
@@ -10,10 +11,12 @@ export default class Callback extends Model {
   // Extend Model properties and assign defaults
   code = "";
   message = "";
-  py3Lib = {}; // {<name: str>:{Module:<module name:str>, Class:<is class:boolean>}}
+  pyLibs = new PyLibManager("pyLibs", {
+    onAny: (event, name, value) => this.pyLibUpdated(event, name, value)
+  });
 
   // Define observable properties
-  observables = ["name", "details", "code", "message", "py3Lib"];
+  observables = ["name", "details", "code", "message"];
 
   getCode() {
     return this.code;
@@ -33,12 +36,18 @@ export default class Callback extends Model {
     return this;
   }
 
-  getPy3Lib() {
-    return this.py3Lib;
+  getPyLibs() {
+    return this.pyLibs;
   }
 
-  setPy3Lib(value) {
-    this.py3Lib = value;
+  addPythonLibs(value) {
+    this.pyLibs = { ...this.pyLibs, ...value };
+    return this;
+  }
+
+  deletePythonLib(value) {
+    const { [value]: _, ...newPyLibs } = this.pyLibs;
+    this.pyLibs = { ...newPyLibs };
     return this;
   }
 
@@ -50,55 +59,72 @@ export default class Callback extends Model {
     return Callback.EXTENSION;
   }
 
+  pyLibUpdated(event, prop, value) {
+    // force dispatch
+    this.dispatch(prop, value);
+  }
+
+  setData(json) {
+    const { name, details, code, message, pyLibs } = json;
+
+    super.setData({ name, details, code, message });
+
+    this.pyLibs.setData(pyLibs);
+
+    return this;
+  }
+
   serialize() {
     return {
       ...super.serialize(),
       code: this.getCode(),
       message: this.getMessage(),
-      py3Lib: this.getPy3Lib()
+      pyLibs: this.getPyLibs().serialize()
     };
   }
 
   serializeToDB() {
-    const { name, details, code, message, py3Lib } = this.serialize();
+    const { name, details, code, message } = this.serialize();
 
     return {
       Label: name,
       Code: code,
       Message: message,
       LastUpdate: details,
-      Py3Lib: py3Lib
+      Py3Lib: this.pyLibs.serializeToDB()
     };
   }
 
-  static ofJSON(json) {
+  /**
+   * Serialize database data to model properties
+   * @param {object} json : The data received from the database
+   * @returns {object} Model properties
+   */
+  static serializeOfDB(json) {
     const {
       Label: id,
       Label: name,
       Code: code,
       Message: message,
-      Py3Lib: py3Lib,
+      Py3Lib: pyLibs,
       LastUpdate: details,
       workspace,
       version
     } = json;
 
-    const obj = new this({ id, name, workspace, version });
-
-    return obj
-      .setData({
-        code,
-        message,
-        py3Lib,
-        details
-      })
-      .setDirty(false)
-      .setIsNew(false);
+    return {
+      id,
+      name,
+      code,
+      message,
+      details,
+      workspace,
+      version,
+      pyLibs: PyLibManager.serializeOfDB(pyLibs)
+    };
   }
 
   static SCOPE = "Callback";
 
   static EXTENSION = ".cb";
-
-  static EMPTY = new Callback();
 }

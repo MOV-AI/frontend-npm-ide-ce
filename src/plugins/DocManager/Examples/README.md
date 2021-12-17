@@ -42,17 +42,12 @@ const Configuration = props => {
   }, [call, configRef, path]);
 
   const updateConfigExtension = configExtension => {
-    setData(prevState => {
-      return (prevState ?? ConfigurationModel.EMPTY).setExtension(
-        configExtension
-      );
-    });
+    if (instance.current) instance.current.setExtension(value);
   };
 
   const updateConfigCode = configCode => {
-    setData(prevState => {
-      return (prevState ?? ConfigurationModel.EMPTY).setCode(configCode);
-    });
+    if (value === instance.current.getCode()) return;
+    if (instance.current) instance.current.setCode(value);
   };
 
   return (
