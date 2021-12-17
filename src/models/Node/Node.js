@@ -115,6 +115,19 @@ class Node extends Model {
     return this.parameters;
   }
 
+  setKeyValue(varName, data) {
+    this[varName].setData(data);
+  }
+
+  deleteKeyValue(varName, key) {
+    this[varName].deleteItem(key);
+    return this;
+  }
+
+  getKeyValue(varName, key) {
+    return this[varName].getItem(key);
+  }
+
   getEnvVars() {
     return this.envVars;
   }
@@ -202,7 +215,7 @@ class Node extends Model {
       launch: this.getLaunch(),
       remappable: this.getRemappable(),
       parameters: this.getParameters().serialize(),
-      envvars: this.getEnvVars().serialize(),
+      envVars: this.getEnvVars().serialize(),
       commands: this.getCommands().serialize(),
       ports: this.getPorts().serialize()
     };

@@ -1,7 +1,8 @@
 import React, { memo } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "../../../_shared/mocks";
-import { withStyles, makeStyles } from "@material-ui/core/styles";
+import { HtmlTooltip } from "../_shared/HtmlTooltip";
+import { makeStyles } from "@material-ui/core/styles";
 import Accordion from "@material-ui/core/Accordion";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
@@ -10,7 +11,6 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Divider from "@material-ui/core/Divider";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
-import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import InfoLogo from "@material-ui/icons/Info";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
@@ -74,18 +74,6 @@ const useStyles = makeStyles(theme => ({
     margin: 0
   }
 }));
-
-const HtmlTooltip = withStyles(theme => ({
-  tooltip: {
-    backgroundColor: theme.palette.accent.background,
-    borderColor: theme.palette.accent.border,
-    color: theme.palette.accent.color,
-    padding: theme.spacing(1),
-    maxWidth: 220,
-    fontSize: theme.typography.pxToRem(12),
-    border: "1px solid"
-  }
-}))(Tooltip);
 
 const TOOLTIP = {
   close: 0,

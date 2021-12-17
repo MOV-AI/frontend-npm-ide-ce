@@ -61,10 +61,6 @@ class Manager {
    * @returns : The instance
    */
   setItem({ name, content }) {
-    if (this.checkExists(name)) {
-      throw new Error(`${this.propName} already exists`);
-    }
-
     const obj = new this.model();
 
     obj.setData({ name, ...content });
