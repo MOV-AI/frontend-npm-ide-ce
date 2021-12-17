@@ -43,6 +43,32 @@ test("serialize OF db", () => {
         Value: "/opt/movai",
         Description: ""
       }
+    },
+    PortsInst: {
+      tag_tf: {
+        Template: "ROS1/TFPublisher",
+        Package: "movai_msgs",
+        Message: "TF",
+        Out: {
+          out: {
+            Message: "movai_msgs/TF",
+            Parameter: {
+              Child: "camera_link",
+              Parent: "tag"
+            }
+          }
+        }
+      },
+      camera_info: {
+        Template: "ROS1/Subscriber",
+        Package: "sensor_msgs",
+        Message: "CameraInfo",
+        In: {
+          in: {
+            Message: "sensor_msgs/CameraInfo"
+          }
+        }
+      }
     }
   };
 
@@ -69,7 +95,30 @@ test("serialize OF db", () => {
       }
     },
     envVars: { varA: { name: "varA", value: "/opt/movai" } },
-    commands: { cmd1: { name: "cmd1", value: "exec.sh" } }
+    commands: { cmd1: { name: "cmd1", value: "exec.sh" } },
+    ports: {
+      tag_tf: {
+        template: "ROS1/TFPublisher",
+        msgPackage: "movai_msgs",
+        message: "TF",
+        portOut: {
+          out: {
+            message: "movai_msgs/TF",
+            parameters: { Child: "camera_link", Parent: "tag" }
+          }
+        }
+      },
+      camera_info: {
+        template: "ROS1/Subscriber",
+        msgPackage: "sensor_msgs",
+        message: "CameraInfo",
+        portIn: {
+          in: {
+            message: "sensor_msgs/CameraInfo"
+          }
+        }
+      }
+    }
   };
 
   expect(Node.serializeOfDB(data)).toMatchObject(expected);

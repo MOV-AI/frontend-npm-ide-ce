@@ -1,6 +1,6 @@
 import Model from "../Model/Model";
 import schema from "./schema";
-import { Command, EnvVar, Parameter } from "../subModels";
+import { Command, EnvVar, Parameter, Port } from "../subModels";
 import Manager from "../Manager";
 
 class Node extends Model {
@@ -17,17 +17,14 @@ class Node extends Model {
   launch = true;
   remappable = true;
   packageDep = "";
-  parameters = new Manager("parameters", Parameter, {
+  events = {
     onAny: (event, name, value) => this.propsUpdate(event, name, value)
-  });
-  envVars = new Manager("envVars", EnvVar, {
-    onAny: (event, name, value) => this.propsUpdate(event, name, value)
-  });
-  commands = new Manager("commands", Command, {
-    onAny: (event, name, value) => this.propsUpdate(event, name, value)
-  });
-  //TODO: add ports
-  // ports = new PortsManager();
+  };
+  parameters = new Manager("parameters", Parameter, this.events);
+  envVars = new Manager("envVars", EnvVar, this.events);
+  commands = new Manager("commands", Command, this.events);
+
+  ports = new Manager("ports", Port, this.events);
 
   observables = [
     "name",
@@ -122,6 +119,10 @@ class Node extends Model {
     return this.commands;
   }
 
+  getPorts() {
+    return this.ports;
+  }
+
   getScope() {
     return Node.SCOPE;
   }
@@ -143,7 +144,8 @@ class Node extends Model {
       remappable,
       parameters,
       envVars,
-      commands
+      commands,
+      ports
     } = json;
 
     super.setData({
@@ -161,6 +163,7 @@ class Node extends Model {
     this.parameters.setData(parameters);
     this.envVars.setData(envVars);
     this.commands.setData(commands);
+    this.ports.setData(ports);
 
     return this;
   }
@@ -196,7 +199,8 @@ class Node extends Model {
       remappable: this.getRemappable(),
       parameters: this.getParameters().serialize(),
       envvars: this.getEnvVars().serialize(),
-      commands: this.getCommands().serialize()
+      commands: this.getCommands().serialize(),
+      ports: this.getPorts().serialize()
     };
   }
 
@@ -225,7 +229,8 @@ class Node extends Model {
       PackageDepends: packageDep,
       Parameter: this.getParameters().serializeToDB(),
       EnvVar: this.getEnvVars().serializeToDB(),
-      CmdLine: this.getCommands().serializeToDB()
+      CmdLine: this.getCommands().serializeToDB(),
+      PortsInst: this.getPorts().serializeToDB()
     };
   }
 
@@ -245,7 +250,8 @@ class Node extends Model {
       PackageDepends: packageDep,
       Parameter: parameters,
       EnvVar: envVars,
-      CmdLine: commands
+      CmdLine: commands,
+      PortsInst: ports
     } = json;
 
     return {
@@ -263,7 +269,8 @@ class Node extends Model {
       packageDep,
       parameters: Manager.serializeOfDB(parameters, Parameter),
       envVars: Manager.serializeOfDB(envVars, EnvVar),
-      commands: Manager.serializeOfDB(commands, Command)
+      commands: Manager.serializeOfDB(commands, Command),
+      ports: Manager.serializeOfDB(ports, Port)
     };
   }
   static SCOPE = "Node";
