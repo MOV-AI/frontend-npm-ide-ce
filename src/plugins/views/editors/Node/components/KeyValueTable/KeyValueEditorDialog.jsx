@@ -1,13 +1,11 @@
 import React, { memo } from "react";
 import PropTypes from "prop-types";
 import _isEqual from "lodash/isEqual";
-import _toString from "lodash/toString";
 import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import {
   Typography,
   TextField,
@@ -42,18 +40,20 @@ const KeyValueEditorDialog = props => {
   const {
     onClose,
     onSubmit,
+    validate,
     title,
     varName,
     isNew,
     disableName,
     disableDescription,
+    renderCustomContent,
+    renderValueEditor,
     showDefault
   } = props;
   // State hook
   const [data, setData] = React.useState({});
   // Other hooks
   const classes = useStyles();
-  const theme = useTheme();
   const { t } = useTranslation();
 
   //========================================================================================
@@ -108,8 +108,12 @@ const KeyValueEditorDialog = props => {
    * Submit form and close dialog
    */
   const onSave = () => {
-    onSubmit(varName, data);
-    onClose();
+    validate(data).then(res => {
+      if (res.success) {
+        onSubmit(varName, res.data);
+        onClose();
+      }
+    });
   };
 
   //========================================================================================
@@ -117,23 +121,6 @@ const KeyValueEditorDialog = props => {
    *                                    Render Methods                                    *
    *                                                                                      */
   //========================================================================================
-
-  const renderCodeEditor = value => {
-    return (
-      <Typography component="div" className={classes.codeContainer}>
-        <MonacoCodeEditor
-          value={_toString(value)}
-          onLoad={editor => {
-            if (!isNew) editor.focus();
-          }}
-          language="python"
-          theme={theme.codeEditor.theme}
-          options={{ readOnly: props.disabled }}
-          onChange={newValue => onChangeValue(newValue)}
-        />
-      </Typography>
-    );
-  };
 
   return (
     <Dialog open={true} onClose={onClose} classes={{ paper: classes.paper }}>
@@ -143,7 +130,7 @@ const KeyValueEditorDialog = props => {
       <DialogContent>
         <Typography component="div" className={classes.container}>
           <TextField
-            label="Name"
+            label="Name *"
             value={data.name}
             autoFocus={isNew}
             disabled={disableName}
@@ -162,9 +149,14 @@ const KeyValueEditorDialog = props => {
               onChange={onChangeDescription}
             />
           </FormControl>
+          {renderCustomContent && renderCustomContent()}
           <InputLabel className={classes.marginTop}>Value</InputLabel>
           <FormControl className={classes.marginTop}>
-            {renderCodeEditor(data.value)}
+            {renderValueEditor(data.value, {
+              isNew,
+              onChange: onChangeValue,
+              disabled: props.disabled
+            })}
           </FormControl>
           {showDefault && (
             <Accordion>
@@ -174,7 +166,11 @@ const KeyValueEditorDialog = props => {
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
-                {renderCodeEditor(data.defaultValue)}
+                {renderValueEditor(data.value, {
+                  isNew,
+                  onChange: onChangeValue,
+                  disabled: true
+                })}
               </AccordionDetails>
             </Accordion>
           )}
@@ -194,6 +190,8 @@ KeyValueEditorDialog.propTypes = {
   disableName: PropTypes.bool,
   disableDescription: PropTypes.bool,
   showDefault: PropTypes.bool,
+  renderCustomContent: PropTypes.func,
+  validate: PropTypes.func,
   title: PropTypes.string,
   defaultValue: PropTypes.string
 };
@@ -201,6 +199,7 @@ KeyValueEditorDialog.defaultProps = {
   disableName: false,
   disableDescription: false,
   showDefault: false,
+  validate: data => Promise.resolve({ success: true, data }),
   title: "Title",
   defaultValue: ""
 };

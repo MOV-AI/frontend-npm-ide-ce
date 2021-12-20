@@ -8,11 +8,13 @@ import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import InfoIcon from "@material-ui/icons/Info";
 import Menu from "./Menu";
-import Description from "./components/Description/Description";
 import Loader from "../_shared/Loader/Loader";
+import Description from "./components/Description/Description";
 import ExecutionParameters from "./components/ExecutionParameters/ExecutionParameters";
+import ParametersTable from "./components/ParametersTable/ParametersTable";
 import KeyValueTable from "./components/KeyValueTable/KeyValueTable";
 import KeyValueEditorDialog from "./components/KeyValueTable/KeyValueEditorDialog";
+import useKeyValueMethods from "./components/KeyValueTable/useKeyValueMethods";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -41,6 +43,8 @@ const Node = (props, ref) => {
   // Hooks
   const classes = useStyles();
   const { t } = useTranslation();
+  const { getColumns, renderValueEditor } = useKeyValueMethods();
+  const defaultColumns = getColumns();
 
   //========================================================================================
   /*                                                                                      *
@@ -57,6 +61,7 @@ const Node = (props, ref) => {
   const DEFAULT_KEY_VALUE_DATA = {
     name: "",
     description: "",
+    type: "any",
     value: ""
   };
 
@@ -94,7 +99,17 @@ const Node = (props, ref) => {
    *                                                                                      */
   //========================================================================================
 
-  const handleOpenEditDialog = (varName, dataId) => {
+  /**
+   * Open dialog to edit/add new Parameter/CmdLine/EnvVars
+   * @param {string} varName : One of options ("parameters", "commands", "envVars")
+   * @param {string} dataId : Unique identifier of item (undefined when not created yet)
+   * @param {ReactComponent} DialogComponent : Dialog component to render
+   */
+  const handleOpenEditDialog = (
+    varName,
+    dataId,
+    DialogComponent = KeyValueEditorDialog
+  ) => {
     const obj = data[varName][dataId] || DEFAULT_KEY_VALUE_DATA;
     const isNew = !dataId;
     call(
@@ -102,13 +117,15 @@ const Node = (props, ref) => {
       "customDialog",
       {
         onSubmit: updateKeyValue,
+        renderValueEditor: renderValueEditor,
         title: DIALOG_TITLE[varName],
         disableName: !isNew,
         data: obj,
         varName,
-        isNew
+        isNew,
+        call
       },
-      KeyValueEditorDialog
+      DialogComponent
     );
   };
 
@@ -168,10 +185,18 @@ const Node = (props, ref) => {
           onChangePath={updatePath}
           onChangeExecutionParams={updateExecutionParams}
         />
+        <ParametersTable
+          editable={editable}
+          data={data.parameters}
+          defaultColumns={defaultColumns}
+          openEditDialog={handleOpenEditDialog}
+          onRowDelete={deleteKeyValue}
+        ></ParametersTable>
         <KeyValueTable
           title={t("Environment Variables")}
           editable={editable}
           data={data.envVars}
+          columns={defaultColumns}
           openEditDialog={handleOpenEditDialog}
           onRowDelete={deleteKeyValue}
           varName="envVars"
@@ -180,6 +205,7 @@ const Node = (props, ref) => {
           title={t("Command Line")}
           editable={editable}
           data={data.commands}
+          columns={defaultColumns}
           openEditDialog={handleOpenEditDialog}
           onRowDelete={deleteKeyValue}
           varName="commands"

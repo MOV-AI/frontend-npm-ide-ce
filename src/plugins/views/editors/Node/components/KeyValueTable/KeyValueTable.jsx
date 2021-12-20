@@ -1,7 +1,6 @@
 import React, { memo } from "react";
 import PropTypes from "prop-types";
-import { useTranslation } from "../../../_shared/mocks";
-import { HtmlTooltip } from "../_shared/HtmlTooltip";
+import { useTranslation, DEFAULT_FUNCTION } from "../../../_shared/mocks";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
@@ -10,9 +9,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Divider from "@material-ui/core/Divider";
 import MaterialTable from "@material-table/core";
 import AddBox from "@material-ui/icons/AddBox";
-import IconButton from "@material-ui/core/IconButton";
 import Edit from "@material-ui/icons/Edit";
-import InfoLogo from "@material-ui/icons/Info";
 import _isEqual from "lodash/isEqual";
 
 const useStyles = makeStyles(theme => ({
@@ -40,10 +37,18 @@ const useStyles = makeStyles(theme => ({
 
 const KeyValueTable = props => {
   // Props
-  const { varName, data, title, onRowDelete, openEditDialog, editable } = props;
+  const {
+    varName,
+    data,
+    title,
+    onRowDelete,
+    openEditDialog,
+    editable,
+    columns
+  } = props;
   // Hooks
-  const classes = useStyles();
   const theme = useTheme();
+  const classes = useStyles();
   const { t } = useTranslation();
 
   //========================================================================================
@@ -62,43 +67,9 @@ const KeyValueTable = props => {
     return Object.keys(_data).map(key => ({
       name: _data[key].name,
       value: _data[key].value,
-      info: _data[key].description
+      type: _data[key].type,
+      description: _data[key].description
     }));
-  };
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                 Render sub-components                                *
-   *                                                                                      */
-  //========================================================================================
-
-  const renderInfoIcon = rowData => {
-    return (
-      <HtmlTooltip
-        title={
-          <React.Fragment>
-            <Typography color="inherit" component="h3">
-              <b>{rowData.name}</b>
-            </Typography>
-            <p>{rowData.info}</p>
-          </React.Fragment>
-        }
-      >
-        <IconButton className={classes.logo}>
-          <InfoLogo />
-        </IconButton>
-      </HtmlTooltip>
-    );
-  };
-
-  /**
-   * Render of Value column
-   * @param {*} rowData
-   * @returns Row value column
-   */
-  const renderValue = rowData => {
-    if (rowData.type === "string") return JSON.stringify(rowData.value);
-    return rowData.value;
   };
 
   //========================================================================================
@@ -134,46 +105,6 @@ const KeyValueTable = props => {
     return actions;
   };
 
-  /**
-   * Get table columns definitions
-   *  Info  : Tooltip with name and description
-   *  Name  : Key name
-   *  Value : Key value
-   * @returns {array} Table columns
-   */
-  const getColumns = () => {
-    return [
-      {
-        title: "",
-        field: "description",
-        cellStyle: { padding: "10px", textAlign: "start", width: "5%" },
-        sorting: false,
-        render: renderInfoIcon
-      },
-      {
-        title: t("Name"),
-        field: "name",
-        cellStyle: {
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          width: "40%"
-        }
-      },
-      {
-        title: t("Value"),
-        field: "value",
-        render: renderValue,
-        cellStyle: {
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          width: "40%"
-        }
-      }
-    ];
-  };
-
   //========================================================================================
   /*                                                                                      *
    *                                        Render                                        *
@@ -193,7 +124,7 @@ const KeyValueTable = props => {
           <MaterialTable
             style={{ boxShadow: "none", justifyContent: "center" }}
             title=""
-            columns={getColumns()}
+            columns={columns}
             data={formatData(data)}
             actions={getActions()}
             editable={{
@@ -244,11 +175,10 @@ const KeyValueTable = props => {
   );
 };
 
-const DEFAULT_FUNCTION = name => console.log(`${name} not implemented`);
-
 KeyValueTable.propTypes = {
   varName: PropTypes.string,
   data: PropTypes.array,
+  columns: PropTypes.array,
   title: PropTypes.string,
   onRowDelete: PropTypes.func,
   openEditDialog: PropTypes.func,
@@ -258,6 +188,10 @@ KeyValueTable.propTypes = {
 KeyValueTable.defaultProps = {
   varName: "cmdLine",
   data: [],
+  columns: [
+    { field: "name", title: "Name" },
+    { field: "value", title: "Value" }
+  ],
   title: "Title",
   onRowDelete: () => DEFAULT_FUNCTION("onRowDelete"),
   openEditDialog: () => DEFAULT_FUNCTION("openEditDialog"),
