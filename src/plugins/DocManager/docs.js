@@ -1,6 +1,9 @@
-import ConfigurationStore from "../../store/Configuration/ConfigurationStore";
-import CallbackStore from "../../store/Callback/CallbackStore";
-import NodeStore from "../../store/Node/NodeStore";
+import {
+  CallbackStore,
+  ConfigurationStore,
+  FlowStore,
+  NodeStore
+} from "../../store";
 import Configuration from "../views/editors/Configuration/Configuration";
 import Callback from "../views/editors/Callback/Callback";
 import Node from "../views/editors/Node/Node";
@@ -23,6 +26,10 @@ const factory = (workspace, observer) => {
     },
     [NodeStore.SCOPE]: {
       store: new NodeStore(workspace, observer),
+      plugin: Node
+    },
+    [FlowStore.SCOPE]: {
+      store: new FlowStore(workspace, observer),
       plugin: Node
     }
   };
