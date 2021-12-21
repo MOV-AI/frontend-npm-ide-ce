@@ -78,29 +78,30 @@ const useKeyValueMethods = () => {
       {
         title: "",
         field: "description",
-        cellStyle: { padding: "10px", textAlign: "start", width: "10%" },
+        width: "5%",
+        cellStyle: { padding: "10px", textAlign: "start" },
         sorting: false,
         render: renderInfoIcon
       },
       {
         title: t("Name"),
         field: "name",
+        width: "45%",
         cellStyle: {
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
-          overflow: "hidden",
-          width: "40%"
+          overflow: "hidden"
         }
       },
       {
         title: t("Value"),
         field: "value",
         render: renderValue,
+        width: "45%",
         cellStyle: {
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
-          overflow: "hidden",
-          width: "40%"
+          overflow: "hidden"
         }
       }
     ];

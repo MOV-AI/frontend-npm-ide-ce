@@ -15,11 +15,11 @@ const ParametersTable = props => {
   const typeColumn = {
     title: t("Type"),
     field: "type",
+    width: 150,
     cellStyle: {
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
-      overflow: "hidden",
-      maxWidth: 100
+      overflow: "hidden"
     },
     render: rowData => getLabel(rowData.type)
   };

@@ -16,6 +16,7 @@ class AbstractDataType {
   constructor({ theme }) {
     // Set hooks to be used in abstract renders
     this._theme = theme;
+    this.defaultStringEditor = this.defaultStringEditor.bind(this);
   }
 
   /**

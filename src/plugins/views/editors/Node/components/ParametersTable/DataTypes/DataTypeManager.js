@@ -8,6 +8,8 @@ import StringType from "./types/StringType";
 
 class DataTypeManager {
   constructor({ theme, selfProvision = true }) {
+    // Hooks
+    this.theme = theme;
     // Initiate types
     this.dataTypes = new Map();
     if (selfProvision) {
@@ -19,8 +21,6 @@ class DataTypeManager {
       this.setDataType(ConfigurationType);
       this.setDataType(AnyType);
     }
-    // Hooks
-    this.theme = theme;
   }
 
   /**
