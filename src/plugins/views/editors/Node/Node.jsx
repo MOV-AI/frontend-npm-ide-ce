@@ -14,6 +14,7 @@ import ExecutionParameters from "./components/ExecutionParameters/ExecutionParam
 import ParametersTable from "./components/ParametersTable/ParametersTable";
 import KeyValueTable from "./components/KeyValueTable/KeyValueTable";
 import KeyValueEditorDialog from "./components/KeyValueTable/KeyValueEditorDialog";
+import IOConfig from "./components/IOConfig/IOConfig";
 import useKeyValueMethods from "./components/KeyValueTable/useKeyValueMethods";
 
 const useStyles = makeStyles(theme => ({
@@ -40,6 +41,7 @@ const Node = (props, ref) => {
   } = props;
   // State Hooks
   const [loading, setLoading] = React.useState(true);
+
   // Hooks
   const classes = useStyles();
   const { t } = useTranslation();
@@ -88,6 +90,12 @@ const Node = (props, ref) => {
     renderRightMenu
   });
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                    React Lifecycle                                   *
+   *                                                                                      */
+  //========================================================================================
+
   React.useEffect(() => {
     console.log("debug data changed", data);
     if (data.id && loading) setLoading(false);
@@ -129,6 +137,87 @@ const Node = (props, ref) => {
     );
   };
 
+  /**
+   *
+   * @param {*} callbackName
+   * @param {*} defaultMsg
+   * @param {*} ioConfigName
+   * @param {*} direction
+   * @param {*} portName
+   */
+  const handleOpenCallback = (
+    callbackName,
+    defaultMsg,
+    ioConfigName,
+    direction,
+    portName
+  ) => {
+    // Open existing callback
+    const scope = "Callback";
+    if (callbackName) {
+      call("docManager", "read", { scope, name: callbackName }).then(doc => {
+        call("tabs", "openEditor", {
+          id: doc.getUrl(),
+          name: doc.getName(),
+          scope
+        });
+      });
+    }
+    // Create new callback and open editor
+    else {
+      call("dialog", "newDocument", {
+        scope,
+        onSubmit: newName => {
+          call("docManager", "create", {
+            scope,
+            name: newName
+          }).then(doc => {
+            doc.setMessage(defaultMsg);
+            // Create callback in DB
+            call("docManager", "save", { scope, name: newName }).then(res => {
+              if (res.success) {
+                alert({
+                  message: "Callback created",
+                  severity: "success"
+                });
+                const newTabData = {
+                  id: doc.getUrl(),
+                  name: newName,
+                  scope
+                };
+                call("tabs", "openEditor", newTabData);
+                // Set new callback in Node Port
+                updatePortCallback(ioConfigName, direction, portName, newName);
+              }
+            });
+          });
+        }
+      });
+    }
+  };
+
+  /**
+   *
+   * @param {*} modalData
+   * @param {*} ioConfigName
+   * @param {*} direction
+   * @param {*} portName
+   */
+  const handleOpenSelectScopeModal = (
+    modalData,
+    ioConfigName,
+    direction,
+    portName
+  ) => {
+    call("dialog", "selectScopeModal", {
+      ...modalData,
+      onSubmit: selectedCallback => {
+        // Set new callback in Node Port
+        updatePortCallback(ioConfigName, direction, portName, selectedCallback);
+      }
+    });
+  };
+
   //========================================================================================
   /*                                                                                      *
    *                                 Document Functions                                   *
@@ -147,9 +236,50 @@ const Node = (props, ref) => {
     if (instance.current) instance.current.setPath(value);
   };
 
+  const setPort = (value, resolve, reject, previousData) => {
+    const dataToSave = { [value.name]: value };
+    if (instance.current) instance.current.setPort(dataToSave);
+    resolve();
+  };
+
+  const deletePort = (port, resolve) => {
+    resolve();
+    if (instance.current) instance.current.deletePort(port.name);
+  };
+
+  const updatePortCallback = (
+    ioConfigName,
+    direction,
+    portName,
+    callbackName
+  ) => {
+    instance.current.setPortCallback(
+      ioConfigName,
+      direction,
+      portName,
+      callbackName
+    );
+  };
+
+  const updateIOPortInputs = (
+    value,
+    ioConfigName,
+    direction,
+    ioPortKey,
+    paramName
+  ) => {
+    instance.current.setPortParameter(
+      ioConfigName,
+      direction,
+      ioPortKey,
+      paramName,
+      value
+    );
+  };
+
   const updateKeyValue = (varName, keyValueData) => {
-    const formatData = { [keyValueData.name]: keyValueData };
-    if (instance.current) instance.current.setKeyValue(varName, formatData);
+    const dataToSave = { [keyValueData.name]: keyValueData };
+    if (instance.current) instance.current.setKeyValue(varName, dataToSave);
   };
 
   const deleteKeyValue = (varName, key) => {
@@ -184,6 +314,16 @@ const Node = (props, ref) => {
           editable={editable}
           onChangePath={updatePath}
           onChangeExecutionParams={updateExecutionParams}
+        />
+        <IOConfig
+          {...props}
+          editable={editable}
+          ioConfig={data.ports}
+          onIOConfigRowSet={setPort}
+          onIOConfigRowDelete={deletePort}
+          handleIOPortsInputs={updateIOPortInputs}
+          handleOpenSelectScopeModal={handleOpenSelectScopeModal}
+          handleOpenCallback={handleOpenCallback}
         />
         <ParametersTable
           editable={editable}

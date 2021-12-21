@@ -1,5 +1,6 @@
 import Model from "../../models/Node/Node";
 import DBSubscriber from "../DBSubscriber";
+import Helper from "./NodeHelper";
 import Store from "../Store";
 
 class NodeStore extends Store {
@@ -13,6 +14,9 @@ class NodeStore extends Store {
       observer
     });
   }
+
+  // Set helper object with cloudFunction and more
+  helper = Helper;
 
   loadDoc(name) {
     this.getPlugin("DBSubscriber").subscribe(name);

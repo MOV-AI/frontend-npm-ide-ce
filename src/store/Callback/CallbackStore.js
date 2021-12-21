@@ -1,4 +1,5 @@
 import Model from "../../models/Callback/Callback";
+import DBSubscriber from "../DBSubscriber";
 import Store from "../Store";
 import Helper from "./CallbackHelper";
 
@@ -9,12 +10,19 @@ class CallbackStore extends Store {
       model: Model,
       name: "Callback",
       title: "Callbacks",
+      plugins: [DBSubscriber],
       observer
     });
   }
 
   // Set helper object with cloudFunction
   helper = Helper;
+
+  loadDoc(name) {
+    this.getPlugin("DBSubscriber").subscribe(name);
+
+    return super.loadDoc(name);
+  }
 
   static SCOPE = Model.SCOPE;
 }

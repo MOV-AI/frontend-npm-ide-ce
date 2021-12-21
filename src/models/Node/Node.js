@@ -117,6 +117,7 @@ class Node extends Model {
 
   setKeyValue(varName, data) {
     this[varName].setData(data);
+    return this;
   }
 
   deleteKeyValue(varName, key) {
@@ -136,8 +137,38 @@ class Node extends Model {
     return this.commands;
   }
 
+  setPort(value) {
+    this.ports.setData(value);
+    return this;
+  }
+
+  getPort(key) {
+    return this.ports.getItem(key);
+  }
+
+  deletePort(key) {
+    this.ports.deleteItem(key);
+    return this;
+  }
+
   getPorts() {
     return this.ports;
+  }
+
+  setPortCallback(portId, direction, portName, callbackName) {
+    this.ports
+      .getItem(portId)
+      [direction].getItem(portName)
+      .setCallback(callbackName);
+    return this;
+  }
+
+  setPortParameter(portId, direction, portName, parameterName, value) {
+    this.ports
+      .getItem(portId)
+      [direction].getItem(portName)
+      .setParameter(parameterName, value);
+    return this;
   }
 
   getScope() {

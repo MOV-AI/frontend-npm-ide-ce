@@ -41,6 +41,10 @@ class PortType extends Model {
     return this;
   }
 
+  setParameter(name, value) {
+    this.parameters[name] = value;
+  }
+
   serialize() {
     return {
       name: this.getName(),

@@ -3,12 +3,7 @@ import PropTypes from "prop-types";
 import { useTranslation } from "../../../_shared/mocks";
 import { HtmlTooltip } from "../_shared/HtmlTooltip";
 import { makeStyles } from "@material-ui/core/styles";
-import Accordion from "@material-ui/core/Accordion";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
 import Typography from "@material-ui/core/Typography";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import Divider from "@material-ui/core/Divider";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import IconButton from "@material-ui/core/IconButton";
@@ -16,6 +11,7 @@ import InfoLogo from "@material-ui/icons/Info";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import TextField from "@material-ui/core/TextField";
 import _isEqual from "lodash/isEqual";
+import CollapsibleHeader from "../_shared/CollapsibleHeader";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -181,55 +177,39 @@ const ExecutionParameters = props => {
   );
 
   return (
-    <Typography component="div" className={classes.root}>
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography component="div" className={classes.column}>
-            <Typography className={classes.heading}>
-              {t("Execution Parameters")}
-            </Typography>
-          </Typography>
-        </AccordionSummary>
-        <Divider />
-        <AccordionDetails className={classes.details}>
-          <Typography component="div" className={classes.center}>
-            {/*-------------------- Persistent ------------------------*/}
-            {renderCheckbox("persistent", t("Persistent"), persistent, {
-              id: TOOLTIP.persistent,
-              title: t("Persistent node"),
-              description: t(
-                "After launch, the node will remain active during the flow execution."
-              )
-            })}
-            {/* ---------------- Remappable -------------------*/}
-            {renderCheckbox("remappable", t("Remappable"), remappable, {
-              id: TOOLTIP.remappable,
-              title: t("Remappable"),
-              description: t(
-                "Allows, or not, the ports of the node to be remapped"
-              )
-            })}
-            {/* ---------------- Launch -------------------*/}
-            {renderCheckbox("launch", t("Launch"), launch, {
-              id: TOOLTIP.launch,
-              title: t("Launch"),
-              description: t(
-                "Controls whether the Node is to be launched or not"
-              )
-            })}
-          </Typography>
-          <TextField
-            label={t("Path")}
-            disabled={!editable}
-            className={classes.textField}
-            value={path}
-            onChange={evt => onChangePath(evt.target.value)}
-            margin="normal"
-            variant="outlined"
-          />
-        </AccordionDetails>
-      </Accordion>
-    </Typography>
+    <CollapsibleHeader title={t("Execution Parameters")}>
+      <Typography component="div" className={classes.center}>
+        {/*-------------------- Persistent ------------------------*/}
+        {renderCheckbox("persistent", t("Persistent"), persistent, {
+          id: TOOLTIP.persistent,
+          title: t("Persistent node"),
+          description: t(
+            "After launch, the node will remain active during the flow execution."
+          )
+        })}
+        {/* ---------------- Remappable -------------------*/}
+        {renderCheckbox("remappable", t("Remappable"), remappable, {
+          id: TOOLTIP.remappable,
+          title: t("Remappable"),
+          description: t("Allows, or not, the ports of the node to be remapped")
+        })}
+        {/* ---------------- Launch -------------------*/}
+        {renderCheckbox("launch", t("Launch"), launch, {
+          id: TOOLTIP.launch,
+          title: t("Launch"),
+          description: t("Controls whether the Node is to be launched or not")
+        })}
+      </Typography>
+      <TextField
+        label={t("Path")}
+        disabled={!editable}
+        className={classes.textField}
+        value={path}
+        onChange={evt => onChangePath(evt.target.value)}
+        margin="normal"
+        variant="outlined"
+      />
+    </CollapsibleHeader>
   );
 };
 
