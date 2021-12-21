@@ -1,4 +1,4 @@
-import Model from "../../Model/Model";
+import Model from "../../../Model/Model";
 import schema from "./schema";
 
 class PyLib extends Model {
