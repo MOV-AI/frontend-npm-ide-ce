@@ -53,14 +53,8 @@ class Link extends Model {
   }
 
   serializeToDB() {
-    const { name, from, to } = this.serialize();
+    const { from, to } = this.serialize();
 
-    // return {
-    //   [name]: {
-    //     From: from,
-    //     To: to
-    //   }
-    // };
     return {
       From: from,
       To: to
