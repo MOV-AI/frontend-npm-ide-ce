@@ -55,7 +55,7 @@ class Manager {
   }
 
   /**
-   * Creates a new item or throws error if already exists
+   * Creates a new item
    * Emits the CREATE event
    * @param {object} param0 : An object with the name of the item and the content
    * @returns : The instance
@@ -162,7 +162,6 @@ class Manager {
     Object.entries(json ?? {}).forEach(([key, content]) => {
       output[key] = model.serializeOfDB({ [key]: { ...content } });
     });
-
     return output;
   }
 
