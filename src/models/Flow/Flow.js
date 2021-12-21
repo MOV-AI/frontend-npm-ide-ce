@@ -23,7 +23,6 @@ class Flow extends Model {
   };
 
   // Extend Model properties and assign defaults
-  info = "";
   description = "";
 
   exposedPorts = new ExposedPortsManager(
@@ -38,22 +37,13 @@ class Flow extends Model {
   subFlows = new Manager("subFlows", SubFlow, this.propEvents);
 
   // Define observable properties
-  observables = ["name", "details", "info", "description"];
+  observables = ["name", "details", "description"];
 
   //========================================================================================
   /*                                                                                      *
    *                                     Data Handlers                                    *
    *                                                                                      */
   //========================================================================================
-
-  getInfo() {
-    return this.info;
-  }
-
-  setInfo(value) {
-    this.info = value;
-    return this;
-  }
 
   getDescription() {
     return this.description;
@@ -98,7 +88,6 @@ class Flow extends Model {
 
   setData(json) {
     const {
-      info,
       description,
       name,
       details,
@@ -110,7 +99,7 @@ class Flow extends Model {
       parameters
     } = json;
 
-    super.setData({ info, description, name, details });
+    super.setData({ description, name, details });
 
     this.nodeInstances.setData(nodeInstances);
     this.subFlows.setData(subFlows);
@@ -142,7 +131,6 @@ class Flow extends Model {
   serialize() {
     return {
       ...super.serialize(),
-      info: this.getInfo(),
       description: this.getDescription(),
       nodeInstances: this.getNodeInstances().serialize(),
       subFlows: this.getSubFlows().serialize(),
@@ -158,10 +146,9 @@ class Flow extends Model {
    * @returns {object} Database data
    */
   serializeToDB() {
-    const { info, name, description, details } = this.serialize();
+    const { name, description, details } = this.serialize();
 
     return {
-      Info: info,
       Label: name,
       Description: description,
       LastUpdate: details,
@@ -186,7 +173,6 @@ class Flow extends Model {
       LastUpdate: details,
       workspace,
       version,
-      Info: info,
       Description: description,
       NodeInst: nodeInstances,
       Container: subFlows,
@@ -202,7 +188,6 @@ class Flow extends Model {
       details,
       workspace,
       version,
-      info,
       description,
       nodeInstances: Manager.serializeOfDB(nodeInstances, NodeInstance),
       subFlows: Manager.serializeOfDB(subFlows, SubFlow),
