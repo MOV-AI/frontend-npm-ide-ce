@@ -100,7 +100,7 @@ const IOPorts = props => {
                 <Divider />
                 <AccordionDetails className={classes.details}>
                   {/* ------------------------- Callback ------------------------- */}
-                  {callback !== undefined && (
+                  {callback !== null && (
                     <Callback
                       id={callback}
                       ioPort={ioPort}
@@ -113,20 +113,19 @@ const IOPorts = props => {
                     />
                   )}
                   {/* ------------------------- Parameters ------------------------- */}
-                  {parameters !== undefined &&
-                    Object.keys(parameters).map((param, paramIndex) => {
-                      return (
-                        <Parameters
-                          {...props}
-                          key={paramIndex + direction}
-                          editable={editable}
-                          param={param}
-                          paramValue={parameters[param]}
-                          direction={direction}
-                          ioPort={ioPort}
-                        />
-                      );
-                    })}
+                  {Object.keys(parameters).map((param, paramIndex) => {
+                    return (
+                      <Parameters
+                        {...props}
+                        key={paramIndex + direction}
+                        editable={editable}
+                        param={param}
+                        paramValue={parameters[param]}
+                        direction={direction}
+                        ioPort={ioPort}
+                      />
+                    );
+                  })}
                 </AccordionDetails>
               </Accordion>
             );

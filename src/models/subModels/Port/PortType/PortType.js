@@ -9,7 +9,7 @@ class PortType extends Model {
 
   // Model properties
   message = "";
-  callback;
+  callback = null;
   parameters = {};
 
   observables = ["name", "message", "callback", "parameters"];
