@@ -353,15 +353,6 @@ const Node = (props, ref) => {
           nodeType={data.type}
           value={data.description}
         ></Description>
-        <ExecutionParameters
-          path={data.path}
-          remappable={data.remappable}
-          persistent={data.persistent}
-          launch={data.launch}
-          editable={editable}
-          onChangePath={updatePath}
-          onChangeExecutionParams={updateExecutionParams}
-        />
         <IOConfig
           {...props}
           editable={editable}
@@ -372,6 +363,15 @@ const Node = (props, ref) => {
           handleOpenSelectScopeModal={handleOpenSelectScopeModal}
           handleOpenCallback={handleOpenCallback}
           handleNewCallback={handleNewCallback}
+        />
+        <ExecutionParameters
+          path={data.path}
+          remappable={data.remappable}
+          persistent={data.persistent}
+          launch={data.launch}
+          editable={editable}
+          onChangePath={updatePath}
+          onChangeExecutionParams={updateExecutionParams}
         />
         <ParametersTable
           editable={editable}

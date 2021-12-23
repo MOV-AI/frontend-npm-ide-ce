@@ -109,7 +109,7 @@ const Description = props => {
   };
 
   return (
-    <CollapsibleHeader title={renderTitleSection()}>
+    <CollapsibleHeader title={renderTitleSection()} defaultExpanded={true}>
       {/* ---------------- Description -------------------*/}
       <TextField
         disabled={!editable}
