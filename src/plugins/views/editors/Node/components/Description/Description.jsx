@@ -1,14 +1,10 @@
 import React, { memo } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
-import Accordion from "@material-ui/core/Accordion";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
 import Typography from "@material-ui/core/Typography";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import Divider from "@material-ui/core/Divider";
 import TextField from "@material-ui/core/TextField";
 import { useTranslation } from "../../../_shared/mocks";
+import CollapsibleHeader from "../_shared/CollapsibleHeader";
 
 // Node colors: Each node type has one specific correspondent color
 const NODE_COLORS = {
@@ -62,7 +58,13 @@ const useStyles = makeStyles(theme => ({
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(1)
   },
-  typeContainer: { display: "flex", alignItems: "center" },
+  typeContainer: {
+    display: "flex",
+    alignItems: "center",
+    position: "absolute",
+    right: "100px",
+    top: "20px"
+  },
   details: { display: "flex", flexDirection: "column" },
   row: { display: "flex", flexDirection: "row" },
   heading: { fontSize: "1.5rem" },
@@ -76,47 +78,51 @@ const Description = props => {
   const { t } = useTranslation();
   const classes = useStyles();
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Render                                        *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Render Header with node type
+   * @returns {ReactElement} Element to be rendered in collapsible header
+   */
+  const renderTitleSection = () => {
+    return (
+      <>
+        <Typography className={classes.heading}>{t("Description")}</Typography>
+        <Typography component="div" className={classes.typeContainer}>
+          {nodeType && (
+            <>
+              <Typography
+                component="div"
+                className={classes.nodeTypeMini}
+                style={{ backgroundColor: NODE_COLORS[nodeType] }}
+              ></Typography>
+              <Typography>{nodeType}</Typography>
+            </>
+          )}
+        </Typography>
+      </>
+    );
+  };
+
   return (
-    <Typography component="div" className={classes.root}>
-      <Accordion defaultExpanded>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography component="div" className={classes.column}>
-            <Typography component="div" className={classes.container}>
-              <Typography className={classes.heading}>
-                {t("Description")}
-              </Typography>
-              <Typography component="div" className={classes.typeContainer}>
-                {nodeType && (
-                  <>
-                    <Typography
-                      component="div"
-                      className={classes.nodeTypeMini}
-                      style={{ backgroundColor: NODE_COLORS[nodeType] }}
-                    ></Typography>
-                    <Typography>{nodeType}</Typography>
-                  </>
-                )}
-              </Typography>
-            </Typography>
-          </Typography>
-        </AccordionSummary>
-        <Divider />
-        <AccordionDetails className={classes.details}>
-          {/* ---------------- Description -------------------*/}
-          <TextField
-            disabled={!editable}
-            className={classes.textField}
-            label={t("Description")}
-            rows="4"
-            multiline
-            defaultValue={value}
-            onChange={evt => onChangeDescription(evt.target.value)}
-            margin="normal"
-            variant="outlined"
-          />
-        </AccordionDetails>
-      </Accordion>
-    </Typography>
+    <CollapsibleHeader title={renderTitleSection()}>
+      {/* ---------------- Description -------------------*/}
+      <TextField
+        disabled={!editable}
+        className={classes.textField}
+        label={t("Description")}
+        rows="4"
+        multiline
+        defaultValue={value}
+        onChange={evt => onChangeDescription(evt.target.value)}
+        margin="normal"
+        variant="outlined"
+      />
+    </CollapsibleHeader>
   );
 };
 

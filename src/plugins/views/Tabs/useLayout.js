@@ -103,13 +103,22 @@ const useLayout = (props, dockRef) => {
    */
   const _getCustomTab = React.useCallback((docData, onCloseTab, isDirty) => {
     const getIconByScope = {
-      Callback: style => <CodeIcon style={{ ...style }} />,
-      Layout: style => <i className={`icon-Layouts`} style={{ ...style }}></i>,
-      Flow: style => <AccountTreeIcon style={{ ...style }} />,
+      Callback: style => <CodeIcon style={{ ...style, color: "cadetblue" }} />,
+      Layout: style => (
+        <i
+          className={`icon-Layouts`}
+          style={{ ...style, color: "darkred" }}
+        ></i>
+      ),
+      Flow: style => <AccountTreeIcon style={{ ...style, color: "orchid" }} />,
       Annotation: style => <DescriptionIcon style={{ ...style }} />,
       GraphicScene: style => <DeviceHubIcon style={{ ...style }} />,
-      Node: style => <i className={`icon-Nodes`} style={{ ...style }}></i>,
-      Configuration: style => <BuildIcon style={{ ...style }} />,
+      Node: style => (
+        <i className={`icon-Nodes`} style={{ ...style, color: "khaki" }}></i>
+      ),
+      Configuration: style => (
+        <BuildIcon style={{ ...style, color: "goldenrod" }} />
+      ),
       Default: <></>
     };
 
@@ -117,7 +126,7 @@ const useLayout = (props, dockRef) => {
       <Tooltip title={docData.id}>
         <div onAuxClick={() => onCloseTab(docData.id)}>
           {getIconByScope[docData.scope || "Default"]({
-            fontSize: 12,
+            fontSize: 13,
             marginTop: 2,
             marginRight: 10,
             marginLeft: 0
@@ -277,6 +286,7 @@ const useLayout = (props, dockRef) => {
       const newTabData = { ...currentTabData, isDirty: isDirty };
       tabsById.current.set(tabId, newTabData);
       // Trigger tab update
+      if (!dockRef.current) return;
       const currentTab = dockRef.current.find(tabId);
       dockRef.current.updateTab(tabId, currentTab);
     },
