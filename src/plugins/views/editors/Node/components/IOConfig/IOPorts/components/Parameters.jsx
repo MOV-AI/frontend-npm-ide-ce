@@ -41,16 +41,15 @@ const Parameters = props => {
       <Grid item xs={9}>
         <Input
           disabled={!editable}
-          value={paramValue}
+          defaultValue={paramValue}
           type={"text"}
           className={classes.input}
           onChange={evt =>
             props.handleIOPortsInputs(
               evt.target.value,
-              props.rowData.tableData.id,
+              props.rowData.name,
               direction,
               ioPort,
-              "Parameter",
               param
             )
           }

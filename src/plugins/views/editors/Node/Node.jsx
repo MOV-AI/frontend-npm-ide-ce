@@ -35,12 +35,12 @@ const Node = (props, ref) => {
     id,
     name,
     call,
+    alert,
     instance,
     data = new Model({}).serialize(),
+    loading,
     editable = true
   } = props;
-  // State Hooks
-  const [loading, setLoading] = React.useState(true);
 
   // Hooks
   const classes = useStyles();
@@ -67,6 +67,10 @@ const Node = (props, ref) => {
     value: ""
   };
 
+  const ROS_VALID_NAMES = new RegExp(
+    /(?!.*__.*)^[a-zA-Z~/]{1}?[a-zA-Z0-9_/]*$/
+  );
+
   //========================================================================================
   /*                                                                                      *
    *                                   React callbacks                                    *
@@ -92,17 +96,6 @@ const Node = (props, ref) => {
 
   //========================================================================================
   /*                                                                                      *
-   *                                    React Lifecycle                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  React.useEffect(() => {
-    console.log("debug data changed", data);
-    if (data.id && loading) setLoading(false);
-  }, [data, loading]);
-
-  //========================================================================================
-  /*                                                                                      *
    *                                    Event Handlers                                    *
    *                                                                                      */
   //========================================================================================
@@ -124,7 +117,7 @@ const Node = (props, ref) => {
       "dialog",
       "customDialog",
       {
-        onSubmit: updateKeyValue,
+        onSubmit: (...args) => updateKeyValue(...args, isNew),
         renderValueEditor: renderValueEditor,
         title: DIALOG_TITLE[varName],
         disableName: !isNew,
@@ -138,84 +131,115 @@ const Node = (props, ref) => {
   };
 
   /**
-   *
-   * @param {*} callbackName
-   * @param {*} defaultMsg
-   * @param {*} ioConfigName
-   * @param {*} direction
-   * @param {*} portName
+   * Create new callback, set it in node port and open editor
+   * @param {string} defaultMsg : Callback default message
+   * @param {string} ioConfigName : I/O Config Name
+   * @param {string} portName : Port name
    */
-  const handleOpenCallback = (
-    callbackName,
-    defaultMsg,
-    ioConfigName,
-    direction,
-    portName
-  ) => {
-    // Open existing callback
+  const handleNewCallback = (defaultMsg, ioConfigName, portName) => {
     const scope = "Callback";
-    if (callbackName) {
-      call("docManager", "read", { scope, name: callbackName }).then(doc => {
-        call("tabs", "openEditor", {
-          id: doc.getUrl(),
-          name: doc.getName(),
-          scope
-        });
-      });
-    }
-    // Create new callback and open editor
-    else {
-      call("dialog", "newDocument", {
-        scope,
-        onSubmit: newName => {
-          call("docManager", "create", {
-            scope,
-            name: newName
-          }).then(doc => {
-            doc.setMessage(defaultMsg);
-            // Create callback in DB
-            call("docManager", "save", { scope, name: newName }).then(res => {
-              if (res.success) {
-                alert({
-                  message: "Callback created",
-                  severity: "success"
-                });
-                const newTabData = {
-                  id: doc.getUrl(),
-                  name: newName,
-                  scope
-                };
-                call("tabs", "openEditor", newTabData);
-                // Set new callback in Node Port
-                updatePortCallback(ioConfigName, direction, portName, newName);
-              }
-            });
+    call("dialog", "newDocument", {
+      scope,
+      onSubmit: newName => {
+        call("docManager", "create", {
+          scope,
+          name: newName
+        }).then(doc => {
+          doc.setMessage(defaultMsg);
+          // Create callback in DB
+          call("docManager", "save", { scope, name: newName }).then(res => {
+            if (res.success) {
+              alert({
+                message: "Callback created",
+                severity: "success"
+              });
+              // Open editor of new callback
+              const newTabData = {
+                id: doc.getUrl(),
+                name: newName,
+                scope
+              };
+              call("tabs", "openEditor", newTabData);
+              // Set new callback in Node Port
+              updatePortCallback(ioConfigName, portName, newName);
+            }
           });
-        }
-      });
-    }
+        });
+      }
+    });
   };
 
   /**
-   *
-   * @param {*} modalData
-   * @param {*} ioConfigName
-   * @param {*} direction
-   * @param {*} portName
+   * Open Callback
+   * @param {string} callbackName : Callback name
    */
-  const handleOpenSelectScopeModal = (
-    modalData,
-    ioConfigName,
-    direction,
-    portName
-  ) => {
+  const handleOpenCallback = callbackName => {
+    // If no callback name is passed -> returns
+    if (!callbackName) return;
+    // Open existing callback
+    const scope = "Callback";
+    call("docManager", "read", { scope, name: callbackName }).then(doc => {
+      call("tabs", "openEditor", {
+        id: doc.getUrl(),
+        name: doc.getName(),
+        scope
+      });
+    });
+  };
+
+  /**
+   * Handle Open SelectScopeModal
+   * @param {object} modalData : Props to pass to SelectScopeModal
+   * @param {string} ioConfigName : I/O Config Name
+   * @param {string} portName : Port name
+   */
+  const handleOpenSelectScopeModal = (modalData, ioConfigName, portName) => {
     call("dialog", "selectScopeModal", {
       ...modalData,
       onSubmit: selectedCallback => {
+        const splitURL = selectedCallback.split("/");
+        const callback = splitURL.length > 1 ? splitURL[2] : selectedCallback;
         // Set new callback in Node Port
-        updatePortCallback(ioConfigName, direction, portName, selectedCallback);
+        updatePortCallback(ioConfigName, portName, callback);
       }
     });
+  };
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                      Validation                                      *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * @summary: Validate document name against invalid characters. It accept ROS valid names
+   * and can't accept two consecutive underscores.
+   * @param {string} paramName : name of the document
+   * @param {string} type : one of options "port" or "keyValue"
+   * @param {object} previousData : Previous data row
+   * @returns {object} {result: <boolean>, error: <string>}
+   **/
+  const validateName = (paramName, type, previousData) => {
+    const re = ROS_VALID_NAMES;
+    try {
+      if (!paramName) throw new Error(`${type} name is mandatory`);
+      else if (type === "ports" && !re.test(paramName)) {
+        throw new Error(`Invalid ${type} name`);
+      }
+
+      // Validate against repeated names
+      const checkNewName = !previousData && data[type][paramName];
+      const checkNameChanged =
+        previousData &&
+        previousData.name !== paramName &&
+        data[type][paramName];
+      if (checkNameChanged || checkNewName) {
+        throw new Error(`Cannot have 2 entries with the same name`);
+      }
+    } catch (error) {
+      return { result: false, error: error.message };
+    }
+    return { result: true, error: "" };
   };
 
   //========================================================================================
@@ -237,28 +261,40 @@ const Node = (props, ref) => {
   };
 
   const setPort = (value, resolve, reject, previousData) => {
-    const dataToSave = { [value.name]: value };
-    if (instance.current) instance.current.setPort(dataToSave);
-    resolve();
+    try {
+      // Trim name
+      value.name = value.name.trim();
+
+      // Validate port name
+      const validation = validateName(value.name, "ports", previousData);
+      if (!validation.result) {
+        throw new Error(validation.error);
+      }
+
+      // Check for transport/package/message
+      if (!value.template) throw new Error("No Transport and Protocol chosen");
+      else if (!value.msgPackage) throw new Error("No Package chosen");
+      else if (!value.message) throw new Error("No Message chosen");
+
+      // Proceed with saving
+      const dataToSave = { [value.name]: value };
+      if (instance.current) instance.current.setPort(dataToSave);
+      resolve();
+    } catch (err) {
+      // Show alert
+      alert({ message: err.message, severity: "error" });
+      // Reject promise
+      reject();
+    }
   };
 
   const deletePort = (port, resolve) => {
-    resolve();
     if (instance.current) instance.current.deletePort(port.name);
+    resolve();
   };
 
-  const updatePortCallback = (
-    ioConfigName,
-    direction,
-    portName,
-    callbackName
-  ) => {
-    instance.current.setPortCallback(
-      ioConfigName,
-      direction,
-      portName,
-      callbackName
-    );
+  const updatePortCallback = (ioConfigId, portName, callback) => {
+    instance.current.setPortCallback(ioConfigId, portName, callback);
   };
 
   const updateIOPortInputs = (
@@ -277,9 +313,20 @@ const Node = (props, ref) => {
     );
   };
 
-  const updateKeyValue = (varName, keyValueData) => {
-    const dataToSave = { [keyValueData.name]: keyValueData };
-    if (instance.current) instance.current.setKeyValue(varName, dataToSave);
+  const updateKeyValue = (varName, keyValueData, isNew) => {
+    try {
+      const keyName = keyValueData.name;
+      const dataToSave = { [keyName]: keyValueData };
+      const previousData = !isNew && data[varName]?.[keyName];
+      // Validate port name
+      const validation = validateName(keyName, varName, previousData);
+      if (!validation.result) {
+        throw new Error(validation.error);
+      }
+      if (instance.current) instance.current.setKeyValue(varName, dataToSave);
+    } catch (err) {
+      if (err.message) alert({ message: err.message, severity: "error" });
+    }
   };
 
   const deleteKeyValue = (varName, key) => {
@@ -324,6 +371,7 @@ const Node = (props, ref) => {
           handleIOPortsInputs={updateIOPortInputs}
           handleOpenSelectScopeModal={handleOpenSelectScopeModal}
           handleOpenCallback={handleOpenCallback}
+          handleNewCallback={handleNewCallback}
         />
         <ParametersTable
           editable={editable}

@@ -57,12 +57,12 @@ const useIOConfigColumns = data => {
    * @returns {ReactElement} Element to be rendered as port icon
    */
   const renderPortIcon = rowData => {
-    const inIcon = rowData.portIn ? (
+    const inIcon = Object.keys(rowData.portIn).length ? (
       <Tooltip title="Iport">
         <i className="icon-in" style={{ fontSize: "1.5rem" }}></i>
       </Tooltip>
     ) : undefined;
-    const outIcon = rowData.portOut ? (
+    const outIcon = Object.keys(rowData.portOut).length ? (
       <Tooltip title="Oport">
         <i className="icon-out" style={{ fontSize: "1.5rem" }}></i>
       </Tooltip>
@@ -103,6 +103,33 @@ const useIOConfigColumns = data => {
    * @returns {ReactElement} Element to edit Transport/Protocol
    */
   const getTransportEditComponent = props => {
+    /**
+     * On Changte Transport / Protocol
+     * @param {Event} event
+     */
+    const onChange = event => {
+      const newData = { ...props.rowData };
+      newData.template = event.target.value;
+
+      // Autofill if only one package and message
+      const packageOptions = getPackageOptions(newData);
+      // If only one package
+      if (packageOptions.length === 1) {
+        newData.msgPackage = packageOptions[0].value;
+        const messageOptions = getMessageOptions(newData);
+        // If only one message
+        if (messageOptions.length === 1) {
+          newData.message = messageOptions[0].value;
+        } else {
+          newData.message = "";
+        }
+      } else {
+        newData.msgPackage = "";
+        newData.message = "";
+      }
+      props.onRowDataChange(newData);
+    };
+
     // When you click edit, second column should be a selector with the Transport/Protocol
     const options = getGroupOptions(scopePorts);
     return (
@@ -110,29 +137,8 @@ const useIOConfigColumns = data => {
         <FormControl className={classes.formControl}>
           <NativeSelect
             className={classes.control}
-            value={props.value} // match the templateKey and shows label
-            onChange={evt => {
-              const newData = { ...props.rowData };
-              newData.Template = evt.target.value;
-
-              // Autofill if only one package and message
-              const packageOptions = getPackageOptions(newData);
-              // If only one package
-              if (packageOptions.length === 1) {
-                newData.Package = packageOptions[0].value;
-                const messageOptions = getMessageOptions(newData);
-                // If only one message
-                if (messageOptions.length === 1) {
-                  newData.Message = messageOptions[0].value;
-                } else {
-                  newData.Message = "";
-                }
-              } else {
-                newData.Package = "";
-                newData.Message = "";
-              }
-              props.onRowDataChange(newData);
-            }}
+            value={props.value}
+            onChange={onChange}
           >
             <option value="" />
             {options.map((transport, transportIndex) => {
@@ -167,6 +173,17 @@ const useIOConfigColumns = data => {
    * @returns {ReactElement} Element to edit Package
    */
   const getPackageEditComponent = props => {
+    /**
+     * On change event for package selector
+     * @param {Event} event
+     */
+    const onChange = event => {
+      const newData = { ...props.rowData };
+      newData.msgPackage = event.target.value;
+      newData.message = "";
+      props.onRowDataChange(newData);
+    };
+
     // When you click edit, third column should be a selector with the Packages
     const options = getPackageOptions(props.rowData);
     return (
@@ -175,12 +192,7 @@ const useIOConfigColumns = data => {
           <NativeSelect
             className={classes.control}
             value={props.value}
-            onChange={evt => {
-              const newData = { ...props.rowData };
-              newData.Package = evt.target.value;
-              newData.Message = "";
-              props.onRowDataChange(newData);
-            }}
+            onChange={onChange}
           >
             <option value="" />
             {renderOptions(options)}
@@ -196,6 +208,16 @@ const useIOConfigColumns = data => {
    * @returns {ReactElement} Element to edit Message
    */
   const getMessageEditComponent = props => {
+    /**
+     * On change message selector
+     * @param {*} evt
+     */
+    const onChange = evt => {
+      const newData = { ...props.rowData };
+      newData.message = evt.target.value;
+      props.onRowDataChange(newData);
+    };
+
     // When you click edit, fourth column should be a selector with the Message
     const options = getMessageOptions(props.rowData);
     return (
@@ -204,11 +226,7 @@ const useIOConfigColumns = data => {
           <NativeSelect
             className={classes.control}
             value={props.value}
-            onChange={evt => {
-              const newData = { ...props.rowData };
-              newData.Message = evt.target.value;
-              props.onRowDataChange(newData);
-            }}
+            onChange={onChange}
           >
             <option value="" />
             {renderOptions(options)}
@@ -245,7 +263,7 @@ const useIOConfigColumns = data => {
       {
         title: t("Transport / Protocol"),
         field: "template",
-        render: rowData => <div>{scopePorts[rowData?.Template]?.Label}</div>, // what you see (not in edit mode)
+        render: rowData => <div>{scopePorts[rowData?.template]?.Label}</div>, // what you see (not in edit mode)
         editComponent: getTransportEditComponent
       },
       {

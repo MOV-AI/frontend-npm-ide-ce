@@ -6,8 +6,9 @@ import MaterialTable from "../../../_shared/MaterialTable/MaterialTable";
 import IOPorts from "./IOPorts/IOPorts";
 import CollapsibleHeader from "../_shared/CollapsibleHeader";
 import { Typography } from "@material-ui/core";
-import { useTranslation } from "../../../_shared/mocks";
+import { useTranslation, DEFAULT_FUNCTION } from "../../../_shared/mocks";
 import useIOConfigColumns from "./hooks/useIOConfigColumns";
+import useHelper from "./hooks/useHelper";
 
 const useStyles = makeStyles(theme => ({
   details: {
@@ -52,17 +53,20 @@ const IOConfig = props => {
     handleIOPortsInputs,
     handleOpenSelectScopeModal,
     handleOpenCallback,
+    handleNewCallback,
     autoFocus,
     editable
   } = props;
 
   // State hooks
   const [scopePorts, setScopePorts] = React.useState({});
+  const [scopeCallback, setScopeCallback] = React.useState({});
   const [scopeSystemPortsData, setScopeSystemPortsData] = React.useState({});
 
   // Other hooks
   const classes = useStyles();
   const { t } = useTranslation();
+  const { getAllCallbacksWithMessage, getEffectiveMessage } = useHelper();
   const { getColumns } = useIOConfigColumns({
     scopeSystemPortsData,
     scopePorts,
@@ -86,6 +90,10 @@ const IOConfig = props => {
       store.helper.getPortsData().then(res => {
         if (res) setScopeSystemPortsData(res);
       });
+      // Get All callback options
+      store.helper.getScopeCallback().then(res => {
+        if (res) setScopeCallback(res);
+      });
     });
   }, [call, scope]);
 
@@ -94,6 +102,34 @@ const IOConfig = props => {
    *                                    Private Methods                                   *
    *                                                                                      */
   //========================================================================================
+
+  /**
+   * Update lock rows : Add fade out effect to detail panel when editing table
+   * @returns
+   */
+  const updateLockRows = () => {
+    if (!tableRef.current || !tableContainerRef.current) return;
+    setTimeout(() => {
+      const editingRow = tableRef.current.dataManager.lastEditingRow;
+      const addingRow =
+        tableContainerRef?.current?.querySelector("tr[mode='add']");
+      if (editingRow || addingRow) {
+        tableContainerRef?.current?.classList.add("editing");
+      } else {
+        tableContainerRef?.current?.classList.remove("editing");
+      }
+    });
+  };
+
+  /**
+   * Update callback options for each row
+   */
+  const updateCallbackOptions = React.useCallback(
+    (portData, callbacksAvailable) => {
+      console.log("debug  updateCallbackOptions", portData, callbacksAvailable);
+    },
+    []
+  );
 
   /**
    * Format data : Convert object in array to be rendered in Material Table
@@ -109,20 +145,54 @@ const IOConfig = props => {
   };
 
   /**
-   * Update lock rows : Add fade out effect to detail panel when editing table
-   * @returns
+   * Format port data
    */
-  const updateLockRows = () => {
-    if (!tableRef.current) return;
-    if (
-      tableRef?.current?.dataManager.lastEditingRow ||
-      tableContainerRef?.current?.querySelector("tr[mode='add']")
-    ) {
-      tableContainerRef?.current?.classList.add("editing");
-    } else {
-      tableContainerRef?.current?.classList.remove("editing");
-    }
-  };
+  const formatPortData = React.useCallback(
+    (rowData, direction, key) => {
+      // Set port properties
+      const effectiveMessage = getEffectiveMessage(rowData, direction, key);
+      rowData[direction][key]["message"] = effectiveMessage;
+      rowData[direction][key]["callback"] = rowData[direction][key].Callback;
+      rowData[direction][key]["parameters"] = rowData[direction][key].Parameter;
+      // Delete LinkEnabled
+      delete rowData[direction][key]["LinkEnabled"];
+      if (direction === "portOut") return rowData;
+      // Set available callback options for input ports
+      const anyMessage = "movai_msgs/Any";
+      const anyCallback = getAllCallbacksWithMessage(scopeCallback, anyMessage);
+      updateCallbackOptions(rowData["portIn"][key], anyCallback);
+      return rowData;
+    },
+    [
+      getEffectiveMessage,
+      updateCallbackOptions,
+      getAllCallbacksWithMessage,
+      scopeCallback
+    ]
+  );
+
+  /**
+   * Set port data
+   */
+  const setPortData = React.useCallback(
+    rowData => {
+      rowData["portIn"] = scopePorts[rowData.template]?.In;
+      rowData["portOut"] = scopePorts[rowData.template]?.Out;
+      // Update CallbackOptions and EffectiveMessage = (pkg/msg) of each ioport
+      if (rowData["portIn"] !== undefined) {
+        Object.keys(rowData["portIn"]).forEach(key => {
+          rowData = formatPortData(rowData, "portIn", key);
+        });
+      }
+      if (rowData["portOut"] !== undefined) {
+        Object.keys(rowData["portOut"]).forEach(key => {
+          rowData = formatPortData(rowData, "portOut", key);
+        });
+      }
+      return rowData;
+    },
+    [scopePorts, formatPortData]
+  );
 
   //========================================================================================
   /*                                                                                      *
@@ -131,21 +201,24 @@ const IOConfig = props => {
   //========================================================================================
 
   /**
-   *
+   * Handle Add of new config
    * @param {*} newData
    * @returns
    */
   const handleRowAdd = useCallback(
     newData => {
       return new Promise((resolve, reject) => {
+        // Set port in/out
+        newData = setPortData(newData);
+        // Call method to set row
         onIOConfigRowSet(newData, resolve, reject);
       });
     },
-    [onIOConfigRowSet]
+    [onIOConfigRowSet, setPortData]
   );
 
   /**
-   *
+   * Handle Update of config
    * @param {*} newData
    * @param {*} oldData
    * @returns
@@ -153,14 +226,17 @@ const IOConfig = props => {
   const handleRowUpdate = useCallback(
     (newData, oldData) => {
       return new Promise((resolve, reject) => {
+        // Set port in/out
+        newData = setPortData(newData);
+        // Call method to set row
         onIOConfigRowSet(newData, resolve, reject, oldData);
       });
     },
-    [onIOConfigRowSet]
+    [onIOConfigRowSet, setPortData]
   );
 
   /**
-   *
+   * Handle Delete of config
    * @param {*} value
    * @returns
    */
@@ -180,7 +256,7 @@ const IOConfig = props => {
   //========================================================================================
 
   /**
-   *
+   * Render custom Toolbar
    * @param {*} _props
    * @returns
    */
@@ -195,7 +271,7 @@ const IOConfig = props => {
   };
 
   /**
-   *
+   * Render custom edit row
    * @param {*} _props
    * @returns
    */
@@ -241,6 +317,7 @@ const IOConfig = props => {
                 rowData={panelData.rowData}
                 handleIOPortsInputs={handleIOPortsInputs}
                 handleOpenCallback={handleOpenCallback}
+                handleNewCallback={handleNewCallback}
                 handleOpenSelectScopeModal={handleOpenSelectScopeModal}
               />
             );
@@ -263,23 +340,31 @@ const IOConfig = props => {
 };
 
 IOConfig.propTypes = {
-  ioConfig: PropTypes.array,
-  scopePorts: PropTypes.object,
-  scopePortsData: PropTypes.object,
+  ioConfig: PropTypes.object,
   onIOConfigRowSet: PropTypes.func,
   onIOConfigRowDelete: PropTypes.func,
+  handleIOPortsInputs: PropTypes.func,
+  handleOpenSelectScopeModal: PropTypes.func,
+  handleOpenCallback: PropTypes.func,
+  handleNewCallback: PropTypes.func,
   editable: PropTypes.bool
 };
 
 IOConfig.defaultProps = {
   editable: true,
+  onIOConfigRowSet: () => DEFAULT_FUNCTION("onIOConfigRowSet"),
+  onIOConfigRowDelete: () => DEFAULT_FUNCTION("onIOConfigRowDelete"),
+  handleIOPortsInputs: () => DEFAULT_FUNCTION("IOInputs"),
+  handleOpenSelectScopeModal: () => DEFAULT_FUNCTION("openSelectScopeModal"),
+  handleOpenCallback: () => DEFAULT_FUNCTION("handleOpenCallback"),
+  handleNewCallback: () => DEFAULT_FUNCTION("handleNewCallback"),
   ioConfig: [
     {
       name: "undefined",
-      Template: "undefined",
-      Package: "undefined",
-      Message: "undefined",
-      ioports: [
+      template: "undefined",
+      msgPackage: "undefined",
+      message: "undefined",
+      portIn: [
         {
           name: "undefined",
           message: "undefined",
@@ -292,17 +377,7 @@ IOConfig.defaultProps = {
         }
       ]
     }
-  ],
-  scopePorts: {
-    "ROS1/Subscriber": {},
-    "ROS1/Publisher": {},
-    "MovAi/Widget": {}
-  },
-  scopeSystemPortsData: {
-    ROS1_action: {},
-    ROS1_msg: {},
-    ROS1_srv: {}
-  }
+  ]
 };
 
 export default IOConfig;

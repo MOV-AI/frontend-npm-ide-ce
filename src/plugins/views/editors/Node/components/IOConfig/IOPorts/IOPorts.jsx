@@ -40,7 +40,12 @@ const useStyles = makeStyles(theme => {
 
 const IOPorts = props => {
   // Props
-  const { editable, handleOpenCallback, handleOpenSelectScopeModal } = props;
+  const {
+    editable,
+    handleOpenCallback,
+    handleNewCallback,
+    handleOpenSelectScopeModal
+  } = props;
   // Hooks
   const classes = useStyles();
 
@@ -108,6 +113,7 @@ const IOPorts = props => {
                       message={message}
                       direction={direction}
                       portName={props.rowData.name}
+                      handleNewCallback={handleNewCallback}
                       handleOpenCallback={handleOpenCallback}
                       handleOpenSelectScopeModal={handleOpenSelectScopeModal}
                     />

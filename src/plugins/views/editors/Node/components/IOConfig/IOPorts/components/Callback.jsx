@@ -42,7 +42,7 @@ const Callback = props => {
     message,
     callback,
     portName,
-    direction,
+    handleNewCallback,
     handleOpenCallback,
     handleOpenSelectScopeModal
   } = props;
@@ -93,7 +93,6 @@ const Callback = props => {
                     scopeList: ["Callback"]
                   },
                   portName,
-                  direction,
                   ioPort
                 );
               }}
@@ -114,15 +113,13 @@ const Callback = props => {
           </Link>
         </Tooltip>
 
-        {/* PlusIcon - Create new Callback with associated Message */}
+        {/* EditIcon - Create new Callback with associated Message */}
         {props.editable && (
           <Tooltip title={t("Create callback")}>
             <Link
               className={classes.icon}
               component="button"
-              onClick={() =>
-                handleOpenCallback(null, message, portName, direction, ioPort)
-              }
+              onClick={() => handleNewCallback(message, portName, ioPort)}
             >
               <Edit />
             </Link>

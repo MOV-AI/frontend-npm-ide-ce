@@ -93,14 +93,14 @@ const useSelectOptions = data => {
   const getPackageOptions = rowData => {
     if (
       rowData === undefined ||
-      rowData.Template === undefined ||
-      rowData.Template === ""
+      rowData.template === undefined ||
+      rowData.template === ""
     ) {
       return [];
     }
     let packageOptions = [];
     try {
-      const dataObj = { ...scopePorts[rowData.Template].Data };
+      const dataObj = { ...scopePorts[rowData.template].Data };
       // If there is package and message add package option
       if (Object.keys(dataObj).length > 1) {
         packageOptions = [{ value: dataObj.Package, label: dataObj.Package }];
@@ -128,16 +128,16 @@ const useSelectOptions = data => {
   const getMessageOptions = rowData => {
     if (
       rowData === undefined ||
-      rowData.Template === undefined ||
-      rowData.Template === "" ||
-      rowData.Package === undefined ||
-      rowData.Package === ""
+      rowData.template === undefined ||
+      rowData.template === "" ||
+      rowData.msgPackage === undefined ||
+      rowData.msgPackage === ""
     ) {
       return [];
     }
     let messageOptions = [];
     try {
-      const dataObj = { ...scopePorts[rowData.Template].Data };
+      const dataObj = { ...scopePorts[rowData.template].Data };
       // If there is package and message add package option
       if (Object.keys(dataObj).length > 1) {
         messageOptions = [{ value: dataObj.Message, label: dataObj.Message }];
@@ -145,7 +145,7 @@ const useSelectOptions = data => {
       // Else go find by type and selected package and return the messages
       else {
         messageOptions = scopeSystemPortsData[dataObj.type][
-          rowData.Package
+          rowData.msgPackage
         ].map(element => {
           return { value: element, label: element };
         });

@@ -211,6 +211,7 @@ class Dialog extends IDEPlugin {
         open={true}
         message={message}
         selected={selected}
+        allowArchive={false}
         scopeList={scopeList}
         onCancel={this._handleDialogClose}
         onSubmit={selectedItem => {

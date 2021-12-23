@@ -109,7 +109,7 @@ const Description = props => {
             label={t("Description")}
             rows="4"
             multiline
-            value={value}
+            defaultValue={value}
             onChange={evt => onChangeDescription(evt.target.value)}
             margin="normal"
             variant="outlined"

@@ -155,11 +155,14 @@ class Node extends Model {
     return this.ports;
   }
 
-  setPortCallback(portId, direction, portName, callbackName) {
+  setPortCallback(portId, portName, callbackName) {
     this.ports
       .getItem(portId)
-      [direction].getItem(portName)
+      ["portIn"].getItem(portName)
       .setCallback(callbackName);
+    // Temporary Hack to trigger data change
+    const content = this.ports.getItem(portId).serialize();
+    this.ports.setItem({ name: portId, content });
     return this;
   }
 
@@ -168,6 +171,9 @@ class Node extends Model {
       .getItem(portId)
       [direction].getItem(portName)
       .setParameter(parameterName, value);
+    // Temporary Hack to trigger data change
+    const content = this.ports.getItem(portId).serialize();
+    this.ports.setItem({ name: portId, content });
     return this;
   }
 
