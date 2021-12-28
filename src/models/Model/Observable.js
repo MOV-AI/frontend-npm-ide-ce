@@ -41,8 +41,8 @@ class Observable {
    * Enable observables
    * @returns
    */
-  enableObservables() {
-    this[symbols.enabled] = true;
+  enableObservables(enable = true) {
+    this[symbols.enabled] = enable;
     return this;
   }
 
@@ -73,6 +73,8 @@ class Observable {
    * @returns  {any}
    */
   dispatch(prop, value) {
+    if (!this[symbols.enabled]) return;
+
     try {
       for (const fn of this.subscribers.values()) {
         setTimeout(() => fn.call(this, this, prop, value), 0);

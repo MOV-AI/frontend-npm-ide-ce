@@ -1,13 +1,13 @@
 import Node from "./Node";
 import { Command, EnvVar, Parameter, Port } from "../subModels";
 
-test("smoke test", () => {
+test("Smoke test", () => {
   const obj = new Node();
 
   expect(obj).toBeInstanceOf(Node);
 });
 
-test("serialize OF db", () => {
+test("Serialize OF db", () => {
   const data = {
     Label: "align_with_cart",
     LastUpdate: {
@@ -125,7 +125,7 @@ test("serialize OF db", () => {
   expect(Node.serializeOfDB(data)).toMatchObject(expected);
 });
 
-test("serialize TO db", () => {
+test("Serialize TO db", () => {
   const obj = new Node();
 
   const data = {
@@ -199,7 +199,7 @@ test("serialize TO db", () => {
   expect(obj.serializeToDB(data)).toMatchObject(expected);
 });
 
-test("add ports", () => {
+test("Add ports", () => {
   const name = "tag_tf";
   const data = {
     [name]: {
@@ -230,7 +230,7 @@ test("add ports", () => {
   expect(obj.getPorts().getItem(name).getMessage()).toBe("TF");
 });
 
-test("delete a port", () => {
+test("Delete a port", () => {
   const name = "tag_tf";
   const data = {
     [name]: {
@@ -261,7 +261,7 @@ test("delete a port", () => {
   expect(obj.getPorts().getItem(name)).toBe(undefined);
 });
 
-test("update port", () => {
+test("Update port", () => {
   const name = "tag_tf";
   const data = {
     [name]: {
@@ -295,7 +295,7 @@ test("update port", () => {
   expect(obj.getPorts().getItem(name).getDescription()).toBe("new description");
 });
 
-test("add parameter", () => {
+test("Add parameter", () => {
   const name = "param1";
   const data = {
     [name]: { name, value: 1981, description: "max speed" }
@@ -310,7 +310,7 @@ test("add parameter", () => {
   expect(obj.getParameters().getItem(name).getValue()).toBe(1981);
 });
 
-test("delete parameter", () => {
+test("Delete parameter", () => {
   const name = "param1";
   const data = {
     [name]: { name, value: 1981, description: "max speed" }
@@ -324,7 +324,7 @@ test("delete parameter", () => {
   expect(obj.getParameters().getItem(name)).toBe(undefined);
 });
 
-test("update parameter", () => {
+test("Update parameter", () => {
   const name = "param1";
   const data = {
     [name]: { name, value: 1981, description: "max speed" }
@@ -341,7 +341,7 @@ test("update parameter", () => {
   expect(obj.getParameters().getItem(name).getDescription()).toBe("min speed");
 });
 
-test("add envvar", () => {
+test("Add envvar", () => {
   const name = "param1";
   const data = { [name]: { name, value: "/opt/movai" } };
 
@@ -353,7 +353,7 @@ test("add envvar", () => {
   expect(obj.getEnvVars().getItem(name).getValue()).toBe("/opt/movai");
 });
 
-test("update envvar", () => {
+test("Update envvar", () => {
   const name = "param1";
   const data = { [name]: { name, value: "/opt/movai" } };
 
@@ -367,7 +367,7 @@ test("update envvar", () => {
   expect(obj.getEnvVars().getItem(name).getValue()).toBe("/opt/user");
 });
 
-test("delete envvar", () => {
+test("Delete envvar", () => {
   const name = "param1";
   const data = { [name]: { name, value: "/opt/movai" } };
 
@@ -382,7 +382,7 @@ test("delete envvar", () => {
   expect(obj.getEnvVars().getItem(name)).toBe(undefined);
 });
 
-test("add command", () => {
+test("Add command", () => {
   const name = "cmd1";
   const data = { [name]: { name, value: "file.sh" } };
   const obj = new Node();
@@ -393,7 +393,7 @@ test("add command", () => {
   expect(obj.getCommands().getItem(name).getValue()).toBe("file.sh");
 });
 
-test("update command", () => {
+test("Update command", () => {
   const name = "cmd1";
   const data = { [name]: { name, value: "file.sh" } };
 
@@ -407,7 +407,7 @@ test("update command", () => {
   expect(obj.getCommands().getItem(name).getValue()).toBe("updated.sh");
 });
 
-test("delete command", () => {
+test("Delete command", () => {
   const name = "cmd1";
   const data = { [name]: { name, value: "file.sh" } };
 
@@ -420,4 +420,102 @@ test("delete command", () => {
   obj.getCommands().deleteItem(name);
 
   expect(obj.getCommands().getItem(name)).toBe(undefined);
+});
+
+test("Call dispatcher on port callback change", done => {
+  const name = "camera_info";
+  const data = {
+    [name]: {
+      template: "ROS1/Subscriber",
+      msgPackage: "sensor_msgs",
+      message: "CameraInfo",
+      portIn: {
+        in: {
+          message: "sensor_msgs/CameraInfo",
+          callback: "cb1"
+        }
+      }
+    }
+  };
+
+  const expected = {
+    [name]: {
+      ...data[name],
+      portIn: {
+        in: {
+          message: "sensor_msgs/CameraInfo",
+          callback: "cb2"
+        }
+      }
+    }
+  };
+
+  const obj = new Node();
+  obj.getPorts().setData(data);
+
+  // subscribe to changes to validate dispatcher
+  obj.subscribe((obj, prop, value) => {
+    try {
+      expect(obj).toBeInstanceOf(Node);
+      expect(prop).toBe("ports");
+      expect(value).toMatchObject(expected);
+
+      done();
+    } catch (error) {
+      done(error);
+    }
+  });
+
+  // Change the port callback
+  obj.setPortCallback(name, "in", "cb2");
+});
+
+test("Call dispatcher on port parameter change", done => {
+  const name = "camera_info";
+  const data = {
+    [name]: {
+      template: "ROS1/Subscriber",
+      msgPackage: "sensor_msgs",
+      message: "CameraInfo",
+      portIn: {
+        in: {
+          message: "sensor_msgs/CameraInfo",
+          callback: "cb1",
+          parameters: { enabled: false }
+        }
+      }
+    }
+  };
+
+  const expected = {
+    [name]: {
+      ...data[name],
+      portIn: {
+        in: {
+          message: "sensor_msgs/CameraInfo",
+          callback: "cb1",
+          parameters: { enabled: true }
+        }
+      }
+    }
+  };
+
+  const obj = new Node();
+  obj.getPorts().setData(data);
+
+  // subscribe to changes to validate dispatcher
+  obj.subscribe((obj, prop, value) => {
+    try {
+      expect(obj).toBeInstanceOf(Node);
+      expect(prop).toBe("ports");
+      expect(value).toMatchObject(expected);
+
+      done();
+    } catch (error) {
+      done(error);
+    }
+  });
+
+  // Change a port parameter
+  obj.setPortParameter(name, "portIn", "in", "enabled", true);
 });

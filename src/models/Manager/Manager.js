@@ -67,6 +67,11 @@ class Manager {
 
     this.data.set(name, obj);
 
+    //subscribe to object changes to emit update event
+    obj.subscribe(() => {
+      this.emit(EVENTS.UPDATE);
+    });
+
     this.emit(EVENTS.CREATE);
 
     return this;
