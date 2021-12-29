@@ -65,7 +65,7 @@ class Node extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Node} : The instance
    */
   setDescription(value) {
     this.description = value;
@@ -83,7 +83,7 @@ class Node extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Node} : The instance
    */
   setPath(value) {
     this.path = value;
@@ -101,7 +101,7 @@ class Node extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Node} : The instance
    */
   setType(value) {
     this.type = value;
@@ -112,7 +112,7 @@ class Node extends Model {
    * Sets the new value of the property
    * @param {string} parameter : The name of the parameter
    * @param {string} value : The value of the parameter
-   * @returns {object} : The instance
+   * @returns {Node} : The instance
    */
   setExecutionParameter(parameter, value) {
     super.setData({ [parameter]: value });
@@ -130,7 +130,7 @@ class Node extends Model {
   /**
    * Sets the new value of the property
    * @param {boolean} value : The new value
-   * @returns {object} : The instance
+   * @returns {Node} : The instance
    */
   setPersistent(value) {
     this.persistent = value;
@@ -148,7 +148,7 @@ class Node extends Model {
   /**
    * Sets the new value of the property
    * @param {boolean} value : The new value
-   * @returns {object} : The instance
+   * @returns {Node} : The instance
    */
   setLaunch(value) {
     this.launch = value;
@@ -166,7 +166,7 @@ class Node extends Model {
   /**
    * Sets the new value of the property
    * @param {boolean} value : The new value
-   * @returns {object} : The instance
+   * @returns {Node} : The instance
    */
   setRemappable(value) {
     this.remappable = value;
@@ -184,7 +184,7 @@ class Node extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Node} : The instance
    */
   setPackageDep(value) {
     this.packageDep = value;
@@ -204,7 +204,7 @@ class Node extends Model {
    * Can only be used with managed properties
    * @param {string} varName : The name of the property
    * @param {any} data : The data of the item
-   * @returns {object} : The instance
+   * @returns {Node} : The instance
    */
   setKeyValue(varName, data) {
     this[varName].setData(data);
@@ -216,7 +216,7 @@ class Node extends Model {
    * Can only be used with managed properties
    * @param {string} varName : The name of the property
    * @param {any} key : The name of the item
-   * @returns {object} : The instance
+   * @returns {Node} : The instance
    */
   deleteKeyValue(varName, key) {
     this[varName].deleteItem(key);
@@ -253,7 +253,7 @@ class Node extends Model {
   /**
    * Adds a port
    * @param {object} value : The port value
-   * @returns {object} : The instance
+   * @returns {Node} : The instance
    */
   setPort(value) {
     this.ports.setData(value);
@@ -272,7 +272,7 @@ class Node extends Model {
   /**
    * Deletes a port
    * @param {string} key : The name of the port
-   * @returns {object} : The instance
+   * @returns {Node} : The instance
    */
   deletePort(key) {
     this.ports.deleteItem(key);
@@ -292,7 +292,7 @@ class Node extends Model {
    * @param {string} portId : The id of the port
    * @param {string} portName : The name of the port
    * @param {string} callbackName : The new callback name
-   * @returns {object} : The instance
+   * @returns {Node} : The instance
    */
   setPortCallback(portId, portName, callbackName) {
     this.getPorts()
@@ -311,7 +311,7 @@ class Node extends Model {
    * @param {string} portName : The name of the port
    * @param {string} parameterName : The parameter of the port to update
    * @param {any} value : The new value of the parameter
-   * @returns {object} : The instance
+   * @returns {Node} : The instance
    */
   setPortParameter(portId, direction, portName, parameterName, value) {
     this.getPorts()
@@ -340,8 +340,8 @@ class Node extends Model {
 
   /**
    * Updates the properties of the instance
-   * @param {object} json : The data to update to the model
-   * @returns {object} : The instance
+   * @param {object} json : The data to update the instance
+   * @returns {Node} : The instance
    */
   setData(json) {
     const {

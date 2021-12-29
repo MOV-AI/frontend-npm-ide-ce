@@ -33,6 +33,11 @@ class PortType extends Model {
     return this.message;
   }
 
+  /**
+   * Sets the new value of the property
+   * @param {string} value : The new value
+   * @returns {PortType} : The instance
+   */
   setMessage(value) {
     this.message = value;
     return this;
@@ -46,6 +51,11 @@ class PortType extends Model {
     return this.callback;
   }
 
+  /**
+   * Sets the new value of the property
+   * @param {string} value : The new value
+   * @returns {PortType} : The instance
+   */
   setCallback(value) {
     this.callback = value;
     return this;
@@ -60,9 +70,9 @@ class PortType extends Model {
   }
 
   /**
-   * Sets the parameters value
-   * @param {object} value : The parameters value
-   * @returns {object} : The instance
+   * Sets the new value of the property
+   * @param {object} value : The new value
+   * @returns {PortType} : The instance
    */
   setParameters(value) {
     this.parameters = value;

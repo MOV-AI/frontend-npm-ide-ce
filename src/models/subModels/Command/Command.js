@@ -36,7 +36,7 @@ class Command extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Command} : The instance
    */
   setName(value) {
     this.name = value;
@@ -54,7 +54,7 @@ class Command extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Command} : The instance
    */
   setValue(value) {
     this.value = value;
@@ -72,7 +72,7 @@ class Command extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Command} : The instance
    */
   setDescription(value) {
     this.description = value;

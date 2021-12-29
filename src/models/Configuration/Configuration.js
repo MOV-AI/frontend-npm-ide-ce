@@ -34,7 +34,7 @@ export default class Configuration extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Configuration} : The instance
    */
   setCode(code) {
     this.code = code;
@@ -52,7 +52,7 @@ export default class Configuration extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Configuration} : The instance
    */
   setExtension(extension) {
     this.extension = extension || this.extension;

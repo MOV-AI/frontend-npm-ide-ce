@@ -37,7 +37,7 @@ class Parameter extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Parameter} : The instance
    */
   setName(value) {
     this.name = value;
@@ -55,7 +55,7 @@ class Parameter extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Parameter} : The instance
    */
   setValue(value) {
     this.value = value;
@@ -73,7 +73,7 @@ class Parameter extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Parameter} : The instance
    */
   setType(value) {
     this.type = value;
@@ -91,7 +91,7 @@ class Parameter extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Parameter} : The instance
    */
   setDescription(value) {
     this.description = value;

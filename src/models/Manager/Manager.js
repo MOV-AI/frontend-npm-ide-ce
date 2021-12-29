@@ -58,7 +58,7 @@ class Manager {
    * Creates a new item
    * Emits the CREATE event
    * @param {object} param0 : An object with the name of the item and the content
-   * @returns {object} : The instance
+   * @returns {Manager} : The instance
    */
   setItem({ name, content }) {
     const obj = new this.model();
@@ -80,7 +80,7 @@ class Manager {
   /**
    * Updates an item
    * @param {object} param0 : An object with the name of the item and the content
-   * @returns {object} : The instance
+   * @returns {Manager} : The instance
    */
   updateItem({ name, content }) {
     this.getItem(name)?.setData(content);
@@ -108,7 +108,7 @@ class Manager {
   /**
    * Creates one or more items
    * @param {object} json : An object with the items to create
-   * @returns {object} : The instance
+   * @returns {Manager} : The instance
    */
   setData(json) {
     Object.entries(json ?? {}).forEach(([name, content]) => {

@@ -69,7 +69,7 @@ export default class Model extends Observable {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Model} : The instance
    */
   setName(value) {
     this.name = value;
@@ -95,7 +95,7 @@ export default class Model extends Observable {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Model} : The instance
    */
   setDetails(value) {
     this.details = value;
@@ -113,7 +113,7 @@ export default class Model extends Observable {
   /**
    * Sets the new value of the property
    * @param {boolean} value : The new value
-   * @returns {object} : The instance
+   * @returns {Model} : The instance
    */
   setIsLoaded(value) {
     this.isLoaded = Boolean(value);
@@ -131,7 +131,7 @@ export default class Model extends Observable {
   /**
    * Sets the new value of the property
    * @param {boolean} value : The new value
-   * @returns {object} : The instance
+   * @returns {Model} : The instance
    */
   setDirty(value) {
     this.isDirty = Boolean(value);
@@ -149,7 +149,7 @@ export default class Model extends Observable {
   /**
    * Sets the new value of the property
    * @param {boolean} value : The new value
-   * @returns {object} : The instance
+   * @returns {Model} : The instance
    */
   setIsNew(value) {
     this.isNew = Boolean(value);
@@ -167,7 +167,7 @@ export default class Model extends Observable {
   /**
    * Sets the new value of the property
    * @param {boolean} value : The new value
-   * @returns {object} : The instance
+   * @returns {Model} : The instance
    */
   setOutdated(value) {
     this.isOutdated = value;
@@ -176,8 +176,8 @@ export default class Model extends Observable {
 
   /**
    * Updates the properties of the instance
-   * @param {object} json : The data to update to the model
-   * @returns {object} : The instance
+   * @param {object} json : The data to update the instance
+   * @returns {Model} : The instance
    */
   setData(json) {
     Object.entries(json ?? {}).forEach(([key, value]) => {

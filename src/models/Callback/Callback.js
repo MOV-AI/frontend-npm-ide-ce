@@ -47,7 +47,7 @@ export default class Callback extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Callback} : The instance
    */
   setCode(value) {
     this.code = value;
@@ -65,7 +65,7 @@ export default class Callback extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Callback} : The instance
    */
   setMessage(value) {
     this.message = value;
@@ -83,7 +83,7 @@ export default class Callback extends Model {
   /**
    * Adds a python lib to the list of imports
    * @param {object} value : The pylib to add
-   * @returns {object} : The instance
+   * @returns {Callback} : The instance
    */
   addPythonLibs(value) {
     this.pyLibs = { ...this.pyLibs, ...value };
@@ -93,7 +93,7 @@ export default class Callback extends Model {
   /**
    * Deletes a python lib from the list of imports
    * @param {string} value : The id of the pyLib
-   * @returns {object} : The instance
+   * @returns {Callback} : The instance
    */
   deletePythonLib(value) {
     const { [value]: _, ...newPyLibs } = this.pyLibs;
@@ -117,6 +117,11 @@ export default class Callback extends Model {
     return Callback.EXTENSION;
   }
 
+  /**
+   * Updates the properties of the instance
+   * @param {object} json : The data to update the instance
+   * @returns {Callback} : The instance
+   */
   setData(json) {
     const { name, details, code, message, pyLibs } = json;
 

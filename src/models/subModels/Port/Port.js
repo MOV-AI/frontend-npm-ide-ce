@@ -51,7 +51,7 @@ class Port extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Port} : The instance
    */
   setDescription(value) {
     this.description = value;
@@ -69,7 +69,7 @@ class Port extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Port} : The instance
    */
   setTemplate(value) {
     this.template = value;
@@ -87,7 +87,7 @@ class Port extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Port} : The instance
    */
   setPackage(value) {
     this.msgPackage = value;
@@ -105,7 +105,7 @@ class Port extends Model {
   /**
    * Sets the new value of the property
    * @param {string} value : The new value
-   * @returns {object} : The instance
+   * @returns {Port} : The instance
    */
   setMessage(value) {
     this.message = value;
@@ -130,8 +130,8 @@ class Port extends Model {
 
   /**
    * Updates the properties of the instance
-   * @param {object} json : The data to update to the model
-   * @returns {object} : The instance
+   * @param {object} json : The data to update the instance
+   * @returns {Port} : The instance
    */
   setData(json) {
     const {
