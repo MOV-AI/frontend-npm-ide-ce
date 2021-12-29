@@ -9,60 +9,112 @@ export default class Callback extends Model {
     super({ schema, ...arguments[0] });
   }
 
-  // Extend Model properties and assign defaults
-  code = "";
-  message = "";
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Events                                        *
+   *                                                                                      */
+  //========================================================================================
+
   pyLibs = new Manager("pyLibs", PyLib, {
     onAny: (event, name, value) => this.propsUpdate(event, name, value)
   });
 
-  // Define observable properties
+  //========================================================================================
+  /*                                                                                      *
+   *                                   Model Properties                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  code = "";
+  message = "";
+
   observables = ["name", "details", "code", "message"];
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                     Data Handlers                                    *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Returns the code property
+   * @returns {string}
+   */
   getCode() {
     return this.code;
   }
 
+  /**
+   * Sets the new value of the property
+   * @param {string} value : The new value
+   * @returns {object} : The instance
+   */
   setCode(value) {
     this.code = value;
     return this;
   }
 
+  /**
+   * Returns the message property
+   * @returns {string}
+   */
   getMessage() {
     return this.message;
   }
 
+  /**
+   * Sets the new value of the property
+   * @param {string} value : The new value
+   * @returns {object} : The instance
+   */
   setMessage(value) {
     this.message = value;
     return this;
   }
 
+  /**
+   * Returns the pyLibs manager
+   * @returns {Manager}
+   */
   getPyLibs() {
     return this.pyLibs;
   }
 
+  /**
+   * Adds a python lib to the list of imports
+   * @param {object} value : The pylib to add
+   * @returns {object} : The instance
+   */
   addPythonLibs(value) {
     this.pyLibs = { ...this.pyLibs, ...value };
     return this;
   }
 
+  /**
+   * Deletes a python lib from the list of imports
+   * @param {string} value : The id of the pyLib
+   * @returns {object} : The instance
+   */
   deletePythonLib(value) {
     const { [value]: _, ...newPyLibs } = this.pyLibs;
     this.pyLibs = { ...newPyLibs };
     return this;
   }
 
+  /**
+   * Returns the scope property
+   * @returns {string}
+   */
   getScope() {
     return Callback.SCOPE;
   }
 
+  /**
+   * Returns the extension property
+   * @returns {string}
+   */
   getFileExtension() {
     return Callback.EXTENSION;
-  }
-
-  propsUpdate(event, prop, value) {
-    // force dispatch
-    this.dispatch(prop, value);
   }
 
   setData(json) {
@@ -75,6 +127,34 @@ export default class Callback extends Model {
     return this;
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Event Handlers                                    *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * @private
+   * Forces the events dispatcher
+   * @param {string} event : The name of the event
+   * @param {string} prop : The of the property updated
+   * @param {any} value : The new value of the property
+   */
+  propsUpdate(event, prop, value) {
+    // force dispatch
+    this.dispatch(prop, value);
+  }
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                      Serializers                                     *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Returns the instance properties serialized
+   * @returns {object}
+   */
   serialize() {
     return {
       ...super.serialize(),
@@ -84,6 +164,11 @@ export default class Callback extends Model {
     };
   }
 
+  /**
+   * Returns the instance properties serialized to
+   * the database format
+   * @returns {object}
+   */
   serializeToDB() {
     const { name, details, code, message } = this.serialize();
 
@@ -97,9 +182,9 @@ export default class Callback extends Model {
   }
 
   /**
-   * Serialize database data to model properties
+   * Returns properties serialized from the database format
    * @param {object} json : The data received from the database
-   * @returns {object} Model properties
+   * @returns {object}
    */
   static serializeOfDB(json) {
     const {

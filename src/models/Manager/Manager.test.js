@@ -1,13 +1,13 @@
 import Manager from "./Manager";
 import PyLib from "../Callback/PyLib/PyLib";
 
-test("smoke test", () => {
+test("Smoke test", () => {
   const obj = new Manager();
 
   expect(obj).toBeInstanceOf(Manager);
 });
 
-test("serialize OF db", () => {
+test("Serialize OF db", () => {
   const content = {
     Duration: {
       Module: "rospy",
@@ -37,7 +37,7 @@ test("serialize OF db", () => {
   expect(data).toMatchObject(expected);
 });
 
-test("serialize TO db", () => {
+test("Serialize TO db", () => {
   const content = {
     Duration: {
       Module: "rospy",

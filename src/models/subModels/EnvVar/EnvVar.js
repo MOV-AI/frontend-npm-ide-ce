@@ -7,40 +7,88 @@ class EnvVar extends Model {
     super({ schema, ...arguments[0] });
   }
 
-  // Model properties
+  //========================================================================================
+  /*                                                                                      *
+   *                                   Model Properties                                   *
+   *                                                                                      */
+  //========================================================================================
+
   name = "";
   value = "";
   description = "";
 
   observables = ["name", "value", "description"];
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                     Data Handlers                                    *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Returns the name property
+   * @returns {string}
+   */
   getName() {
     return this.name;
   }
 
+  /**
+   * Sets the new value of the property
+   * @param {string} value : The new value
+   * @returns {object} : The instance
+   */
   setName(value) {
     this.name = value;
     return this;
   }
 
+  /**
+   * Returns the value property
+   * @returns {string}
+   */
   getValue() {
     return this.value;
   }
 
+  /**
+   * Sets the new value of the property
+   * @param {string} value : The new value
+   * @returns {object} : The instance
+   */
   setValue(value) {
     this.value = value;
     return this;
   }
 
+  /**
+   * Returns the description property
+   * @returns {string}
+   */
   getDescription() {
     return this.description;
   }
 
+  /**
+   * Sets the new value of the property
+   * @param {string} value : The new value
+   * @returns {object} : The instance
+   */
   setDescription(value) {
     this.description = value;
     return this;
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                      Serializers                                     *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Returns the instance properties serialized
+   * @returns {object}
+   */
   serialize() {
     return {
       name: this.getName(),
@@ -49,6 +97,11 @@ class EnvVar extends Model {
     };
   }
 
+  /**
+   * Returns the instance properties serialized to
+   * the database format
+   * @returns {object}
+   */
   serializeToDB() {
     const { value, description } = this.serialize();
 
@@ -58,6 +111,11 @@ class EnvVar extends Model {
     };
   }
 
+  /**
+   * Returns properties serialized from the database format
+   * @param {object} json : The data received from the database
+   * @returns {object}
+   */
   static serializeOfDB(json) {
     const name = Object.keys(json)[0];
     const content = Object.values(json)[0];

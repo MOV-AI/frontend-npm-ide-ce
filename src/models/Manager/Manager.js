@@ -48,17 +48,17 @@ class Manager {
   /**
    * Returns an item based on a name
    * @param {string} name : The name of the item
-   * @returns {any} : The value of the item or undefined
+   * @returns {object} : The value of the item or undefined
    */
   getItem(name) {
     return this.data.get(name);
   }
 
   /**
-   * Creates a new item or throws error if already exists
+   * Creates a new item
    * Emits the CREATE event
    * @param {object} param0 : An object with the name of the item and the content
-   * @returns : The instance
+   * @returns {object} : The instance
    */
   setItem({ name, content }) {
     const obj = new this.model();
@@ -79,8 +79,8 @@ class Manager {
 
   /**
    * Updates an item
-   * @param {object} param0: An object with the name of the item and the content
-   * @returns : The instance
+   * @param {object} param0 : An object with the name of the item and the content
+   * @returns {object} : The instance
    */
   updateItem({ name, content }) {
     this.getItem(name)?.setData(content);
@@ -92,8 +92,8 @@ class Manager {
 
   /**
    * Deletes an item
-   * @param {string} key The name of the item
-   * @returns : True on success, false otherwise
+   * @param {string} key : The name of the item
+   * @returns {boolean} : True on success, false otherwise
    */
   deleteItem(name) {
     this.getItem(name)?.destroy();
@@ -108,7 +108,7 @@ class Manager {
   /**
    * Creates one or more items
    * @param {object} json : An object with the items to create
-   * @returns : The instance
+   * @returns {object} : The instance
    */
   setData(json) {
     Object.entries(json ?? {}).forEach(([name, content]) => {
@@ -173,7 +173,7 @@ class Manager {
 
   //========================================================================================
   /*                                                                                      *
-   *                                        Events                                        *
+   *                                    Events Handlers                                   *
    *                                                                                      */
   //========================================================================================
 

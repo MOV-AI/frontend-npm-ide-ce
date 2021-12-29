@@ -1,13 +1,13 @@
 import Callback from "./Callback";
 import PyLib from "./PyLib/PyLib";
 
-test("smoke test", () => {
+test("Smoke test", () => {
   const obj = new Callback();
 
   expect(obj).toBeInstanceOf(Callback);
 });
 
-test("set isDirty on setCode", () => {
+test("Set isDirty on setCode", () => {
   const obj = new Callback({ name: "test" }).setDirty(false);
 
   obj.setCode("varA: 1");
@@ -15,7 +15,7 @@ test("set isDirty on setCode", () => {
   expect(obj.getDirty()).toBe(true);
 });
 
-test("set isDirty on setMessage", () => {
+test("Set isDirty on setMessage", () => {
   const obj = new Callback({ name: "test" }).setDirty(false);
 
   obj.setMessage("movai_msgs/Any");
@@ -23,7 +23,7 @@ test("set isDirty on setMessage", () => {
   expect(obj.getDirty()).toBe(true);
 });
 
-test("create new document", () => {
+test("Create new document", () => {
   const obj = new Callback({ name: "test" });
 
   expect(obj.getIsNew()).toBe(true);
@@ -31,7 +31,7 @@ test("create new document", () => {
   expect(obj.getDirty()).toBe(true);
 });
 
-test("create document of JSON", () => {
+test("Create document of JSON", () => {
   const json = {
     workspace: "myworkspace",
     Label: "test",
@@ -59,7 +59,7 @@ test("create document of JSON", () => {
   expect(obj.getDirty()).toBe(false);
 });
 
-test("serialize to database", () => {
+test("Serialize to database", () => {
   const json = {
     workspace: "myworkspace",
     Label: "test",
@@ -86,7 +86,7 @@ test("serialize to database", () => {
   expect(obj.getDirty()).toBe(false);
 });
 
-test("verify serialize defaults to DB", () => {
+test("Verify serialize defaults to DB", () => {
   const json = {
     workspace: "myworkspace",
     Label: "test",
@@ -113,7 +113,7 @@ test("verify serialize defaults to DB", () => {
   expect(obj.getDirty()).toBe(false);
 });
 
-test("add single import", () => {
+test("Add single import", () => {
   const name = "math";
   const content = { module: "math", libClass: false };
 
@@ -124,7 +124,7 @@ test("add single import", () => {
   expect(obj.getPyLibs().getItem("math")).toBeInstanceOf(PyLib);
 });
 
-test("add imports", () => {
+test("Add imports", () => {
   const data = { math: { module: "math", libClass: false } };
 
   const obj = new Callback();
@@ -134,7 +134,7 @@ test("add imports", () => {
   expect(obj.getPyLibs().getItem("math")).toBeInstanceOf(PyLib);
 });
 
-test("delete import", () => {
+test("Delete import", () => {
   const data = { math: { module: "math", libClass: false } };
 
   const obj = new Callback();
@@ -147,7 +147,7 @@ test("delete import", () => {
   expect(obj.getPyLibs().getItem("math")).toBe(undefined);
 });
 
-test("update import", () => {
+test("Update import", () => {
   const data = { math: { module: "math", libClass: false } };
 
   const obj = new Callback();

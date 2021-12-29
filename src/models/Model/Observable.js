@@ -3,6 +3,11 @@ const symbols = {
   enabled: Symbol()
 };
 
+/**
+ * Provides observable capabilities
+ * Implements a proxy trap to execute callbacks when
+ * an observed property changes
+ */
 class Observable {
   constructor() {
     this[symbols.timer] = undefined;

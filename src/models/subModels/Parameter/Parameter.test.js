@@ -1,6 +1,6 @@
 import Parameter from "./Parameter";
 
-test("smoke test", () => {
+test("Smoke test", () => {
   const obj = new Parameter();
 
   expect(obj).toBeInstanceOf(Parameter);
@@ -9,7 +9,7 @@ test("smoke test", () => {
   expect(obj.getType()).toBe("any");
 });
 
-test("serialize to DB", () => {
+test("Serialize to DB", () => {
   const param = new Parameter();
 
   const data = { name: "param1", value: 1981, description: "best year" };
@@ -24,7 +24,7 @@ test("serialize to DB", () => {
   expect(param.serializeToDB()).toMatchObject(expected);
 });
 
-test("serialize OF db", () => {
+test("Serialize OF db", () => {
   const content = {
     param1: { Value: 1981, Description: "best year", Type: "boolean" }
   };

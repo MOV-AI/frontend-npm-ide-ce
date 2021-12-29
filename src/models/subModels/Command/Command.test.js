@@ -1,13 +1,13 @@
 import Command from "./Command";
 
-test("smoke test", () => {
+test("Smoke test", () => {
   const obj = new Command();
 
   expect(obj).toBeInstanceOf(Command);
   expect(obj.getValue()).toBe("");
 });
 
-test("serialize to DB", () => {
+test("Serialize to DB", () => {
   const cmd = new Command();
 
   const data = { name: "cmd1", value: "file.sh", description: "test cmd1" };
@@ -18,7 +18,7 @@ test("serialize to DB", () => {
   expect(cmd.serializeToDB()).toMatchObject(expected);
 });
 
-test("serialize OF db", () => {
+test("Serialize OF db", () => {
   const content = {
     cmd1: { Value: "file.sh", Description: "test cmd1" }
   };

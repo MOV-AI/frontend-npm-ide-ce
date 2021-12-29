@@ -7,13 +7,28 @@ class PortType extends Model {
     super({ schema, ...arguments[0] });
   }
 
-  // Model properties
+  //========================================================================================
+  /*                                                                                      *
+   *                                   Model Properties                                   *
+   *                                                                                      */
+  //========================================================================================
+
   message = "";
   callback = null;
   parameters = {};
 
   observables = ["name", "message", "callback", "parameters"];
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                     Data Handlers                                    *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Returns the message property
+   * @returns {string}
+   */
   getMessage() {
     return this.message;
   }
@@ -23,6 +38,10 @@ class PortType extends Model {
     return this;
   }
 
+  /**
+   * Returns the callback property
+   * @returns {string}
+   */
   getCallback() {
     return this.callback;
   }
@@ -32,20 +51,44 @@ class PortType extends Model {
     return this;
   }
 
+  /**
+   * Returns the parameters property
+   * @returns {object}
+   */
   getParameters() {
     return this.parameters;
   }
 
+  /**
+   * Sets the parameters value
+   * @param {object} value : The parameters value
+   * @returns {object} : The instance
+   */
   setParameters(value) {
     this.parameters = value;
     return this;
   }
 
+  /**
+   * Sets the value of a parameter
+   * @param {string} name : The name of the parameter
+   * @param {any} value : The new value of the parameter
+   */
   setParameter(name, value) {
     this.parameters[name] = value;
     this.dispatch("parameters", this.getParameters());
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                      Serializers                                     *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Returns the instance properties serialized
+   * @returns {object}
+   */
   serialize() {
     return {
       name: this.getName(),
@@ -55,6 +98,12 @@ class PortType extends Model {
     };
   }
 
+  /**
+   * Returns the instance properties serialized to
+   * the database format
+   * Override in the extended class
+   * @returns {object}
+   */
   serializeToDB() {
     const { message, callback, parameters } = this.serialize();
 
@@ -65,6 +114,12 @@ class PortType extends Model {
     };
   }
 
+  /**
+   * Returns properties serialized from the database format
+   * Override in the extended class
+   * @param {object} json : The data received from the database
+   * @returns {object}
+   */
   static serializeOfDB(json) {
     const name = Object.keys(json)[0];
     const content = Object.values(json)[0];
