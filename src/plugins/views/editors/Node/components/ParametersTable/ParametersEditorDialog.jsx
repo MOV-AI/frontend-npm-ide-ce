@@ -9,7 +9,8 @@ const ParameterEditorDialog = props => {
   const { alert } = props;
   // Hooks
   const [data, setData] = React.useState({});
-  const { getDataTypes, getLabel, getEditComponent, validate } = useDataTypes();
+  const { getDataTypes, getLabel, getEditComponent, getValidValue, validate } =
+    useDataTypes();
 
   //========================================================================================
   /*                                                                                      *
@@ -95,9 +96,19 @@ const ParameterEditorDialog = props => {
         <Select
           fullWidth
           value={data.type || "any"}
-          onChange={evt =>
-            setData(prevState => ({ ...prevState, type: evt?.target?.value }))
-          }
+          onChange={evt => {
+            const type = evt?.target?.value;
+
+            getValidValue(type, data.value).then(newValue => {
+              setData(prevState => {
+                return {
+                  ...prevState,
+                  type,
+                  value: newValue ?? prevState.value
+                };
+              });
+            });
+          }}
         >
           {getDataTypes().map(key => (
             <MenuItem key={key} value={key}>
@@ -107,7 +118,7 @@ const ParameterEditorDialog = props => {
         </Select>
       </FormControl>
     );
-  }, [data.type, getDataTypes, getLabel]);
+  }, [data, getDataTypes, getLabel, getValidValue]);
 
   /**
    * Render Value Editor Component
