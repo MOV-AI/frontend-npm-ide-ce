@@ -63,7 +63,12 @@ class BaseStore extends StorePluginManager {
         const obj = this.getDoc(name) || this.newDoc(name).setIsNew(false);
 
         const data = obj.constructor.serializeOfDB(file);
-        return obj.setData(data).setIsLoaded(true).setDirty(false);
+        return obj
+          .enableObservables(false)
+          .setData(data)
+          .setIsLoaded(true)
+          .setDirty(false)
+          .enableObservables(true);
       })
       .catch(error => {
         if (error.status === 404) {
@@ -149,7 +154,13 @@ class BaseStore extends StorePluginManager {
 
       // create only if the instance does not exist yet
       if (!this.getDoc(name)) {
-        this.newDoc(name).setIsNew(false).setIsLoaded(false).setDirty(false);
+        const doc = this.newDoc(name);
+        doc
+          .enableObservables(false)
+          .setIsNew(false)
+          .setIsLoaded(false)
+          .setDirty(false)
+          .enableObservables(true);
       }
     });
 

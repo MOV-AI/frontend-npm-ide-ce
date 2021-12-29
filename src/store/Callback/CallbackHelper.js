@@ -17,7 +17,7 @@ const cloudFunction = async functionName => {
     .then(response => {
       return response.success ? response.result : null;
     })
-    .catch(err => console.error("debug err", err));
+    .catch(err => console.warn("debug err", err));
 };
 
 /**

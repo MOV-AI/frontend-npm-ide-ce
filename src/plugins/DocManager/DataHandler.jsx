@@ -10,6 +10,7 @@ const MESSAGES = {
 const DataHandler = props => {
   const { children, call, scope, name, id, alert } = props;
   const [data, setData] = React.useState();
+  const [loading, setLoading] = React.useState(true);
   const modelRef = React.useRef();
   const subscriberRef = React.useRef();
 
@@ -49,6 +50,7 @@ const DataHandler = props => {
     call("docManager", "read", { scope, name }).then(model => {
       setData(model.serialize());
       modelRef.current = model;
+      setLoading(false);
       subscriberRef.current = model.subscribe((instance, key, value) => {
         setData(prevState => {
           return { ...prevState, [key]: value };
@@ -62,7 +64,7 @@ const DataHandler = props => {
   }, [call, scope, name]);
 
   return React.Children.map(children, el =>
-    React.cloneElement(el, { data, save, instance: modelRef })
+    React.cloneElement(el, { data, save, instance: modelRef, loading })
   );
 };
 

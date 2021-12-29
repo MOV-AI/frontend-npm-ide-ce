@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { DEFAULT_FUNCTION } from "../_shared/mocks";
 import Model from "../../../../models/Configuration/Configuration";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
@@ -26,8 +27,6 @@ const useStyles = makeStyles(theme => ({
     }
   }
 }));
-
-const DEFAULT_FUNCTION = name => console.log(`${name} not implemented`);
 
 const Configuration = (props, ref) => {
   const {

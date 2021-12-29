@@ -41,6 +41,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       on,
       call,
       addKeyBind,
+      removeKeyBind,
       save,
       instance,
       activateKeyBind,
@@ -107,7 +108,18 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       addKeyBind("ctrl+s", saveDocument);
       initRightMenu();
       on("tabs", `${id}-active`, activateEditor);
-    }, [activateEditor, addKeyBind, id, initRightMenu, on, saveDocument]);
+
+      // Remove key bind on component unmount
+      return () => removeKeyBind("ctrl+s");
+    }, [
+      activateEditor,
+      addKeyBind,
+      removeKeyBind,
+      id,
+      initRightMenu,
+      on,
+      saveDocument
+    ]);
 
     return (
       <div onFocus={activateEditor} style={{ height: "100%" }}>

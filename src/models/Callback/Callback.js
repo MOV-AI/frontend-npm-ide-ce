@@ -1,6 +1,7 @@
 import Model from "../Model/Model";
 import schema from "./schema";
-import PyLibManager from "./PyLib/PyLibManager";
+import Manager from "../Manager";
+import PyLib from "./PyLib";
 
 export default class Callback extends Model {
   constructor() {
@@ -11,8 +12,8 @@ export default class Callback extends Model {
   // Extend Model properties and assign defaults
   code = "";
   message = "";
-  pyLibs = new PyLibManager("pyLibs", {
-    onAny: (event, name, value) => this.pyLibUpdated(event, name, value)
+  pyLibs = new Manager("pyLibs", PyLib, {
+    onAny: (event, name, value) => this.propsUpdate(event, name, value)
   });
 
   // Define observable properties
@@ -59,7 +60,7 @@ export default class Callback extends Model {
     return Callback.EXTENSION;
   }
 
-  pyLibUpdated(event, prop, value) {
+  propsUpdate(event, prop, value) {
     // force dispatch
     this.dispatch(prop, value);
   }
@@ -120,7 +121,7 @@ export default class Callback extends Model {
       details,
       workspace,
       version,
-      pyLibs: PyLibManager.serializeOfDB(pyLibs)
+      pyLibs: Manager.serializeOfDB(pyLibs, PyLib)
     };
   }
 
