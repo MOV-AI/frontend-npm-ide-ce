@@ -4,6 +4,8 @@ class ObjectType extends DataType {
   // Object type properties definition
   key = "object";
   label = "Object";
+  default = "{}";
+
   editComponent = (props, mode = "row") => {
     const editor = {
       row: _props => this.stringEditComponent(_props, "{}"),

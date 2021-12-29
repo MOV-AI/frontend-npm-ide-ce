@@ -9,6 +9,8 @@ import _toString from "lodash/toString";
 class AbstractDataType {
   key = "";
   label = "";
+  default = "";
+
   editComponent = this.defaultStringEditor;
   // hooks
   _theme = {};

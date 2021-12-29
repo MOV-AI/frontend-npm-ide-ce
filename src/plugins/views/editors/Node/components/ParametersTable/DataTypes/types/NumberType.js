@@ -6,6 +6,8 @@ class NumberType extends DataType {
   // Number type properties definition
   key = "number";
   label = "Number";
+  default = "0";
+
   editComponent = props => {
     return (
       <TextField
