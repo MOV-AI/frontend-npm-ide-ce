@@ -1,5 +1,6 @@
-import React from "react";
+import React, { memo } from "react";
 import PropTypes from "prop-types";
+import _isEqual from "lodash/isEqual";
 import KeyValueTable from "../KeyValueTable/KeyValueTable";
 import ParameterEditorDialog from "./ParametersEditorDialog";
 import useDataTypes from "./DataTypes/hooks/useDataTypes";
@@ -64,4 +65,9 @@ ParametersTable.defaultProps = {
   editable: false
 };
 
-export default ParametersTable;
+//The function returns true when the compared props equal, preventing the component from re-rendering
+function arePropsEqual(prevProps, nextProps) {
+  return _isEqual(prevProps.data, nextProps.data);
+}
+
+export default memo(ParametersTable, arePropsEqual);

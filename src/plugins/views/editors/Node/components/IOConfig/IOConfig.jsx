@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, memo } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import { MTableToolbar, MTableEditRow } from "material-table";
@@ -6,6 +6,7 @@ import MaterialTable from "../../../_shared/MaterialTable/MaterialTable";
 import IOPorts from "./IOPorts/IOPorts";
 import CollapsibleHeader from "../_shared/CollapsibleHeader";
 import { Typography } from "@material-ui/core";
+import _isEqual from "lodash/isEqual";
 import { useTranslation, DEFAULT_FUNCTION } from "../../../_shared/mocks";
 import useIOConfigColumns from "./hooks/useIOConfigColumns";
 import useHelper from "./hooks/useHelper";
@@ -380,4 +381,9 @@ IOConfig.defaultProps = {
   ]
 };
 
-export default IOConfig;
+//The function returns true when the compared props equal, preventing the component from re-rendering
+function arePropsEqual(prevProps, nextProps) {
+  return _isEqual(prevProps.ioConfig, nextProps.ioConfig);
+}
+
+export default memo(IOConfig, arePropsEqual);
