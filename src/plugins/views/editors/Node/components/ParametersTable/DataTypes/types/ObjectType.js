@@ -8,7 +8,7 @@ class ObjectType extends DataType {
 
   editComponent = (props, mode = "row") => {
     const editor = {
-      row: _props => this.stringEditComponent(_props, "{}"),
+      row: _props => this.stringEditComponent(_props, this.default),
       dialog: this.codeEditComponent
     };
     return editor[mode](props);
