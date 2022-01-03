@@ -139,7 +139,8 @@ const IOConfig = props => {
    */
   const formatData = _data => {
     if (Array.isArray(_data)) return _data;
-    return Object.keys(_data).map(key => ({
+    return Object.keys(_data).map((key, i) => ({
+      id: `${i}_${_data[key].name}`,
       name: _data[key].name,
       ..._data[key]
     }));
@@ -293,6 +294,34 @@ const IOConfig = props => {
     );
   };
 
+  /**
+   * Render Details Panel
+   * @param {*} panelData
+   * @returns
+   */
+  const renderDetailPanel = useCallback(
+    panelData => {
+      return (
+        <IOPorts
+          classNames="child-row"
+          editable={editable}
+          rowData={panelData.rowData}
+          handleIOPortsInputs={handleIOPortsInputs}
+          handleOpenCallback={handleOpenCallback}
+          handleNewCallback={handleNewCallback}
+          handleOpenSelectScopeModal={handleOpenSelectScopeModal}
+        />
+      );
+    },
+    [
+      editable,
+      handleIOPortsInputs,
+      handleOpenCallback,
+      handleNewCallback,
+      handleOpenSelectScopeModal
+    ]
+  );
+
   //========================================================================================
   /*                                                                                      *
    *                                        Render                                        *
@@ -310,19 +339,7 @@ const IOConfig = props => {
           ref={tableRef}
           columns={getColumns()}
           data={formatData(ioConfig)}
-          detailPanel={panelData => {
-            return (
-              <IOPorts
-                classNames="child-row"
-                editable={editable}
-                rowData={panelData.rowData}
-                handleIOPortsInputs={handleIOPortsInputs}
-                handleOpenCallback={handleOpenCallback}
-                handleNewCallback={handleNewCallback}
-                handleOpenSelectScopeModal={handleOpenSelectScopeModal}
-              />
-            );
-          }}
+          detailPanel={renderDetailPanel}
           editable={{
             isEditable: () => editable,
             isDeletable: () => editable,

@@ -47,7 +47,7 @@ const CollapsibleHeader = props => {
 };
 
 CollapsibleHeader.propTypes = {
-  title: PropTypes.element,
+  title: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
   defaultExpanded: PropTypes.bool
 };
 
