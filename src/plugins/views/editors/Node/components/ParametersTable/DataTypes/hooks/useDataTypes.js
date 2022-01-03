@@ -51,9 +51,7 @@ const useDataTypes = () => {
   const getValidValue = async (type, value) => {
     const typeInst = dataTypeManager.getType(type);
     const res = await typeInst.validate(value);
-    const isValid = res.success;
-
-    return isValid ? value : typeInst.default;
+    return res.success ? value : typeInst.default;
   };
 
   /**
