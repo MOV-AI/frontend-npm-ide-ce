@@ -34,13 +34,13 @@ const KeyValueTable = props => {
    */
   const formatData = _data => {
     if (Array.isArray(_data)) return _data;
-    return Object.keys(_data).map((key, i) => {
+    Object.values(_data).map((item, i) => {
       return {
-        id: `${i}_${_data[key].name}`,
-        name: _data[key].name,
-        value: _data[key].value,
-        type: _data[key].type,
-        description: _data[key].description
+        id: `${i}_${item.name}`,
+        name: item.name,
+        value: item.value,
+        type: item.type,
+        description: item.description
       };
     });
   };
