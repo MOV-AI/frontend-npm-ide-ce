@@ -34,7 +34,7 @@ const KeyValueTable = props => {
    */
   const formatData = _data => {
     if (Array.isArray(_data)) return _data;
-    Object.values(_data).map((item, i) => {
+    return Object.values(_data).map((item, i) => {
       return {
         id: `${i}_${item.name}`,
         name: item.name,
