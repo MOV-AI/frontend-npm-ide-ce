@@ -78,7 +78,7 @@ class Store extends BaseStore {
     const doc = this.getDoc(name);
 
     // rename the document
-    if (newName) doc.setName(newName);
+    if (newName) this.renameDoc(doc, newName);
 
     //get the document data
     const data = doc.serializeToDB();
@@ -100,7 +100,7 @@ class Store extends BaseStore {
       }
     };
 
-    return saveMethodByIsNew[doc.isNew](data).then(res => {
+    return saveMethodByIsNew[doc.getIsNew()](data).then(res => {
       if (res.success) {
         doc.setIsNew(false).setDirty(false);
         this.observer.onDocumentDirty(this.name, doc, doc.getDirty());
