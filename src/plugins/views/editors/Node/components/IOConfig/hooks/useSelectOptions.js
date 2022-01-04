@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+
 const useSelectOptions = data => {
   const { scopeSystemPortsData, scopePorts } = data;
 
@@ -47,7 +49,7 @@ const useSelectOptions = data => {
   /**
    * Receive an object of Templates/Ports and format to render
    */
-  const getGroupOptions = () => {
+  const getGroupOptions = useCallback(() => {
     const groupedObj = [];
     let groupIndex = -1;
     try {
@@ -84,13 +86,13 @@ const useSelectOptions = data => {
       console.warn("debug : Error getting Transport/Protocol Options");
     }
     return groupedObj;
-  };
+  }, [scopePorts]);
 
   /**
    * Dependencies object and the selected template.
    * @returns {array} List of Packages
    */
-  const getPackageOptions = rowData => {
+  const getPackageOptions = useCallback(rowData => {
     if (
       rowData === undefined ||
       rowData.template === undefined ||
@@ -119,13 +121,13 @@ const useSelectOptions = data => {
       console.warn("debug : Error getting Package Options");
       return [];
     }
-  };
+  }, [scopePorts, scopeSystemPortsData]);
 
   /**
    * Get list of messages based in dependencies object and the selected protocol and package.
    * @returns {array} List of Messages
    */
-  const getMessageOptions = rowData => {
+  const getMessageOptions = useCallback(rowData => {
     if (
       rowData === undefined ||
       rowData.template === undefined ||
@@ -156,7 +158,7 @@ const useSelectOptions = data => {
       console.warn("debug : Error in getting Message Options");
       return [];
     }
-  };
+  }, [scopePorts, scopeSystemPortsData]);
 
   return { getGroupOptions, getPackageOptions, getMessageOptions };
 };

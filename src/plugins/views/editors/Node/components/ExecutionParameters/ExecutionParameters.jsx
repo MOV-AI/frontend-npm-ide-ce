@@ -204,7 +204,7 @@ const ExecutionParameters = props => {
         label={t("Path")}
         disabled={!editable}
         className={classes.textField}
-        value={path}
+        defaultValue={path}
         onChange={evt => onChangePath(evt.target.value)}
         margin="normal"
         variant="outlined"
@@ -235,7 +235,20 @@ ExecutionParameters.defaultProps = {
 
 //The function returns true when the compared props equal, preventing the component from re-rendering
 function arePropsEqual(prevProps, nextProps) {
-  return _isEqual(prevProps, nextProps);
+  // filter out functions
+  const {
+    onChangeExecutionParams: a,
+    onChangePath: b,
+    ...filtPrevProps
+  } = prevProps;
+
+  const {
+    onChangeExecutionParams: aa,
+    onChangePath: bb,
+    ...filtNextProps
+  } = nextProps;
+
+  return _isEqual(filtPrevProps, filtNextProps);
 }
 
 export default memo(ExecutionParameters, arePropsEqual);

@@ -4,6 +4,8 @@ class StringType extends DataType {
   // String type properties definition
   key = "string";
   label = "String";
+  default = '""';
+
   editComponent = (props, mode = "row") => {
     // Define editor by mode
     const editorByMode = {

@@ -1,15 +1,16 @@
-import React from "react";
-import KeyValueEditorDialog from "../KeyValueTable/KeyValueEditorDialog";
-import useDataTypes from "./DataTypes/hooks/useDataTypes";
+import React, { useCallback } from "react";
 import { MenuItem, Select, FormControl, InputLabel } from "@material-ui/core";
 import { withTheme } from "../../../../../../decorators/withTheme";
 import withAlerts from "../../../../../../decorators/withAlerts";
+import KeyValueEditorDialog from "../KeyValueTable/KeyValueEditorDialog";
+import useDataTypes from "./DataTypes/hooks/useDataTypes";
 
 const ParameterEditorDialog = props => {
   const { alert } = props;
   // Hooks
   const [data, setData] = React.useState({});
-  const { getDataTypes, getLabel, getEditComponent, validate } = useDataTypes();
+  const { getDataTypes, getLabel, getEditComponent, getValidValue, validate } =
+    useDataTypes();
 
   //========================================================================================
   /*                                                                                      *
@@ -55,7 +56,6 @@ const ParameterEditorDialog = props => {
     };
     return validate(dataToValidate)
       .then(res => {
-        console.log("debug validate res", dataToValidate, res);
         if (!res.success)
           throw new Error(res.error || "Data validation failed");
         // Prepare data to submit
@@ -67,6 +67,33 @@ const ParameterEditorDialog = props => {
         return err;
       });
   };
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                   Component Handlers                                 *
+   *                                                                                      */
+  //========================================================================================
+  /**
+   * Handle Type Select onChange Event
+   * @param {*} evt
+   * @returns
+   */
+  const handleTypeChange = useCallback(
+    evt => {
+      const type = evt?.target?.value;
+
+      getValidValue(type, data.value).then(newValue => {
+        setData(prevState => {
+          return {
+            ...prevState,
+            type,
+            value: newValue ?? prevState.value
+          };
+        });
+      });
+    },
+    [data, getValidValue]
+  );
 
   //========================================================================================
   /*                                                                                      *
@@ -88,16 +115,14 @@ const ParameterEditorDialog = props => {
    * Render Data Type Selector
    * @returns {ReactComponent} Form control with data type selector
    */
-  const renderTypeSelector = React.useCallback(() => {
+  const renderTypeSelector = useCallback(() => {
     return (
       <FormControl style={{ marginTop: 15 }}>
         <InputLabel>Type *</InputLabel>
         <Select
           fullWidth
           value={data.type || "any"}
-          onChange={evt =>
-            setData(prevState => ({ ...prevState, type: evt?.target?.value }))
-          }
+          onChange={handleTypeChange}
         >
           {getDataTypes().map(key => (
             <MenuItem key={key} value={key}>
@@ -107,12 +132,12 @@ const ParameterEditorDialog = props => {
         </Select>
       </FormControl>
     );
-  }, [data.type, getDataTypes, getLabel]);
+  }, [data, getDataTypes, getLabel, handleTypeChange]);
 
   /**
    * Render Value Editor Component
    */
-  const renderValueEditor = React.useCallback(() => {
+  const renderValueEditor = useCallback(() => {
     const editComponent = getEditComponent(data.type);
     if (!editComponent) return <></>;
     return getEditComponent(data.type)(
