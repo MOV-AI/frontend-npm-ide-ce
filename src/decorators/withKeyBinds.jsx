@@ -1,6 +1,10 @@
 import React from "react";
 import hotkeys from "hotkeys-js";
 
+hotkeys.filter = function (event) {
+  return true;
+};
+
 hotkeys("ctrl+s", event => {
   event.preventDefault();
 });
