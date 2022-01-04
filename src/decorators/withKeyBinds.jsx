@@ -1,6 +1,14 @@
 import React from "react";
 import hotkeys from "hotkeys-js";
 
+/**
+ * By default hotkeys are not enabled for INPUT SELECT TEXTAREA elements.
+ * Hotkeys.filter to return to the true shortcut keys set to play a role, false shortcut keys set up failure.
+ */
+hotkeys.filter = function (event) {
+  return true;
+};
+
 hotkeys("ctrl+s", event => {
   event.preventDefault();
 });
