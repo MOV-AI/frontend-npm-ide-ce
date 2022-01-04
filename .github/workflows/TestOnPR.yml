@@ -1,3 +1,4 @@
+
 name: "CI - On main/dev/release branches"
 on:
   pull_request:
@@ -8,90 +9,20 @@ on:
     paths-ignore:
       - 'package.json'
       - 'package-lock.json'
-      - 'CHANGELOG.md' 
+
 jobs:
-  Test-Frontend-Component:
-    runs-on: ubuntu-20.04
-    container:
-      image: registry.cloud.mov.ai/devops/npm-buildserver:latest
-      credentials:
-        username: ${{secrets.PORTUS_APP_USER}} 
-        password: ${{secrets.PORTUS_APP_TOKEN}}
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-    steps:
-    - name: Checkout    
-      uses: actions/checkout@v2
-      with:
-        # Disabling shallow clone is recommended for improving relevancy of reporting
-        fetch-depth: 0
-
-    - name: Setup Github as proxy Registry 
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16.x'
-        registry-url: 'https://npm.pkg.github.com/mov-ai'
-
-    - name: Find Package details
-      id: vars
-      run: |
-        PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]')
-        PACKAGE_NAME=$(cat package.json | grep name |head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]')
-        
-        echo ::set-output name=npm_pkg_name::$PACKAGE_NAME
-        echo ::set-output name=npm_pkg_version::$PACKAGE_VERSION
-    
-    - name: Bump package.json metadata Version
-      uses: deef0000dragon1/json-edit-action/@v1
-      env:
-        KEY: movai.Version
-        VALUE: ${{steps.vars.outputs.npm_pkg_version}}
-        FILE: package.json
-
-    - name: Install dependencies
-      run: npm ci --loglevel verbose
-
-    - name: Build
-      run: npm run build
-
-    - name: Check NPM log on failure
-      if: ${{ failure() }}
-      run: cat /github/home/.npm/_logs/*.log
-
-    - name: Bump manifest.json metadata Version
-      uses: deef0000dragon1/json-edit-action/@v1
-      env:
-        KEY: version
-        VALUE: ${{steps.vars.outputs.npm_pkg_version}}
-        FILE: build/manifest.json
-
-    - name: Quality Gate
-      uses: SonarSource/sonarqube-scan-action@v1.0.0
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: https://sonarqube.aws.cloud.mov.ai
-      with:
-        projectBaseDir: ${{ env.PROJECT_SRC_DIR }}
-        args: >
-          -Dsonar.organization=MOV-AI
-          -Dsonar.projectKey=${{ github.event.repository.name }}
-          -Dsonar.verbose=true
-          -Dsonar.sources=.
-          -Dsonar.scm.provider=git
-          -Dsonar.qualitygate.wait=true
-          -Dsonar.qualitygate.timeout=300
-
-    - name: Link to SonarQube Dashboard
-      shell: bash
-      run: |
-        echo "Please check report here: https://sonarqube.aws.cloud.mov.ai/dashboard?id=${{ github.event.repository.name }}"
-      id: sonar_links
-     
-    - name: Run tests
-      run: npm run test
-
-    - name: Pack debian
-      run: |
-        dch -v ${{ steps.vars.outputs.npm_pkg_version }} -D "UNRELEASED" "bump version"
-        dpkg-buildpackage
+  CI:
+    uses: MOV-AI/.github/.github/workflows/frontend-workflow.yml@v1
+    with:
+      deploy: 'false'
+      run_tests: 'false'
+    secrets:
+      auto_commit_user: ${{ secrets.RAISE_BOT_COMMIT_USER }}
+      auto_commit_mail: ${{ secrets.RAISE_BOT_COMMIT_MAIL }}
+      registry_user: ${{ secrets.PORTUS_APP_USER }}
+      registry_password: ${{ secrets.PORTUS_APP_TOKEN }}
+      nexus_publisher_user: ${{ secrets.NEXUS_PUBLISHER_USR }}
+      nexus_publisher_password: ${{ secrets.NEXUS_PUBLISHER_PWD }}
+      gh_token: ${{ secrets.GITHUB_TOKEN }}
+      sonar_token: ${{ secrets.SONAR_TOKEN }}
+      npm_token: ${{ secrets.NPM_TOKEN }}
