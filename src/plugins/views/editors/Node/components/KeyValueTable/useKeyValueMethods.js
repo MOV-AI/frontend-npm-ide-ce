@@ -99,6 +99,7 @@ const useKeyValueMethods = () => {
         render: renderValue,
         width: "45%",
         cellStyle: {
+          maxWidth: 200,
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
           overflow: "hidden"
