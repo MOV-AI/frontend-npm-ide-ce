@@ -28,9 +28,30 @@ const useStyles = makeStyles(theme => {
 
 const Parameters = props => {
   // Props
-  const { param, paramValue, direction, ioPort, editable } = props;
+  const {
+    param,
+    paramValue,
+    direction,
+    ioPort,
+    editable,
+    handleIOPortsInputs,
+    rowData: { name: rowDataName }
+  } = props;
   // Hooks
   const classes = useStyles();
+
+  const handleOnChange = React.useCallback(
+    evt => {
+      handleIOPortsInputs(
+        evt.target.value,
+        rowDataName,
+        direction,
+        ioPort,
+        param
+      );
+    },
+    [rowDataName, direction, ioPort, param, handleIOPortsInputs]
+  );
 
   return (
     <Grid className={classes.gridContainer}>
@@ -44,15 +65,7 @@ const Parameters = props => {
           defaultValue={paramValue}
           type={"text"}
           className={classes.input}
-          onChange={evt =>
-            props.handleIOPortsInputs(
-              evt.target.value,
-              props.rowData.name,
-              direction,
-              ioPort,
-              param
-            )
-          }
+          onChange={handleOnChange}
         />
       </Grid>
     </Grid>

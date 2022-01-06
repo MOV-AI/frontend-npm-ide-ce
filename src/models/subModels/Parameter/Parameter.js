@@ -8,21 +8,11 @@ class Parameter extends Model {
   }
 
   // Model properties
-  name = "";
   value = "";
   type = Parameter.defaults.type;
   description = "";
 
   observables = ["name", "value", "type", "description"];
-
-  getName() {
-    return this.name;
-  }
-
-  setName(value) {
-    this.name = value;
-    return this;
-  }
 
   getValue() {
     return this.value;
@@ -73,9 +63,10 @@ class Parameter extends Model {
   static serializeOfDB(json) {
     const name = Object.keys(json)[0];
     const content = Object.values(json)[0];
-    const { Value: value, Type: type, Description: description } = content;
+    const type = content.Type ?? Parameter.defaults.type;
+    const { Value: value, Description: description } = content;
 
-    return { name, value, type: type ?? Parameter.defaults.type, description };
+    return { name, value, type, description };
   }
 }
 Parameter.defaults = {

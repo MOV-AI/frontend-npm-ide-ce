@@ -87,6 +87,7 @@ const useKeyValueMethods = () => {
         title: t("Name"),
         field: "name",
         width: "45%",
+        defaultSort: "asc",
         cellStyle: {
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
