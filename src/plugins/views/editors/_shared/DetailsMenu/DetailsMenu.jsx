@@ -1,5 +1,11 @@
 import React from "react";
-import { Divider, List, ListItem, ListItemText } from "@material-ui/core";
+import {
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  Typography
+} from "@material-ui/core";
 
 const DetailsMenu = ({ name, details }) => {
   return (
@@ -13,15 +19,18 @@ const DetailsMenu = ({ name, details }) => {
         component="nav"
       >
         <ListItem>
-          <ListItemText primary={`Name: ${name}`} />
+          <ListItemText primary={`Name:`} />
+          <Typography>{name}</Typography>
         </ListItem>
         <Divider />
         <ListItem divider>
-          <ListItemText primary={`Last Updated: ${details.date}`} />
+          <ListItemText primary={`Last Updated:`} />
+          <Typography>{details.date}</Typography>
         </ListItem>
         <Divider />
         <ListItem divider>
-          <ListItemText primary={`User: ${details.user}`} />
+          <ListItemText primary={`User:`} />
+          <Typography>{details.user}</Typography>
         </ListItem>
       </List>
     </div>

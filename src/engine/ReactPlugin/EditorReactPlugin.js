@@ -2,6 +2,7 @@ import React from "react";
 import withAlerts from "../../decorators/withAlerts";
 import withKeyBinds from "../../decorators/withKeyBinds";
 import withMenuHandler from "../../decorators/withMenuHandler";
+import withLoader from "../../decorators/withLoader";
 import { withDataHandler } from "../../plugins/DocManager/DataHandler";
 import { ViewPlugin } from "./ViewReactPlugin";
 
@@ -40,6 +41,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       id,
       on,
       call,
+      scope,
       addKeyBind,
       removeKeyBind,
       save,
@@ -122,7 +124,11 @@ export function withEditorPlugin(ReactComponent, methods = []) {
     ]);
 
     return (
-      <div onFocus={activateEditor} style={{ height: "100%" }}>
+      <div
+        onFocus={activateEditor}
+        style={{ height: "100%" }}
+        className={`container-${scope}`}
+      >
         <RefComponent
           {...props}
           activateEditor={activateEditor}
@@ -137,6 +143,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
   const DecoratedEditorComponent = composeDecorators(EditorComponent, [
     withMenuHandler,
     withKeyBinds,
+    withLoader,
     withDataHandler,
     withAlerts
   ]);

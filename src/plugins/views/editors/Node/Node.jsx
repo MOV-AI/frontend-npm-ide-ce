@@ -7,7 +7,6 @@ import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import InfoIcon from "@material-ui/icons/Info";
 import Menu from "./Menu";
-import Loader from "../_shared/Loader/Loader";
 import Description from "./components/Description/Description";
 import ExecutionParameters from "./components/ExecutionParameters/ExecutionParameters";
 import ParametersTable from "./components/ParametersTable/ParametersTable";
@@ -31,7 +30,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Node = (props, ref) => {
-  const { id, name, call, alert, instance, loading, editable = true } = props;
+  const { id, name, call, alert, instance, editable = true } = props;
 
   // Hooks
   const classes = useStyles();
@@ -74,7 +73,7 @@ const Node = (props, ref) => {
   //========================================================================================
 
   const renderRightMenu = React.useCallback(() => {
-    const details = data.details ?? {};
+    const details = data?.details ?? {};
     const menuName = `${id}-detail-menu`;
     // add bookmark
     call("rightDrawer", "setBookmark", {
@@ -84,7 +83,7 @@ const Node = (props, ref) => {
         view: <Menu id={id} name={name} details={details}></Menu>
       }
     });
-  }, [call, id, name, data.details]);
+  }, [call, id, name, data?.details]);
 
   usePluginMethods(ref, {
     renderRightMenu
@@ -113,10 +112,9 @@ const Node = (props, ref) => {
       "dialog",
       "customDialog",
       {
-        onSubmit: (...args) => updateKeyValue(...args, isNew),
+        onSubmit: (...args) => updateKeyValue(...args, obj, isNew),
         renderValueEditor: renderValueEditor,
         title: DIALOG_TITLE[varName],
-        disableName: !isNew,
         data: obj,
         varName,
         isNew,
@@ -272,9 +270,15 @@ const Node = (props, ref) => {
       else if (!value.msgPackage) throw new Error("No Package chosen");
       else if (!value.message) throw new Error("No Message chosen");
 
-      // Proceed with saving
-      const dataToSave = { [value.name]: value };
-      if (instance.current) instance.current.setPort(dataToSave);
+      if (previousData) {
+        // Update port
+        if (instance.current)
+          instance.current.updatePort(previousData.name, value);
+      } else {
+        // Proceed with saving
+        const dataToSave = { [value.name]: value };
+        if (instance.current) instance.current.setPort(dataToSave);
+      }
       resolve();
     } catch (err) {
       // Show alert
@@ -309,17 +313,24 @@ const Node = (props, ref) => {
     );
   };
 
-  const updateKeyValue = (varName, keyValueData, isNew) => {
+  const updateKeyValue = (varName, newData, oldData, isNew) => {
     try {
-      const keyName = keyValueData.name;
-      const dataToSave = { [keyName]: keyValueData };
+      const keyName = newData.name;
+      const dataToSave = { [keyName]: newData };
       const previousData = !isNew && data[varName]?.[keyName];
       // Validate port name
       const validation = validateName(keyName, varName, previousData);
       if (!validation.result) {
         throw new Error(validation.error);
       }
-      if (instance.current) instance.current.setKeyValue(varName, dataToSave);
+      if (isNew) {
+        // update key value
+        if (instance.current) instance.current.setKeyValue(varName, dataToSave);
+      } else {
+        // add key value
+        if (instance.current)
+          instance.current.updateKeyValueItem(varName, oldData.name, newData);
+      }
     } catch (err) {
       if (err.message) alert({ message: err.message, severity: "error" });
     }
@@ -339,68 +350,59 @@ const Node = (props, ref) => {
    *                                                                                      */
   //========================================================================================
 
-  const renderNodeEditor = () => {
-    if (loading) return <Loader />;
-    return (
-      <Typography component="div" className={classes.container}>
-        <Description
-          onChangeDescription={updateDescription}
-          editable={editable}
-          nodeType={data.type}
-          value={data.description}
-        ></Description>
-        <IOConfig
-          {...props}
-          editable={editable}
-          ioConfig={data.ports}
-          onIOConfigRowSet={setPort}
-          onIOConfigRowDelete={deletePort}
-          handleIOPortsInputs={updateIOPortInputs}
-          handleOpenSelectScopeModal={handleOpenSelectScopeModal}
-          handleOpenCallback={handleOpenCallback}
-          handleNewCallback={handleNewCallback}
-        />
-        <ExecutionParameters
-          path={data.path}
-          remappable={data.remappable}
-          persistent={data.persistent}
-          launch={data.launch}
-          editable={editable}
-          onChangePath={updatePath}
-          onChangeExecutionParams={updateExecutionParams}
-        />
-        <ParametersTable
-          editable={editable}
-          data={data.parameters}
-          defaultColumns={defaultColumns}
-          openEditDialog={handleOpenEditDialog}
-          onRowDelete={deleteKeyValue}
-        ></ParametersTable>
-        <KeyValueTable
-          title={t("Environment Variables")}
-          editable={editable}
-          data={data.envVars}
-          columns={defaultColumns}
-          openEditDialog={handleOpenEditDialog}
-          onRowDelete={deleteKeyValue}
-          varName="envVars"
-        ></KeyValueTable>
-        <KeyValueTable
-          title={t("Command Line")}
-          editable={editable}
-          data={data.commands}
-          columns={defaultColumns}
-          openEditDialog={handleOpenEditDialog}
-          onRowDelete={deleteKeyValue}
-          varName="commands"
-        ></KeyValueTable>
-      </Typography>
-    );
-  };
-
   return (
-    <Typography component="div" className={classes.root}>
-      {renderNodeEditor()}
+    <Typography component="div" className={classes.container}>
+      <Description
+        onChangeDescription={updateDescription}
+        editable={editable}
+        nodeType={data.type}
+        value={data.description}
+      ></Description>
+      <IOConfig
+        {...props}
+        editable={editable}
+        ioConfig={data.ports}
+        onIOConfigRowSet={setPort}
+        onIOConfigRowDelete={deletePort}
+        handleIOPortsInputs={updateIOPortInputs}
+        handleOpenSelectScopeModal={handleOpenSelectScopeModal}
+        handleOpenCallback={handleOpenCallback}
+        handleNewCallback={handleNewCallback}
+      />
+      <ExecutionParameters
+        path={data.path}
+        remappable={data.remappable}
+        persistent={data.persistent}
+        launch={data.launch}
+        editable={editable}
+        onChangePath={updatePath}
+        onChangeExecutionParams={updateExecutionParams}
+      />
+      <ParametersTable
+        editable={editable}
+        data={data.parameters}
+        defaultColumns={defaultColumns}
+        openEditDialog={handleOpenEditDialog}
+        onRowDelete={deleteKeyValue}
+      ></ParametersTable>
+      <KeyValueTable
+        title={t("Environment Variables")}
+        editable={editable}
+        data={data.envVars}
+        columns={defaultColumns}
+        openEditDialog={handleOpenEditDialog}
+        onRowDelete={deleteKeyValue}
+        varName="envVars"
+      ></KeyValueTable>
+      <KeyValueTable
+        title={t("Command Line")}
+        editable={editable}
+        data={data.commands}
+        columns={defaultColumns}
+        openEditDialog={handleOpenEditDialog}
+        onRowDelete={deleteKeyValue}
+        varName="commands"
+      ></KeyValueTable>
     </Typography>
   );
 };

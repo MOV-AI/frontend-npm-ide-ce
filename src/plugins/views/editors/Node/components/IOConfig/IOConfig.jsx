@@ -126,9 +126,7 @@ const IOConfig = props => {
    * Update callback options for each row
    */
   const updateCallbackOptions = React.useCallback(
-    (portData, callbacksAvailable) => {
-      console.log("debug  updateCallbackOptions", portData, callbacksAvailable);
-    },
+    (portData, callbacksAvailable) => {},
     []
   );
 
@@ -139,11 +137,13 @@ const IOConfig = props => {
    */
   const formatData = _data => {
     if (Array.isArray(_data)) return _data;
-    return Object.keys(_data).map((key, i) => ({
-      id: `${i}_${_data[key].name}`,
-      name: _data[key].name,
-      ..._data[key]
-    }));
+    return Object.entries(_data).map(([key, item]) => {
+      return {
+        ...item,
+        id: key, // Just to have an id on the rows (to prevent error thrown)
+        name: item.name
+      };
+    });
   };
 
   /**
