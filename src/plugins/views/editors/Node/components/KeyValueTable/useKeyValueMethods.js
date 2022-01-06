@@ -124,6 +124,7 @@ const useKeyValueMethods = () => {
             if (!isNew) editor.focus();
           }}
           language="python"
+          disableMinimap={true}
           theme={theme.codeEditor.theme}
           options={{ readOnly: disabled }}
           onChange={newValue => onChange(newValue)}
