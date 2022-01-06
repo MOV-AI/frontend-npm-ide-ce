@@ -120,6 +120,16 @@ class Node extends Model {
     return this;
   }
 
+  updateKeyValueItem(varName, oldName, newData) {
+    const name = newData.name;
+    if(oldName !== name){
+      this[varName].renameItem({ oldName, name }, true);
+    }
+    
+    this[varName].updateItem({ name, content: newData });
+    return this;
+  }
+
   deleteKeyValue(varName, key) {
     this[varName].deleteItem(key);
     return this;
@@ -139,6 +149,21 @@ class Node extends Model {
 
   setPort(value) {
     this.ports.setData(value);
+    return this;
+  }
+
+  updatePort(oldName, newData) {
+    const name = newData.name;
+    if(oldName !== name){
+      this.ports.renameItem({ oldName, name }, true);
+    }
+
+    this.ports.updateItem({ name, content: newData });
+    return this;
+  }
+
+  renamePort(value) {
+    this.ports.renameItem(value);
     return this;
   }
 

@@ -91,6 +91,24 @@ class Manager {
   }
 
   /**
+   * Renames an item 
+   * @param {object} param0: An object with the old name of the item and the new name for the item
+   * @param {boolean} preventEmit: A boolean to prevent the second EVENTS.UPDATE emission
+   * @returns : The instance
+   */
+  renameItem({ oldName, name }, preventEmit) {
+    const oldItem = this.getItem(oldName);
+    if(oldItem){
+      oldItem.setName(name);
+      this.data.delete(oldName);
+      this.data.set(name, oldItem);
+      !preventEmit && this.emit(EVENTS.UPDATE);
+    }
+
+    return this;
+  }
+
+  /**
    * Deletes an item
    * @param {string} key The name of the item
    * @returns : True on success, false otherwise

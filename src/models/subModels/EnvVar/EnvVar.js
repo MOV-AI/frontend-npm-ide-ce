@@ -8,20 +8,10 @@ class EnvVar extends Model {
   }
 
   // Model properties
-  name = "";
   value = "";
   description = "";
 
   observables = ["name", "value", "description"];
-
-  getName() {
-    return this.name;
-  }
-
-  setName(value) {
-    this.name = value;
-    return this;
-  }
 
   getValue() {
     return this.value;

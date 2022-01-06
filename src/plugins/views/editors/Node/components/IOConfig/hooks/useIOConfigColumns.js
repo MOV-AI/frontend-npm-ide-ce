@@ -258,6 +258,7 @@ const useIOConfigColumns = data => {
       {
         title: t("Name"),
         field: "name",
+        defaultSort: "asc",
         editComponent: getNameEditComponent
       },
       {

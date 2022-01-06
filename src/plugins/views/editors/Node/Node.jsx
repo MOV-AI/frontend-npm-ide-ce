@@ -117,10 +117,9 @@ const Node = (props, ref) => {
       "dialog",
       "customDialog",
       {
-        onSubmit: (...args) => updateKeyValue(...args, isNew),
+        onSubmit: (...args) => updateKeyValue(...args, obj, isNew),
         renderValueEditor: renderValueEditor,
         title: DIALOG_TITLE[varName],
-        disableName: !isNew,
         data: obj,
         varName,
         isNew,
@@ -276,9 +275,15 @@ const Node = (props, ref) => {
       else if (!value.msgPackage) throw new Error("No Package chosen");
       else if (!value.message) throw new Error("No Message chosen");
 
-      // Proceed with saving
-      const dataToSave = { [value.name]: value };
-      if (instance.current) instance.current.setPort(dataToSave);
+      if (previousData) {
+        // Update port
+        if (instance.current)
+          instance.current.updatePort(previousData.name, value);
+      } else {
+        // Proceed with saving
+        const dataToSave = { [value.name]: value };
+        if (instance.current) instance.current.setPort(dataToSave);
+      }
       resolve();
     } catch (err) {
       // Show alert
@@ -313,17 +318,24 @@ const Node = (props, ref) => {
     );
   };
 
-  const updateKeyValue = (varName, keyValueData, isNew) => {
+  const updateKeyValue = (varName, newData, oldData, isNew) => {
     try {
-      const keyName = keyValueData.name;
-      const dataToSave = { [keyName]: keyValueData };
+      const keyName = newData.name;
+      const dataToSave = { [keyName]: newData };
       const previousData = !isNew && data[varName]?.[keyName];
       // Validate port name
       const validation = validateName(keyName, varName, previousData);
       if (!validation.result) {
         throw new Error(validation.error);
       }
-      if (instance.current) instance.current.setKeyValue(varName, dataToSave);
+      if (isNew) {
+        // update key value
+        if (instance.current) instance.current.setKeyValue(varName, dataToSave);
+      } else {
+        // add key value
+        if (instance.current)
+          instance.current.updateKeyValueItem(varName, oldData.name, newData);
+      }
     } catch (err) {
       if (err.message) alert({ message: err.message, severity: "error" });
     }
