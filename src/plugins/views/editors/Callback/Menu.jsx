@@ -255,7 +255,7 @@ const Menu = props => {
         <ListItem button onClick={() => handleExpandClick(ACTIVE_ITEM.imports)}>
           <ListItemText primary="Imports" />
           <IconButton
-            disabled={!editable || instance?.current?.getIsNew()}
+            disabled={!editable}
             onClick={e => {
               e.stopPropagation();
               handleAddImportsClick();
@@ -273,7 +273,7 @@ const Menu = props => {
         <ListItem button onClick={() => handleExpandClick(ACTIVE_ITEM.message)}>
           <ListItemText primary="Message" />
           <IconButton
-            disabled={!editable || instance?.current?.getIsNew()}
+            disabled={!editable}
             onClick={e => {
               e.stopPropagation();
               handleEditMessageClick();
