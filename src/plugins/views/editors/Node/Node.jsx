@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Model from "../../../../models/Node/Node";
 import { useTranslation } from "../_shared/mocks";
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
@@ -16,6 +15,7 @@ import KeyValueTable from "./components/KeyValueTable/KeyValueTable";
 import KeyValueEditorDialog from "./components/KeyValueTable/KeyValueEditorDialog";
 import IOConfig from "./components/IOConfig/IOConfig";
 import useKeyValueMethods from "./components/KeyValueTable/useKeyValueMethods";
+import useDataSubscriber from "../../../DocManager/useDataSubscriber";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -31,21 +31,17 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Node = (props, ref) => {
-  const {
-    id,
-    name,
-    call,
-    alert,
-    instance,
-    data = new Model({}).serialize(),
-    loading,
-    editable = true
-  } = props;
+  const { id, name, call, alert, instance, loading, editable = true } = props;
 
   // Hooks
   const classes = useStyles();
   const { t } = useTranslation();
   const { getColumns, renderValueEditor } = useKeyValueMethods();
+  const { data } = useDataSubscriber({
+    instance,
+    propsData: props.data,
+    keysToDisconsider: ["description", "path", "name"]
+  });
   const defaultColumns = getColumns();
 
   //========================================================================================
