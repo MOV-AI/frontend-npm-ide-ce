@@ -126,9 +126,7 @@ const IOConfig = props => {
    * Update callback options for each row
    */
   const updateCallbackOptions = React.useCallback(
-    (portData, callbacksAvailable) => {
-      console.log("debug  updateCallbackOptions", portData, callbacksAvailable);
-    },
+    (portData, callbacksAvailable) => {},
     []
   );
 

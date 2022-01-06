@@ -132,6 +132,7 @@ class AbstractDataType {
             if (!props.isNew) editor.focus();
           }}
           language="python"
+          disableMinimap={true}
           theme={this._theme.codeEditor.theme}
           options={{ readOnly: props.disabled }}
           onChange={value => props.onChange(value)}
