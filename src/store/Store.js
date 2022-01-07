@@ -110,12 +110,12 @@ class Store extends BaseStore {
   }
 
   /**
-   *
+   * Create copy of document and save it in DB
    * @param {string} name The name of the document to copy
    * @param {string} newName The name of the new document (copy)
-   * @returns {Promise<>}
+   * @returns {Promise<Model>} Promise resolved after finish copying document
    */
-  copyDoc(name, newName) {
+  async copyDoc(name, newName) {
     return this.readDoc(name).then(doc => {
       const newObj = this.model
         .ofJSON(doc.serializeToDB())
@@ -124,6 +124,14 @@ class Store extends BaseStore {
 
       this.setDoc(newName, newObj);
       this.saveDoc(newName);
+
+      // Add subscriber to update dirty state
+      newObj.subscribe((instance, prop, value) =>
+        this.onDocumentUpdate(instance, prop, value)
+      );
+
+      // Return copied document
+      return newObj;
     });
   }
 

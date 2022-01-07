@@ -244,7 +244,16 @@ const Explorer = props => {
               onSubmit: newName =>
                 new Promise((resolve, reject) => {
                   call("docManager", "copy", { name, scope }, newName).then(
-                    () => resolve()
+                    copiedDoc => {
+                      resolve();
+                      // Open copied document
+                      _requestScopeVersions({
+                        scope,
+                        deepness: 1,
+                        name: copiedDoc.getName(),
+                        url: copiedDoc.getUrl()
+                      });
+                    }
                   );
                 })
             });
