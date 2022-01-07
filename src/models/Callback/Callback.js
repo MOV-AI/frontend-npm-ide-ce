@@ -28,7 +28,8 @@ export default class Callback extends Model {
   code = "";
   message = "";
 
-  observables = ["name", "details", "code", "message"];
+  // Define observable properties
+  observables = Object.values(Callback.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -186,6 +187,12 @@ export default class Callback extends Model {
     };
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Static                                        *
+   *                                                                                      */
+  //========================================================================================
+
   /**
    * Returns properties serialized from the database format
    * @param {object} json : The data received from the database
@@ -218,4 +225,11 @@ export default class Callback extends Model {
   static SCOPE = "Callback";
 
   static EXTENSION = ".cb";
+
+  static OBSERVABLE_KEYS = {
+    NAME: "name",
+    CODE: "code",
+    DETAILS: "details",
+    MESSAGE: "message"
+  };
 }

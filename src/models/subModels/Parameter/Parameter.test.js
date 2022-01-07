@@ -1,10 +1,10 @@
 import Parameter from "./Parameter";
 
 test("Smoke test", () => {
-  const obj = new Parameter();
+  const obj = new Parameter({ name: "param1" });
 
   expect(obj).toBeInstanceOf(Parameter);
-  expect(obj.getName()).toBe("");
+  expect(obj.getName()).toBe("param1");
   expect(obj.getDescription()).toBe("");
   expect(obj.getType()).toBe("any");
 });

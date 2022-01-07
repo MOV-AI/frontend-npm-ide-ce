@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   FormControl,
@@ -56,7 +56,7 @@ const useIOConfigColumns = data => {
    * @param {*} rowData
    * @returns {ReactElement} Element to be rendered as port icon
    */
-  const renderPortIcon = rowData => {
+  const renderPortIcon = useCallback(rowData => {
     const inIcon = Object.keys(rowData.portIn).length ? (
       <Tooltip title="Iport">
         <i className="icon-in" style={{ fontSize: "1.5rem" }}></i>
@@ -73,14 +73,14 @@ const useIOConfigColumns = data => {
         {outIcon}
       </>
     );
-  };
+  }, []);
 
   /**
    * @private Get Name edit component
    * @param {*} props : edit element props
    * @returns {ReactElement} TextField to edit name
    */
-  const getNameEditComponent = props => {
+  const getNameEditComponent = useCallback(props => {
     return (
       <TextField
         autoFocus={autoFocus}
@@ -95,14 +95,14 @@ const useIOConfigColumns = data => {
         }}
       />
     );
-  };
+  }, [autoFocus]);
 
   /**
    * @private Get Transport/Protocol edit component
    * @param {*} props : edit element props
    * @returns {ReactElement} Element to edit Transport/Protocol
    */
-  const getTransportEditComponent = props => {
+  const getTransportEditComponent = useCallback(props => {
     /**
      * On Changte Transport / Protocol
      * @param {Event} event
@@ -165,14 +165,14 @@ const useIOConfigColumns = data => {
         </FormControl>
       </div>
     );
-  };
+  }, [classes, scopePorts, getGroupOptions, getMessageOptions, getPackageOptions]);
 
   /**
    * @private Get Package edit component
    * @param {*} props : edit element props
    * @returns {ReactElement} Element to edit Package
    */
-  const getPackageEditComponent = props => {
+  const getPackageEditComponent = useCallback(props => {
     /**
      * On change event for package selector
      * @param {Event} event
@@ -200,14 +200,14 @@ const useIOConfigColumns = data => {
         </FormControl>
       </div>
     );
-  };
+  }, [classes, getPackageOptions]);
 
   /**
    * @private Get Message edit component
    * @param {*} props : edit element props
    * @returns {ReactElement} Element to edit Message
    */
-  const getMessageEditComponent = props => {
+  const getMessageEditComponent = useCallback(props => {
     /**
      * On change message selector
      * @param {*} evt
@@ -234,7 +234,7 @@ const useIOConfigColumns = data => {
         </FormControl>
       </div>
     );
-  };
+  }, [classes, getMessageOptions]);
 
   //========================================================================================
   /*                                                                                      *
@@ -251,13 +251,14 @@ const useIOConfigColumns = data => {
       {
         title: "",
         field: "portType",
-        render: rowData => renderPortIcon(rowData),
+        render: renderPortIcon,
         editable: "never",
         width: 50
       },
       {
         title: t("Name"),
         field: "name",
+        defaultSort: "asc",
         editComponent: getNameEditComponent
       },
       {

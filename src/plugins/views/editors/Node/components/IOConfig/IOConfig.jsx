@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, memo } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import { MTableToolbar, MTableEditRow } from "material-table";
@@ -6,6 +6,7 @@ import MaterialTable from "../../../_shared/MaterialTable/MaterialTable";
 import IOPorts from "./IOPorts/IOPorts";
 import CollapsibleHeader from "../_shared/CollapsibleHeader";
 import { Typography } from "@material-ui/core";
+import _isEqual from "lodash/isEqual";
 import { useTranslation, DEFAULT_FUNCTION } from "../../../_shared/mocks";
 import useIOConfigColumns from "./hooks/useIOConfigColumns";
 import useHelper from "./hooks/useHelper";
@@ -125,9 +126,7 @@ const IOConfig = props => {
    * Update callback options for each row
    */
   const updateCallbackOptions = React.useCallback(
-    (portData, callbacksAvailable) => {
-      console.log("debug  updateCallbackOptions", portData, callbacksAvailable);
-    },
+    (portData, callbacksAvailable) => {},
     []
   );
 
@@ -138,10 +137,13 @@ const IOConfig = props => {
    */
   const formatData = _data => {
     if (Array.isArray(_data)) return _data;
-    return Object.keys(_data).map(key => ({
-      name: _data[key].name,
-      ..._data[key]
-    }));
+    return Object.entries(_data).map(([key, item]) => {
+      return {
+        ...item,
+        id: key, // Just to have an id on the rows (to prevent error thrown)
+        name: item.name
+      };
+    });
   };
 
   /**
@@ -292,6 +294,34 @@ const IOConfig = props => {
     );
   };
 
+  /**
+   * Render Details Panel
+   * @param {*} panelData
+   * @returns
+   */
+  const renderDetailPanel = useCallback(
+    panelData => {
+      return (
+        <IOPorts
+          classNames="child-row"
+          editable={editable}
+          rowData={panelData.rowData}
+          handleIOPortsInputs={handleIOPortsInputs}
+          handleOpenCallback={handleOpenCallback}
+          handleNewCallback={handleNewCallback}
+          handleOpenSelectScopeModal={handleOpenSelectScopeModal}
+        />
+      );
+    },
+    [
+      editable,
+      handleIOPortsInputs,
+      handleOpenCallback,
+      handleNewCallback,
+      handleOpenSelectScopeModal
+    ]
+  );
+
   //========================================================================================
   /*                                                                                      *
    *                                        Render                                        *
@@ -309,19 +339,7 @@ const IOConfig = props => {
           ref={tableRef}
           columns={getColumns()}
           data={formatData(ioConfig)}
-          detailPanel={panelData => {
-            return (
-              <IOPorts
-                classNames="child-row"
-                editable={editable}
-                rowData={panelData.rowData}
-                handleIOPortsInputs={handleIOPortsInputs}
-                handleOpenCallback={handleOpenCallback}
-                handleNewCallback={handleNewCallback}
-                handleOpenSelectScopeModal={handleOpenSelectScopeModal}
-              />
-            );
-          }}
+          detailPanel={renderDetailPanel}
           editable={{
             isEditable: () => editable,
             isDeletable: () => editable,
@@ -380,4 +398,9 @@ IOConfig.defaultProps = {
   ]
 };
 
-export default IOConfig;
+//The function returns true when the compared props equal, preventing the component from re-rendering
+function arePropsEqual(prevProps, nextProps) {
+  return _isEqual(prevProps.ioConfig, nextProps.ioConfig);
+}
+
+export default memo(IOConfig, arePropsEqual);

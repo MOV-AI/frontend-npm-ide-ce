@@ -12,37 +12,18 @@ class Parameter extends Model {
    *                                   Model Properties                                   *
    *                                                                                      */
   //========================================================================================
-
-  name = "";
   value = "";
   type = Parameter.defaults.type;
   description = "";
 
-  observables = ["name", "value", "type", "description"];
+  // Define observable properties
+  observables = Object.values(Parameter.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
    *                                     Data Handlers                                    *
    *                                                                                      */
   //========================================================================================
-
-  /**
-   * Returns the name property
-   * @returns {string}
-   */
-  getName() {
-    return this.name;
-  }
-
-  /**
-   * Sets the new value of the property
-   * @param {string} value : The new value
-   * @returns {Parameter} : The instance
-   */
-  setName(value) {
-    this.name = value;
-    return this;
-  }
 
   /**
    * Returns the value property
@@ -132,6 +113,12 @@ class Parameter extends Model {
     };
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Static                                        *
+   *                                                                                      */
+  //========================================================================================
+
   /**
    * Returns properties serialized from the database format
    * @param {object} json : The data received from the database
@@ -140,11 +127,21 @@ class Parameter extends Model {
   static serializeOfDB(json) {
     const name = Object.keys(json)[0];
     const content = Object.values(json)[0];
-    const { Value: value, Type: type, Description: description } = content;
+    const type = content.Type ?? Parameter.defaults.type;
+    const { Value: value, Description: description } = content;
 
-    return { name, value, type: type ?? Parameter.defaults.type, description };
+    return { name, value, type, description };
   }
+
+  static OBSERVABLE_KEYS = {
+    NAME: "name",
+    VALUE: "value",
+    DESCRIPTION: "description",
+    TYPE: "type"
+  };
 }
+
+// Default model values
 Parameter.defaults = {
   type: "any"
 };

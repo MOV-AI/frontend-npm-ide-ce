@@ -9,6 +9,8 @@ import _toString from "lodash/toString";
 class AbstractDataType {
   key = "";
   label = "";
+  default = "";
+
   editComponent = this.defaultStringEditor;
   // hooks
   _theme = {};
@@ -130,6 +132,7 @@ class AbstractDataType {
             if (!props.isNew) editor.focus();
           }}
           language="python"
+          disableMinimap={true}
           theme={this._theme.codeEditor.theme}
           options={{ readOnly: props.disabled }}
           onChange={value => props.onChange(value)}

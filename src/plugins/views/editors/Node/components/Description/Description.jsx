@@ -91,19 +91,21 @@ const Description = props => {
   const renderTitleSection = () => {
     return (
       <>
-        <Typography className={classes.heading}>{t("Description")}</Typography>
-        <Typography component="div" className={classes.typeContainer}>
-          {nodeType && (
+        <Typography component="span" className={classes.heading}>
+          {t("Description")}
+        </Typography>
+        {nodeType && (
+          <Typography component="span" className={classes.typeContainer}>
             <>
               <Typography
-                component="div"
+                component="span"
                 className={classes.nodeTypeMini}
                 style={{ backgroundColor: NODE_COLORS[nodeType] }}
               ></Typography>
-              <Typography>{nodeType}</Typography>
+              <Typography component="span">{nodeType}</Typography>
             </>
-          )}
-        </Typography>
+          </Typography>
+        )}
       </>
     );
   };

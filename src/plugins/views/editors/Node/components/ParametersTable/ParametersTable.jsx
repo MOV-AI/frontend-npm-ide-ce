@@ -1,9 +1,10 @@
-import React from "react";
+import React, { memo } from "react";
 import PropTypes from "prop-types";
+import _isEqual from "lodash/isEqual";
+import { useTranslation, DEFAULT_FUNCTION } from "../../../_shared/mocks";
 import KeyValueTable from "../KeyValueTable/KeyValueTable";
 import ParameterEditorDialog from "./ParametersEditorDialog";
 import useDataTypes from "./DataTypes/hooks/useDataTypes";
-import { useTranslation, DEFAULT_FUNCTION } from "../../../_shared/mocks";
 
 const ParametersTable = props => {
   // Props
@@ -16,6 +17,9 @@ const ParametersTable = props => {
     title: t("Type"),
     field: "type",
     width: 150,
+    tableData: {
+      columnOrder: 1.5 // Workaround to add this column after 1, but before 2
+    },
     cellStyle: {
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
@@ -23,9 +27,8 @@ const ParametersTable = props => {
     },
     render: rowData => getLabel(rowData.type)
   };
-  // Add type column to position 2 of columns array
   const columns = [...defaultColumns];
-  columns.splice(2, 0, typeColumn);
+  columns.push(typeColumn);
 
   //========================================================================================
   /*                                                                                      *
@@ -49,7 +52,7 @@ const ParametersTable = props => {
 };
 
 ParametersTable.propTypes = {
-  data: PropTypes.array,
+  data: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   defaultColumns: PropTypes.array,
   onRowDelete: PropTypes.func,
   openEditDialog: PropTypes.func,
@@ -64,4 +67,9 @@ ParametersTable.defaultProps = {
   editable: false
 };
 
-export default ParametersTable;
+//The function returns true when the compared props equal, preventing the component from re-rendering
+function arePropsEqual(prevProps, nextProps) {
+  return _isEqual(prevProps.data, nextProps.data);
+}
+
+export default memo(ParametersTable, arePropsEqual);

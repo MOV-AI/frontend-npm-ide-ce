@@ -15,7 +15,9 @@ export default class Configuration extends Model {
 
   code = "";
   extension = "yaml";
-  observables = ["name", "details", "code", "extension"];
+
+  // Define observable properties
+  observables = Object.values(Configuration.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -93,6 +95,12 @@ export default class Configuration extends Model {
     };
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Static                                        *
+   *                                                                                      */
+  //========================================================================================
+
   /**
    * Returns the instance properties serialized to
    * the database format
@@ -117,11 +125,13 @@ export default class Configuration extends Model {
    * @returns {object}
    */
   static serializeOfDB(json) {
+    // Get defaults if DB value is not defined
+    const extension = json.Type || Configuration.defaults.extension;
+    // Get value from DB
     const {
       Label: id,
       Label: name,
       Yaml: code,
-      Type: extension,
       LastUpdate: details,
       workspace,
       version
@@ -141,4 +151,16 @@ export default class Configuration extends Model {
   static SCOPE = "Configuration";
 
   static EXTENSION = ".conf";
+
+  static OBSERVABLE_KEYS = {
+    NAME: "name",
+    CODE: "code",
+    DETAILS: "details",
+    EXTENSION: "extension"
+  };
 }
+
+// Default model values
+Configuration.defaults = {
+  extension: "yaml"
+};

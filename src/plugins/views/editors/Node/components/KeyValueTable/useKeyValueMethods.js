@@ -87,6 +87,7 @@ const useKeyValueMethods = () => {
         title: t("Name"),
         field: "name",
         width: "45%",
+        defaultSort: "asc",
         cellStyle: {
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
@@ -99,6 +100,7 @@ const useKeyValueMethods = () => {
         render: renderValue,
         width: "45%",
         cellStyle: {
+          maxWidth: 200,
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
           overflow: "hidden"
@@ -123,6 +125,7 @@ const useKeyValueMethods = () => {
             if (!isNew) editor.focus();
           }}
           language="python"
+          disableMinimap={true}
           theme={theme.codeEditor.theme}
           options={{ readOnly: disabled }}
           onChange={newValue => onChange(newValue)}

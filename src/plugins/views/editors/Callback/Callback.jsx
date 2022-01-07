@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Model from "../../../../models/Callback/Callback";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
@@ -25,8 +24,8 @@ const Callback = (props, ref) => {
     call,
     scope,
     instance,
-    saveDocument = () => console.log(`Not implemented`),
-    data = new Model({}).serialize(),
+    data,
+    saveDocument,
     editable = true
   } = props;
   // Style Hooks
@@ -76,7 +75,7 @@ const Callback = (props, ref) => {
     <div className={classes.container}>
       <MonacoCodeEditor
         style={{ flexGrow: 1, height: "100%", width: "100%" }}
-        value={data.code}
+        value={data?.code}
         language={"python"}
         theme={theme.codeEditor.theme}
         options={{ readOnly: !editable }}

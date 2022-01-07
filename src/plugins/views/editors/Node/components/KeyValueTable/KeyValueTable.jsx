@@ -34,12 +34,15 @@ const KeyValueTable = props => {
    */
   const formatData = _data => {
     if (Array.isArray(_data)) return _data;
-    return Object.keys(_data).map(key => ({
-      name: _data[key].name,
-      value: _data[key].value,
-      type: _data[key].type,
-      description: _data[key].description
-    }));
+    return Object.values(_data).map((item, i) => {
+      return {
+        id: `${i}_${item.name}`,
+        name: item.name,
+        value: item.value,
+        type: item.type,
+        description: item.description
+      };
+    });
   };
 
   //========================================================================================
@@ -99,7 +102,7 @@ const KeyValueTable = props => {
 
 KeyValueTable.propTypes = {
   varName: PropTypes.string,
-  data: PropTypes.array,
+  data: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   columns: PropTypes.array,
   title: PropTypes.string,
   onRowDelete: PropTypes.func,

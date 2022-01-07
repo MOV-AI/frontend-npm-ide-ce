@@ -6,6 +6,8 @@ class BooleanType extends DataType {
   // Boolean type properties definition
   key = "boolean";
   label = "Boolean";
+  default = "False";
+
   editComponent = (props, mode = "row") => {
     let pyValue = this.toString(props.rowData.value).toLowerCase();
     const editor = {
@@ -27,8 +29,9 @@ class BooleanType extends DataType {
   validate(value) {
     return new Promise(resolve => {
       try {
-        const parsed = this.getParsedValue(value);
-        const isValid = typeof parsed === "number" && !isNaN(parsed);
+        const parsed = this.pythonToBool(value);
+        const isValid = typeof parsed === "boolean";
+
         resolve({ success: isValid });
       } catch (e) {
         resolve({ success: false });
@@ -43,12 +46,31 @@ class BooleanType extends DataType {
   //========================================================================================
 
   /**
-   * Convert boolean to python value
+   * Convert boolean to Python string
    * @param {boolean} value
+   * @returns {string} : A string representing a Python boolean
    */
   boolToPython(value) {
-    value = this.toString(value);
-    return value.charAt(0).toLocaleUpperCase() + value.slice(1);
+    const options = {
+      true: "True",
+      false: "False"
+    };
+
+    return options[value] ?? options[false];
+  }
+
+  /**
+   * Convert from Python string to boolean
+   * @param {string} value : A string representing a Python boolean
+   * @returns {boolean}
+   */
+  pythonToBool(value) {
+    const options = {
+      True: true,
+      False: false
+    };
+
+    return options[value];
   }
 
   /**

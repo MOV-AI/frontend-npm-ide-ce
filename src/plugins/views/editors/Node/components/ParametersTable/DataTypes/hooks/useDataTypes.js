@@ -42,6 +42,19 @@ const useDataTypes = () => {
   };
 
   /**
+   * Return the value if valid otherwise returns
+   * the default value ot the type
+   * @param {string} type : The type to convert to
+   * @param {string} value : The value to validate
+   * @returns {string}
+   */
+  const getValidValue = async (type, value) => {
+    const typeInst = dataTypeManager.getType(type);
+    const res = await typeInst.validate(value);
+    return res.success ? value : typeInst.default;
+  };
+
+  /**
    * Validation method of data
    * @param {{type: string, value: *}} data : Data to be validated
    * @returns {Promise} Async validation of data
@@ -52,7 +65,13 @@ const useDataTypes = () => {
     return dataType.validate(data.value);
   };
 
-  return { getLabel, getDataTypes, getEditComponent, validate };
+  return {
+    getLabel,
+    getDataTypes,
+    getEditComponent,
+    getValidValue,
+    validate
+  };
 };
 
 export default useDataTypes;

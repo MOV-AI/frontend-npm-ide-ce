@@ -13,35 +13,17 @@ class Command extends Model {
    *                                                                                      */
   //========================================================================================
 
-  name = "";
   value = "";
   description = "";
 
-  observables = ["name", "value", "description"];
+  // Define observable properties
+  observables = Object.values(Command.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
    *                                     Data Handlers                                    *
    *                                                                                      */
   //========================================================================================
-
-  /**
-   * Returns the name property
-   * @returns {string}
-   */
-  getName() {
-    return this.name;
-  }
-
-  /**
-   * Sets the new value of the property
-   * @param {string} value : The new value
-   * @returns {Command} : The instance
-   */
-  setName(value) {
-    this.name = value;
-    return this;
-  }
 
   /**
    * Returns the value property
@@ -111,6 +93,12 @@ class Command extends Model {
     };
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Static                                        *
+   *                                                                                      */
+  //========================================================================================
+
   /**
    * Returns properties serialized from the database format
    * @param {object} json : The data received from the database
@@ -123,6 +111,12 @@ class Command extends Model {
 
     return { name, value, description };
   }
+
+  static OBSERVABLE_KEYS = {
+    NAME: "name",
+    VALUE: "value",
+    DESCRIPTION: "description"
+  };
 }
 
 export default Command;

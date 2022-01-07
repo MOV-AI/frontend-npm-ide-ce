@@ -36,17 +36,8 @@ class Node extends Model {
   commands = new Manager("commands", Command, this.events);
   ports = new Manager("ports", Port, this.events);
 
-  observables = [
-    "name",
-    "details",
-    "description",
-    "path",
-    "type",
-    "persistent",
-    "launch",
-    "remappable",
-    "packageDep"
-  ];
+  // Define observable properties
+  observables = Object.values(Node.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -202,12 +193,29 @@ class Node extends Model {
   /**
    * Adds a new instance of a managed property
    * Can only be used with managed properties
-   * @param {string} varName : The name of the property
+   * @param {string} propName : The name of the property
    * @param {any} data : The data of the item
    * @returns {Node} : The instance
    */
-  setKeyValue(varName, data) {
-    this[varName].setData(data);
+  setKeyValue(propName, data) {
+    this[propName].setData(data);
+    return this;
+  }
+
+  /**
+   * Update an item of the manager
+   * @param {string} propName : Model property
+   * @param {*} prevName : Previous item name
+   * @param {*} content : The data to update the item
+   * @returns {Node} : The instance
+   */
+  updateKeyValueItem(propName, prevName, content) {
+    const name = content.name;
+    if (prevName !== name) {
+      this[propName].renameItem({ prevName, name }, true);
+    }
+
+    this[propName].updateItem({ name, content });
     return this;
   }
 
@@ -252,11 +260,22 @@ class Node extends Model {
 
   /**
    * Adds a port
-   * @param {object} value : The port value
+   * @param {object} data : The data to set the port
    * @returns {Node} : The instance
    */
-  setPort(value) {
-    this.ports.setData(value);
+  setPort(data) {
+    this.setKeyValue("ports", data);
+    return this;
+  }
+
+  /**
+   * Updates the port with the provided content.
+   * @param {string} currName : The current name of the port
+   * @param {object} data : The data to update the port
+   * @returns {Node} : The instance
+   */
+  updatePort(currName, content) {
+    this.updateKeyValueItem("ports", currName, content);
     return this;
   }
 
@@ -266,7 +285,7 @@ class Node extends Model {
    * @returns {Port}
    */
   getPort(key) {
-    return this.ports.getItem(key);
+    return this.getKeyValue("ports", key);
   }
 
   /**
@@ -275,7 +294,7 @@ class Node extends Model {
    * @returns {Node} : The instance
    */
   deletePort(key) {
-    this.ports.deleteItem(key);
+    this.deleteKeyValue("ports", key);
     return this;
   }
 
@@ -463,6 +482,12 @@ class Node extends Model {
     };
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Static                                        *
+   *                                                                                      */
+  //========================================================================================
+
   /**
    * Returns properties serialized from the database format
    * Override in the extended class
@@ -511,6 +536,18 @@ class Node extends Model {
   static SCOPE = "Node";
 
   static EXTENSION = ".nd";
+
+  static OBSERVABLE_KEYS = {
+    NAME: "name",
+    DETAILS: "details",
+    DESCRIPTION: "description",
+    PATH: "path",
+    TYPE: "type",
+    PERSISTENT: "persistent",
+    LAUNCH: "launch",
+    REMAPPABLE: "remappable",
+    PACKAGE_DEP: "packageDep"
+  };
 }
 
 Node.defaults = {

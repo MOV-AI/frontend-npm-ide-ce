@@ -4,9 +4,11 @@ class ArrayType extends DataType {
   // Array type properties definition
   key = "array";
   label = "Array";
+  default = "[]";
+
   editComponent = (props, mode = "row") => {
     const editor = {
-      row: _props => this.stringEditComponent(_props, "[]"),
+      row: _props => this.stringEditComponent(_props, this.default),
       dialog: this.codeEditComponent
     };
     return editor[mode](props);
