@@ -3,6 +3,7 @@ import DetailsMenu from "../_shared/DetailsMenu/DetailsMenu";
 import AddImportDialog from "./dialogs/AddImport";
 import EditMessageDialog from "./dialogs/EditMessage";
 import Model from "../../../../models/Callback/Callback";
+import { useTranslation } from "../_shared/mocks";
 import { withDataHandler } from "../../../DocManager/DataHandler";
 import {
   Collapse,
@@ -55,8 +56,9 @@ const Menu = props => {
   } = props;
   // State hook
   const [activeItem, setActiveItem] = React.useState(0);
-  // Style hook
+  // Other hooks
   const classes = useStyles();
+  const { t } = useTranslation();
 
   //========================================================================================
   /*                                                                                      *
@@ -78,6 +80,7 @@ const Menu = props => {
    */
   const addImports = pyLibs => {
     if (instance.current) instance.current.getPyLibs().setData(pyLibs);
+    setActiveItem(ACTIVE_ITEM.imports);
   };
 
   /**
@@ -86,6 +89,7 @@ const Menu = props => {
    */
   const setMessage = msg => {
     if (instance.current) instance.current.setMessage(msg);
+    setActiveItem(ACTIVE_ITEM.message);
   };
 
   //========================================================================================
@@ -216,7 +220,7 @@ const Menu = props => {
                 primary={pyLib.name}
               />
               <ListItemSecondaryAction>
-                <Tooltip title>
+                <Tooltip title={t("Remove import")}>
                   <IconButton edge="end" onClick={() => deleteImport(pyLib)}>
                     <DeleteIcon fontSize="small" />
                   </IconButton>
