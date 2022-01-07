@@ -69,11 +69,13 @@ export default class Configuration extends Model {
    * @returns {object} Model properties
    */
   static serializeOfDB(json) {
+    // Get defaults if DB value is not defined
+    const extension = json.Type || Configuration.defaults.extension;
+    // Get value from DB
     const {
       Label: id,
       Label: name,
       Yaml: code,
-      Type: extension,
       LastUpdate: details,
       workspace,
       version
@@ -94,3 +96,8 @@ export default class Configuration extends Model {
 
   static EXTENSION = ".conf";
 }
+
+// Default model values
+Configuration.defaults = {
+  extension: "yaml"
+};

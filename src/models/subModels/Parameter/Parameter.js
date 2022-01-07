@@ -69,6 +69,8 @@ class Parameter extends Model {
     return { name, value, type, description };
   }
 }
+
+// Default model values
 Parameter.defaults = {
   type: "any"
 };
