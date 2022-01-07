@@ -78,17 +78,19 @@ const Node = (props, ref) => {
   //========================================================================================
 
   const renderRightMenu = React.useCallback(() => {
-    const details = data?.details ?? {};
+    const details = props.data?.details ?? {};
     const menuName = `${id}-detail-menu`;
     // add bookmark
     call("rightDrawer", "setBookmark", {
       [menuName]: {
         icon: <InfoIcon></InfoIcon>,
         name: menuName,
-        view: <Menu id={id} name={name} details={details}></Menu>
+        view: (
+          <Menu id={id} name={name} details={details} model={instance}></Menu>
+        )
       }
     });
-  }, [call, id, name, data?.details]);
+  }, [call, id, name, props.data, instance]);
 
   usePluginMethods(ref, {
     renderRightMenu
