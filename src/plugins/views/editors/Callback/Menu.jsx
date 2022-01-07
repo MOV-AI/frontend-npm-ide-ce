@@ -21,6 +21,7 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 import AddIcon from "@material-ui/icons/Add";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
+import useDataSubscriber from "../../../DocManager/useDataSubscriber";
 
 const useStyles = makeStyles(theme => ({
   itemValue: {
@@ -45,16 +46,14 @@ const ACTIVE_ITEM = {
 
 const Menu = props => {
   // Props
-  const {
-    call,
-    scope,
-    name,
-    instance,
-    data = new Model({}).serialize(),
-    editable = true
-  } = props;
+  const { call, scope, name, instance, editable = true } = props;
   // State hook
   const [activeItem, setActiveItem] = React.useState(0);
+  const { data } = useDataSubscriber({
+    instance,
+    propsData: props.data,
+    keysToDisconsider: [Model.OBSERVABLE_KEYS.CODE]
+  });
   // Style hook
   const classes = useStyles();
 
@@ -249,7 +248,7 @@ const Menu = props => {
 
   return (
     <div>
-      <DetailsMenu name={name} details={data.details}></DetailsMenu>
+      <DetailsMenu name={name} details={data.details || {}}></DetailsMenu>
       <List>
         {/* ============ IMPORTS ============ */}
         <ListItem button onClick={() => handleExpandClick(ACTIVE_ITEM.imports)}>

@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { DEFAULT_FUNCTION } from "../_shared/mocks";
 import Model from "../../../../models/Configuration/Configuration";
+import { DEFAULT_FUNCTION } from "../_shared/mocks";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
@@ -10,6 +10,7 @@ import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { AppBar, Toolbar } from "@material-ui/core";
 import InfoIcon from "@material-ui/icons/Info";
 import Menu from "./Menu";
+import useDataSubscriber from "../../../DocManager/useDataSubscriber";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -36,9 +37,14 @@ const Configuration = (props, ref) => {
     instance,
     activateEditor = () => DEFAULT_FUNCTION("activateEditor"),
     saveDocument = () => DEFAULT_FUNCTION("saveDocument"),
-    data = new Model({}).serialize(),
     editable = true
   } = props;
+  // Other Hooks
+  const { data } = useDataSubscriber({
+    instance,
+    propsData: props.data,
+    keysToDisconsider: [Model.OBSERVABLE_KEYS.CODE]
+  });
   // Style Hooks
   const classes = useStyles();
   const theme = useTheme();
@@ -50,17 +56,19 @@ const Configuration = (props, ref) => {
   //========================================================================================
 
   const renderRightMenu = React.useCallback(() => {
-    const details = data.details ?? {};
+    const details = props.data?.details || {};
     const menuName = `${id}-detail-menu`;
     // add bookmark
     call("rightDrawer", "setBookmark", {
       [menuName]: {
         icon: <InfoIcon></InfoIcon>,
         name: menuName,
-        view: <Menu id={id} name={name} details={details}></Menu>
+        view: (
+          <Menu id={id} name={name} details={details} model={instance}></Menu>
+        )
       }
     });
-  }, [call, id, name, data.details]);
+  }, [call, id, name, instance, props.data]);
 
   usePluginMethods(ref, {
     renderRightMenu
