@@ -25,17 +25,8 @@ class Node extends Model {
   commands = new Manager("commands", Command, this.events);
   ports = new Manager("ports", Port, this.events);
 
-  observables = [
-    "name",
-    "details",
-    "description",
-    "path",
-    "type",
-    "persistent",
-    "launch",
-    "remappable",
-    "packageDep"
-  ];
+  // Define observable properties
+  observables = Object.values(Node.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -122,10 +113,10 @@ class Node extends Model {
 
   updateKeyValueItem(varName, oldName, newData) {
     const name = newData.name;
-    if(oldName !== name){
+    if (oldName !== name) {
       this[varName].renameItem({ oldName, name }, true);
     }
-    
+
     this[varName].updateItem({ name, content: newData });
     return this;
   }
@@ -154,7 +145,7 @@ class Node extends Model {
 
   updatePort(oldName, newData) {
     const name = newData.name;
-    if(oldName !== name){
+    if (oldName !== name) {
       this.ports.renameItem({ oldName, name }, true);
     }
 
@@ -310,6 +301,12 @@ class Node extends Model {
     };
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Static                                        *
+   *                                                                                      */
+  //========================================================================================
+
   static serializeOfDB(json) {
     const {
       Label: id,
@@ -352,6 +349,18 @@ class Node extends Model {
   static SCOPE = "Node";
 
   static EXTENSION = ".nd";
+
+  static OBSERVABLE_KEYS = {
+    NAME: "name",
+    DETAILS: "details",
+    DESCRIPTION: "description",
+    PATH: "path",
+    TYPE: "type",
+    PERSISTENT: "persistent",
+    LAUNCH: "launch",
+    REMAPPABLE: "remappable",
+    PACKAGE_DEP: "packageDep"
+  };
 }
 
 Node.defaults = {

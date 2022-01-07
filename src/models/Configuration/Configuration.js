@@ -12,7 +12,7 @@ export default class Configuration extends Model {
   extension = "yaml";
 
   // Define observable properties
-  observables = ["name", "details", "code", "extension"];
+  observables = Object.values(Configuration.OBSERVABLE_KEYS);
 
   getCode() {
     return this.code;
@@ -47,6 +47,12 @@ export default class Configuration extends Model {
       extension: this.getExtension()
     };
   }
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Static                                        *
+   *                                                                                      */
+  //========================================================================================
 
   /**
    * Serialize model properties to database format
@@ -93,4 +99,11 @@ export default class Configuration extends Model {
   static SCOPE = "Configuration";
 
   static EXTENSION = ".conf";
+
+  static OBSERVABLE_KEYS = {
+    NAME: "name",
+    CODE: "code",
+    DETAILS: "details",
+    EXTENSION: "extension"
+  };
 }

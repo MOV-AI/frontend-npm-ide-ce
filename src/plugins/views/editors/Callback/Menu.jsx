@@ -2,6 +2,7 @@ import React from "react";
 import DetailsMenu from "../_shared/DetailsMenu/DetailsMenu";
 import AddImportDialog from "./dialogs/AddImport";
 import EditMessageDialog from "./dialogs/EditMessage";
+import Model from "../../../../models/Callback/Callback";
 import { withDataHandler } from "../../../DocManager/DataHandler";
 import {
   Collapse,
@@ -51,7 +52,7 @@ const Menu = props => {
   const { data } = useDataSubscriber({
     instance,
     propsData: props.data,
-    keysToDisconsider: ["code"]
+    keysToDisconsider: [Model.OBSERVABLE_KEYS.CODE]
   });
   // Style hook
   const classes = useStyles();

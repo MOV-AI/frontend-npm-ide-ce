@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import Model from "../../../../models/Configuration/Configuration";
 import { DEFAULT_FUNCTION } from "../_shared/mocks";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
@@ -42,7 +43,7 @@ const Configuration = (props, ref) => {
   const { data } = useDataSubscriber({
     instance,
     propsData: props.data,
-    keysToDisconsider: ["code"]
+    keysToDisconsider: [Model.OBSERVABLE_KEYS.CODE]
   });
   // Style Hooks
   const classes = useStyles();

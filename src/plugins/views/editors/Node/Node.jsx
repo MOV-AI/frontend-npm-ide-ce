@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import Model from "../../../../models/Node/Node";
 import { useTranslation } from "../_shared/mocks";
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
@@ -39,7 +40,11 @@ const Node = (props, ref) => {
   const { data } = useDataSubscriber({
     instance,
     propsData: props.data,
-    keysToDisconsider: ["description", "path", "name"]
+    keysToDisconsider: [
+      Model.OBSERVABLE_KEYS.DESCRIPTION,
+      Model.OBSERVABLE_KEYS.NAME,
+      Model.OBSERVABLE_KEYS.PATH
+    ]
   });
   const defaultColumns = getColumns();
 

@@ -27,8 +27,12 @@ const useDataSubscriber = props => {
           if (_isEqual(prevState[key], value)) return prevState;
           return { ...prevState, [key]: value };
         });
-        // Update details
-        if (key === "details") setDetails(value);
+        // Update details if necessary
+        setDetails(prevState => {
+          const newDetails = modelRef.getDetails();
+          if (prevState === newDetails) return prevState;
+          else return newDetails;
+        });
       });
     }
     // on component unmount : unsubscribe
