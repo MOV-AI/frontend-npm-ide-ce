@@ -8,7 +8,7 @@ const symbols = {
 };
 
 // debounce updates (in milliseconds)
-const DEBOUNCE_TIME = 1500;
+const DEBOUNCE_TIME = 100;
 
 /**
  * Class providing a subscriptions manager for the documents
@@ -55,7 +55,7 @@ class DBSubscriber extends StoreAbstractPlugin {
 
   getPattern(docName) {
     const { scope } = this;
-    return { Scope: scope, Name: docName };
+    return { Scope: scope, Name: docName, LastUpdate: "*" };
   }
 
   /**
