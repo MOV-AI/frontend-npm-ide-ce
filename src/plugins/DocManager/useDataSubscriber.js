@@ -4,7 +4,7 @@ import _isEqual from "lodash/isEqual";
 const useDataSubscriber = props => {
   const { instance, keysToDisconsider = [], propsData = {} } = props;
   // State hooks
-  const [data, setData] = React.useState({});
+  const [data, setData] = React.useState(propsData);
   const [details, setDetails] = React.useState({});
   //
 

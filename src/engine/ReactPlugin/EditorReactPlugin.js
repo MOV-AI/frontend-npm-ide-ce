@@ -59,8 +59,8 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       action => {
         const getSaveByAction = {
           updateDoc: () => {
-            const { scope, name } = instance.current.serialize();
-            call("docManager", "reloadDoc", { scope, name });
+            const { scope: _scope, name } = instance.current.serialize();
+            call("docManager", "reloadDoc", { scope: _scope, name });
           },
           overwriteDoc: save
         };
@@ -78,17 +78,17 @@ export function withEditorPlugin(ReactComponent, methods = []) {
      */
     const saveDocument = React.useCallback(() => {
       // If document is outdated
-      const { scope, name } = instance.current.serialize();
+      const { scope: _scope, name } = instance.current.serialize();
       if (instance.current.getOutdated()) {
         call("dialog", "saveOutdatedDocument", {
           name,
-          scope,
+          scope: _scope,
           onSubmit: _handleOutdatedSave
         });
       } else {
         instance.current.getIsNew()
           ? call("dialog", "newDocument", {
-              scope,
+              scope: _scope,
               onSubmit: newName => save(newName)
             })
           : save();
@@ -142,8 +142,8 @@ export function withEditorPlugin(ReactComponent, methods = []) {
   // Decorate component
   const DecoratedEditorComponent = composeDecorators(EditorComponent, [
     withMenuHandler,
-    withKeyBinds,
     withLoader,
+    withKeyBinds,
     withDataHandler,
     withAlerts
   ]);
