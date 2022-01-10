@@ -1,6 +1,6 @@
 import BaseModel from "./BaseModel";
 
-test("set isDirty on setName", () => {
+test("Set isDirty on setName", () => {
   const obj = new BaseModel({ name: "test" });
 
   obj.setName("myName");
@@ -8,7 +8,7 @@ test("set isDirty on setName", () => {
   expect(obj.getDirty()).toBe(true);
 });
 
-test("set isDirty on setDetails", () => {
+test("Set isDirty on setDetails", () => {
   const obj = new BaseModel({ name: "test" });
 
   obj.setDetails({});
@@ -16,7 +16,7 @@ test("set isDirty on setDetails", () => {
   expect(obj.getDirty()).toBe(true);
 });
 
-test("get document url", () => {
+test("Get document url", () => {
   const name = "test";
   const workspace = "workspace";
 
@@ -27,14 +27,14 @@ test("get document url", () => {
   expect(obj.getUrl()).toBe(expected);
 });
 
-test("get document name", () => {
+test("Get document name", () => {
   const name = "test;";
   const obj = new BaseModel({ name });
 
   expect(obj.getName()).toBe(name);
 });
 
-test("get document details", () => {
+test("Get document details", () => {
   const name = "test;";
   const obj = new BaseModel({ name });
 
@@ -43,7 +43,7 @@ test("get document details", () => {
   expect(obj.getDetails()).toMatchObject(expected);
 });
 
-test("create new document", () => {
+test("Create new document", () => {
   const obj = new BaseModel({ name: "test" });
 
   expect(obj.getIsNew()).toBe(true);
@@ -52,7 +52,7 @@ test("create new document", () => {
   expect(obj.getOutdated()).toBe(false);
 });
 
-test("create document of JSON", () => {
+test("Create document of JSON", () => {
   const json = {
     workspace: "myworkspace",
     name: "test",

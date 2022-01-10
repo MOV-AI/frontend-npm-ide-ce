@@ -7,39 +7,86 @@ export default class Configuration extends Model {
     super({ schema, ...arguments[0] });
   }
 
-  // Extend Model properties and assign defaults
+  //========================================================================================
+  /*                                                                                      *
+   *                                   Model Properties                                   *
+   *                                                                                      */
+  //========================================================================================
+
   code = "";
   extension = "yaml";
 
   // Define observable properties
   observables = Object.values(Configuration.OBSERVABLE_KEYS);
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                     Data Handlers                                    *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Returns the code property
+   * @returns {string}
+   */
   getCode() {
     return this.code;
   }
 
+  /**
+   * Sets the new value of the property
+   * @param {string} value : The new value
+   * @returns {Configuration} : The instance
+   */
   setCode(code) {
     this.code = code;
     return this;
   }
 
+  /**
+   * Returns the extension property
+   * @returns {string}
+   */
   getExtension() {
     return this.extension;
   }
 
+  /**
+   * Sets the new value of the property
+   * @param {string} value : The new value
+   * @returns {Configuration} : The instance
+   */
   setExtension(extension) {
     this.extension = extension || this.extension;
     return this;
   }
 
+  /**
+   * Returns the scope property
+   * @returns {string}
+   */
   getScope() {
     return Configuration.SCOPE;
   }
 
+  /**
+   * Returns the file extension property
+   * @returns {string}
+   */
   getFileExtension() {
     return Configuration.EXTENSION;
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                      Serializers                                     *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Returns the instance properties serialized
+   * @returns {object}
+   */
   serialize() {
     return {
       ...super.serialize(),
@@ -55,8 +102,10 @@ export default class Configuration extends Model {
   //========================================================================================
 
   /**
-   * Serialize model properties to database format
-   * @returns {object} Database data
+   * Returns the instance properties serialized to
+   * the database format
+   * Override in the extended class
+   * @returns {object}
    */
   serializeToDB() {
     const { name, code, extension, details } = this.serialize();
@@ -70,9 +119,10 @@ export default class Configuration extends Model {
   }
 
   /**
-   * Serialize database data to model properties
+   * Returns properties serialized from the database format
+   * Override in the extended class
    * @param {object} json : The data received from the database
-   * @returns {object} Model properties
+   * @returns {object}
    */
   static serializeOfDB(json) {
     // Get defaults if DB value is not defined
