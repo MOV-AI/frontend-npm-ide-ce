@@ -40,6 +40,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
     const {
       id,
       on,
+      name,
       call,
       scope,
       addKeyBind,
@@ -58,15 +59,12 @@ export function withEditorPlugin(ReactComponent, methods = []) {
     const _handleOutdatedSave = React.useCallback(
       action => {
         const getSaveByAction = {
-          updateDoc: () => {
-            const { scope: _scope, name } = instance.current.serialize();
-            call("docManager", "reloadDoc", { scope: _scope, name });
-          },
+          updateDoc: () => call("docManager", "reloadDoc", { scope, name }),
           overwriteDoc: save
         };
         return action in getSaveByAction ? getSaveByAction[action]() : false;
       },
-      [instance, call, save]
+      [call, save, scope, name]
     );
 
     /**
@@ -78,22 +76,21 @@ export function withEditorPlugin(ReactComponent, methods = []) {
      */
     const saveDocument = React.useCallback(() => {
       // If document is outdated
-      const { scope: _scope, name } = instance.current.serialize();
       if (instance.current.getOutdated()) {
         call("dialog", "saveOutdatedDocument", {
           name,
-          scope: _scope,
+          scope,
           onSubmit: _handleOutdatedSave
         });
       } else {
         instance.current.getIsNew()
           ? call("dialog", "newDocument", {
-              scope: _scope,
+              scope,
               onSubmit: newName => save(newName)
             })
           : save();
       }
-    }, [call, instance, save, _handleOutdatedSave]);
+    }, [call, instance, save, _handleOutdatedSave, scope, name]);
 
     /**
      * Activate editor : activate editor's keybinds and update right menu
@@ -124,11 +121,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
     ]);
 
     return (
-      <div
-        onFocus={activateEditor}
-        style={{ height: "100%" }}
-        className={`container-${scope}`}
-      >
+      <div onFocus={activateEditor} className={`container-${scope}`}>
         <RefComponent
           {...props}
           activateEditor={activateEditor}

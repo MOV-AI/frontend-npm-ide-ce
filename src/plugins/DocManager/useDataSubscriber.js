@@ -15,8 +15,8 @@ const useDataSubscriber = props => {
   //========================================================================================
 
   React.useEffect(() => {
-    var subscriberId;
-    var modelRef = instance.current;
+    let subscriberId;
+    const modelRef = instance.current;
     if (modelRef) {
       setData(modelRef.serialize());
       setDetails(modelRef.getDetails());

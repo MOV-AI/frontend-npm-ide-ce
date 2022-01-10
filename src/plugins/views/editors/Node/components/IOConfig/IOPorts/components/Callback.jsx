@@ -52,6 +52,28 @@ const Callback = props => {
 
   //========================================================================================
   /*                                                                                      *
+   *                                        Handler                                       *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Open Select scope modal
+   */
+  const openSelectScopeModal = React.useCallback(() => {
+    handleOpenSelectScopeModal(
+      {
+        message,
+        selectedIoPort: ioPort,
+        selected: callback,
+        scopeList: ["Callback"]
+      },
+      portName,
+      ioPort
+    );
+  }, [callback, handleOpenSelectScopeModal, ioPort, message, portName]);
+
+  //========================================================================================
+  /*                                                                                      *
    *                                        Render                                        *
    *                                                                                      */
   //========================================================================================
@@ -83,19 +105,7 @@ const Callback = props => {
             <Link
               className={classes.icon}
               component="button"
-              onClick={() => {
-                // Open SelectScopeModal
-                handleOpenSelectScopeModal(
-                  {
-                    message,
-                    selectedIoPort: ioPort,
-                    selected: callback,
-                    scopeList: ["Callback"]
-                  },
-                  portName,
-                  ioPort
-                );
-              }}
+              onClick={openSelectScopeModal}
             >
               <FolderOpenIcon />
             </Link>

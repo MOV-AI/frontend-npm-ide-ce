@@ -8,6 +8,9 @@ const useStyles = makeStyles(theme => ({
     height: "100%",
     display: "flex",
     flexDirection: "column",
+    "& > div[class^='container-']": {
+      height: "100%"
+    },
     "& > div.container-Node": {
       overflow: "auto"
     }

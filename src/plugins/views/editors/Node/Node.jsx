@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import Model from "../../../../models/Node/Node";
+import CallbackModel from "../../../../models/Callback/Callback";
 import { useTranslation } from "../_shared/mocks";
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
@@ -138,7 +139,7 @@ const Node = (props, ref) => {
    * @param {string} portName : Port name
    */
   const handleNewCallback = (defaultMsg, ioConfigName, portName) => {
-    const scope = "Callback";
+    const scope = CallbackModel.SCOPE;
     call("dialog", "newDocument", {
       scope,
       onSubmit: newName => {
@@ -178,7 +179,7 @@ const Node = (props, ref) => {
     // If no callback name is passed -> returns
     if (!callbackName) return;
     // Open existing callback
-    const scope = "Callback";
+    const scope = CallbackModel.SCOPE;
     call("docManager", "read", { scope, name: callbackName }).then(doc => {
       call("tabs", "openEditor", {
         id: doc.getUrl(),
