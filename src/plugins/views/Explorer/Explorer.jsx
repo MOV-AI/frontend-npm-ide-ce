@@ -1,5 +1,6 @@
 import { Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { useTranslation } from "../editors/_shared/mocks";
 import _get from "lodash/get";
 import _set from "lodash/set";
 import { Maybe } from "monet";
@@ -21,7 +22,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Explorer = props => {
-  const { call, on } = props;
+  const { call, on, height } = props;
   const classes = useStyles();
   const [data, setData] = React.useState([]);
 
@@ -111,50 +112,111 @@ const Explorer = props => {
     [_pushSorted]
   );
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                     Handle Events                                    *
+   *                                                                                      */
+  //========================================================================================
+
   /**
    * Expand tree or open document depending on the node deepness
    *  0 : collapse others and expand tree node
    *  1 : open document node
    * @param {{id: String, deepness: String, url: String, name: String, scope: String}} node : Clicked node
    */
-  const _requestScopeVersions = node => {
-    const deepnessToAction = {
-      0: () => {
-        // Toggle the expansion of the clicked panel
-        setData(prevData => {
-          const nextData = [...prevData];
-          const isExpanded = _get(
-            prevData,
-            [node.id, "state", "expanded"],
-            false
-          );
-          _set(nextData, [node.id, "state"], {
-            expanded: !isExpanded
-          });
-
-          // Close other panels
-          prevData
-            .filter(elem => elem.id !== node.id)
-            .forEach(panel => {
-              _set(nextData, [panel.id, "state"], {
-                expanded: false
-              });
+  const requestScopeVersions = React.useCallback(
+    node => {
+      const deepnessToAction = {
+        0: () => {
+          // Toggle the expansion of the clicked panel
+          setData(prevData => {
+            const nextData = [...prevData];
+            const isExpanded = _get(
+              prevData,
+              [node.id, "state", "expanded"],
+              false
+            );
+            _set(nextData, [node.id, "state"], {
+              expanded: !isExpanded
             });
-          return nextData;
-        });
-      },
-      1: () => {
-        call("tabs", "openEditor", {
-          id: node.url,
-          name: node.name,
-          scope: node.scope
-        });
-      }
-    };
-    _get(deepnessToAction, node.deepness, () => {
-      console.log("action not implemented");
-    })();
-  };
+
+            // Close other panels
+            prevData
+              .filter(elem => elem.id !== node.id)
+              .forEach(panel => {
+                _set(nextData, [panel.id, "state"], {
+                  expanded: false
+                });
+              });
+            return nextData;
+          });
+        },
+        1: () => {
+          call("tabs", "openEditor", {
+            id: node.url,
+            name: node.name,
+            scope: node.scope
+          });
+        }
+      };
+      _get(deepnessToAction, node.deepness, () => {
+        console.log("action not implemented");
+      })();
+    },
+    [call]
+  );
+
+  /**
+   * Handle click to copy document
+   * @param {{name: string, scope: string}} node : Clicked document node
+   */
+  const handleCopy = React.useCallback(
+    node => {
+      const { name, scope } = node;
+      call("dialog", "copyDocument", {
+        scope,
+        name,
+        onSubmit: newName =>
+          new Promise((resolve, reject) => {
+            call("docManager", "copy", { name, scope }, newName).then(
+              copiedDoc => {
+                resolve();
+                // Open copied document
+                requestScopeVersions({
+                  scope,
+                  deepness: 1,
+                  name: copiedDoc.getName(),
+                  url: copiedDoc.getUrl()
+                });
+              }
+            );
+          })
+      });
+    },
+    [call, requestScopeVersions]
+  );
+
+  /**
+   * Handle click to delete document
+   * @param {{name: string, scope: string}} node : Clicked document node
+   */
+  const handleDelete = React.useCallback(
+    node => {
+      const { name, scope } = node;
+      call("dialog", "confirmation", {
+        submitText: t("Delete"),
+        title: t("Confirm to delete"),
+        onSubmit: () =>
+          call("docManager", "delete", { name, scope }).catch(error =>
+            console.log(
+              `Could not delete ${name} \n ${error.statusText ?? error}`
+            )
+          ),
+        message: `Are you sure you want to delete the document "${name}"?`
+      });
+    },
+    [call, t]
+  );
 
   //========================================================================================
   /*                                                                                      *
@@ -229,55 +291,12 @@ const Explorer = props => {
       <h1 className={classes.header}>{t("Explorer")}</h1>
       <Typography component="div" className={classes.typography}>
         <VirtualizedTree
-          onClickNode={async node => {
-            _requestScopeVersions(node);
-          }}
           data={data}
-          handleChange={nodes => {
-            console.log("debug handle change", nodes);
-          }}
-          handleCopyClick={node => {
-            const { name, scope } = node;
-            call("dialog", "copyDocument", {
-              scope,
-              name,
-              onSubmit: newName =>
-                new Promise((resolve, reject) => {
-                  call("docManager", "copy", { name, scope }, newName).then(
-                    copiedDoc => {
-                      resolve();
-                      // Open copied document
-                      _requestScopeVersions({
-                        scope,
-                        deepness: 1,
-                        name: copiedDoc.getName(),
-                        url: copiedDoc.getUrl()
-                      });
-                    }
-                  );
-                })
-            });
-          }}
-          // TODO: fire a snackbar on error
-          handleDeleteClick={node => {
-            const { name, scope } = node;
-            call("dialog", "confirmation", {
-              submitText: "Delete",
-              title: t("Confirm to delete"),
-              onSubmit: () =>
-                call("docManager", "delete", { name, scope }).catch(error =>
-                  console.log(
-                    `Could not delete ${name} \n ${error.statusText ?? error}`
-                  )
-                ),
-              message: `Are you sure you want to delete the document "${name}"?`
-            });
-          }}
-          handleCompareClick={node => {
-            console.log("debug compare click", node);
-          }}
+          onClickNode={requestScopeVersions}
+          handleCopyClick={handleCopy}
+          handleDeleteClick={handleDelete}
           showIcons={true}
-          height={props.height}
+          height={height}
         ></VirtualizedTree>
       </Typography>
     </Typography>
@@ -288,13 +307,10 @@ export default withViewPlugin(Explorer);
 
 Explorer.propTypes = {
   call: PropTypes.func.isRequired,
-  profile: PropTypes.object.isRequired
+  on: PropTypes.func.isRequired,
+  height: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 };
 
 Explorer.defaultProps = {
-  profile: { name: "explorer" }
+  height: 700
 };
-
-function useTranslation() {
-  return { t: s => s };
-}
