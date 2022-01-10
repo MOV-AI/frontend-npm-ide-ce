@@ -37,3 +37,21 @@ export const SCOPES = {
   NODE: "Node",
   FLOW: "Flow"
 };
+
+/**
+ * Simple Event to Stop Propagation
+ * @param e: event to stop the propagation
+ */
+export const stopPropagation = e => {
+  e.stopPropagation();
+}
+
+/**
+ * Returns the document name from an URL
+ * @param {String} url
+ * @returns {String}
+ */
+export function getNameFromURL(url) {
+  console.log("url", url);
+  return url?.substring(url.lastIndexOf("/") +1);
+}

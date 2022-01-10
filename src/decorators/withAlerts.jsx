@@ -10,15 +10,35 @@ const withAlerts = Component => {
     // Props
     const { call } = props;
 
+    // Consts
+    const SEVERITIES = {
+      SUCCESS: "success",
+      ERROR: "error",
+      INFO: "info",
+      WARNING: "warning"
+    };
+
     /**
      * Create snackbar alert
      * @param {{message: String, severity: String}} alertData
      */
-    const alert = ({ title, message, location, severity = "success" }) => {
+    const alert = ({
+      title,
+      message,
+      location,
+      severity = SEVERITIES.SUCCESS
+    }) => {
       call("alert", "show", { title, message, severity, location });
     };
 
-    return <Component {...props} ref={ref} alert={alert} />;
+    return (
+      <Component
+        {...props}
+        ref={ref}
+        alert={alert}
+        alertSeverities={SEVERITIES}
+      />
+    );
   };
 };
 

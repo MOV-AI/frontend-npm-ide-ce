@@ -6,7 +6,7 @@ import KeyValueEditorDialog from "../KeyValueTable/KeyValueEditorDialog";
 import useDataTypes from "./DataTypes/hooks/useDataTypes";
 
 const ParameterEditorDialog = props => {
-  const { alert } = props;
+  const { alert, alertSeverities } = props;
   // Hooks
   const [data, setData] = React.useState({});
   const { getDataTypes, getLabel, getEditComponent, getValidValue, validate } =
@@ -67,7 +67,7 @@ const ParameterEditorDialog = props => {
         return { ...res, data: dataToSubmit };
       })
       .catch(err => {
-        alert({ message: err.message, severity: "error" });
+        alert({ message: err.message, severity: alertSeverities.ERROR });
         return err;
       });
   };
