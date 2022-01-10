@@ -194,7 +194,7 @@ class Node extends Model {
    * Adds a new instance of a managed property
    * Can only be used with managed properties
    * @param {string} propName : The name of the property
-   * @param {any} data : The data of the item
+   * @param {any} data : The data to set the item
    * @returns {Node} : The instance
    */
   setKeyValue(propName, data) {
@@ -203,8 +203,9 @@ class Node extends Model {
   }
 
   /**
-   * Update an item of the manager
-   * @param {string} propName : Model property
+   * Updates an instance of a managed property
+   * Can only be used with managed properties
+   * @param {string} propName : The name of the property
    * @param {*} prevName : Previous item name
    * @param {*} content : The data to update the item
    * @returns {Node} : The instance

@@ -12,8 +12,6 @@ class PyLib extends Model {
    *                                   Model Properties                                   *
    *                                                                                      */
   //========================================================================================
-
-  name = "";
   module = "";
   libClass = "";
 
@@ -24,15 +22,6 @@ class PyLib extends Model {
    *                                     Data Handlers                                    *
    *                                                                                      */
   //========================================================================================
-
-  getName() {
-    return this.name;
-  }
-
-  setName(value) {
-    this.name = value;
-    return this;
-  }
 
   getModule() {
     return this.module;
