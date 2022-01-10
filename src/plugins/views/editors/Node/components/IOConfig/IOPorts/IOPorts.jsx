@@ -83,7 +83,7 @@ const IOPorts = props => {
               <Accordion
                 defaultExpanded
                 className={classes.ioPortTitle}
-                key={ioPortIndex + direction}
+                key={`${ioPortIndex} ${direction}`}
                 expanded={disableAccordion ? true : undefined}
               >
                 <AccordionSummary

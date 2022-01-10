@@ -126,7 +126,8 @@ const IOConfig = props => {
    * Update callback options for each row
    */
   const updateCallbackOptions = React.useCallback(
-    (portData, callbacksAvailable) => {},
+    (portData, callbacksAvailable) =>
+      console.log("updateCallbackOptions", portData, callbacksAvailable),
     []
   );
 
@@ -162,7 +163,7 @@ const IOConfig = props => {
       // Set available callback options for input ports
       const anyMessage = "movai_msgs/Any";
       const anyCallback = getAllCallbacksWithMessage(scopeCallback, anyMessage);
-      updateCallbackOptions(rowData["portIn"][key], anyCallback);
+      updateCallbackOptions(rowData.portIn[key], anyCallback);
       return rowData;
     },
     [
@@ -178,16 +179,16 @@ const IOConfig = props => {
    */
   const setPortData = React.useCallback(
     rowData => {
-      rowData["portIn"] = scopePorts[rowData.template]?.In;
-      rowData["portOut"] = scopePorts[rowData.template]?.Out;
+      rowData.portIn = scopePorts[rowData.template]?.In;
+      rowData.portOut = scopePorts[rowData.template]?.Out;
       // Update CallbackOptions and EffectiveMessage = (pkg/msg) of each ioport
-      if (rowData["portIn"] !== undefined) {
-        Object.keys(rowData["portIn"]).forEach(key => {
+      if (rowData.portIn !== undefined) {
+        Object.keys(rowData.portIn).forEach(key => {
           rowData = formatPortData(rowData, "portIn", key);
         });
       }
-      if (rowData["portOut"] !== undefined) {
-        Object.keys(rowData["portOut"]).forEach(key => {
+      if (rowData.portOut !== undefined) {
+        Object.keys(rowData.portOut).forEach(key => {
           rowData = formatPortData(rowData, "portOut", key);
         });
       }

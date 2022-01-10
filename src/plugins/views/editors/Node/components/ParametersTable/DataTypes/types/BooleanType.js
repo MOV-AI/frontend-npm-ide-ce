@@ -74,7 +74,7 @@ class BooleanType extends DataType {
   }
 
   /**
-   *
+   * Render Boolean Type edit component
    * @param {*} props
    * @param {*} pyValue
    * @param {*} usePythonValue
@@ -90,18 +90,19 @@ class BooleanType extends DataType {
       parsedValue = false;
     }
 
+    // On change checkbox value
+    const onChangeCheckbox = event => {
+      const boolValue = event.target.checked;
+      const value = usePythonValue ? this.boolToPython(boolValue) : boolValue;
+      props.onChange(value);
+    };
+
     return (
       <Checkbox
         color={"primary"}
         style={{ width: "fit-content" }}
         checked={parsedValue}
-        onChange={evt => {
-          const boolValue = evt.target.checked;
-          const value = usePythonValue
-            ? this.boolToPython(boolValue)
-            : boolValue;
-          props.onChange(value);
-        }}
+        onChange={onChangeCheckbox}
         disabled={props.disabled}
       />
     );
