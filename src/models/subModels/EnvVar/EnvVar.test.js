@@ -1,13 +1,13 @@
 import EnvVar from "./EnvVar";
 
-test("smoke test", () => {
+test("Smoke test", () => {
   const obj = new EnvVar();
 
   expect(obj).toBeInstanceOf(EnvVar);
   expect(obj.getValue()).toBe("");
 });
 
-test("serialize to DB", () => {
+test("Serialize to DB", () => {
   const envvar = new EnvVar();
 
   const data = {
@@ -22,7 +22,7 @@ test("serialize to DB", () => {
   expect(envvar.serializeToDB()).toMatchObject(expected);
 });
 
-test("serialize OF db", () => {
+test("Serialize OF db", () => {
   const content = {
     envvar1: { Value: "/opt/movai", Description: "test envvar1" }
   };

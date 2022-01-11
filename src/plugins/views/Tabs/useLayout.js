@@ -7,6 +7,7 @@ import CodeIcon from "@material-ui/icons/Code";
 import DescriptionIcon from "@material-ui/icons/Description";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import { Tooltip } from "@material-ui/core";
+import { getTabIconColor } from "../../../utils/Utils";
 
 const DEFAULT_LAYOUT = {
   dockbox: {
@@ -102,23 +103,19 @@ const useLayout = (props, dockRef) => {
    * @returns {Element} Tab element to render
    */
   const _getCustomTab = React.useCallback((docData, onCloseTab, isDirty) => {
+    const color = getTabIconColor(docData.scope);
     const getIconByScope = {
-      Callback: style => <CodeIcon style={{ ...style, color: "cadetblue" }} />,
+      Callback: style => <CodeIcon style={{ ...style, color }} />,
       Layout: style => (
-        <i
-          className={`icon-Layouts`}
-          style={{ ...style, color: "darkred" }}
-        ></i>
+        <i className={`icon-Layouts`} style={{ ...style, color }}></i>
       ),
-      Flow: style => <AccountTreeIcon style={{ ...style, color: "orchid" }} />,
-      Annotation: style => <DescriptionIcon style={{ ...style }} />,
-      GraphicScene: style => <DeviceHubIcon style={{ ...style }} />,
+      Flow: style => <AccountTreeIcon style={{ ...style, color }} />,
+      Annotation: style => <DescriptionIcon style={{ ...style, color }} />,
+      GraphicScene: style => <DeviceHubIcon style={{ ...style, color }} />,
       Node: style => (
-        <i className={`icon-Nodes`} style={{ ...style, color: "khaki" }}></i>
+        <i className={`icon-Nodes`} style={{ ...style, color }}></i>
       ),
-      Configuration: style => (
-        <BuildIcon style={{ ...style, color: "goldenrod" }} />
-      ),
+      Configuration: style => <BuildIcon style={{ ...style, color }} />,
       Default: <></>
     };
 

@@ -1,12 +1,12 @@
-import { Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import { useTranslation } from "../editors/_shared/mocks";
+import React, { useCallback } from "react";
+import PropTypes from "prop-types";
 import _get from "lodash/get";
 import _set from "lodash/set";
 import { Maybe } from "monet";
-import PropTypes from "prop-types";
-import React from "react";
+import { Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
+import { useTranslation } from "../editors/_shared/mocks";
 import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
 
 const useStyles = makeStyles(theme => ({
@@ -39,7 +39,7 @@ const Explorer = props => {
    * @param {Array} list
    * @param {TreeNode} element
    */
-  const _pushSorted = React.useCallback((list, element) => {
+  const _pushSorted = useCallback((list, element) => {
     /**
      * Compare objects' name property to sort
      * @param {*} a
@@ -63,7 +63,7 @@ const Explorer = props => {
    * Delete document from local list
    * @param {{documentName: String, documentType: String}} docData
    */
-  const _deleteDocument = React.useCallback(docData => {
+  const _deleteDocument = useCallback(docData => {
     const { documentName, documentType } = docData;
     setData(prevState => {
       const newData = [...prevState];
@@ -86,7 +86,7 @@ const Explorer = props => {
    * @param {DocManager} docManager
    * @param {{documentName: String, documentType: String}} docData
    */
-  const _addDocument = React.useCallback(
+  const _addDocument = useCallback(
     (docManager, docData) => {
       const { documentName, documentType, document } = docData;
       setData(prevState => {
@@ -124,7 +124,7 @@ const Explorer = props => {
    *  1 : open document node
    * @param {{id: String, deepness: String, url: String, name: String, scope: String}} node : Clicked node
    */
-  const requestScopeVersions = React.useCallback(
+  const requestScopeVersions = useCallback(
     node => {
       const deepnessToAction = {
         0: () => {
@@ -170,7 +170,7 @@ const Explorer = props => {
    * Handle click to copy document
    * @param {{name: string, scope: string}} node : Clicked document node
    */
-  const handleCopy = React.useCallback(
+  const handleCopy = useCallback(
     node => {
       const { name, scope } = node;
       call("dialog", "copyDocument", {
@@ -200,7 +200,7 @@ const Explorer = props => {
    * Handle click to delete document
    * @param {{name: string, scope: string}} node : Clicked document node
    */
-  const handleDelete = React.useCallback(
+  const handleDelete = useCallback(
     node => {
       const { name, scope } = node;
       call("dialog", "confirmation", {
@@ -228,7 +228,7 @@ const Explorer = props => {
    * Load documents
    * @param {DocManager} docManager
    */
-  const loadDocs = React.useCallback(docManager => {
+  const loadDocs = useCallback(docManager => {
     return setData(_ =>
       docManager.getStores().map((store, id) => {
         const { name, title } = store;
@@ -255,7 +255,7 @@ const Explorer = props => {
    * @param {DocManager} docManager
    * @param {{action: String, documentName: String, documentType: String}} docData
    */
-  const updateDocs = React.useCallback(
+  const updateDocs = useCallback(
     (docManager, docData) => {
       const { action } = docData;
       const updateByActionMap = {

@@ -59,7 +59,11 @@ const ParameterEditorDialog = props => {
         if (!res.success)
           throw new Error(res.error || "Data validation failed");
         // Prepare data to submit
-        const dataToSubmit = { ...dataToValidate, value: valueToSave(data) };
+        if (res.parsed) data.value = res.parsed.toString();
+        const dataToSubmit = {
+          ...dataToValidate,
+          value: valueToSave(data)
+        };
         return { ...res, data: dataToSubmit };
       })
       .catch(err => {

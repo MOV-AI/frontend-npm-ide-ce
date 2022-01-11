@@ -173,8 +173,8 @@ class BaseStore extends StorePluginManager {
 
       // create only if the instance does not exist yet
       if (!this.getDoc(name)) {
-        const doc = this.newDoc(name);
-        doc
+        const newDoc = this.newDoc(name);
+        newDoc
           .enableObservables(false)
           .setIsNew(false)
           .setIsLoaded(false)

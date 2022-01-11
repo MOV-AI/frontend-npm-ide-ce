@@ -29,13 +29,32 @@ class NumberType extends DataType {
   validate(value) {
     return new Promise(resolve => {
       try {
-        const parsed = this.getParsedValue(value);
+        const parsed = this.parseValueToFloat(value);
         const isValid = typeof parsed === "number" && !isNaN(parsed);
-        resolve({ success: isValid });
+        resolve({ success: isValid, parsed });
       } catch (e) {
         resolve({ success: false });
       }
     });
+  }
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
+  
+  /**
+   * Parse float correctly
+   * @param {string} value
+   * @returns {boolean} : false if the string contains any commas (,)
+   * @returns {float} : A float with the parsedFloat value
+   */
+  parseValueToFloat(value) {
+    if(value.indexOf(',') >= 0)
+      return false;
+  
+    return parseFloat(value);
   }
 }
 

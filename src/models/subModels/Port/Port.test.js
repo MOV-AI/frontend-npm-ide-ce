@@ -1,7 +1,7 @@
 import Manager from "../../Manager";
 import Port from "./Port";
 
-test("smoke test", () => {
+test("Smoke test", () => {
   const obj = new Port();
 
   expect(obj).toBeInstanceOf(Port);
@@ -9,7 +9,7 @@ test("smoke test", () => {
   expect(obj.getPortIn()).toBeInstanceOf(Manager);
 });
 
-test("serialize TO DB", () => {
+test("Serialize TO DB", () => {
   const port = new Port();
 
   const data = {
@@ -50,7 +50,7 @@ test("serialize TO DB", () => {
   expect(port.serializeToDB()).toMatchObject(expected);
 });
 
-test("serialize OF db", () => {
+test("Serialize OF db", () => {
   const name = "tag_tf";
   const content = {
     [name]: {
