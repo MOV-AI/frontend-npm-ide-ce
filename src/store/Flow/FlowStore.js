@@ -1,6 +1,7 @@
 import Model from "../../models/Flow/Flow";
 import DBSubscriber from "../DBSubscriber";
 import Store from "../Store";
+import Helper from "./FlowHelper";
 
 class FlowStore extends Store {
   constructor(workspace, observer) {
@@ -13,6 +14,9 @@ class FlowStore extends Store {
       observer
     });
   }
+
+  // Set helper object with cloudFunction
+  helper = Helper;
 
   loadDoc(name) {
     this.getPlugin("DBSubscriber").subscribe(name);

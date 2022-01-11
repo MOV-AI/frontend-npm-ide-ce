@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import GrainIcon from "@material-ui/icons/Grain";
 import { makeStyles } from "@material-ui/core/styles";
@@ -17,8 +17,10 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import StopIcon from "@material-ui/icons/Stop";
-import { FLOW_VIEW_MODE } from "../../Constants/constants";
+import { RobotManager } from "@mov-ai/mov-fe-lib-core";
+import { FLOW_VIEW_MODE, ROBOT_BLACKLIST } from "../../Constants/constants";
 import { DEFAULT_FUNCTION, useTranslation } from "../../../_shared/mocks";
+import Workspace from "../../../../../../utils/Workspace";
 
 const useStyles = makeStyles(theme => ({
   flowLink: {
@@ -54,19 +56,203 @@ const useStyles = makeStyles(theme => ({
 
 /***
  *  
-    // const SELECTED_ROBOT_KEY = "movai.selectedRobot";
     // const FEEDBACK_TIMEOUT = 10000;
  */
 
+const ButtonTopBar = React.forwardRef((props, ref) => {
+  const { disabled, onClick, children } = props;
+  const classes = useStyles();
+  return (
+    <Button
+      ref={ref}
+      size="small"
+      color="primary"
+      variant="contained"
+      disabled={disabled}
+      className={classes.buttonPill}
+      onClick={onClick}
+    >
+      {children}
+    </Button>
+  );
+});
+
 const FlowTopBar = props => {
+  // Props
+  const { call, alert, scope, onRobotChange, onViewModeChange } = props;
   // State hooks
   const [loading, setLoading] = React.useState(false);
-  const [robotStatus, setRobotStatus] = React.useState({});
-  const [robotSelected, setRobotSelected] = React.useState({});
-  const [viewMode, setViewMode] = React.useState({});
+  const [robotStatus, setRobotStatus] = React.useState({
+    activeFlow: "",
+    robotOnline: true
+  });
+  const [robotSelected, setRobotSelected] = React.useState("");
+  const [robotList, setRobotList] = React.useState({});
+  const [viewMode, setViewMode] = React.useState(FLOW_VIEW_MODE.default);
   // Other hooks
   const classes = useStyles();
   const { t } = useTranslation();
+  // Refs
+  const buttonDOMRef = React.useRef();
+  const helperRef = React.useRef();
+  // Managers Memos
+  const robotManager = React.useMemo(() => new RobotManager(), []);
+  const workspaceManager = React.useMemo(() => new Workspace(), []);
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                      Subscribers                                     *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Subscribe to changes in robot status
+   * @param {string} robotId : Robot ID
+   */
+  const robotSubscribe = useCallback(robotId => {
+    console.log("debug robotSubscribe", robotId, setRobotStatus);
+  }, []);
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * @private Reset node status
+   */
+  const resetNodeStatus = useCallback(() => {
+    console.log("debug resetNodeStatus");
+  }, []);
+
+  /**
+   * @private Unsubscribe current selected robot
+   */
+  const robotUnsubscribe = useCallback(() => {
+    if (robotSelected) {
+      resetNodeStatus();
+      robotManager.getRobot(robotSelected).unsubscribe({ property: "Status" });
+    }
+  }, [resetNodeStatus, robotManager, robotSelected]);
+
+  /**
+   * @private Get store helper to use cloud functions
+   */
+  const initStoreHelper = useCallback(() => {
+    return call("docManager", "getStore", scope).then(store => {
+      helperRef.current = store.helper;
+      return store.helper;
+    });
+  }, [call, scope]);
+
+  /**
+   * @private Init selected robot
+   * @param {string} robotId : Robot ID
+   */
+  const initSelectedRobot = useCallback(
+    robotId => {
+      setRobotSelected(robotId);
+      robotSubscribe(robotId);
+      onRobotChange(robotId);
+    },
+    [onRobotChange, robotSubscribe]
+  );
+
+  /**
+   * Get running default robot
+   * @param {String} currentRobot : current selected robot id
+   */
+  const getRunningRobot = useCallback(
+    currentRobot => {
+      // If there's a currently selected robot in local storage
+      if (currentRobot) initSelectedRobot(currentRobot);
+      // Call callback to get default robot
+      const helper = helperRef.current;
+      console.log("debug store helper", helper);
+      helper
+        .getDefaultRobot()
+        .then(robotId => {
+          console.log("debug store robotId", robotId);
+          // Update default robot in state and set as selected if there's none
+          if (robotId) {
+            setRobotList(prevState => {
+              return {
+                ...prevState,
+                [robotId]: { ...prevState[robotId], isDefault: true }
+              };
+            });
+            // Update Flow selected robot if none is selected yet
+            if (!currentRobot) {
+              workspaceManager.setSelectedRobot(robotId);
+              initSelectedRobot(robotId);
+            }
+          }
+        })
+        .catch(err => {
+          console.log("getRunningRobot error", err);
+          alert({
+            message: "Error running backend.FlowTopBar callback",
+            severity: "error"
+          });
+        });
+    },
+    [initSelectedRobot, workspaceManager, alert]
+  );
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    React Lifecycle                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * On Load Robot List
+   * @param {object} robots : All robots load from robotManager
+   */
+  const onLoadRobotList = useCallback(
+    robots => {
+      const currentSelected = workspaceManager.getSelectedRobot();
+      // Remove blacklisted robots
+      Object.keys(robots).forEach(robotId => {
+        if (ROBOT_BLACKLIST.includes(robots[robotId].RobotName))
+          delete robots[robotId];
+      });
+      // Update state hooks
+      setRobotList(robots);
+      setRobotSelected(currentSelected);
+      // Get running Robot
+      getRunningRobot(currentSelected);
+    },
+    [getRunningRobot, workspaceManager]
+  );
+
+  /**
+   * On component mount
+   */
+  React.useEffect(() => {
+    // Load store loader and robot list
+    initStoreHelper().then(() => {
+      robotManager.getAll(onLoadRobotList);
+    });
+  }, [robotManager, onLoadRobotList, initStoreHelper]);
+
+  /**
+   * On component unmount
+   */
+  React.useEffect(() => {
+    // On unmount
+    return () => {
+      robotUnsubscribe();
+    };
+  }, [robotUnsubscribe]);
+
+  /**
+   * Finish loading when there's an update on activeFlow
+   */
+  React.useEffect(() => {
+    setLoading(false);
+  }, [robotStatus.activeFlow]);
 
   //========================================================================================
   /*                                                                                      *
@@ -74,7 +260,49 @@ const FlowTopBar = props => {
    *                                                                                      */
   //========================================================================================
 
-  const { active_flow, robotOnline } = robotStatus;
+  const { activeFlow, robotOnline } = robotStatus;
+
+  const isFlowRunning = useCallback(flowName => {
+    console.log("debug isFlowRunning ?", flowName);
+    return false;
+  }, []);
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Events                                        *
+   *                                                                                      */
+  //========================================================================================
+
+  const handleChangeRobot = useCallback(() => {
+    console.log("debug handleChangeRobot");
+  }, []);
+
+  const sendActionToRobot = useCallback(action => {
+    console.log("debug sendActionToRobot", action);
+  }, []);
+
+  const handleStartFlow = useCallback(() => {
+    console.log("debug handleStartFlow");
+  }, []);
+
+  const handleStopFlow = useCallback(() => {
+    sendActionToRobot("STOP");
+  }, [sendActionToRobot]);
+
+  /**
+   *
+   * @param {*} _
+   * @param {*} newViewMode
+   * @returns
+   */
+  const handleViewModeChange = useCallback(
+    (_, newViewMode) => {
+      if (!newViewMode) return;
+      setViewMode(newViewMode);
+      onViewModeChange(newViewMode);
+    },
+    [onViewModeChange]
+  );
 
   //========================================================================================
   /*                                                                                      *
@@ -86,7 +314,7 @@ const FlowTopBar = props => {
    *
    * @returns
    */
-  const renderStartButton = React.useEffect(() => {
+  const renderStartButton = useCallback(() => {
     // Render circular progress if loading
     return loading ? (
       <CircularProgress size={25} color="inherit" />
@@ -101,7 +329,7 @@ const FlowTopBar = props => {
    *
    * @returns
    */
-  const renderStopButton = React.useEffect(() => {
+  const renderStopButton = useCallback(() => {
     // Render circular progress if loading
     return loading ? (
       <CircularProgress size={25} color="inherit" />
@@ -119,60 +347,48 @@ const FlowTopBar = props => {
           <FormControl className={classes.formControl}>
             <Select
               id="robot-selector"
-              value={this.state.robotSelected}
-              startAdornment={<i className="fas fa-robot"></i>}
-              onChange={this.handleChange}
+              value={robotSelected}
+              startAdornment={<i className="icon-Happy"></i>}
+              onChange={handleChangeRobot}
             >
-              {Object.keys(this.state.robotList).map((robotId, robotIndex) => {
-                const isDefaultRobot = this.state.robotList[robotId].isDefault;
+              {Object.keys(robotList).map((robotId, robotIndex) => {
+                const isDefaultRobot = robotList[robotId].isDefault;
                 return (
                   <MenuItem
                     key={`robotList-${robotIndex}`}
                     value={robotId}
                     className={isDefaultRobot ? classes.defaultRobot : ""}
                   >
-                    {this.state.robotList[robotId].RobotName}
+                    {robotList[robotId].RobotName}
                   </MenuItem>
                 );
               })}
             </Select>
           </FormControl>
-          {this.isFlowRunning(active_flow) ? (
-            <Button
-              variant="contained"
+          {isFlowRunning(activeFlow) ? (
+            <ButtonTopBar
+              ref={buttonDOMRef}
               disabled={loading}
-              color="primary"
-              className={classes.buttonPill}
-              ref={buttonDOM => {
-                this.buttonDOM = buttonDOM;
-              }}
-              size="small"
-              onClick={() => this.handleClickAction("STOP")}
+              onClick={handleStopFlow}
             >
               {renderStopButton()}
-            </Button>
+            </ButtonTopBar>
           ) : (
-            <Button
+            <ButtonTopBar
+              ref={buttonDOMRef}
               disabled={!robotOnline || loading}
-              variant="contained"
-              color="primary"
-              className={classes.buttonPill}
-              ref={buttonDOM => {
-                this.buttonDOM = buttonDOM;
-              }}
-              size="small"
-              onClick={this.handleStartFlow}
+              onClick={handleStartFlow}
             >
               {renderStartButton()}
-            </Button>
+            </ButtonTopBar>
           )}
         </Typography>
         <Typography component="div" className={classes.visualizationToggle}>
           <ToggleButtonGroup
-            size="small"
-            value={this.state.viewMode}
             exclusive
-            onChange={this.handleViewModeChange}
+            size="small"
+            value={viewMode}
+            onChange={handleViewModeChange}
           >
             <ToggleButton value={FLOW_VIEW_MODE.default}>
               <Tooltip title={t("Main flow view")}>
@@ -197,6 +413,7 @@ FlowTopBar.propTypes = {
   nodeCompleteStatusUpdated: PropTypes.func,
   onViewModeChange: PropTypes.func,
   onStartStopFlow: PropTypes.func,
+  onRobotChange: PropTypes.func,
   openFlow: PropTypes.func,
   workspace: PropTypes.string,
   type: PropTypes.string,
@@ -205,6 +422,7 @@ FlowTopBar.propTypes = {
 
 FlowTopBar.defaultProps = {
   openFlow: () => DEFAULT_FUNCTION("openFlow"),
+  onRobotChange: () => DEFAULT_FUNCTION("onRobotChange"),
   onViewModeChange: () => DEFAULT_FUNCTION("onViewModeChange"),
   onStartStopFlow: () => DEFAULT_FUNCTION("onStartStopFlow"),
   nodeCompleteStatusUpdated: () => DEFAULT_FUNCTION("completeStatusUpdated"),
