@@ -76,7 +76,7 @@ const useMainInterface = props => {
     return () => mainInterface.current.destroy();
   });
 
-  return [mainInterface, loading];
+  return { mainInterface, loading };
 };
 
 export default useMainInterface;

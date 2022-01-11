@@ -25,6 +25,7 @@ import { Document, RobotManager, MasterDB } from "@mov-ai/mov-fe-lib-core";
 import { withTranslation } from "react-i18next";
 import { robotBlackList } from "../../../../constants/constants";
 import LocalStorage from "../../../_shared/LocalStorage/LocalStorage";
+import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
 
 const styles = theme => ({
   flowLink: {
@@ -109,7 +110,7 @@ class FlowTopBar extends Component {
         };
       });
     }
-    // const robotStatus = robot;
+    // Subscribe to status change
     robot.subscribe({
       property: "Status",
       onLoad: data => {
@@ -478,6 +479,24 @@ class FlowTopBar extends Component {
     this.props.onViewModeChange(viewMode);
   };
 
+  handleStartFlow = () => {
+    const { active_flow } = this.state.robotStatus;
+    if (active_flow === "") {
+      this.handleClickAction("START");
+    } else {
+      // Confirmation alert : Another flow is running!
+      MasterComponent.confirmAlert(
+        "Another flow is running!",
+        `"${
+          this.state.robotList[this.state.robotSelected].RobotName
+        }" is running flow "${active_flow}".\nAre you sure you want to run the flow "${this.getFlowPath()}"?`,
+        () => this.handleClickAction("START"), //change
+        () => console.log("close modal"), //do nothing close modal
+        "Run"
+      );
+    }
+  };
+
   //========================================================================================
   /*                                                                                      *
    *                                        Helper                                        *
@@ -511,6 +530,40 @@ class FlowTopBar extends Component {
    *                                        Render                                        *
    *                                                                                      */
   //========================================================================================
+
+  /**
+   *
+   * @returns
+   */
+  renderStartButton = () => {
+    const { t } = this.props;
+    const { isLoading } = this.state;
+    // Render circular progress if loading
+    return isLoading ? (
+      <CircularProgress size={25} color="inherit" />
+    ) : (
+      <Tooltip title={t("Start Flow")}>
+        <PlayArrowIcon />
+      </Tooltip>
+    );
+  };
+
+  /**
+   *
+   * @returns
+   */
+  renderStopButton = () => {
+    const { t } = this.props;
+    const { isLoading } = this.state;
+    // Render circular progress if loading
+    return isLoading ? (
+      <CircularProgress size={25} color="inherit" />
+    ) : (
+      <Tooltip title={t("Stop Flow")}>
+        <StopIcon />
+      </Tooltip>
+    );
+  };
 
   render() {
     const { t, classes } = this.props;
@@ -557,13 +610,7 @@ class FlowTopBar extends Component {
                 size="small"
                 onClick={() => this.handleClickAction("STOP")}
               >
-                {isLoading ? (
-                  <CircularProgress size={25} color="inherit" />
-                ) : (
-                  <Tooltip title={t("Stop Flow")}>
-                    <StopIcon />
-                  </Tooltip>
-                )}
+                {this.renderStopButton()}
               </Button>
             ) : (
               <Button
@@ -575,29 +622,9 @@ class FlowTopBar extends Component {
                   this.buttonDOM = buttonDOM;
                 }}
                 size="small"
-                onClick={
-                  active_flow === ""
-                    ? () => this.handleClickAction("START")
-                    : () =>
-                        MasterComponent.confirmAlert(
-                          "Another flow is running!",
-                          `"${
-                            this.state.robotList[this.state.robotSelected]
-                              .RobotName
-                          }" is running flow "${active_flow}".\nAre you sure you want to run the flow "${this.getFlowPath()}"?`,
-                          () => this.handleClickAction("START"), //change
-                          () => {}, //do nothing close modal
-                          "Run"
-                        )
-                }
+                onClick={this.handleStartFlow}
               >
-                {isLoading ? (
-                  <CircularProgress size={25} color="inherit" />
-                ) : (
-                  <Tooltip title={t("Start Flow")}>
-                    <PlayArrowIcon />
-                  </Tooltip>
-                )}
+                {this.renderStartButton()}
               </Button>
             )}
           </Typography>
@@ -639,10 +666,10 @@ FlowTopBar.propTypes = {
 };
 
 FlowTopBar.defaultProps = {
-  openFlow: () => {},
-  onViewModeChange: () => {},
-  onStartStopFlow: () => {},
-  nodeCompleteStatusUpdated: () => {},
+  openFlow: () => DEFAULT_FUNCTION("openFlow"),
+  onViewModeChange: () => DEFAULT_FUNCTION("onViewModeChange"),
+  onStartStopFlow: () => DEFAULT_FUNCTION("onStartStopFlow"),
+  nodeCompleteStatusUpdated: () => DEFAULT_FUNCTION("completeStatusUpdated"),
   workspace: "global",
   type: "Flow",
   version: "__UNVERSIONED__"

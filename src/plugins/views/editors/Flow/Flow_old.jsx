@@ -10,8 +10,8 @@ import BaseFlow from "./Views/BaseFlow";
 // import RContainerMenu from "./Components/Menus/RContainerMenu";
 // import RDebugNodeMenu from "./Components/Menus/RDebugNodeMenu";
 import ContextMenu from "./Components/Menus/ContextMenu";
-import FlowTopBar from "./Components/flowTopBar/FlowTopBar";
-import FlowBottomBar from "./Components/FlowBottomBar/FlowBottomBar";
+// import FlowTopBar from "./Components/flowTopBar/FlowTopBar";
+// import FlowBottomBar from "./Components/FlowBottomBar/FlowBottomBar";
 
 import { FLOW_VIEW_MODE } from "./Constants/constants";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -380,7 +380,29 @@ class Flow extends Component {
   };
 
   renderBaseFlow() {
-    return <div>it works</div>;
+    return (
+      <React.Fragment>
+        <BaseFlow
+          {...this.props}
+          ref={this._baseFlow}
+          type={this.type}
+          // nodeContextMenu={this.nodeContextMenu}
+          // canvasContextMenu={this.canvasContextMenu}
+          // linkContextMenu={this.linkContextMenu}
+          // portContextMenu={this.portContextMenu}
+          // onFlowValidated={warnings => this.onFlowValidated(warnings)}
+          // onNodeSelected={node => this.onNodeSelected(node)}
+          // onLinkSelected={event => this.onLinkSelected(event)}
+          // onDblClick={node => this.onDblClick(node)}
+          // updateRMainMenu={() => this.updateRMainMenu()}
+          // renderRMenu={() => this.renderMenus()}
+          // renderRDebugNodeMenu={this.addRDebugNodeMenu}
+          // readOnly={readOnly}
+          // setPortHasCallBack={this.setPortHasCallBack}
+          // t={this.props.t}
+        ></BaseFlow>
+      </React.Fragment>
+    );
   }
 
   render() {
@@ -395,7 +417,7 @@ class Flow extends Component {
         }}
       >
         <div id="flow-top-bar">
-          <FlowTopBar
+          {/* <FlowTopBar
             defaultViewMode={viewMode}
             nodeStatusUpdated={this.onNodeStatusUpdate}
             nodeCompleteStatusUpdated={this.onMonitoringNodeStatusUpdate}
@@ -410,16 +432,16 @@ class Flow extends Component {
             type={model}
             id={id}
             version={version}
-          ></FlowTopBar>
+          ></FlowTopBar> */}
         </div>
         {this.renderBaseFlow()}
-        <FlowBottomBar
+        {/* <FlowBottomBar
           openFlow={data => this.openDoc(data)}
           onToggleWarnings={this.onToggleWarnings}
           robotSelected={robotSelected}
           runningFlow={runningFlow}
           warnings={warnings}
-        />
+        /> */}
       </div>
     );
   }

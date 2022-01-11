@@ -7,6 +7,7 @@ import ReactResizeDetector from "react-resize-detector";
 import Warnings from "../Components/Warnings/Warnings";
 import Tooltip from "../Components/Tooltips/Tooltip";
 import { Rest } from "@mov-ai/mov-fe-lib-core";
+import { DEFAULT_FUNCTION } from "../../_shared/mocks";
 
 class Monitoring extends Component {
   state = {
@@ -252,9 +253,9 @@ Monitoring.defaultProps = {
   type: "flow",
   robotSelected: "Default",
   nodeContextMenu: {},
-  onNodeSelected: () => {},
-  onDblClick: () => {},
-  updateRMainMenu: () => {},
+  onNodeSelected: () => DEFAULT_FUNCTION("onNodeSelected"),
+  onDblClick: () => DEFAULT_FUNCTION("onDblClick"),
+  updateRMainMenu: () => DEFAULT_FUNCTION("updateRMainMenu"),
   masterComponent: { alert: window.alert, ALERTS: { error: 1 } },
   model: "Flow",
   readOnly: false,
