@@ -17,7 +17,7 @@ const BaseFlow = props => {
   // State Hooks
   const [loading, setLoading] = useState(true);
 
-  const containerId = useRef(`base-${Math.floor(Math.random() * 9999)}`);
+  const containerId = useRef(`base-${id.replace(/\//g, "-")}`);
   const container = useRef();
 
   const handleEvents = useCallback((evt, data) => {
