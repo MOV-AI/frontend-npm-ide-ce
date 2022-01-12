@@ -6,10 +6,11 @@ import useMainInterface from "./hooks/useMainInterface";
 import styles from "./styles";
 import Loader from "../../_shared/Loader/Loader";
 import { EVT_NAMES } from "../events";
+import { usePluginMethods } from "../../../../../engine/ReactPlugin/ViewReactPlugin";
 
 const useStyles = makeStyles(styles);
 
-const BaseFlow = props => {
+const BaseFlow = React.forwardRef((props, ref) => {
   const classes = useStyles(props);
   const { instance, id, name, type, model, dataFromDB } = props;
   const readOnly = false;
@@ -26,7 +27,7 @@ const BaseFlow = props => {
     }
   }, []);
 
-  useMainInterface({
+  const { mainInterface } = useMainInterface({
     classes,
     instance,
     name,
@@ -39,6 +40,8 @@ const BaseFlow = props => {
     readOnly,
     handleEvents
   });
+
+  usePluginMethods(ref, { mainInterface });
 
   return (
     <div id={`flow-main-${id}`} className={classes.flowContainer}>
@@ -59,12 +62,12 @@ const BaseFlow = props => {
       ></div>
     </div>
   );
-};
+});
 
 BaseFlow.propTypes = {
   id: PropTypes.string.isRequired,
-  type: PropTypes.string.isRequired,
-  model: PropTypes.string.isRequired
+  type: PropTypes.string,
+  model: PropTypes.string
 };
 
 export default BaseFlow;

@@ -34,9 +34,9 @@ const useStyles = makeStyles(theme => ({
  */
 export const DialogTitle = props => {
   const classes = useStyles();
-  const { children, onClose, hasCloseButton, ...other } = props;
+  const { children, onClose, hasCloseButton } = props;
   return (
-    <MuiDialogTitle disableTypography className={classes.root} {...other}>
+    <MuiDialogTitle disableTypography className={classes.root}>
       <Typography variant="h6">{children}</Typography>
       {hasCloseButton ? (
         <IconButton

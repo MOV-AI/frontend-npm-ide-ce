@@ -18,11 +18,15 @@ const useStyles = makeStyles(theme => ({
 
 const Flow = (props, ref) => {
   // Props
-  const { id, call, scope, name, instance, data, alert } = props;
+  const { id, call, scope, name, instance, data, alert, confirmationAlert } =
+    props;
   // State Hooks
   const [dataFromDB, setDataFromDB] = useState();
   // Other Hooks
   const classes = useStyles();
+  // Refs
+  const baseFlowRef = React.useRef();
+  const mainInterfaceRef = React.useRef();
 
   //========================================================================================
   /*                                                                                      *
@@ -55,13 +59,23 @@ const Flow = (props, ref) => {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Initialize data
+   */
   useEffect(() => {
-    const obj = instance.current;
+    const model = instance.current;
 
-    if (obj) {
-      setDataFromDB(obj.serializeToDB());
+    if (model) {
+      setDataFromDB(model.serializeToDB());
     }
   }, [instance, data]);
+
+  /**
+   * Initialize main interface
+   */
+  useEffect(() => {
+    mainInterfaceRef.current = baseFlowRef.current?.mainInterface;
+  }, [baseFlowRef.current?.mainInterface]);
 
   //========================================================================================
   /*                                                                                      *
@@ -76,23 +90,23 @@ const Flow = (props, ref) => {
           id={id}
           call={call}
           alert={alert}
+          confirmationAlert={confirmationAlert}
           scope={scope}
-          // defaultViewMode={viewMode}
+          version={instance.current?.version}
+          mainInterface={mainInterfaceRef}
           // nodeStatusUpdated={this.onNodeStatusUpdate}
           // nodeCompleteStatusUpdated={this.onMonitoringNodeStatusUpdate}
           // onStartStopFlow={this.onStartStopFlow}
           // onViewModeChange={this.onViewModeChange}
           // onRobotChange={this.onRobotChange}
           // openFlow={data => this.openDoc(data)}
-          // interfaceMode={this.mainInterface?.mode?.mode}
-          // graph={this.mainInterface?.graph}
           // warnings={warnings}
           // workspace={workspace}
           // type={model}
           // version={version}
         ></FlowTopBar>
       </div>
-      <BaseFlow {...props} id={id} dataFromDB={dataFromDB} />
+      <BaseFlow {...props} ref={baseFlowRef} dataFromDB={dataFromDB} />
       {/* <FlowBottomBar
           openFlow={data => this.openDoc(data)}
           onToggleWarnings={this.onToggleWarnings}

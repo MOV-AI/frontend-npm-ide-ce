@@ -21,6 +21,7 @@ import { RobotManager } from "@mov-ai/mov-fe-lib-core";
 import { FLOW_VIEW_MODE, ROBOT_BLACKLIST } from "../../Constants/constants";
 import { DEFAULT_FUNCTION, useTranslation } from "../../../_shared/mocks";
 import Workspace from "../../../../../../utils/Workspace";
+import useNodeStatusUpdate from "./hooks/useNodeStatusUpdate";
 
 const useStyles = makeStyles(theme => ({
   flowLink: {
@@ -54,10 +55,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-/***
- *  
-    // const FEEDBACK_TIMEOUT = 10000;
- */
+const FEEDBACK_TIMEOUT = 10000;
 
 const ButtonTopBar = React.forwardRef((props, ref) => {
   const { disabled, onClick, children } = props;
@@ -79,39 +77,33 @@ const ButtonTopBar = React.forwardRef((props, ref) => {
 
 const FlowTopBar = props => {
   // Props
-  const { call, alert, scope, onRobotChange, onViewModeChange } = props;
+  const {
+    call,
+    alert,
+    scope,
+    mainInterface,
+    id,
+    onRobotChange,
+    confirmationAlert,
+    onViewModeChange
+  } = props;
   // State hooks
   const [loading, setLoading] = React.useState(false);
-  const [robotStatus, setRobotStatus] = React.useState({
-    activeFlow: "",
-    robotOnline: true
-  });
   const [robotSelected, setRobotSelected] = React.useState("");
   const [robotList, setRobotList] = React.useState({});
   const [viewMode, setViewMode] = React.useState(FLOW_VIEW_MODE.default);
   // Other hooks
   const classes = useStyles();
   const { t } = useTranslation();
+  const { robotSubscribe, robotUnsubscribe, getFlowPath, robotStatus } =
+    useNodeStatusUpdate(props, robotSelected, viewMode);
   // Refs
   const buttonDOMRef = React.useRef();
   const helperRef = React.useRef();
+  const commandRobotTimeoutRef = React.useRef();
   // Managers Memos
   const robotManager = React.useMemo(() => new RobotManager(), []);
   const workspaceManager = React.useMemo(() => new Workspace(), []);
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                      Subscribers                                     *
-   *                                                                                      */
-  //========================================================================================
-
-  /**
-   * Subscribe to changes in robot status
-   * @param {string} robotId : Robot ID
-   */
-  const robotSubscribe = useCallback(robotId => {
-    console.log("debug robotSubscribe", robotId, setRobotStatus);
-  }, []);
 
   //========================================================================================
   /*                                                                                      *
@@ -120,21 +112,16 @@ const FlowTopBar = props => {
   //========================================================================================
 
   /**
-   * @private Reset node status
+   * @private Change robot subscriber (on change of selected robot)
+   * @param {String} robotId : New selected robot
    */
-  const resetNodeStatus = useCallback(() => {
-    console.log("debug resetNodeStatus");
-  }, []);
-
-  /**
-   * @private Unsubscribe current selected robot
-   */
-  const robotUnsubscribe = useCallback(() => {
-    if (robotSelected) {
-      resetNodeStatus();
-      robotManager.getRobot(robotSelected).unsubscribe({ property: "Status" });
-    }
-  }, [resetNodeStatus, robotManager, robotSelected]);
+  const changeRobotSubscriber = useCallback(
+    robotId => {
+      robotUnsubscribe();
+      robotSubscribe(robotId);
+    },
+    [robotSubscribe, robotUnsubscribe]
+  );
 
   /**
    * @private Get store helper to use cloud functions
@@ -169,7 +156,6 @@ const FlowTopBar = props => {
       if (currentRobot) initSelectedRobot(currentRobot);
       // Call callback to get default robot
       const helper = helperRef.current;
-      console.log("debug store helper", helper);
       helper
         .getDefaultRobot()
         .then(robotId => {
@@ -252,7 +238,8 @@ const FlowTopBar = props => {
    */
   React.useEffect(() => {
     setLoading(false);
-  }, [robotStatus.activeFlow]);
+    clearTimeout(commandRobotTimeoutRef.current);
+  }, [robotStatus.activeFlow, setLoading]);
 
   //========================================================================================
   /*                                                                                      *
@@ -260,12 +247,29 @@ const FlowTopBar = props => {
    *                                                                                      */
   //========================================================================================
 
-  const { activeFlow, robotOnline } = robotStatus;
-
-  const isFlowRunning = useCallback(flowName => {
-    console.log("debug isFlowRunning ?", flowName);
-    return false;
-  }, []);
+  /**
+   * Check if can start flow
+   * @param {string} action : One of values: "START" or "STOP"
+   * @returns {boolean} True if can run flow and False otherwise
+   */
+  const canRunFlow = useCallback(
+    action => {
+      const graph = mainInterface.current?.current?.graph;
+      const warnings = graph?.warnings || [];
+      const warningsVisibility = graph.warningsVisibility;
+      const runtimeWarnings = warnings.filter(wn => wn.isRuntime);
+      runtimeWarnings.forEach(warning => {
+        graph.setPermanentWarnings(warning);
+        if (!warningsVisibility)
+          alert({
+            message: runtimeWarnings[0].message,
+            severity: runtimeWarnings[0].type
+          });
+      });
+      return !(runtimeWarnings.length && action === "START");
+    },
+    [alert, mainInterface]
+  );
 
   //========================================================================================
   /*                                                                                      *
@@ -273,33 +277,114 @@ const FlowTopBar = props => {
    *                                                                                      */
   //========================================================================================
 
-  const handleChangeRobot = useCallback(() => {
-    console.log("debug handleChangeRobot");
-  }, []);
+  /**
+   * Handle change of selected robot
+   * @param {Event} event : Change native event
+   */
+  const handleChangeRobot = useCallback(
+    event => {
+      setRobotSelected(prevState => {
+        const robotId = event.target.value;
+        if (robotId !== prevState) {
+          // Set in local storage
+          workspaceManager.setSelectedRobot(robotId);
+          // Change subscriber and update state
+          changeRobotSubscriber(robotId);
+          onRobotChange(robotId);
+          return robotId;
+        }
+        return prevState;
+      });
+    },
+    [changeRobotSubscriber, onRobotChange, workspaceManager]
+  );
 
-  const sendActionToRobot = useCallback(action => {
-    console.log("debug sendActionToRobot", action);
-  }, []);
+  /**
+   * Send action to start robot
+   * @param {*} action
+   * @returns To avoid starting flow if flow is not eligible to start
+   */
+  const sendActionToRobot = useCallback(
+    action => {
+      const canStart = canRunFlow(action);
+      if (!canStart) return;
+      setLoading(true);
+      // Send action to robot
+      helperRef.current
+        .sendToRobot({
+          action,
+          flowPath: getFlowPath(),
+          robotId: robotSelected
+        })
+        .then(res => {
+          if (!res) return;
+          commandRobotTimeoutRef.current = setTimeout(() => {
+            setLoading(false);
+            alert({
+              message: `Failed to ${action.toLowerCase()} flow`,
+              severity: "error"
+            });
+          }, FEEDBACK_TIMEOUT);
+        })
+        .catch(err => {
+          alert({
+            message: "Error running backend.FlowTopBar callback",
+            severity: "error"
+          });
+        });
+      if (buttonDOMRef.current) buttonDOMRef.current.blur();
+    },
+    [alert, canRunFlow, getFlowPath, robotSelected, setLoading]
+  );
 
+  /**
+   * Handle Start flow button click
+   */
   const handleStartFlow = useCallback(() => {
-    console.log("debug handleStartFlow");
-  }, []);
+    // Start Flow if there's no active flow
+    if (robotStatus.activeFlow === "") {
+      sendActionToRobot("START");
+    } else {
+      // Confirmation alert if Another flow is running!
+      const title = "Another flow is running!";
+      const message = `"${robotList[robotSelected].RobotName}" is running flow "${robotStatus.activeFlow}".\nAre you sure you want to run the flow "${id}"?`;
+      confirmationAlert({
+        title,
+        message,
+        submitText: "Run",
+        onSubmit: () => sendActionToRobot("START")
+      });
+    }
+  }, [
+    id,
+    robotStatus.activeFlow,
+    robotList,
+    robotSelected,
+    confirmationAlert,
+    sendActionToRobot
+  ]);
 
+  /**
+   * Handle Stop flow button click
+   */
   const handleStopFlow = useCallback(() => {
     sendActionToRobot("STOP");
   }, [sendActionToRobot]);
 
   /**
-   *
-   * @param {*} _
-   * @param {*} newViewMode
+   * Handle view mode change : default view to tree view
+   * @param {Event} _ : Event change
+   * @param {string} newViewMode : New value
    * @returns
    */
   const handleViewModeChange = useCallback(
     (_, newViewMode) => {
       if (!newViewMode) return;
-      setViewMode(newViewMode);
-      onViewModeChange(newViewMode);
+      setViewMode(prevState => {
+        if (prevState === newViewMode) return prevState;
+        onViewModeChange(newViewMode);
+        return newViewMode;
+      });
     },
     [onViewModeChange]
   );
@@ -311,8 +396,8 @@ const FlowTopBar = props => {
   //========================================================================================
 
   /**
-   *
-   * @returns
+   * Render Start button content
+   * @returns {ReactElement} CircularProgress to indicate loading or play icon with tooltip
    */
   const renderStartButton = useCallback(() => {
     // Render circular progress if loading
@@ -326,8 +411,8 @@ const FlowTopBar = props => {
   }, [loading, t]);
 
   /**
-   *
-   * @returns
+   * Render Stop button content
+   * @returns {ReactElement} CircularProgress to indicate loading or Stop icon with tooltip
    */
   const renderStopButton = useCallback(() => {
     // Render circular progress if loading
@@ -365,7 +450,7 @@ const FlowTopBar = props => {
               })}
             </Select>
           </FormControl>
-          {isFlowRunning(activeFlow) ? (
+          {getFlowPath() === robotStatus.activeFlow ? (
             <ButtonTopBar
               ref={buttonDOMRef}
               disabled={loading}
@@ -376,7 +461,7 @@ const FlowTopBar = props => {
           ) : (
             <ButtonTopBar
               ref={buttonDOMRef}
-              disabled={!robotOnline || loading}
+              disabled={!robotStatus.isOnline || loading}
               onClick={handleStartFlow}
             >
               {renderStartButton()}
@@ -395,7 +480,7 @@ const FlowTopBar = props => {
                 <GrainIcon fontSize="small" />
               </Tooltip>
             </ToggleButton>
-            <ToggleButton value={FLOW_VIEW_MODE.treeView}>
+            <ToggleButton value={FLOW_VIEW_MODE.treeView} disabled>
               <Tooltip title={t("Tree view")}>
                 <i className="icon-tree" style={{ fontSize: "1.2rem" }}></i>
               </Tooltip>
@@ -425,6 +510,7 @@ FlowTopBar.defaultProps = {
   onRobotChange: () => DEFAULT_FUNCTION("onRobotChange"),
   onViewModeChange: () => DEFAULT_FUNCTION("onViewModeChange"),
   onStartStopFlow: () => DEFAULT_FUNCTION("onStartStopFlow"),
+  nodeStatusUpdated: () => DEFAULT_FUNCTION("nodeStatusUpdated"),
   nodeCompleteStatusUpdated: () => DEFAULT_FUNCTION("completeStatusUpdated"),
   workspace: "global",
   type: "Flow",
