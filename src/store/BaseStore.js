@@ -63,7 +63,12 @@ class BaseStore extends StorePluginManager {
         const obj = this.getDoc(name) || this.newDoc(name).setIsNew(false);
 
         const data = obj.constructor.serializeOfDB(file);
-        return obj.setData(data).setIsLoaded(true).setDirty(false);
+        return obj
+          .enableObservables(false)
+          .setData(data)
+          .setIsLoaded(true)
+          .setDirty(false)
+          .enableObservables(true);
       })
       .catch(error => {
         if (error.status === 404) {
@@ -85,6 +90,10 @@ class BaseStore extends StorePluginManager {
     return this.data.set(name, value);
   }
 
+  delDoc(name) {
+    return this.data.delete(name);
+  }
+
   deleteDocFromStore(name) {
     this.getDoc(name)?.destroy();
     return this.data.delete(name);
@@ -93,6 +102,21 @@ class BaseStore extends StorePluginManager {
   generateName(next = 1) {
     const name = `untitled-${next}`;
     return this.data.has(name) ? this.generateName(next + 1) : name;
+  }
+
+  /**
+   * Rename the document (locally)
+   * @param {object} doc The document instance
+   * @param {string} newName The new name of the document
+   */
+  renameDoc(doc, newName) {
+    // remove the document from the local store
+    this.delDoc(doc.getName());
+    // re add the document with the new name
+    this.setDoc(newName, doc);
+
+    //rename the instance
+    doc.setName(newName);
   }
 
   //========================================================================================
@@ -149,7 +173,13 @@ class BaseStore extends StorePluginManager {
 
       // create only if the instance does not exist yet
       if (!this.getDoc(name)) {
-        this.newDoc(name).setIsNew(false).setIsLoaded(false).setDirty(false);
+        const newDoc = this.newDoc(name);
+        newDoc
+          .enableObservables(false)
+          .setIsNew(false)
+          .setIsLoaded(false)
+          .setDirty(false)
+          .enableObservables(true);
       }
     });
 

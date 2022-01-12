@@ -12,11 +12,12 @@
   "dependencies": {
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
+    "@material-table/core": "^4.3.11",
     "@material-ui/core": "^4.12.3",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.60",
     "@material-ui/styles": "^4.11.4",
-    "@mov-ai/mov-fe-lib-code-editor": "^1.0.5",
+    "@mov-ai/mov-fe-lib-code-editor": "^1.0.6",
     "@mov-ai/mov-fe-lib-core": "^1.0.33",
     "@mov-ai/mov-fe-lib-react": "^1.0.33",
     "@remixproject/engine": "^0.3.19",

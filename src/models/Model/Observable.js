@@ -3,6 +3,11 @@ const symbols = {
   enabled: Symbol()
 };
 
+/**
+ * Provides observable capabilities
+ * Implements a proxy trap to execute callbacks when
+ * an observed property changes
+ */
 class Observable {
   constructor() {
     this[symbols.timer] = undefined;
@@ -41,8 +46,8 @@ class Observable {
    * Enable observables
    * @returns
    */
-  enableObservables() {
-    this[symbols.enabled] = true;
+  enableObservables(enable = true) {
+    this[symbols.enabled] = enable;
     return this;
   }
 
@@ -73,6 +78,8 @@ class Observable {
    * @returns  {any}
    */
   dispatch(prop, value) {
+    if (!this[symbols.enabled]) return;
+
     try {
       for (const fn of this.subscribers.values()) {
         setTimeout(() => fn.call(this, this, prop, value), 0);

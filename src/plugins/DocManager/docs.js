@@ -1,7 +1,9 @@
 import ConfigurationStore from "../../store/Configuration/ConfigurationStore";
 import CallbackStore from "../../store/Callback/CallbackStore";
+import NodeStore from "../../store/Node/NodeStore";
 import Configuration from "../views/editors/Configuration/Configuration";
 import Callback from "../views/editors/Callback/Callback";
+import Node from "../views/editors/Node/Node";
 
 /**
  * Returns a list of interfaces
@@ -18,6 +20,10 @@ const factory = (workspace, observer) => {
     [ConfigurationStore.SCOPE]: {
       store: new ConfigurationStore(workspace, observer),
       plugin: Configuration
+    },
+    [NodeStore.SCOPE]: {
+      store: new NodeStore(workspace, observer),
+      plugin: Node
     }
   };
 };

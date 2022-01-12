@@ -1,13 +1,13 @@
-import PyLibManager from "./PyLibManager";
-import PyLib from "./PyLib";
+import Manager from "./Manager";
+import PyLib from "../Callback/PyLib/PyLib";
 
-test("smoke test", () => {
-  const obj = new PyLibManager();
+test("Smoke test", () => {
+  const obj = new Manager();
 
-  expect(obj).toBeInstanceOf(PyLibManager);
+  expect(obj).toBeInstanceOf(Manager);
 });
 
-test("serialize OF db", () => {
+test("Serialize OF db", () => {
   const content = {
     Duration: {
       Module: "rospy",
@@ -32,12 +32,12 @@ test("serialize OF db", () => {
     }
   };
 
-  const data = PyLibManager.serializeOfDB(content);
+  const data = Manager.serializeOfDB(content, PyLib);
 
   expect(data).toMatchObject(expected);
 });
 
-test("serialize TO db", () => {
+test("Serialize TO db", () => {
   const content = {
     Duration: {
       Module: "rospy",
@@ -49,14 +49,14 @@ test("serialize TO db", () => {
     }
   };
 
-  const data = PyLibManager.serializeOfDB(content);
+  const data = Manager.serializeOfDB(content, PyLib);
 
-  const obj = new PyLibManager();
-  expect(obj).toBeInstanceOf(PyLibManager);
+  const obj = new Manager("pyLibs", PyLib);
+  expect(obj).toBeInstanceOf(Manager);
 
   obj.setData(data);
-  expect(obj.getPyLib("Duration")).toBeInstanceOf(PyLib);
-  expect(obj.getPyLib("Duration").getModule()).toBe("rospy");
+  expect(obj.getItem("Duration")).toBeInstanceOf(PyLib);
+  expect(obj.getItem("Duration").getModule()).toBe("rospy");
 
   expect(obj.serializeToDB()).toMatchObject(content);
 });
