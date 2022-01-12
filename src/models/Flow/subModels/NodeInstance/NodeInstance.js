@@ -89,6 +89,10 @@ class NodeInstance extends Model {
     return this.position;
   }
 
+  setPosition(x, y) {
+    return this.position.setData({ x, y });
+  }
+
   getParameters() {
     return this.parameters;
   }

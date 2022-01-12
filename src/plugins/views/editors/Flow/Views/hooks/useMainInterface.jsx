@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import MainInterface from "../../Components/interface/MainInterface";
 
 const useMainInterface = props => {
   const {
     classes,
+    instance,
     name,
     data,
     type,
@@ -12,12 +13,8 @@ const useMainInterface = props => {
     container,
     model,
     readOnly,
-    workspace,
-    version,
     handleEvents
   } = props;
-
-  const [loading, setLoading] = useState(true);
 
   const mainInterface = useRef();
 
@@ -28,16 +25,8 @@ const useMainInterface = props => {
   //========================================================================================
 
   const handleMainInterfaceEvents = useCallback(
-    (_evt, _data, _callback) => {
-      console.log("debug handle events", _evt, _data, _callback);
-      if (_evt === "loading") {
-        setLoading(_data);
-        return;
-      }
-
-      if (typeof handleEvents === "function") {
-        handleEvents(_evt, _data, _callback);
-      }
+    (evt, value, callback) => {
+      handleEvents(evt, value, callback);
     },
     [handleEvents]
   );
@@ -49,34 +38,25 @@ const useMainInterface = props => {
   //========================================================================================
 
   useEffect(() => {
-    console.log("debug useMainInterface data", data);
-    console.log(
-      "debug useMainInterface maininterfacae ",
-      mainInterface.current
-    );
     if (!data || mainInterface.current) return;
-    console.log("debug useMainInterface create ", data);
 
     mainInterface.current = new MainInterface(
       name,
+      instance,
       type,
       width,
       height,
       container,
       model,
       readOnly,
-      workspace,
-      version,
-      classes,
-      data
+      data,
+      classes
     );
 
     mainInterface.current.subscribe(handleMainInterfaceEvents);
-
-    return () => mainInterface.current.destroy();
   });
 
-  return { mainInterface, loading };
+  return { mainInterface };
 };
 
 export default useMainInterface;

@@ -1,28 +1,34 @@
-import React, { useRef, useCallback } from "react";
+import React, { useRef, useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import Backdrop from "@material-ui/core/Backdrop";
 import useMainInterface from "./hooks/useMainInterface";
 import styles from "./styles";
 import Loader from "../../_shared/Loader/Loader";
+import { EVT_NAMES } from "../events";
 
 const useStyles = makeStyles(styles);
 
 const BaseFlow = props => {
-  console.log("debug baseflow props", props);
   const classes = useStyles(props);
-  const { id, name, type, model, workspace, version, dataFromDB } = props;
+  const { instance, id, name, type, model, dataFromDB } = props;
   const readOnly = false;
+
+  // State Hooks
+  const [loading, setLoading] = useState(true);
 
   const containerId = useRef(`base-${Math.floor(Math.random() * 9999)}`);
   const container = useRef();
 
-  const handleEvents = useCallback((evt, _data) => {
-    console.log("debug handle events", evt, _data);
+  const handleEvents = useCallback((evt, data) => {
+    if (evt === EVT_NAMES.LOADING) {
+      setLoading(data);
+    }
   }, []);
 
-  const { loading } = useMainInterface({
+  useMainInterface({
     classes,
+    instance,
     name,
     data: dataFromDB,
     type,
@@ -31,12 +37,8 @@ const BaseFlow = props => {
     container,
     model,
     readOnly,
-    workspace,
-    version,
     handleEvents
   });
-
-  console.log("debug nBaseFlow container id", containerId.current);
 
   return (
     <div id={`flow-main-${id}`} className={classes.flowContainer}>

@@ -56,10 +56,10 @@ const Flow = (props, ref) => {
   //========================================================================================
 
   useEffect(() => {
-    if (instance.current) {
-      console.log("debug plugin instance", data);
-      const _data = instance.current.serializeToDB();
-      setDataFromDB(_data);
+    const obj = instance.current;
+
+    if (obj) {
+      setDataFromDB(obj.serializeToDB());
     }
   }, [instance, data]);
 

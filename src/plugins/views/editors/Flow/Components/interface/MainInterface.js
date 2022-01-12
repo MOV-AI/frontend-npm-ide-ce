@@ -1,311 +1,206 @@
 import { throttleTime, filter } from "rxjs/operators";
 import { BehaviorSubject } from "rxjs";
 import lodash from "lodash";
-
-// import MasterComponent from "../../../MasterComponent/MasterComponent";
 import { formatNodeData, formatNodeVisualization } from "../../Utils/Formater";
 import GraphValidator from "../../Core/Graph/GraphValidator";
 import RestApi from "../../Core/Api/RestApi";
-import FlowSubscriber from "../../Subscribers/NewFlowSubscriber";
-
 import Canvas from "./canvas";
 import Graph from "../../Core/Graph/GraphBase";
 import InterfaceModes from "./InterfaceModes";
 import Shortcuts from "./Shortcuts";
-import { NodesDB } from "../../toRemove/api/NodesDB";
-import FlowsDB from "../../Subscribers/Flows";
-import { Document } from "@mov-ai/mov-fe-lib-core";
-import _get from "lodash/get";
-
 import { maxMovingPixels, FLOW_VIEW_MODE } from "../../Constants/constants";
+import { EVT_NAMES, EVT_TYPES } from "../../events";
 
 // to remove
 const t = v => v;
+
+const DEFAULT_MODE = "default";
 
 export default class MainInterface {
   constructor(
     //component,
     uid,
+    modelView,
     type,
     width,
     height,
     container,
     model,
     readOnly,
-    workspace = "global",
-    version = "__UNVERSIONED__",
-    theme,
     data,
+    theme,
     graphBuilder = (_interface, _canvas, _id) =>
       new Graph(_interface, _canvas, _id)
   ) {
     this.uid = uid;
     this.width = width;
     this.height = height;
-    this.maxMovingPixels = maxMovingPixels;
-    this.type = type ?? "flow";
     this.container = container;
-    //this.component = component;
-    this.canvas = null;
-    this.graph = null;
-    this.flowSubscriber = null;
-    this.shortcuts = null;
-    this.model = model || "Flow";
+    this.modelView = modelView;
+    this.type = type ?? "flow";
     this.state_sub = new BehaviorSubject(0);
-    this.loading = 2;
     this.readOnly = readOnly;
-    this.theme = theme;
     this.data = data;
     this.graphBuilder = graphBuilder;
+    this.theme = theme;
 
     this.mode = new InterfaceModes(this);
-    this.api = new RestApi(this.uid, this.type, this.model);
-
-    this.workspace = workspace;
-    this.version = version;
-    this.name = this.uid;
-    this.document = {};
+    this.api = new RestApi(this.uid, this.type, this.modelView.SCOPE);
 
     this.subscriber = null;
 
-    this._waitForDB();
-    //setTimeout(this._waitForDB, 1);
+    this.initialize();
   }
 
-  destroy = () => {
-    if (this.flowSubscriber) {
-      this.flowSubscriber.destroy();
-      this.flowSubscriber = null;
-    }
-    this.subscriber = null;
-  };
-
-  _initialize = () => {
-    console.log("debug _loaddoc initializing");
+  initialize = () => {
     this.canvas = new Canvas(
       this,
       this.uid,
       this.type,
       this.width,
       this.height,
-      this.maxMovingPixels,
+      maxMovingPixels,
       this.container,
       this.readOnly
     );
 
     this.graph = this.graphBuilder(this, this.canvas, this.uid);
     this.shortcuts = new Shortcuts(this, this.canvas);
+
     // Set initial mode as loading
-    this.setMode("loading");
+    this.setMode(EVT_NAMES.LOADING);
+
     // Load document and add subscribers
-    //this._loadDoc()._addSubscribers().state_sub.next(1);
-    this._addSubscribers()
-      ._loadDoc()
+    this.addSubscribers()
+      .loadDoc()
       .then(() => {
-        console.log("debug _loaddoc promise finish");
-
         this.canvas.el.focus();
-        // to remove
-        console.log("debug _loaddoc loading false");
-        this.dispatch("loading", false);
+
+        this.dispatch(EVT_NAMES.LOADING, false);
       });
-    // Set focus to canvas
-    // setTimeout(() => {
-    //   this.canvas.el.focus();
-    //   // to remove
-    //   console.log("debug _loaddoc loading false");
-    //   this.dispatch("loading", false);
-    // }, 2000);
-  };
-
-  _waitForDB = () => {
-    this.nodesDB = new NodesDB();
-    this.nodesDB.onStateChange(data => this._loading(data));
-    this.flowsDB = new FlowsDB();
-    this.flowsDB.onStateChange(data => this._loading(data));
-    return this;
-  };
-
-  _loading = data => {
-    this.loading -= data;
-    if (this.loading === 0) this._initialize();
   };
 
   reload = () => {
     this.canvas.reload();
     this.destroy();
-    this._loadDoc();
+    this.loadDoc();
   };
 
-  _eventsOn = (fn, param) => {
+  eventsOn = (fn, param) => {
     const isEditable = this.graph.viewMode === FLOW_VIEW_MODE.default;
     if (isEditable) fn(param);
   };
 
-  _addSubscribers = () => {
+  /**
+   * @private
+   * Initializes the subscribers
+   * @returns {MainInterface} : The instance
+   */
+  addSubscribers = () => {
     // addNode mode -> click event
-    this.mode.addNode.onClick.subscribe(() =>
-      this._eventsOn(this.dlgNewNode, "NodeInst")
-    );
-    this.mode.addFlow.onClick.subscribe(() =>
-      this._eventsOn(this.dlgNewNode, "Container")
-    );
-    this.mode.addState.onClick.subscribe(() =>
-      this._eventsOn(this.dlgNewNode, "State")
-    );
+    this.mode.addNode.onClick.subscribe(() => {
+      this.dispatch(EVT_NAMES.ADD_NODE);
+    });
+    this.mode.addFlow.onClick.subscribe(() => {
+      this.dispatch(EVT_NAMES.ADD_FLOW);
+    });
+    this.mode.addState.onClick.subscribe(() => {
+      this.dispatch(EVT_NAMES.ADD_STATE);
+    });
 
     // loading mode -> onExit event
     this.mode.loading.onExit.subscribe(() => {
-      //this.component.setState({ loading: false });
-      console.log("debug maininterface loading false");
-      //this.dispatch("loading", false);
+      //this.dispatch(EVT_NAMES.LOADING, false);
     });
 
     // loading mode -> onEnter event
     this.mode.loading.onEnter.subscribe(() => {
-      //this.component.setState({ loading: true });
-      console.log("debug maininterface loading true");
-
-      this.dispatch("loading", true);
+      this.dispatch(EVT_NAMES.LOADING, true);
     });
 
-    this.mode.default.onEnter.subscribe(() => this.onDefault());
+    this.mode.default.onEnter.subscribe(this.onDefault);
 
     // drag mode -> onExit event
-    this.mode.drag.onExit.subscribe(node => this.onDragEnd(node));
+    this.mode.drag.onExit.subscribe(this.onDragEnd);
 
     // experimental: send new position onDrag instead of onExit
     // drag mode -> onDrag event
-    this.mode.drag.onDrag
-      .pipe(throttleTime(100))
-      .subscribe(node => this.onDragEnd(node));
+    this.mode.drag.onDrag.pipe(throttleTime(100)).subscribe(this.onDragEnd);
 
     // context menus modes -> onEnter events
-    this.mode.nodeCtxMenu.onEnter.subscribe(data => this.onNodeCtxMenu(data));
-    this.mode.canvasCtxMenu.onEnter.subscribe(data =>
-      this.onCanvasCtxMenu(data)
-    );
-    this.mode.linkCtxMenu.onEnter.subscribe(data => this.onLinkCtxMenu(data));
-    this.mode.portCtxMenu.onEnter.subscribe(data => this.onPortCtxMenu(data));
+    this.mode.nodeCtxMenu.onEnter.subscribe(this.onNodeCtxMenu);
+    this.mode.canvasCtxMenu.onEnter.subscribe(this.onCanvasCtxMenu);
+    this.mode.linkCtxMenu.onEnter.subscribe(this.onLinkCtxMenu);
+    this.mode.portCtxMenu.onEnter.subscribe(this.onPortCtxMenu);
 
     // Node click and double click events
-    this.mode.selectNode.onEnter.subscribe(data => this.onSelectNode(data));
+    this.mode.selectNode.onEnter.subscribe(this.onSelectNode);
     this.mode.selectNode.onExit.subscribe(data =>
       //this.onSelectNode(data, false)
       {}
     );
-    this.mode.onDblClick.onEnter.subscribe(node => {
-      this.setMode("default");
+    this.mode.onDblClick.onEnter.subscribe(() => {
+      this.setMode(DEFAULT_MODE);
     });
 
     // Linking mode events
-    this.mode.linking.onEnter.subscribe(() => this.onLinkingEnter());
-    this.mode.linking.onExit.subscribe(() => this.onLinkingExit());
+    this.mode.linking.onEnter.subscribe(this.onLinkingEnter);
+    this.mode.linking.onExit.subscribe(this.onLinkingExit);
 
     // Canvas events (not modes)
     this.canvas.events
       .pipe(
-        filter(event => event.name === "onMouseOver" && event.type === "Port")
+        filter(
+          event =>
+            event.name === EVT_NAMES.ON_MOUSE_OVER &&
+            event.type === EVT_TYPES.PORT
+        )
       )
-      .subscribe(event => this.onPortMouseOver(event));
+      .subscribe(this.onPortMouseOver);
 
     this.canvas.events
       .pipe(
-        filter(event => event.name === "onMouseOut" && event.type === "Port")
+        filter(
+          event =>
+            event.name === EVT_NAMES.ON_MOUSE_OUT &&
+            event.type === EVT_TYPES.PORT
+        )
       )
-      .subscribe(event => this.onPortMouseOver(event));
+      .subscribe(this.onPortMouseOver);
 
     // link error events
     this.canvas.events
       .pipe(
         filter(
-          event => event.name === "onChangeMouseOver" && event.type === "Link"
+          event =>
+            event.name === EVT_NAMES.ON_CHG_MOUSE_OVER &&
+            event.type === EVT_TYPES.LINK
         )
       )
-      .subscribe(event => this.onLinkErrorMouseOver(event));
+      .subscribe(this.onLinkErrorMouseOver);
 
     // toggle warnings
     this.canvas.events
-      .pipe(filter(event => event.name === "onToggleWarnings"))
-      .subscribe(event => this.onToggleWarnings(event));
+      .pipe(filter(event => event.name === EVT_NAMES.ON_TOGGLE_WARNINGS))
+      .subscribe(this.onToggleWarnings);
 
     return this;
   };
 
-  _loadDoc = () => {
-    console.log("debug _loadDoc forwarded", this.data);
-    if (this.data) {
-      //this._loadData(this.data);
-
-      // why do we need to do setTimeout?
-      //setTimeout(() => this._loadData(this.data), 1);
-      this.document = { ...this.data };
-      return this.graph.loadData(this.data);
-      //return this;
-    }
-    const { workspace, name, model, version } = this;
-    console.log("debug _loadDoc", workspace, name, model, version);
-    // Get document
-    const doc = new Document({ workspace, name, type: model, version }, "v2");
-    doc
-      .read()
-      // .then(data => {
-      //   console.log("debug _loadDoc read", data);
-      //   return _get(data, `${model}.${doc.name}`, null);
-      // })
-      // .then(data => {
-      //   console.log("debug _loadDoc one", data);
-      //   if (!data) throw new Error("Data not found");
-      //   return data;
-      // })
-      // .then(_data => {
-      //   const data = {
-      //     ..._data,
-      //     url: doc.path
-      //   };
-      //   console.log("debug _loadDoc data", data);
-
-      //   this.flowsDB.addFlow(workspace === "global" ? doc.name : doc.url, data);
-
-      //   return data;
-      // })
-      .then(data => this._loadData(this.data))
-      .then(() => {
-        /** only subscribe to changes when working on the global workspace (aka Redis) */
-        // if (workspace === "global") {
-        //   setTimeout(() => {
-        //     // defer events subscription bc on restore
-        //     // del and set events are mixed causing the elements
-        //     // to render incorrectly
-        //     this.flowSubscriber = new FlowSubscriber(
-        //       this.uid,
-        //       this,
-        //       this.graph,
-        //       this.component,
-        //       this.model
-        //     );
-        //   }, 1500);
-        // }
-      })
-      .catch(error => this.onLoadError(error));
-
-    return this;
+  /**
+   * @private
+   * Loads the document in the graph
+   * @returns {MainInterface} : The instance
+   */
+  loadDoc = () => {
+    return this.graph.loadData(this.data);
   };
 
-  _loadData = data => {
-    this.document = { ...data };
-    this.graph.loadData(data);
-
-    // this.document = {
-    //   Label: data.Label,
-    //   LastUpdate: data.LastUpdate,
-    //   User: data.User,
-    //   ExposedPorts: data.ExposedPorts,
-    //   Layers: data.Layers,
-    //   Description: data.Description,
-    //   Parameter: data.Parameter
-    // };
-  };
+  //========================================================================================
+  /*                                                                                      *
+   *                                  Setters and Getters                                 *
+   *                                                                                      */
+  //========================================================================================
 
   get selectedNodes() {
     return this.graph.selectedNodes;
@@ -337,212 +232,69 @@ export default class MainInterface {
     this.graph.nodeStatusUpdated(node_status, robotStatus);
   };
 
-  setDocument(key, value) {
-    this.document[key] = value;
-    this.flowsDB.updateCache(this.document.Label, key, value);
-  }
-
-  /**
-   * dlgNewNode - show dialog to input name of the new node
-   *
-   */
-  dlgNewNode = type => {
-    const titles = {
-      NodeInst: t("Add node"),
-      Container: t("Add sub flow"),
-      State: t("Add state")
-    };
-    const node = this.mode.current.props.data;
-    const nodes = this.graph.nodes;
-    // MasterComponent.createNewApp(
-    //   titles[type],
-    //   value => this.dlgSubmitNode(value, node),
-    //   () => this.mode.setMode("default"),
-    //   value => GraphValidator.validateNodeName(value, nodes)
-    // );
-  };
-
-  /**
-   *  dlgSubmitNode - func to format data before calling api
-   * @param {string} value Node name
-   * @param {object} node Node params
-   */
-  dlgSubmitNode(value, node) {
-    const _node = { ...node, id: value };
-    const flow = { name: this.uid, type: this.type };
-    const data = formatNodeData(flow, _node, _node.type ? _node.type : "Node");
-    this.api.addNewNode(data);
-    this.setMode("default");
-  }
-
   validateNodeTocopy = data => {
     return lodash.get(data, "node.ContainerFlow", "") !== this.uid;
   };
 
-  /**
-   * dlgPasteNode - show dialog to input name of the copy
-   */
-  dlgPasteNode = (position, nodeToCopy) => {
-    const nodes = this.graph.nodes;
-    const modalTitle = {
-      NodeInst: t("Paste Node"),
-      Container: t("Paste Sub-flow"),
-      State: t("Paste State")
-    };
-    // Validate if pasted node still exists
-    if (!nodes.get(nodeToCopy.node.id)) {
-      return this.api.resetClipboard();
-    }
-    // Open modal to enter copied node name
-    // return new Promise((re, rej) => {
-    //   MasterComponent.createNewApp(
-    //     modalTitle[nodeToCopy.node.type],
-    //     value => {
-    //       this.dlgPSubmitNode(value, position, nodeToCopy);
-    //       re(true);
-    //     },
-    //     () => {
-    //       this.mode.setMode("default");
-    //       re(true);
-    //     },
-    //     value => GraphValidator.validateNodeName(value, nodes),
-    //     // Add input name to props
-    //     { inputValue: `copy_${nodeToCopy.node.name}` }
-    //   );
-    // });
-  };
-
-  dlgPSubmitNode(value, position, nodeToCopy) {
-    this.api.copyNode(value, position, nodeToCopy);
-    this.setMode("default");
-  }
-
   addLink = () => {
     const { src, trg, link, to_create } = this.mode.linking.props;
+
     if (to_create && link.is_valid(src, trg, this.graph.links)) {
-      const { src, trg, link } = this.mode.linking.props;
+      // TODO: add link
       this.api.addLink(link.to_save(src, trg));
     }
   };
 
-  onLoadError = error => {
-    const message = `Error loading flow ${this.uid}\n${error.message}`;
-    // MasterComponent.confirmAlert(
-    //   "Error",
-    //   message,
-    //   () => {},
-    //   //() => MasterComponent.deleteTab("Flow", this.uid),
-    //   "",
-    //   "default",
-    //   "Ok",
-    //   "primary",
-    //   [],
-    //   true,
-    //   true
-    // );
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Event Handlers                                    *
+   *                                                                                      */
+  //========================================================================================
+
+  onCanvasCtxMenu = data => {
+    const { x, y } = data.position;
+
+    this.dispatch(EVT_NAMES.ON_CANVAS_CTX_MENU, {
+      x,
+      y,
+      onClose: () => {
+        this.setMode(DEFAULT_MODE);
+      }
+    });
   };
 
   onDefault = () => {
     this.selectedNodes.length = 0;
   };
 
-  onDragEnd = node => {
-    const nodes = [...this.selectedNodes, node].filter(obj => obj);
-    const updatedNodes = [];
+  onDragEnd = draggedNode => {
+    const nodes = this.selectedNodes;
+
+    if (
+      !this.selectedNodes.filter(node => node.data.id === draggedNode.data.id)
+    ) {
+      nodes.push(draggedNode);
+    }
+
     nodes.forEach(node => {
-      const nodeId = node.data.id;
-      if (updatedNodes.indexOf(nodeId) >= 0) return;
-      updatedNodes.push(nodeId);
-      const pos = formatNodeVisualization(node.data, node.data.type);
-      // hack change after review callback Backend.FlowApi
-      const nodeType =
-        node.data.type === "Container" ? "MovAI/Flow" : "MovAI/State";
-      this.api.setNodePosition({
-        nodeId,
-        data: { ...pos.Visualization },
-        nodeType
-      });
-    });
-  };
+      const { id } = node.data;
+      const [x, y] = node.data.Visualization;
 
-  onNodeCtxMenu = data => {
-    // this.component.props.nodeContextMenu.current.handleOpen(data.event, {
-    //   ...data.node.data,
-    //   node: data.node,
-    //   onClose: () => {
-    //     this.setMode("default");
-    //   }
-    // });
-    this.dispatch("onNodeCtxMenu", {
-      ...data.node.data,
-      node: data.node,
-      onClose: () => {
-        this.setMode("default");
-      }
-    });
-  };
-
-  onCanvasCtxMenu = data => {
-    // if (!this.component.props.canvasContextMenu) return;
-    // this.component.props.canvasContextMenu.current.handleOpen(data.event, {
-    //   x: data.position.x,
-    //   y: data.position.y,
-    //   onClose: () => {
-    //     this.setMode("default");
-    //   }
-    // });
-    this.dispatch("onCanvasCtxMenu", {
-      x: data.position.x,
-      y: data.position.y,
-      onClose: () => {
-        this.setMode("default");
-      }
+      this.modelView.current.getNodeInstances().getItem(id).setPosition(x, y);
     });
   };
 
   onLinkCtxMenu = data => {
-    // if (!this.component.props.linkContextMenu) return;
-    // this.component.props.linkContextMenu.current.handleOpen(data.event, {
-    //   ...data,
-    //   onClose: () => {
-    //     this.setMode("default");
-    //   }
-    // });
-    this.dispatch("onLinkCtxMenu", {
+    this.dispatch(EVT_NAMES.ON_LINK_CTX_MENU, {
       ...data,
       onClose: () => {
-        this.setMode("default");
+        this.setMode(DEFAULT_MODE);
       }
     });
   };
 
-  onPortCtxMenu = data => {
-    //if (!this.component.props.portContextMenu) return;
-    data.exposedPorts = this.graph.exposedPorts || {};
-    // this.component.props.setPortHasCallBack(!!data.port.data.callback);
-    // this.component.props.portContextMenu.current.handleOpen(data.event, {
-    //   ...data,
-    //   onClose: () => {
-    //     this.setMode("default");
-    //   }
-    // });
-    this.dispatch("onPortCtxMenu", {
-      ...data,
-      onClose: () => {
-        this.setMode("default");
-      }
-    });
-  };
-
-  onSelectNode = data => {
-    const { nodes, shiftKey } = data;
-    const selectedNodes = this.selectedNodes;
-    this.selectedLink = null;
-    if (!shiftKey) selectedNodes.length = 0;
-    nodes.forEach(node => {
-      const _selected = node.selected;
-      _selected ? selectedNodes.push(node) : lodash.pull(selectedNodes, node);
-    });
+  onLinking = data => {
+    this.graph.nodes.forEach(node => node.obj.linking(data));
   };
 
   onLinkingEnter = () => {
@@ -555,22 +307,44 @@ export default class MainInterface {
     this.addLink();
   };
 
-  onLinking = data => {
-    this.graph.nodes.forEach(node => node.obj.linking(data));
+  onNodeCtxMenu = data => {
+    this.dispatch(EVT_NAMES.ON_NODE_CTX_MENU, {
+      ...data.node.data,
+      node: data.node,
+      onClose: () => {
+        this.setMode(DEFAULT_MODE);
+      }
+    });
   };
 
-  /**
-   *
-   * @param {obj} data {port, mouseover}
-   */
+  onPortCtxMenu = data => {
+    data.exposedPorts = this.graph.exposedPorts || {};
+
+    this.dispatch(EVT_NAMES.ON_PORT_CTX_MENU, {
+      ...data,
+      onClose: () => {
+        this.setMode(DEFAULT_MODE);
+      }
+    });
+  };
+
+  onSelectNode = data => {
+    const { nodes, shiftKey } = data;
+    const { selectedNodes } = this;
+    this.selectedLink = null;
+
+    if (!shiftKey) selectedNodes.length = 0;
+
+    nodes.forEach(node => {
+      node.selected
+        ? selectedNodes.push(node)
+        : lodash.pull(selectedNodes, node);
+    });
+  };
+
   onPortMouseOver = event => {
-    // open/close the tooltip component
-    // this.component.tooltip.current.handleOpen(
-    //   event.data.port,
-    //   event.data.mouseover
-    // );
     const { port, mouseover } = event.data;
-    this.dispatch("onPortMouseOver", { port, mouseover });
+    this.dispatch(EVT_NAMES.ON_PORT_MOUSE_OVER, { port, mouseover });
   };
 
   /**
@@ -578,20 +352,14 @@ export default class MainInterface {
    * @param {*} event {link, mouseover}
    */
   onLinkErrorMouseOver = event => {
-    // open/close tooltip component
-    // this.component.flowTooltip.current.handleOpen(
-    //   event.data.link,
-    //   event.data.mouseover
-    // );
     const { link, mouseover } = event.data;
-    this.dispatch("onLinkErrorMouseOver", { link, mouseover });
+    this.dispatch(EVT_NAMES.ON_LINK_ERROR_MOUSE_OVER, { link, mouseover });
   };
 
   onToggleWarnings = event => {
     // show/hide warnings
-    //this.component.warnings.current.handleOpen(event.data);
     this.graph.updateWarningsVisibility(event.data);
-    this.dispatch("onToggleWarnings", { ...event.data });
+    this.dispatch(EVT_NAMES.ON_TOGGLE_WARNINGS, { ...event.data });
   };
 
   onStateChange = fn => {
@@ -600,14 +368,16 @@ export default class MainInterface {
 
   onLayersChange = layers => {
     const visited_links = new Set();
+
     this.graph.nodes.forEach(node => {
       node.obj.onLayersChange(layers);
+
       node.links.forEach(link_id => {
         const link = this.graph.links.get(link_id);
         if (
-          // link was not yet visited or was visited and is visible
+          // link was not yet visited or is visible
           !visited_links.has(link_id) ||
-          (visited_links.has(link_id) && link.visible === true)
+          link.visible
         ) {
           link.visibility = node.obj.visible;
         }
@@ -632,8 +402,82 @@ export default class MainInterface {
    * @param {function} callback A function to execute after handling the event
    */
   dispatch = (evt, data, callback) => {
-    if (typeof this.subscriber === "function") {
-      this.subscriber(evt, data, callback);
-    }
+    this.subscriber(evt, data, callback);
   };
+
+  destroy = () => {
+    this.subscriber = null;
+  };
+
+  // ******* TO MOVE *******
+  /**
+   * dlgNewNode - show dialog to input name of the new node
+   *
+   */
+  dlgNewNode = type => {
+    const titles = {
+      NodeInst: t("Add node"),
+      Container: t("Add sub flow"),
+      State: t("Add state")
+    };
+    const node = this.mode.current.props.data;
+    const nodes = this.graph.nodes;
+    // MasterComponent.createNewApp(
+    //   titles[type],
+    //   value => this.dlgSubmitNode(value, node),
+    //   () => this.mode.setMode(DEFAULT_MODE),
+    //   value => GraphValidator.validateNodeName(value, nodes)
+    // );
+  };
+
+  /**
+   *  dlgSubmitNode - func to format data before calling api
+   * @param {string} value Node name
+   * @param {object} node Node params
+   */
+  dlgSubmitNode(value, node) {
+    const _node = { ...node, id: value };
+    const flow = { name: this.uid, type: this.type };
+    const data = formatNodeData(flow, _node, _node.type ? _node.type : "Node");
+    this.api.addNewNode(data);
+    this.setMode(DEFAULT_MODE);
+  }
+
+  /**
+   * dlgPasteNode - show dialog to input name of the copy
+   */
+  dlgPasteNode = (position, nodeToCopy) => {
+    const nodes = this.graph.nodes;
+    const modalTitle = {
+      NodeInst: t("Paste Node"),
+      Container: t("Paste Sub-flow"),
+      State: t("Paste State")
+    };
+    // Validate if pasted node still exists
+    if (!nodes.get(nodeToCopy.node.id)) {
+      return this.api.resetClipboard();
+    }
+    // Open modal to enter copied node name
+    // return new Promise((re, rej) => {
+    //   MasterComponent.createNewApp(
+    //     modalTitle[nodeToCopy.node.type],
+    //     value => {
+    //       this.dlgPSubmitNode(value, position, nodeToCopy);
+    //       re(true);
+    //     },
+    //     () => {
+    //       this.mode.setMode(DEFAULT_MODE);
+    //       re(true);
+    //     },
+    //     value => GraphValidator.validateNodeName(value, nodes),
+    //     // Add input name to props
+    //     { inputValue: `copy_${nodeToCopy.node.name}` }
+    //   );
+    // });
+  };
+
+  dlgPSubmitNode(value, position, nodeToCopy) {
+    this.api.copyNode(value, position, nodeToCopy);
+    this.setMode(DEFAULT_MODE);
+  }
 }
