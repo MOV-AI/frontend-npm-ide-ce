@@ -25,14 +25,8 @@ class NodeInstance extends Model {
   envVars = new Manager("envVars", EnvVar, this.propEvents);
   commands = new Manager("commands", Command, this.propEvents);
 
-  observables = [
-    "name",
-    "template",
-    "persistent",
-    "remappable",
-    "layers",
-    "position"
-  ];
+  // Define observable properties
+  observables = Object.values(NodeInstance.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -90,7 +84,13 @@ class NodeInstance extends Model {
   }
 
   setPosition(x, y) {
-    return this.position.setData({ x, y });
+    this.position.setData({ x, y });
+    this.dispatch(
+      NodeInstance.OBSERVABLE_KEYS.POSITION,
+      this.position.serialize()
+    );
+
+    return this;
   }
 
   getParameters() {
@@ -217,6 +217,15 @@ class NodeInstance extends Model {
       commands: Manager.serializeOfDB(commands, Command)
     };
   }
+
+  static OBSERVABLE_KEYS = {
+    NAME: "name",
+    TEMPLATE: "template",
+    PERSISTENT: "persistent",
+    REMAPPABLE: "remappable",
+    LAYERS: "layers",
+    POSITION: "persistent"
+  };
 }
 
 export default NodeInstance;
