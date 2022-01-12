@@ -6,6 +6,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import BaseFlow from "./Views/BaseFlow";
 import Menu from "../Configuration/Menu";
 import FlowTopBar from "./Components/FlowTopBar/FlowTopBar";
+import FlowBottomBar from "./Components/FlowBottomBar/FlowBottomBar";
 import "./Resources/css/Flow.css";
 
 const useStyles = makeStyles(theme => ({
@@ -22,6 +23,9 @@ const Flow = (props, ref) => {
     props;
   // State Hooks
   const [dataFromDB, setDataFromDB] = useState();
+  const [robotSelected, setRobotSelected] = useState("");
+  const [runningFlow, setRunningFlow] = useState("");
+  const [warnings, setWarnings] = useState([]);
   // Other Hooks
   const classes = useStyles();
   // Refs
@@ -79,6 +83,68 @@ const Flow = (props, ref) => {
 
   //========================================================================================
   /*                                                                                      *
+   *                                     Handle Events                                    *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * On Robot selection change
+   * @param {*} robotId
+   */
+  const onRobotChange = React.useCallback(robotId => {
+    setRobotSelected(robotId);
+  }, []);
+
+  /**
+   * On change running flow
+   * @param {*} flow
+   */
+  const onStartStopFlow = React.useCallback(flow => {
+    // Update state variable
+    setRunningFlow(prevState => {
+      if (prevState === flow) return prevState;
+      return flow;
+    });
+  }, []);
+
+  /**
+   * On flow validation
+   * @param {*} validationWarnings
+   */
+  const onFlowValidated = React.useCallback(validationWarnings => {
+    setWarnings(validationWarnings);
+  }, []);
+
+  /**
+   * Open document in new tab
+   * @param {*} docData
+   */
+  const openDoc = React.useCallback(
+    docData => {
+      call("docManager", "read", {
+        scope: docData.type,
+        name: docData.name
+      }).then(doc => {
+        call("tabs", "openEditor", {
+          id: doc.getUrl(),
+          name: doc.getName(),
+          scope: doc.getScope()
+        });
+      });
+    },
+    [call]
+  );
+
+  /**
+   * Toggle Warnings
+   * @param {boolean} isVisible
+   */
+  const onToggleWarnings = React.useCallback(isVisible => {
+    mainInterfaceRef.current.onToggleWarnings({ data: isVisible });
+  }, []);
+
+  //========================================================================================
+  /*                                                                                      *
    *                                        Render                                        *
    *                                                                                      */
   //========================================================================================
@@ -92,28 +158,30 @@ const Flow = (props, ref) => {
           alert={alert}
           confirmationAlert={confirmationAlert}
           scope={scope}
+          warnings={warnings}
           version={instance.current?.version}
           mainInterface={mainInterfaceRef}
+          onRobotChange={onRobotChange}
+          onStartStopFlow={onStartStopFlow}
+          openFlow={openDoc}
           // nodeStatusUpdated={this.onNodeStatusUpdate}
           // nodeCompleteStatusUpdated={this.onMonitoringNodeStatusUpdate}
-          // onStartStopFlow={this.onStartStopFlow}
           // onViewModeChange={this.onViewModeChange}
-          // onRobotChange={this.onRobotChange}
-          // openFlow={data => this.openDoc(data)}
-          // warnings={warnings}
-          // workspace={workspace}
-          // type={model}
-          // version={version}
         ></FlowTopBar>
       </div>
-      <BaseFlow {...props} ref={baseFlowRef} dataFromDB={dataFromDB} />
-      {/* <FlowBottomBar
-          openFlow={data => this.openDoc(data)}
-          onToggleWarnings={this.onToggleWarnings}
-          robotSelected={robotSelected}
-          runningFlow={runningFlow}
-          warnings={warnings}
-        /> */}
+      <BaseFlow
+        {...props}
+        ref={baseFlowRef}
+        dataFromDB={dataFromDB}
+        onFlowValidated={onFlowValidated}
+      />
+      <FlowBottomBar
+        openFlow={openDoc}
+        onToggleWarnings={onToggleWarnings}
+        robotSelected={robotSelected}
+        runningFlow={runningFlow}
+        warnings={warnings}
+      />
     </div>
   );
 };

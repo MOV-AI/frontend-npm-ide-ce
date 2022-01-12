@@ -4,6 +4,7 @@ import WarningIcon from "@material-ui/icons/Warning";
 import PropTypes from "prop-types";
 import { RobotManager, Document } from "@mov-ai/mov-fe-lib-core";
 import { Typography, Tooltip } from "@material-ui/core";
+import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
 
 const useStyles = makeStyles(theme => ({
   bar: {
@@ -18,6 +19,7 @@ const useStyles = makeStyles(theme => ({
     color: "black"
   },
   default: {
+    color: "white",
     background: theme.palette.background.primary,
     borderTop: "solid 1px black"
   },
@@ -158,7 +160,7 @@ FlowBottomBar.propTypes = {
 };
 
 FlowBottomBar.defaultProps = {
-  openFlow: () => {},
+  openFlow: () => DEFAULT_FUNCTION("openFlow"),
   robotSelected: "",
   runningFlow: ""
 };
