@@ -1,17 +1,17 @@
-- Top bar - IN PROPGRESS
-- Bottom bar
+RM - Top bar - IN PROPGRESS
+RM - Bottom bar
 - Menu to add nodes and subflows
 - - floating window
 - - uses plugin system
 - Flow internal events
-- - Dispatch - DONE
+MJ - - Dispatch - DONE
 - - Dialogs
 - - - Warnings
 - - - Tooltips
 - - - Confirm delete
 - - Context Menus
 - - - Exposed Ports
-- Right menu
+RM - Right menu
 - - Details - DONE
 - - Node
 - - - Modals
@@ -26,10 +26,10 @@
 - - - - Parameters
 - - - - Groups (aka layers)
 - - Link
-- Dirty
-- ReadOnly
-- Replace RestAPI
+MJ - Dirty
+MJ - ReadOnly
+MJ - Replace RestAPI
 - - Save position
 - - Add, delete
 - - - Nodes, subflows, links
-- Remove StateNode
+MJ - Remove StateNode
