@@ -271,7 +271,10 @@ export default class MainInterface {
     const nodes = this.selectedNodes;
 
     if (
-      !this.selectedNodes.filter(node => node.data.id === draggedNode.data.id)
+      !this.selectedNodes.filter(
+        node => node.data.id === draggedNode.data.id
+      ) ||
+      !this.selectedNodes.length
     ) {
       nodes.push(draggedNode);
     }
