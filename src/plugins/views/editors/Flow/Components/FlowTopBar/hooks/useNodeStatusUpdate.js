@@ -177,6 +177,7 @@ const useNodeStatusUpdate = (props, robotSelected, viewMode) => {
 
       if (robotStatusData) {
         isOnline = isRobotOnline(robotStatusData.timestamp);
+        activeFlow = robotStatusData.active_flow;
 
         const running = isOnline && isFlowRunning(robotStatusData.active_flow);
         const runningNodes = running ? getNodesRunning(robotStatusData) : [];
@@ -294,9 +295,19 @@ const useNodeStatusUpdate = (props, robotSelected, viewMode) => {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Update selected robot ref
+   */
   useEffect(() => {
     selectedRobotRef.current = robotSelected;
   }, [robotSelected]);
+
+  /**
+   * Reset node status when flow stop running
+   */
+  useEffect(() => {
+    if (!robotStatus.activeFlow) resetNodeStatus();
+  }, [robotStatus.activeFlow, resetNodeStatus]);
 
   return {
     robotSubscribe,

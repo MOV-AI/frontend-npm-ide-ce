@@ -32,7 +32,7 @@ const useStyles = makeStyles(theme => ({
     display: "inline-block",
     padding: "0 15px",
     borderRight: `solid 1px ${theme.palette.background.secondary}`,
-    "& i": { marginRight: 10 },
+    "& i": { marginRight: 10, fontSize: "14px" },
     "&:hover": {
       filter: `drop-shadow(2px 4px 6px white)`
     }
@@ -130,7 +130,7 @@ const FlowBottomBar = props => {
               className={classes.action}
               onClick={evt => handleOpenFlow(evt)}
             >
-              <i className="fas fa-robot"></i>
+              <i className="icon-Happy"></i>
               {selectedRobotName} : {parseFlowName(runningFlow)}
             </Typography>
           </Tooltip>

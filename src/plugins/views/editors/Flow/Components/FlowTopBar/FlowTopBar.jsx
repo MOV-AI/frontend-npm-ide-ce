@@ -84,6 +84,7 @@ const FlowTopBar = props => {
     mainInterface,
     id,
     onRobotChange,
+    defaultViewMode,
     confirmationAlert,
     onViewModeChange
   } = props;
@@ -91,7 +92,7 @@ const FlowTopBar = props => {
   const [loading, setLoading] = React.useState(false);
   const [robotSelected, setRobotSelected] = React.useState("");
   const [robotList, setRobotList] = React.useState({});
-  const [viewMode, setViewMode] = React.useState(FLOW_VIEW_MODE.default);
+  const [viewMode, setViewMode] = React.useState(defaultViewMode);
   // Other hooks
   const classes = useStyles();
   const { t } = useTranslation();

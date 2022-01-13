@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
+import { FLOW_VIEW_MODE } from "./Constants/constants";
 import InfoIcon from "@material-ui/icons/Info";
 import BaseFlow from "./Views/BaseFlow";
 import Menu from "../Configuration/Menu";
@@ -26,11 +27,13 @@ const Flow = (props, ref) => {
   const [robotSelected, setRobotSelected] = useState("");
   const [runningFlow, setRunningFlow] = useState("");
   const [warnings, setWarnings] = useState([]);
+  const [viewMode, setViewMode] = useState(FLOW_VIEW_MODE.default);
   // Other Hooks
   const classes = useStyles();
   // Refs
   const baseFlowRef = React.useRef();
   const mainInterfaceRef = React.useRef();
+  const isEditableComponentRef = React.useRef(true);
 
   //========================================================================================
   /*                                                                                      *
@@ -38,7 +41,7 @@ const Flow = (props, ref) => {
    *                                                                                      */
   //========================================================================================
 
-  const renderRightMenu = React.useCallback(() => {
+  const renderRightMenu = useCallback(() => {
     const details = props.data?.details || {};
     const menuName = `${id}-detail-menu`;
     // add bookmark
@@ -47,7 +50,13 @@ const Flow = (props, ref) => {
         icon: <InfoIcon></InfoIcon>,
         name: menuName,
         view: (
-          <Menu id={id} name={name} details={details} model={instance}></Menu>
+          <Menu
+            id={id}
+            name={name}
+            details={details}
+            model={instance}
+            editable={isEditableComponentRef.current}
+          ></Menu>
         )
       }
     });
@@ -83,6 +92,27 @@ const Flow = (props, ref) => {
 
   //========================================================================================
   /*                                                                                      *
+   *                                        Helper                                        *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * @private Get main interface instance
+   */
+  const getMainInterface = () => {
+    return mainInterfaceRef.current?.current;
+  };
+
+  /**
+   * Set mode
+   * @param {string} mode : Interface mode
+   */
+  const setMode = useCallback(mode => {
+    getMainInterface().setMode(mode);
+  }, []);
+
+  //========================================================================================
+  /*                                                                                      *
    *                                     Handle Events                                    *
    *                                                                                      */
   //========================================================================================
@@ -91,7 +121,7 @@ const Flow = (props, ref) => {
    * On Robot selection change
    * @param {*} robotId
    */
-  const onRobotChange = React.useCallback(robotId => {
+  const onRobotChange = useCallback(robotId => {
     setRobotSelected(robotId);
   }, []);
 
@@ -99,7 +129,7 @@ const Flow = (props, ref) => {
    * On change running flow
    * @param {*} flow
    */
-  const onStartStopFlow = React.useCallback(flow => {
+  const onStartStopFlow = useCallback(flow => {
     // Update state variable
     setRunningFlow(prevState => {
       if (prevState === flow) return prevState;
@@ -111,7 +141,7 @@ const Flow = (props, ref) => {
    * On flow validation
    * @param {*} validationWarnings
    */
-  const onFlowValidated = React.useCallback(validationWarnings => {
+  const onFlowValidated = useCallback(validationWarnings => {
     setWarnings(validationWarnings);
   }, []);
 
@@ -119,7 +149,7 @@ const Flow = (props, ref) => {
    * Open document in new tab
    * @param {*} docData
    */
-  const openDoc = React.useCallback(
+  const openDoc = useCallback(
     docData => {
       call("docManager", "read", {
         scope: docData.type,
@@ -136,11 +166,37 @@ const Flow = (props, ref) => {
   );
 
   /**
+   * On view mode change
+   * @param {string} newViewMode : One of the following "default" or "treeView"
+   */
+  const onViewModeChange = useCallback(
+    newViewMode => {
+      setViewMode(prevState => {
+        if (prevState === newViewMode) return prevState;
+        isEditableComponentRef.current = newViewMode === FLOW_VIEW_MODE.default;
+        // Set mode loading after changing view mode
+        setMode("loading");
+        return newViewMode;
+      });
+    },
+    [setMode]
+  );
+
+  /**
    * Toggle Warnings
    * @param {boolean} isVisible
    */
-  const onToggleWarnings = React.useCallback(isVisible => {
-    mainInterfaceRef.current.onToggleWarnings({ data: isVisible });
+  const onToggleWarnings = useCallback(isVisible => {
+    getMainInterface()?.onToggleWarnings({ data: isVisible });
+  }, []);
+
+  /**
+   * Update node active status
+   * @param {object} nodeStatus : Nodes to update status
+   * @param {{activeFlow: string, isOnline: boolean}} robotStatus : Robot current status
+   */
+  const onNodeStatusUpdate = useCallback((nodeStatus, robotStatus) => {
+    getMainInterface()?.nodeStatusUpdated(nodeStatus, robotStatus);
   }, []);
 
   //========================================================================================
@@ -159,14 +215,15 @@ const Flow = (props, ref) => {
           confirmationAlert={confirmationAlert}
           scope={scope}
           warnings={warnings}
+          defaultViewMode={viewMode}
           version={instance.current?.version}
           mainInterface={mainInterfaceRef}
+          openFlow={openDoc}
           onRobotChange={onRobotChange}
           onStartStopFlow={onStartStopFlow}
-          openFlow={openDoc}
-          // nodeStatusUpdated={this.onNodeStatusUpdate}
+          nodeStatusUpdated={onNodeStatusUpdate}
+          onViewModeChange={onViewModeChange}
           // nodeCompleteStatusUpdated={this.onMonitoringNodeStatusUpdate}
-          // onViewModeChange={this.onViewModeChange}
         ></FlowTopBar>
       </div>
       <BaseFlow
