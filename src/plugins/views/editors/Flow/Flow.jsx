@@ -8,6 +8,7 @@ import BaseFlow from "./Views/BaseFlow";
 import Menu from "./Components/Menus/Menu";
 import FlowTopBar from "./Components/FlowTopBar/FlowTopBar";
 import FlowBottomBar from "./Components/FlowBottomBar/FlowBottomBar";
+import Shortcuts from "./Components/interface/Shortcuts";
 import "./Resources/css/Flow.css";
 
 const useStyles = makeStyles(theme => ({
@@ -217,6 +218,13 @@ const Flow = (props, ref) => {
         const persistentWarns = evtData.warnings.filter(el => el.isPersistent);
         onFlowValidated({ warnings: persistentWarns });
       });
+
+      // Enable shortcuts
+      const shortcuts = new Shortcuts(mainInterface);
+
+      return () => {
+        shortcuts.destroy();
+      };
     },
     [onFlowValidated]
   );

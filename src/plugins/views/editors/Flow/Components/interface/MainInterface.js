@@ -98,8 +98,6 @@ export default class MainInterface {
       docManager
     });
 
-    this.shortcuts = new Shortcuts(this, this.canvas);
-
     // Set initial mode as loading
     this.setMode(EVT_NAMES.LOADING);
 

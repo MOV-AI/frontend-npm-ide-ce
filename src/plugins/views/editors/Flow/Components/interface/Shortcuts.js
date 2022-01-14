@@ -6,9 +6,9 @@ import * as d3 from "d3";
 import Vec2 from "../../Utils/Vec2";
 
 export default class Shortcuts {
-  constructor(mainInterface, canvas) {
+  constructor(mainInterface) {
     this.mainInterface = mainInterface;
-    this.canvas = canvas;
+    this.canvas = mainInterface.canvas;
     this.mtrap = null;
 
     this._init();
@@ -243,5 +243,9 @@ export default class Shortcuts {
       .transition()
       .duration(2500)
       .call(this.canvas.zoomBehavior.translateTo, xCenter, yCenter);
+  };
+
+  destroy = () => {
+    // Remove shortcuts
   };
 }
