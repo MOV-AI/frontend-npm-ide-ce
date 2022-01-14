@@ -1,31 +1,33 @@
-import React, { useRef, useCallback, useState } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import Backdrop from "@material-ui/core/Backdrop";
 import useMainInterface from "./hooks/useMainInterface";
 import styles from "./styles";
 import Loader from "../../_shared/Loader/Loader";
-import { EVT_NAMES } from "../events";
 import { usePluginMethods } from "../../../../../engine/ReactPlugin/ViewReactPlugin";
 
 const useStyles = makeStyles(styles);
 
 const BaseFlow = React.forwardRef((props, ref) => {
   const classes = useStyles(props);
-  const { call, instance, id, name, type, model, dataFromDB } = props;
+  const {
+    call,
+    instance,
+    id,
+    name,
+    type,
+    model,
+    dataFromDB,
+    onNodeSelected,
+    onReady
+  } = props;
   const readOnly = false;
 
   // State Hooks
   const [loading, setLoading] = useState(true);
 
-  const containerId = useRef(`base-${id.replace(/\//g, "-")}`);
-  const container = useRef();
-
-  const handleEvents = useCallback((evt, data) => {
-    if (evt === EVT_NAMES.LOADING) {
-      setLoading(data);
-    }
-  }, []);
+  const containerId = useMemo(() => `base-${id.replace(/\//g, "-")}`, [id]);
 
   const { mainInterface } = useMainInterface({
     classes,
@@ -35,12 +37,24 @@ const BaseFlow = React.forwardRef((props, ref) => {
     type,
     width: "400px",
     height: "200px",
-    container,
+    containerId,
     model,
     readOnly,
-    handleEvents,
     call
   });
+
+  useEffect(() => {
+    const mInt = mainInterface.current;
+    if (!mInt) return;
+
+    // Subscribe to on loading exit (finish) event
+    mInt.mode.loading.onExit.subscribe(() => {
+      setLoading(false);
+    });
+
+    // Dispatch on ready event
+    onReady(mInt);
+  }, [mainInterface, dataFromDB, onNodeSelected, onReady]);
 
   usePluginMethods(ref, { mainInterface });
 
@@ -57,8 +71,7 @@ const BaseFlow = React.forwardRef((props, ref) => {
           height: "100%",
           flexGrow: 1
         }}
-        id={containerId.current}
-        ref={container}
+        id={containerId}
         tagindex="0"
       ></div>
     </div>
@@ -66,5 +79,8 @@ const BaseFlow = React.forwardRef((props, ref) => {
 });
 
 BaseFlow.propTypes = {};
+BaseFlow.defaultProps = {
+  onReady: () => console.warning("On ready prop not received")
+};
 
 export default BaseFlow;

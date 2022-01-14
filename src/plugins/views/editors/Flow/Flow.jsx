@@ -142,6 +142,7 @@ const Flow = (props, ref) => {
    * @param {*} validationWarnings
    */
   const onFlowValidated = useCallback(validationWarnings => {
+    console.log("TODO: fix warnings");
     setWarnings(validationWarnings);
   }, []);
 
@@ -199,6 +200,27 @@ const Flow = (props, ref) => {
     getMainInterface()?.nodeStatusUpdated(nodeStatus, robotStatus);
   }, []);
 
+  /**
+   * Subscribe to mainInterface and canvas events
+   */
+  const onReady = useCallback(
+    mainInterface => {
+      // Subscribe to on node select event
+      mainInterface.mode.selectNode.onEnter.subscribe(() => {
+        const selectedNodes = mainInterface.selectedNodes;
+        const node = selectedNodes.length !== 1 ? null : selectedNodes[0];
+        console.log("IMPLEMENT ON NODE SELECTED", node);
+      });
+
+      // Subscribe to flow validations
+      mainInterface.graph.onFlowValidated.subscribe(evtData => {
+        const persistentWarns = evtData.warnings.filter(el => el.isPersistent);
+        onFlowValidated({ warnings: persistentWarns });
+      });
+    },
+    [onFlowValidated]
+  );
+
   //========================================================================================
   /*                                                                                      *
    *                                        Render                                        *
@@ -231,6 +253,7 @@ const Flow = (props, ref) => {
         ref={baseFlowRef}
         dataFromDB={dataFromDB}
         onFlowValidated={onFlowValidated}
+        onReady={onReady}
       />
       <FlowBottomBar
         openFlow={openDoc}

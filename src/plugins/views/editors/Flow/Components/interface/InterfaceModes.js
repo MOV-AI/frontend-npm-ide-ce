@@ -2,7 +2,7 @@ import { BaseMode, AddNodeMode, DragMode, LinkingMode } from "./Modes";
 
 /**
  * InterfaceModes manages the application modes (or states)
- * By default each mode as onEnter and onExit events
+ * By default each mode as onEnter and onExit event
  * Mode events are rxjs Subjects meaning they can be easly subscribed.
  * Ex.:
  * mode.AddNode.onEnter.subscribe({
@@ -16,7 +16,7 @@ export default class InterfaceModes {
 
     this._initialize();
     this.mode = this._loading;
-    this.previous_mode = null;
+    this.previousMode = null;
   }
 
   _initialize = () => {
@@ -74,7 +74,7 @@ export default class InterfaceModes {
   }
 
   get previous() {
-    return this.previous_mode;
+    return this.previousMode;
   }
 
   get canvas() {
@@ -152,20 +152,21 @@ export default class InterfaceModes {
   }
 
   /**
-   * @param {string} mode mode id
-   * @param {any} props - value to save
-   * @param {bool} force - force mode to run onEnter/onExit
+   * @param {string} modeId : The mode id
+   * @param {any} props : The event data
+   * @param {bool} force : Force mode to run onEnter/onExit
    */
-  setMode = (mode_id, props, force) => {
+  setMode = (modeId, props, force) => {
+    console.log("event", modeId, props, force);
     // invalid mode
-    const next_mode = this[mode_id];
-    if (!next_mode) throw new Error("Invalid mode", mode_id);
+    const next_mode = this[modeId];
+    if (!next_mode) throw new Error("Invalid mode", modeId);
 
-    if (this.mode.id === mode_id && !force) return;
+    if (this.mode.id === modeId && !force) return;
 
     // trigger onExit
-    this.previous_mode = this.mode;
-    this.previous_mode.onExit.next(this.previous_mode.props);
+    this.previousMode = this.mode;
+    this.previousMode.onExit.next(this.previousMode.props);
 
     // trigger onEnter
     this.mode = next_mode;
@@ -175,6 +176,6 @@ export default class InterfaceModes {
 
   setPrevious = () => {
     this.mode.onExit.next(this.mode.props);
-    this.mode = this.previous_mode;
+    this.mode = this.previousMode;
   };
 }

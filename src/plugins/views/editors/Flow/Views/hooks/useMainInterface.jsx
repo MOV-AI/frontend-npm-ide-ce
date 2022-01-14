@@ -1,36 +1,14 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import MainInterface from "../../Components/interface/MainInterface";
 
 const useMainInterface = props => {
-  const {
-    classes,
-    instance,
-    name,
-    data,
-    type,
-    width,
-    height,
-    container,
-    model,
-    readOnly,
-    handleEvents,
-    call
-  } = props;
-
-  const mainInterface = useRef();
-
   //========================================================================================
   /*                                                                                      *
-   *                                    Event Handlers                                    *
+   *                                         Hooks                                        *
    *                                                                                      */
   //========================================================================================
 
-  const handleMainInterfaceEvents = useCallback(
-    (evt, value, callback) => {
-      handleEvents(evt, value, callback);
-    },
-    [handleEvents]
-  );
+  const mainInterface = useRef();
 
   //========================================================================================
   /*                                                                                      *
@@ -39,7 +17,21 @@ const useMainInterface = props => {
   //========================================================================================
 
   useEffect(() => {
-    if (!data || mainInterface.current) return;
+    if (!props.data || mainInterface.current) return;
+
+    const {
+      classes,
+      instance,
+      name,
+      data,
+      type,
+      width,
+      height,
+      containerId,
+      model,
+      readOnly,
+      call
+    } = props;
 
     mainInterface.current = new MainInterface({
       id: name,
@@ -47,16 +39,14 @@ const useMainInterface = props => {
       type,
       width,
       height,
-      containerId: container.current.id,
+      containerId,
       model,
       readOnly,
       data,
       classes,
       call
     });
-
-    mainInterface.current.subscribe(handleMainInterfaceEvents);
-  });
+  }, [props]);
 
   return { mainInterface };
 };

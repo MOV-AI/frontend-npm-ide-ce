@@ -208,7 +208,7 @@ class ContainerNode extends BaseContainerNode {
         return this.getNodeInstTemplate(subFlowName, subNodeName.join("__"));
       }
     } catch (error) {
-      const errorMsg = `?*? Could not find the template of the node instance "${nodeName}"`;
+      const errorMsg = `Could not find the template of the node instance "${nodeName}"`;
       console.error(`${errorMsg}; \n${error}`);
     }
   };
