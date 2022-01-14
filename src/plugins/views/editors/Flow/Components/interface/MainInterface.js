@@ -14,7 +14,6 @@ import GraphValidator from "../../Core/Graph/GraphValidator";
 // to remove
 const t = v => v;
 
-const DEFAULT_MODE = "default";
 const TYPES = {
   NODE: "NodeInst",
   CONTAINER: "Container"
@@ -43,6 +42,7 @@ export default class MainInterface {
     this.classes = classes;
     this.docManager = call;
 
+    // TODO: Review
     this.type = type ?? "flow";
     this.initialize();
   }
@@ -56,7 +56,6 @@ export default class MainInterface {
   state_sub = new BehaviorSubject(0);
   mode = new InterfaceModes(this);
   api = null;
-  subscriber = null;
   canvas = null;
   graph = null;
   shortcuts = null;
@@ -68,6 +67,8 @@ export default class MainInterface {
   //========================================================================================
 
   initialize = () => {
+    this.mode.setMode(EVT_NAMES.LOADING);
+
     const {
       classes,
       containerId,
@@ -108,7 +109,7 @@ export default class MainInterface {
       .then(() => {
         this.canvas.el.focus();
 
-        this.dispatch(EVT_NAMES.LOADING, false);
+        this.mode.setMode(EVT_NAMES.DEFAULT);
       });
   };
 
@@ -172,7 +173,7 @@ export default class MainInterface {
       {}
     );
     this.mode.onDblClick.onEnter.subscribe(() => {
-      this.setMode(DEFAULT_MODE);
+      this.setMode(EVT_NAMES.DEFAULT);
     });
 
     // Linking mode events
@@ -290,7 +291,7 @@ export default class MainInterface {
       x,
       y,
       onClose: () => {
-        this.setMode(DEFAULT_MODE);
+        this.setMode(EVT_NAMES.DEFAULT);
       }
     });
   };
@@ -322,7 +323,7 @@ export default class MainInterface {
     this.dispatch(EVT_NAMES.ON_LINK_CTX_MENU, {
       ...data,
       onClose: () => {
-        this.setMode(DEFAULT_MODE);
+        this.setMode(EVT_NAMES.DEFAULT);
       }
     });
   };
@@ -346,7 +347,7 @@ export default class MainInterface {
       ...data.node.data,
       node: data.node,
       onClose: () => {
-        this.setMode(DEFAULT_MODE);
+        this.setMode(EVT_NAMES.DEFAULT);
       }
     });
   };
@@ -357,7 +358,7 @@ export default class MainInterface {
     this.dispatch(EVT_NAMES.ON_PORT_CTX_MENU, {
       ...data,
       onClose: () => {
-        this.setMode(DEFAULT_MODE);
+        this.setMode(EVT_NAMES.DEFAULT);
       }
     });
   };
@@ -421,26 +422,17 @@ export default class MainInterface {
   };
 
   /**
-   * Add a function to be executed every time
-   * an event is triggered
-   * @param {function} callback A function to execute
-   */
-  subscribe = callback => {
-    this.subscriber = callback;
-  };
-
-  /**
    * Dispatch events to the subscriber
    * @param {string} evt The event name
    * @param {any} data Data related to the event
    * @param {function} callback A function to execute after handling the event
    */
   dispatch = (evt, data, callback) => {
-    this.subscriber(evt, data, callback);
+    //this.subscriber(evt, data, callback);
   };
 
   destroy = () => {
-    this.subscriber = null;
+    // Nothing to do
   };
 
   // ******* TO MOVE *******
@@ -459,7 +451,7 @@ export default class MainInterface {
     // MasterComponent.createNewApp(
     //   titles[type],
     //   value => this.dlgSubmitNode(value, node),
-    //   () => this.mode.setMode(DEFAULT_MODE),
+    //   () => this.mode.setMode(EVT_NAMES.DEFAULT),
     //   value => GraphValidator.validateNodeName(value, nodes)
     // );
   };
@@ -474,7 +466,7 @@ export default class MainInterface {
     const flow = { name: this.id, type: this.type };
     const data = formatNodeData(flow, _node, _node.type ? _node.type : "Node");
     this.api.addNewNode(data);
-    this.setMode(DEFAULT_MODE);
+    this.setMode(EVT_NAMES.DEFAULT);
   }
 
   /**
@@ -500,7 +492,7 @@ export default class MainInterface {
     //       re(true);
     //     },
     //     () => {
-    //       this.mode.setMode(DEFAULT_MODE);
+    //       this.mode.setMode(EVT_NAMES.DEFAULT);
     //       re(true);
     //     },
     //     value => GraphValidator.validateNodeName(value, nodes),
@@ -512,6 +504,6 @@ export default class MainInterface {
 
   dlgPSubmitNode(value, position, nodeToCopy) {
     this.api.copyNode(value, position, nodeToCopy);
-    this.setMode(DEFAULT_MODE);
+    this.setMode(EVT_NAMES.DEFAULT);
   }
 }

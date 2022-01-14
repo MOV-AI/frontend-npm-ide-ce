@@ -202,6 +202,7 @@ const Flow = (props, ref) => {
    * @param {*} validationWarnings
    */
   const onFlowValidated = useCallback(validationWarnings => {
+    console.log("TODO: fix warnings");
     setWarnings(validationWarnings);
   }, []);
 
@@ -212,6 +213,27 @@ const Flow = (props, ref) => {
   const onNodeSelected = useCallback(node => {
     console.log("debug onNodeSelected", node);
   }, []);
+
+  /**
+   * Subscribe to mainInterface and canvas events
+   */
+  const onReady = useCallback(
+    mainInterface => {
+      // Subscribe to on node select event
+      mainInterface.mode.selectNode.onEnter.subscribe(() => {
+        const selectedNodes = mainInterface.selectedNodes;
+        const node = selectedNodes.length !== 1 ? null : selectedNodes[0];
+        onNodeSelected(node);
+      });
+
+      // Subscribe to flow validations
+      mainInterface.graph.onFlowValidated.subscribe(evtData => {
+        const persistentWarns = evtData.warnings.filter(el => el.isPersistent);
+        onFlowValidated({ warnings: persistentWarns });
+      });
+    },
+    [onNodeSelected, onFlowValidated]
+  );
 
   //========================================================================================
   /*                                                                                      *
@@ -237,6 +259,7 @@ const Flow = (props, ref) => {
           onStartStopFlow={onStartStopFlow}
           nodeStatusUpdated={onNodeStatusUpdate}
           onViewModeChange={onViewModeChange}
+          onReady={onReady}
           // nodeCompleteStatusUpdated={this.onMonitoringNodeStatusUpdate}
         ></FlowTopBar>
       </div>
@@ -244,8 +267,7 @@ const Flow = (props, ref) => {
         {...props}
         ref={baseFlowRef}
         dataFromDB={dataFromDB}
-        onFlowValidated={onFlowValidated}
-        onNodeSelected={onNodeSelected}
+        onReady={onReady}
       />
       <FlowBottomBar
         openFlow={openDoc}

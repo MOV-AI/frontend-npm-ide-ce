@@ -352,8 +352,6 @@ export default class Graph {
       this.loadLinks(flow.Links)
         .loadExposedPorts(flow.ExposedPorts || {})
         .update();
-
-      this.mode.setMode("default");
     });
   }
 
