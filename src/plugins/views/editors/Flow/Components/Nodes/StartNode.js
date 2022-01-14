@@ -1,8 +1,8 @@
 import BaseNode from "./BaseNode/BaseNode";
 
 class StartNode extends BaseNode {
-  constructor(canvas, node, events) {
-    const _node = {
+  constructor(args) {
+    const node = {
       id: "start",
       NodeLabel: "start",
       Paramater: {},
@@ -12,17 +12,28 @@ class StartNode extends BaseNode {
         y: { Value: 20 }
       }
     };
-    super(canvas, _node, {});
+    const template = {
+      Label: "start",
+      PortsInst: {
+        start: {
+          Out: {
+            start: {
+              Message: "movai_msgs/Transition"
+            }
+          },
+          Template: "MovAI/TransitionFor",
+          Package: "movai_msgs"
+        }
+      }
+    };
 
-    this._init();
+    super({ ...args, node, template });
+
+    this.init();
   }
 
-  _init = () => {
-    this._loadTemplate()
-      ._addPorts()
-      ._renderBody()
-      ._renderHeader()
-      ._renderPorts();
+  init = () => {
+    this.addPorts().renderBody().renderHeader().renderPorts();
   };
 
   /**
@@ -31,31 +42,16 @@ class StartNode extends BaseNode {
   _portEvents = () => {
     return {
       onClick: port => this.onPortClick(port),
-      onMouseOver: () => {},
-      onMouseOut: () => {},
-      onContext: () => {}
-    };
-  };
-
-  _loadTemplate = () => {
-    this._template = {
-      id: "start",
-      name: "start",
-      template: {
-        PortsInst: {
-          start: {
-            Out: {
-              start: {
-                Message: "movai_msgs/Transition"
-              }
-            },
-            Template: "MovAI/TransitionFor",
-            Package: "movai_msgs"
-          }
-        }
+      onMouseOver: () => {
+        // Empty
+      },
+      onMouseOut: () => {
+        // Empty
+      },
+      onContext: () => {
+        // Empty
       }
     };
-    return this;
   };
 
   get headerPos() {

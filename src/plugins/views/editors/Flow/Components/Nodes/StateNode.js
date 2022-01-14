@@ -15,7 +15,7 @@ class StateNode extends BaseNode {
       type: "State"
     };
 
-    this._init();
+    this.init();
   }
 
   get name() {

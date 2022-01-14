@@ -55,7 +55,7 @@ export default class BaseNodeStruct {
   }
 
   get height() {
-    return Math.max(this._getHeight(), this.min_size.h);
+    return Math.max(this.getHeight(), this.min_size.h);
   }
 
   get center() {
@@ -74,10 +74,12 @@ export default class BaseNodeStruct {
   }
 
   /**
+   * @private
    * Calculate max number of ports between in and out
    * Returns: {max, in, out}
    */
-  _getNrOfPorts = () => {
+  // TODO: Refactor
+  getNrOfPorts = () => {
     let ctr_in = 0;
     let ctr_out = 0;
     this._ports.forEach(port => {
@@ -87,18 +89,24 @@ export default class BaseNodeStruct {
   };
 
   /**
+   * @private
    * Calculate node height based on the max nr. of ports per type
    */
-  _getHeight = () => {
+  getHeight = () => {
     const min_ports = 5;
     const min_height = this.ports_spacing * min_ports;
-    const height = (this._getNrOfPorts().Max + 1) * this.ports_spacing;
+    const height = (this.getNrOfPorts().Max + 1) * this.ports_spacing;
     return Math.max(min_height, height);
   };
 
-  _getPortsInitialPos = type => {
-    const nr_of_ports = this._getNrOfPorts();
-    const Height = this._getHeight();
+  /**
+   * @private
+   * @param {*} type
+   * @returns
+   */
+  getPortsInitialPos = type => {
+    const nr_of_ports = this.getNrOfPorts();
+    const Height = this.getHeight();
     const init_x = {
       In: this.padding.x / 2,
       Out: this.width + this.padding.x / 2

@@ -12,7 +12,7 @@ const useStyles = makeStyles(styles);
 
 const BaseFlow = React.forwardRef((props, ref) => {
   const classes = useStyles(props);
-  const { instance, id, name, type, model, dataFromDB } = props;
+  const { call, instance, id, name, type, model, dataFromDB } = props;
   const readOnly = false;
 
   // State Hooks
@@ -38,7 +38,8 @@ const BaseFlow = React.forwardRef((props, ref) => {
     container,
     model,
     readOnly,
-    handleEvents
+    handleEvents,
+    call
   });
 
   usePluginMethods(ref, { mainInterface });
@@ -64,10 +65,6 @@ const BaseFlow = React.forwardRef((props, ref) => {
   );
 });
 
-BaseFlow.propTypes = {
-  id: PropTypes.string.isRequired,
-  type: PropTypes.string,
-  model: PropTypes.string
-};
+BaseFlow.propTypes = {};
 
 export default BaseFlow;

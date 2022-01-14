@@ -37,8 +37,8 @@ const validType = (type_a, type_b) => {
  */
 const isLinkeable = (data_a, data_b) => {
   const rules = [
-    (data_a, data_b) => validMessage(data_a.message, data_b.message),
-    (data_a, data_b) => validType(data_a.type, data_b.type)
+    (a, b) => validMessage(a.message, b.message),
+    (a, b) => validType(a.type, b.type)
   ];
   return rules.every(fn => fn(data_a, data_b));
 };

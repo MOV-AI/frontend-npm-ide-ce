@@ -19,7 +19,8 @@ class SubFlow extends Model {
   position = new Position();
   parameters = new Manager("parameters", Parameter, this.propEvents);
 
-  observables = ["name", "template", "position"];
+  // Define observable properties
+  observables = Object.values(SubFlow.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -38,6 +39,16 @@ class SubFlow extends Model {
 
   getPosition() {
     return this.position;
+  }
+
+  setPosition(x, y) {
+    this.position.setData({ x, y });
+    this.dispatch(
+      SubFlow.OBSERVABLE_KEYS.POSITION,
+      this.getPosition().serialize()
+    );
+
+    return this;
   }
 
   getParameters() {
@@ -106,6 +117,12 @@ class SubFlow extends Model {
       parameters: Manager.serializeOfDB(parameters, Parameter)
     };
   }
+
+  static OBSERVABLE_KEYS = {
+    NAME: "name",
+    TEMPLATE: "template",
+    POSITION: "position"
+  };
 }
 
 SubFlow.defaults = {};

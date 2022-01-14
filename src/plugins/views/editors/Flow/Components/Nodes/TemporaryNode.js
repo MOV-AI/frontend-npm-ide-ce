@@ -2,7 +2,7 @@ import BaseNode from "./BaseNode/BaseNode";
 
 class TemporaryNode extends BaseNode {
   constructor(canvas, node, template) {
-    const _node = {
+    const customNode = {
       id: "",
       NodeLabel: node.Template,
       Paramater: {},
@@ -12,21 +12,20 @@ class TemporaryNode extends BaseNode {
       },
       ...node
     };
-    super(canvas, _node, {}, "node", template);
+    super(canvas, customNode, {}, "node", template);
 
-    this._init()._postInit();
+    this.init().postInit();
   }
 
-  _postInit = () => {
+  postInit = () => {
     this.object.attr("opacity", "0.5");
   };
 
-  _onClick = () => {};
-
-  static builder = async (canvas, node, events) => {
-    const tpl = await TemporaryNode.getNodeTemplate(node.Template);
-
-    return new TemporaryNode(canvas, node, tpl);
+  /**
+   * @override
+   */
+  _onClick = () => {
+    // Empty on purpose
   };
 }
 

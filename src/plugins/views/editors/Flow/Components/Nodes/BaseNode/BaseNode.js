@@ -1,17 +1,12 @@
 import * as d3 from "d3";
 import lodash from "lodash";
-import {
-  convert_visualization,
-  convert_type_css,
-  getBaseTemplate
-} from "../Utils";
+import { convert_visualization, convert_type_css } from "../Utils";
 
 import { flattenObject } from "../../../Utils/utils";
 
 import BaseNodeStruct from "./BaseNodeStruct";
 import BasePort from "./BasePort";
 import BaseNodeHeader from "./BaseNodeHeader";
-import { NodesDB } from "../../../toRemove/api/NodesDB";
 import BaseNodeStatus from "./BaseNodeStatus";
 
 const STYLE = {
@@ -39,13 +34,12 @@ class BaseNode extends BaseNodeStruct {
    * @param {object} node node's data
    * @param {object} events functions to be called on node's events
    */
-  constructor(canvas, node, events, _type, template) {
+  constructor({ canvas, node, events, _type, template }) {
     super(node);
     this.canvas = canvas;
     this.events = events;
     this._type = _type || "node";
     this.object = null;
-    this._nodesDb = new NodesDB();
     this._selected = false;
     this._drag = { handler: null, debounce: null, delta: { x: 0, y: 0 } };
     this.db_click_timeout = null;
@@ -55,48 +49,22 @@ class BaseNode extends BaseNodeStruct {
   /**
    * initialize the node element
    */
-  _init() {
-    this._loadTemplate()
-      ._addPorts()
-      ._renderBody()
-      ._renderHeader()
-      ._renderPorts()
-      ._renderStatus()
-      ._addEvents();
+  init() {
+    this.addPorts()
+      .renderBody()
+      .renderHeader()
+      .renderStatus()
+      .renderPorts()
+      .addEvents();
 
     return this;
   }
 
   /**
-   * _loadTemplate - load the node template
+   * @private
+   * renderBody - render the body of the node
    */
-  _loadTemplate() {
-    if (this._template) return this;
-    this._loadTemplateFromArchive();
-    return this;
-  }
-
-  _loadTemplateFromArchive = async () => {
-    try {
-      if (!this.data.Template) return;
-      const tpl = await this._nodesDb.agetTemplate(
-        this._type,
-        this.data.Template
-      );
-
-      this._template = { ...this._template, ...tpl };
-      this._updateTemplate();
-    } catch (error) {
-      console.log(error);
-    }
-
-    return this;
-  };
-
-  /**
-   * _renderBody - render the body of the node
-   */
-  _renderBody() {
+  renderBody() {
     const { stroke } = STYLE;
     const { padding } = this;
     const maxPadding = Math.max(padding.x, padding.y);
@@ -107,7 +75,7 @@ class BaseNode extends BaseNodeStruct {
     // create the svg element
     this.object = d3
       .create("svg")
-      .attr("id", `${this.canvas.canvasId}-${this.data.id}`)
+      .attr("id", `${this.canvas.containerId}-${this.data.id}`)
       .style("overflow", "visible")
       .attr("width", this.width + maxPadding)
       .attr("height", this.height + maxPadding)
@@ -125,7 +93,7 @@ class BaseNode extends BaseNodeStruct {
       .attr("width", this.width)
       .attr("height", this.height)
       .attr("class", convert_type_css(this._template))
-      .attr("filter", `url(#shadow-${this.canvas.canvasId})`)
+      .attr("filter", `url(#shadow-${this.canvas.containerId})`)
       .attr("stroke", stroke.color.default)
       .attr("stroke-width", stroke.width.default);
 
@@ -133,9 +101,10 @@ class BaseNode extends BaseNodeStruct {
   }
 
   /**
-   * _updateSize - update the size of the node (used after a template update)
+   * @private
+   * updateSize - update the size of the node (used after a template update)
    */
-  _updateSize = () => {
+  updateSize = () => {
     const maxPadding = Math.max(this.padding.x, this.padding.y);
     this.object
       .attr("width", this.width + maxPadding)
@@ -148,39 +117,45 @@ class BaseNode extends BaseNodeStruct {
   };
 
   /**
-   * _addEvents - add events to the svg element
+   * @private
+   * addEvents - add events to the svg element
    */
-  _addEvents = () => {
+  addEvents = () => {
     // node event listeners
-    this.object.on("click", () => this._eventsOn(this._onClick));
-    this.object.on("mousedown", () => this._eventsOn(this._onMouseDown));
-    this.object.on("mouseenter", () => this._eventsOn(this._onMouseEnter));
-    this.object.on("mouseleave", () => this._eventsOn(this._onMouseLeave));
-    this.object.on("dblclick", () => this._eventsOn(this._onDblClick));
+    this.object.on("click", () => this.eventsOn(this._onClick));
+    this.object.on("mousedown", () => this.eventsOn(this._onMouseDown));
+    this.object.on("mouseenter", () => this.eventsOn(this._onMouseEnter));
+    this.object.on("mouseleave", () => this.eventsOn(this._onMouseLeave));
+    this.object.on("dblclick", () => this.eventsOn(this._onDblClick));
 
-    this.object.on("contextmenu", () => this._eventsOn(this._onContext));
+    this.object.on("contextmenu", () => this.eventsOn(this._onContext));
 
-    this._addDrag();
+    this.addDrag();
 
     return this;
   };
 
-  _addDrag = () => {
+  /**
+   * @private
+   * @returns
+   */
+  addDrag = () => {
     if (this.readOnly) return this;
     // assign drag handler to node object
     this._drag.handler = d3
       .drag()
-      .on("start", () => this._eventsOn(this._onDragStart))
-      .on("end", () => this._eventsOn(this._onDragEnd))
-      .on("drag", () => this._eventsOn(this._onDrag));
+      .on("start", () => this.eventsOn(this._onDragStart))
+      .on("end", () => this.eventsOn(this._onDragEnd))
+      .on("drag", () => this.eventsOn(this._onDrag));
     this._drag.handler(this.object);
     return this;
   };
 
   /**
-   * _renderHeader - render the node header
+   * @private
+   * renderHeader - render the node header
    */
-  _renderHeader() {
+  renderHeader() {
     // header already exists; probably an update request;
     if (this._header) this._header.destroy();
 
@@ -200,9 +175,10 @@ class BaseNode extends BaseNodeStruct {
   }
 
   /**
-   * _renderStatus - render the status of the node (circle on the body)
+   * @private
+   * renderStatus - render the status of the node (circle on the body)
    */
-  _renderStatus = () => {
+  renderStatus = () => {
     // status already exists; probably an update request;
     if (this._status) this._status.destroy();
 
@@ -220,7 +196,11 @@ class BaseNode extends BaseNodeStruct {
     return this;
   };
 
-  _portEvents() {
+  /**
+   * @private
+   * @returns
+   */
+  portEvents() {
     return {
       onClick: port => this.onPortClick(port),
       onMouseOver: port => this.onPortMouseOver(port),
@@ -246,13 +226,16 @@ class BaseNode extends BaseNodeStruct {
   }
 
   /**
-   * _addPorts - add node ports
+   * @private
+   * addPorts - add node ports
    */
-  _addPorts(
-    portBuilder = (node, data, events) => new BasePort(node, data, events)
-  ) {
+  addPorts(portBuilder) {
+    const builder =
+      portBuilder ??
+      ((pNode, pData, pEvents) => new BasePort(pNode, pData, pEvents));
+
     // port events
-    const events = this._portEvents();
+    const portEvents = this.portEvents();
 
     // node already has ports; probably an update request
     if (this._ports.size > 0) {
@@ -265,31 +248,31 @@ class BaseNode extends BaseNodeStruct {
     // add ports
     try {
       // get ports from the node's template
-      const ports = lodash.get(this._template, "template.PortsInst", {});
+      const ports = this._template?.PortsInst ?? {};
 
-      Object.keys(ports).forEach(port_inst_name => {
+      Object.keys(ports).forEach(portInstName => {
         // check In and Out ports
         ["In", "Out"].forEach(type => {
           // get port data
-          const data = lodash.get(ports[port_inst_name], `${type}`, {});
+          const data = lodash.get(ports[portInstName], `${type}`, {});
 
-          Object.keys(data).forEach(port_name => {
+          Object.keys(data).forEach(portName => {
             // customize port data for the instance
             const port_data = {
-              name: `${port_inst_name}/${port_name}`,
+              name: `${portInstName}/${portName}`,
               type: type,
-              Template: lodash.get(ports, `${port_inst_name}.Template`, ""),
-              ...data[port_name]
+              Template: ports[portInstName]?.Template ?? "",
+              ...data[portName]
             };
 
             // create port instance
-            const port = portBuilder(this, port_data, events);
+            const port = builder(this, port_data, portEvents);
 
             // check if the create port is valid
             if (port.isValid()) {
               // add port instance
-              const fmt_port_name = `${port_inst_name}/${port_name}`;
-              this._ports.set(fmt_port_name, port);
+              const fmtPortName = `${portInstName}/${portName}`;
+              this._ports.set(fmtPortName, port);
             }
           });
         });
@@ -302,13 +285,14 @@ class BaseNode extends BaseNodeStruct {
   }
 
   /**
-   * _renderPorts - render ports. should be called after adding the ports
+   * @private
+   * renderPorts - render ports. should be called after adding the ports
    */
-  _renderPorts() {
+  renderPorts() {
     const radius = this.port_size;
     const position = {
-      In: this._getPortsInitialPos("In"),
-      Out: this._getPortsInitialPos("Out")
+      In: this.getPortsInitialPos("In"),
+      Out: this.getPortsInitialPos("Out")
     };
 
     this._ports.forEach(port => {
@@ -413,21 +397,12 @@ class BaseNode extends BaseNodeStruct {
   }
 
   /**
-   * template_name - returns the node's template name
+   * Returns the node's template name
    *
    * @returns {string} the template name
    */
-  get template_name() {
+  get templateName() {
     return this.data.Template;
-  }
-
-  /**
-   * events_on - returns if the events should be triggered based on the node visibility
-   *
-   * @returns {boolean} true is node is visible, otherwise false
-   */
-  get events_on() {
-    return this.visible;
   }
 
   /**
@@ -476,7 +451,7 @@ class BaseNode extends BaseNodeStruct {
    *
    * @param {function} fn function to call if the node's events are enabled
    */
-  _eventsOn = fn => {
+  eventsOn = fn => {
     if (this.visible) fn();
   };
 
@@ -665,7 +640,7 @@ class BaseNode extends BaseNodeStruct {
    * _update - update graphical representation
    */
   _update = () => {
-    this._addPorts()._renderPorts()._updateSize()._renderStatus();
+    this.addPorts().renderPorts().updateSize().renderStatus();
 
     return this;
   };
@@ -770,12 +745,12 @@ class BaseNode extends BaseNodeStruct {
    * onTemplateUpdate - on template update event handler
    * templates only change when edited while in redis
    *
-   * @param {string} template_name node's template name
+   * @param {string} name node's template name
    */
-  onTemplateUpdate = template_name => {
-    if (template_name !== this.template_name) return; //not my template
+  onTemplateUpdate = name => {
+    if (name !== this.templateName) return; //not my template
     this._template = undefined;
-    this._loadTemplate()._update();
+    this._update();
   };
 
   /**
@@ -820,7 +795,7 @@ class BaseNode extends BaseNodeStruct {
     };
     Object.keys(data).forEach(key => {
       (fn[key] || fn["default"])(data);
-      if (!this.no_reload_required.includes(key)) this._init().addToCanvas();
+      if (!this.no_reload_required.includes(key)) this.init().addToCanvas();
     });
     return true;
   };
@@ -885,7 +860,7 @@ class BaseNode extends BaseNodeStruct {
    * @returns {string} node's template name
    */
   getExposedName() {
-    return this.template_name;
+    return this.templateName;
   }
 
   /**
@@ -895,10 +870,7 @@ class BaseNode extends BaseNodeStruct {
    * @param {string} type: "node" or "flow" or "start"
    * @param {number} offsetX: Starting point of svg "x" attribute
    */
-  static async getMiniature(templateName, type = "node", offsetX = 30) {
-    const template =
-      (await BaseNode.getNodeTemplate(templateName, type)) ??
-      getBaseTemplate(type);
+  static async getMiniature(template, type = "node", offsetX = 30) {
     const { width, height, padding } = MINI;
     // create the svg element
     const { stroke } = STYLE;
@@ -930,25 +902,6 @@ class BaseNode extends BaseNodeStruct {
     // return node
     return object;
   }
-
-  static getNodeTemplate = async (templateName, _type = "node") => {
-    if (!templateName || _type === "start" || _type === "flow")
-      return undefined;
-
-    try {
-      const templates = new NodesDB();
-      return await templates.agetTemplate(_type, templateName);
-    } catch (error) {
-      console.log("Could not find template in archive", error);
-      return {};
-    }
-  };
-
-  static builder = async (canvas, node, events, _type) => {
-    const tpl = await BaseNode.getNodeTemplate(node.Template, "node");
-
-    return new BaseNode(canvas, node, events, _type, tpl);
-  };
 }
 
 export default BaseNode;

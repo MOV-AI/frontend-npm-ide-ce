@@ -24,8 +24,8 @@ class BasePortStruct {
   ) {
     this.node = node;
     this.data = {
-      name: name,
-      type: type,
+      name,
+      type,
       callback: Callback || "",
       message: Message || "",
       template: Template || "",
@@ -34,7 +34,7 @@ class BasePortStruct {
       exposed: Exposed || false,
       origin: origin || null
     };
-    this.required_keys = ["message", "template"];
+    this.requiredKeys = ["message", "template"];
     this._selected = false;
     this._visible = true;
   }
@@ -75,13 +75,14 @@ class BasePort extends BasePortStruct {
   };
 
   _render() {
+    const css = this.css.default();
     this.object = d3
       .create("svg:circle")
       .attr("cx", this.cx)
       .attr("cy", this.cy)
       .attr("r", this.radius)
       .attr("stroke-width", 0)
-      .attr("class", this.css.default());
+      .attr("class", css);
 
     return this;
   }
@@ -202,7 +203,7 @@ class BasePort extends BasePortStruct {
    * Delete node if true
    */
   isValid = () => {
-    return !this.required_keys.some(key => {
+    return !this.requiredKeys.some(key => {
       // null: key was already deleted
       return [null, undefined, ""].includes(this.data[key]);
     });
