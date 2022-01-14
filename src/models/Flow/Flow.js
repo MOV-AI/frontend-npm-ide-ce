@@ -156,7 +156,7 @@ class Flow extends Model {
       Container: this.getSubFlows().serializeToDB(),
       ExposedPorts: this.getExposedPorts().serializeToDB(),
       Links: this.getLinks().serializeToDB(),
-      groups: this.getGroups().serializeToDB(),
+      Layers: this.getGroups().serializeToDB(),
       Parameter: this.getParameters().serializeToDB()
     };
   }
