@@ -42,7 +42,7 @@ svg text.unselectable {
 
 .port-default {
   fill: white;
-  filter: drop-shadow(0 0 0.03rem black);
+  /*filter: drop-shadow(0 0 0.03rem black); Firefox issues*/
 }
 .port-default:hover {
   fill: green;

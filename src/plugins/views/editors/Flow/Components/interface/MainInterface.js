@@ -1,70 +1,102 @@
-import { throttleTime, filter } from "rxjs/operators";
-import { BehaviorSubject } from "rxjs";
 import lodash from "lodash";
-import { formatNodeData, formatNodeVisualization } from "../../Utils/Formater";
-import GraphValidator from "../../Core/Graph/GraphValidator";
-import RestApi from "../../Core/Api/RestApi";
+import { BehaviorSubject } from "rxjs";
+import { throttleTime, filter } from "rxjs/operators";
+import { formatNodeData } from "../../Utils/Formater";
 import Canvas from "./canvas";
 import Graph from "../../Core/Graph/GraphBase";
 import InterfaceModes from "./InterfaceModes";
+import RestApi from "../../Core/Api/RestApi";
 import Shortcuts from "./Shortcuts";
 import { maxMovingPixels, FLOW_VIEW_MODE } from "../../Constants/constants";
 import { EVT_NAMES, EVT_TYPES } from "../../events";
 
+import GraphValidator from "../../Core/Graph/GraphValidator";
 // to remove
 const t = v => v;
 
 const DEFAULT_MODE = "default";
+const TYPES = {
+  NODE: "NodeInst",
+  CONTAINER: "Container"
+};
 
 export default class MainInterface {
-  constructor(
-    //component,
-    uid,
+  constructor({
+    id,
+    containerId,
     modelView,
     type,
     width,
     height,
-    container,
-    model,
-    readOnly,
     data,
-    theme,
-    graphBuilder = (_interface, _canvas, _id) =>
-      new Graph(_interface, _canvas, _id)
-  ) {
-    this.uid = uid;
+    classes,
+    call,
+    graphCls
+  }) {
+    this.id = id;
+    this.containerId = containerId;
     this.width = width;
     this.height = height;
-    this.container = container;
     this.modelView = modelView;
-    this.type = type ?? "flow";
-    this.state_sub = new BehaviorSubject(0);
-    this.readOnly = readOnly;
     this.data = data;
-    this.graphBuilder = graphBuilder;
-    this.theme = theme;
+    this.graphCls = graphCls ?? Graph;
+    this.classes = classes;
+    this.docManager = call;
 
-    this.mode = new InterfaceModes(this);
-    this.api = new RestApi(this.uid, this.type, this.modelView.SCOPE);
-
-    this.subscriber = null;
-
+    this.type = type ?? "flow";
     this.initialize();
   }
 
-  initialize = () => {
-    this.canvas = new Canvas(
-      this,
-      this.uid,
-      this.type,
-      this.width,
-      this.height,
-      maxMovingPixels,
-      this.container,
-      this.readOnly
-    );
+  //========================================================================================
+  /*                                                                                      *
+   *                                      Properties                                      *
+   *                                                                                      */
+  //========================================================================================
 
-    this.graph = this.graphBuilder(this, this.canvas, this.uid);
+  state_sub = new BehaviorSubject(0);
+  mode = new InterfaceModes(this);
+  api = null;
+  subscriber = null;
+  canvas = null;
+  graph = null;
+  shortcuts = null;
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Initialization                                    *
+   *                                                                                      */
+  //========================================================================================
+
+  initialize = () => {
+    const {
+      classes,
+      containerId,
+      docManager,
+      height,
+      id,
+      modelView,
+      width,
+      type
+    } = this;
+
+    this.api = new RestApi(id, type, modelView.SCOPE);
+    this.canvas = new Canvas({
+      mInterface: this,
+      containerId,
+      width,
+      height,
+      maxMovingPixels,
+      classes,
+      docManager
+    });
+
+    this.graph = new this.graphCls({
+      id,
+      mInterface: this,
+      canvas: this.canvas,
+      docManager
+    });
+
     this.shortcuts = new Shortcuts(this, this.canvas);
 
     // Set initial mode as loading
@@ -228,12 +260,12 @@ export default class MainInterface {
     this.mode.setPrevious();
   };
 
-  nodeStatusUpdated = (node_status, robotStatus) => {
-    this.graph.nodeStatusUpdated(node_status, robotStatus);
+  nodeStatusUpdated = (nodeStatus, robotStatus) => {
+    this.graph.nodeStatusUpdated(nodeStatus, robotStatus);
   };
 
   validateNodeTocopy = data => {
-    return lodash.get(data, "node.ContainerFlow", "") !== this.uid;
+    return data.node?.ContainerFlow !== this.id;
   };
 
   addLink = () => {
@@ -268,22 +300,21 @@ export default class MainInterface {
   };
 
   onDragEnd = draggedNode => {
-    const nodes = this.selectedNodes;
-
-    if (
-      !this.selectedNodes.filter(
-        node => node.data.id === draggedNode.data.id
-      ) ||
-      !this.selectedNodes.length
-    ) {
-      nodes.push(draggedNode);
-    }
+    const nodes = this.selectedNodes.filter(
+      node => node.data.id === draggedNode.data.id
+    );
+    nodes.push(draggedNode);
 
     nodes.forEach(node => {
       const { id } = node.data;
       const [x, y] = node.data.Visualization;
 
-      this.modelView.current.getNodeInstances().getItem(id).setPosition(x, y);
+      const items =
+        node.data.type === TYPES.CONTAINER
+          ? this.modelView.current.getSubFlows()
+          : this.modelView.current.getNodeInstances();
+
+      items.getItem(id).setPosition(x, y);
     });
   };
 
@@ -440,7 +471,7 @@ export default class MainInterface {
    */
   dlgSubmitNode(value, node) {
     const _node = { ...node, id: value };
-    const flow = { name: this.uid, type: this.type };
+    const flow = { name: this.id, type: this.type };
     const data = formatNodeData(flow, _node, _node.type ? _node.type : "Node");
     this.api.addNewNode(data);
     this.setMode(DEFAULT_MODE);

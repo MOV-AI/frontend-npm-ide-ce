@@ -1,4 +1,4 @@
-import Position from "./Position/Position";
+import Position from "../Position/Position";
 import Manager from "../../../Manager";
 import NodeInstance from "./NodeInstance";
 

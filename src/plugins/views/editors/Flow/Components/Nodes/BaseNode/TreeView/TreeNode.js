@@ -25,24 +25,24 @@ class TreeNode extends BaseNode {
   //========================================================================================
 
   /**
-   * @override _init: initialize the node element
+   * @private
+   * @override init: initialize the node element
    */
-  _init() {
-    this._loadTemplate()
-      ._renderBody()
-      ._renderHeader()
-      ._renderStatus()
-      ._addPorts((node, data, events) => new TreeNodePort(node, data, events))
-      ._renderPortsHeader()
-      ._addEvents();
+  init() {
+    this.renderBody()
+      .renderHeader()
+      .renderStatus()
+      .addPorts((node, data, events) => new TreeNodePort(node, data, events))
+      .renderPortsHeader()
+      .addEvents();
 
     return this;
   }
 
   /**
-   * @override _renderHeader - render the node header
+   * @override renderHeader - render the node header
    */
-  _renderHeader() {
+  renderHeader() {
     // header already exists; probably an update request;
     if (this._header) this._header.destroy();
 
@@ -64,9 +64,9 @@ class TreeNode extends BaseNode {
   }
 
   /**
-   * _renderPortsHeader - render the ports collapsable header
+   * renderPortsHeader - render the ports collapsable header
    */
-  _renderPortsHeader() {
+  renderPortsHeader() {
     if (this._collapsablePorts) this._collapsablePorts.destroy();
 
     if (this._ports.size) {
@@ -75,7 +75,7 @@ class TreeNode extends BaseNode {
         text: "PORTS",
         isExpanded: this._displayPorts,
         parent: this.parent,
-        onToggleCollapsePorts: this._onToggleCollapsePorts
+        onToggleCollapsePorts: this.onToggleCollapsePorts
       });
       // Add ports header to node
       this.object.append(() => {
@@ -97,9 +97,9 @@ class TreeNode extends BaseNode {
   }
 
   /**
-   * _renderStatus - render the status of the node (circle on the body)
+   * renderStatus - render the status of the node (circle on the body)
    */
-  _renderStatus = () => {
+  renderStatus = () => {
     const currentStatus = this.status;
     // status already exists; probably an update request;
     if (this._status) this._status.destroy();
@@ -126,27 +126,27 @@ class TreeNode extends BaseNode {
   }
 
   /**
-   * @override _update - update graphical representation
+   * @override update - update graphical representation
    */
-  _update = (addLinks = false) => {
-    this._addPorts((node, data, events) => new TreeNodePort(node, data, events))
+  update = (addLinks = false) => {
+    this.addPorts((node, data, events) => new TreeNodePort(node, data, events))
       ._renderPortsHeader()
-      ._renderStatus();
+      .renderStatus();
 
-    if (addLinks) this._updateLinks();
+    if (addLinks) this.updateLinks();
     return this;
   };
 
   /**
-   * _getAbsolutePosition: Get fixed absolute node position regardless of transformation
+   * getAbsolutePosition: Get fixed absolute node position regardless of transformation
    *
    * @param {TreeNode} node: Node instance to get position
    */
-  _getAbsolutePosition(node) {
+  getAbsolutePosition(node) {
     let nodePosX = parseFloat(node.object.attr("x"));
     let nodePosY = parseFloat(node.object.attr("y"));
     if (node.parent) {
-      const { x, y } = this._getAbsolutePosition(node.parent);
+      const { x, y } = this.getAbsolutePosition(node.parent);
       const nodeContainer = node.el.parentElement;
       const parentContainer = nodeContainer.parentElement;
       nodePosX +=
@@ -245,7 +245,7 @@ class TreeNode extends BaseNode {
    *
    * @param {function} fn function to call if the node's events are enabled
    */
-  _eventsOn = fn => {
+  eventsOn = fn => {
     // Exit function if click is not on clickable area to select/unselect
     const targetClasses = d3.event.target.className.baseVal;
     if (!targetClasses.includes("node-inst-click-area")) return;
@@ -253,14 +253,14 @@ class TreeNode extends BaseNode {
     if (this.visible) fn();
   };
 
-  _onToggleCollapsePorts = () => {
+  onToggleCollapsePorts = () => {
     this._displayPorts = !this._displayPorts;
   };
 
   /**
    * Reload node to update cache
    */
-  _updateLinks = _debounce(() => {
+  updateLinks = _debounce(() => {
     this._links.forEach(link => {
       this.addLink(link);
     });
@@ -271,11 +271,11 @@ class TreeNode extends BaseNode {
    * @param {Object} link : Link info
    * @returns Source/Target ports objects
    */
-  _getLinkPorts = link => {
+  getLinkPorts = link => {
     const sourceCount = link.sourceFullPath.length - 1;
     const targetCount = link.targetFullPath.length - 1;
-    const finalSourcePort = this._formatPort(link, "sourcePort", sourceCount);
-    const finalTargetPort = this._formatPort(link, "targetPort", targetCount);
+    const finalSourcePort = this.formatPort(link, "sourcePort", sourceCount);
+    const finalTargetPort = this.formatPort(link, "targetPort", targetCount);
     const sourcePort = this._ports.get(finalSourcePort);
     const targetPort = this._ports.get(finalTargetPort);
     return { sourcePort, targetPort };
@@ -289,7 +289,7 @@ class TreeNode extends BaseNode {
    * @param {Integer} count : Quantity of parents involved
    * @returns {String} Target/Source port without its parents
    */
-  _formatPort = (link, direction, count) => {
+  formatPort = (link, direction, count) => {
     return link[direction].split("/").splice(count).join("/");
   };
 
@@ -300,7 +300,7 @@ class TreeNode extends BaseNode {
    * @param {String} direction : "sourceNode" or "targetNode"
    * @returns {Boolean} True if valid, false otherwise
    */
-  _checkLink = (link, direction) => {
+  checkLink = (link, direction) => {
     return (
       link[direction] === this.data.id ||
       link[direction] === this.parent?.data?.id
@@ -312,10 +312,10 @@ class TreeNode extends BaseNode {
    * @param {TreeNode} node : TreeNode object
    * @returns {Boolean} True if node is being rendered in canvas and False otherwise
    */
-  _isParentExpanded = (node = this) => {
+  isParentExpanded = (node = this) => {
     let isExpanded = node.parent?.collapsableItem?.isExpanded;
     if (node?.parent?.parent && isExpanded) {
-      isExpanded = this._isParentExpanded(node.parent);
+      isExpanded = this.isParentExpanded(node.parent);
     }
     return isExpanded;
   };
@@ -375,7 +375,7 @@ class TreeNode extends BaseNode {
   onTemplateUpdate = template_name => {
     if (template_name !== this.template_name) return; //not my template
     this._template = undefined;
-    this._loadTemplate()._update(true);
+    this._update(true);
   };
 
   /**
@@ -430,12 +430,12 @@ class TreeNode extends BaseNode {
    * @param {Object} link: parsed link information
    */
   addLink(link) {
-    const { sourcePort, targetPort } = this._getLinkPorts(link);
-    if (sourcePort && this._checkLink(link, "sourceNode")) {
+    const { sourcePort, targetPort } = this.getLinkPorts(link);
+    if (sourcePort && this.checkLink(link, "sourceNode")) {
       sourcePort.addLink(link);
       this.parent.childrenLinks.set(link.id, link);
     }
-    if (targetPort && this._checkLink(link, "targetNode")) {
+    if (targetPort && this.checkLink(link, "targetNode")) {
       targetPort.addLink(link);
       this.parent.childrenLinks.set(link.id, link);
     }
@@ -449,13 +449,13 @@ class TreeNode extends BaseNode {
    * @param {Object} link : Link info
    */
   removeLink(link) {
-    const { sourcePort, targetPort } = this._getLinkPorts(link);
+    const { sourcePort, targetPort } = this.getLinkPorts(link);
     if (sourcePort) sourcePort.removeLink(link);
     if (targetPort) targetPort.removeLink(link);
     // Remove from local link map
     this._links.delete(link.id);
     // Update links
-    this._updateLinks();
+    this.updateLinks();
   }
 
   /**
@@ -475,7 +475,7 @@ class TreeNode extends BaseNode {
    */
   updateBelongLines() {
     if (!this.parent) return;
-    if (this._isParentExpanded()) {
+    if (this.isParentExpanded()) {
       this.drawBelongLine();
     } else {
       this.removeBelongLine();
@@ -500,10 +500,10 @@ class TreeNode extends BaseNode {
     if (this._belongLine) this._belongLine.remove();
     const rootNode = this._getRootNode();
     const previousBrother = this._getPreviousBrother();
-    const previousBrotherPos = this._getAbsolutePosition(previousBrother);
-    const childPos = this._getAbsolutePosition(this);
-    const offset = this._getAbsolutePosition(rootNode);
-    const parentPos = this._getAbsolutePosition(this.parent);
+    const previousBrotherPos = this.getAbsolutePosition(previousBrother);
+    const childPos = this.getAbsolutePosition(this);
+    const offset = this.getAbsolutePosition(rootNode);
+    const parentPos = this.getAbsolutePosition(this.parent);
     const refPos = this._getReferenceOriginPos(parentPos, previousBrotherPos);
     // Build line
     const [lineX, lineY] = this._getBelongLinePoints(offset, childPos, refPos);

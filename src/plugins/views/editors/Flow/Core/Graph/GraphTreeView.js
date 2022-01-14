@@ -6,8 +6,8 @@ import TreeContainerNode from "../../Components/Nodes/TreeView/TreeContainerNode
 import { FLOW_VIEW_MODE } from "../../Constants/constants";
 
 class GraphTreeView extends GraphBase {
-  constructor(mInterface, canvas, flowId) {
-    super(mInterface, canvas, flowId);
+  constructor() {
+    super(arguments);
     this.tree = { root: null };
   }
 

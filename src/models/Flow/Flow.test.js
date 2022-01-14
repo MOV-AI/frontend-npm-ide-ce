@@ -80,3 +80,14 @@ test("Serialize TO db", () => {
 
   expect(obj.serializeToDB()).toMatchObject(content);
 });
+
+test("Get exposed ports", () => {
+  const content = flows.test3;
+
+  const obj = new Flow();
+  obj.setData(Flow.serializeOfDB(content));
+
+  const data = obj.serializeToDB();
+
+  expect(data.ExposedPorts).toMatchObject(content.ExposedPorts);
+});

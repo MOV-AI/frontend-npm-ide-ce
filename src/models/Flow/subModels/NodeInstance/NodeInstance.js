@@ -1,6 +1,6 @@
 import Model from "../../../Model";
 import schema from "./schema";
-import Position from "./Position/Position";
+import Position from "../Position/Position";
 import { Command, EnvVar, Parameter } from "../../../subModels";
 import Manager from "../../../Manager";
 
@@ -87,7 +87,7 @@ class NodeInstance extends Model {
     this.position.setData({ x, y });
     this.dispatch(
       NodeInstance.OBSERVABLE_KEYS.POSITION,
-      this.position.serialize()
+      this.getPosition().serialize()
     );
 
     return this;

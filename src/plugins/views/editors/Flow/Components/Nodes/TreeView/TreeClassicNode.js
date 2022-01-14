@@ -4,7 +4,7 @@ class TreeClassicNode extends TreeNode {
   constructor(canvas, node, events, template, parent) {
     super(canvas, node, events, "node", template, parent);
 
-    this._init();
+    this.init();
   }
 
   /**

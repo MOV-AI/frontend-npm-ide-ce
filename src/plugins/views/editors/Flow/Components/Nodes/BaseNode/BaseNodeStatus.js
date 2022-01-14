@@ -12,14 +12,18 @@ class BaseNodeStatus {
     this.color = color || "grey";
     this.opacity = 0.3;
 
-    this.__render();
+    this.render();
   }
 
   destroy = () => {
     this.object.remove();
   };
 
-  __render = () => {
+  /**
+   * @private
+   * @returns
+   */
+  render = () => {
     this.object = d3
       .create("svg:circle")
       .attr("id", "status")
@@ -34,7 +38,11 @@ class BaseNodeStatus {
     return this;
   };
 
-  _statusAnimation = () => {
+  /**
+   * @private
+   * @returns
+   */
+  statusAnimation = () => {
     // add yellow loading status and stop animation
     if (this._loading) {
       this.object
@@ -56,7 +64,7 @@ class BaseNodeStatus {
     const animate = () => {
       // do not continue to animate
       if (this._status === false || this._loading) {
-        return this._statusAnimation();
+        return this.statusAnimation();
       }
 
       this.object
@@ -95,19 +103,19 @@ class BaseNodeStatus {
   set status(value) {
     this._loading = false;
     this._status = value;
-    this._statusAnimation();
+    this.statusAnimation();
     clearTimeout(this._loadingTimeout);
   }
 
   set statusLoading(val) {
     this._loading = val;
-    this._statusAnimation();
+    this.statusAnimation();
     // set timeout to stop loading
     clearTimeout(this._loadingTimeout);
     this._loadingTimeout = setTimeout(() => {
       if (this._loading) {
         this._loading = false;
-        this._statusAnimation();
+        this.statusAnimation();
       }
     }, 5000);
   }

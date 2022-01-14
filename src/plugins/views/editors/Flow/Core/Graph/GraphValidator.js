@@ -90,7 +90,6 @@ export default class GraphValidator {
       const templateParams = containerNode?._template?.Parameter ?? {};
       for (const param in instanceParams) {
         if (!Object.hasOwnProperty.call(templateParams, param)) {
-          console.log("debug invalid containerNode", templateParams, param);
           invalidContainers.set(containerNode.data.id, containerNode);
         }
       }

@@ -22,17 +22,15 @@ export function convert_visualization(obj) {
 }
 
 export function convert_type_css(template, isMiniature = false) {
-  let css;
   const clickableAreaClass = !isMiniature ? " node-inst-click-area" : "";
-  const type = lodash.get(template, "template.Type", undefined);
-  const id = lodash.get(template, "id", "");
-  css = type ? type.replace("/", "-") : "unknown";
-  css = id === "start" ? "start" : css;
-  return css + clickableAreaClass;
+  const templateClass = template.Type?.replace(/\//g, "-") ?? "unknown";
+  const css = template.Label === "start" ? "start" : templateClass;
+
+  return `${css}${clickableAreaClass}`;
 }
 
 export function port_convert_type_css(message) {
-  return `port-default port-${message.replace("/", "-")}`.toLowerCase();
+  return `port-default port-${message.replace(/\//g, "-")}`.toLowerCase();
 }
 
 export function getBaseTemplate(type) {

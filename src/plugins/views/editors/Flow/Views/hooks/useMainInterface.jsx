@@ -13,7 +13,8 @@ const useMainInterface = props => {
     container,
     model,
     readOnly,
-    handleEvents
+    handleEvents,
+    call
   } = props;
 
   const mainInterface = useRef();
@@ -40,18 +41,19 @@ const useMainInterface = props => {
   useEffect(() => {
     if (!data || mainInterface.current) return;
 
-    mainInterface.current = new MainInterface(
-      name,
-      instance,
+    mainInterface.current = new MainInterface({
+      id: name,
+      modelView: instance,
       type,
       width,
       height,
-      container,
+      containerId: container.current.id,
       model,
       readOnly,
       data,
-      classes
-    );
+      classes,
+      call
+    });
 
     mainInterface.current.subscribe(handleMainInterfaceEvents);
   });

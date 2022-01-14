@@ -12,14 +12,15 @@ class TreeNodeHeader extends BaseNodeHeader {
     this.dy = 18;
     this.template = `${TEMPLATE_LABEL[type]}: ${template}`;
     // Update rendered header
-    this.__render();
+    this.render();
   }
 
   /**
-   * @override __render - render node header
+   * @private
+   * @override render - render node header
    *  Place node name and template name besides the node rect
    */
-  __render() {
+  render() {
     const parsed_text = this.parse_text();
 
     this.object = d3

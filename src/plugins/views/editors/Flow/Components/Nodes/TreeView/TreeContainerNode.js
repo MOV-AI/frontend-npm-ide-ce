@@ -8,6 +8,8 @@ const RENDERING_MODE = {
   spread: 1
 };
 
+// TODO: Remove Flows
+
 class TreeContainerNode extends TreeNode {
   constructor(canvas, node, events, template, parent) {
     super(canvas, node, events, "container", template, parent);
@@ -21,7 +23,6 @@ class TreeContainerNode extends TreeNode {
     this.data = this.base.data;
     this._template = this.base._template;
     this._flowsDb = this.base._flowsDb;
-    this._loadTemplate = this.base._loadTemplate;
     this.getExposedName = this.base.getExposedName;
     this._addPorts = () => this;
 

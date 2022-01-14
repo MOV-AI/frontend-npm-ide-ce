@@ -1,8 +1,6 @@
 import lodash from "lodash";
 import BasePort from "./BaseNode/BasePort";
 import BaseContainerNode from "./BaseNode/BaseContainerNode";
-import Flows from "../../Subscribers/Flows";
-import _flattenDeep from "lodash/flattenDeep";
 
 /**
  * class representing a container
@@ -14,19 +12,35 @@ class ContainerNode extends BaseContainerNode {
    * @param {object} node node's data
    * @param {object} events events to be triggered inside the node
    */
-  constructor(canvas, node, events, template) {
-    super(canvas, node, events, template);
+  constructor(args) {
+    const { factory, ...otherArgs } = args;
+    super(otherArgs);
+
+    this.factory = factory;
 
     // initialize the container
-    this._init();
+    this.init();
   }
 
   /**
-   * _addPorts - add node ports
+   * initialize the node element
    */
-  _addPorts = () => {
+  init() {
+    // Empty on purpose
+  }
+
+  aInit = async () => {
+    await this.addPorts();
+    this.renderBody().renderHeader().renderStatus().renderPorts().addEvents();
+    return this;
+  };
+
+  /**
+   * addPorts - add node ports
+   */
+  addPorts = async () => {
     // add port events
-    const events = this._portEvents();
+    const events = this.portEvents();
 
     // node already has ports; probably an update request
     if (this._ports.size > 0) {
@@ -35,65 +49,80 @@ class ContainerNode extends BaseContainerNode {
       });
       this._ports.clear();
     }
+
     try {
       // ExposedPorts {node_template: {node_name: <[ports]>}, }
-      const exp_templates =
-        lodash.get(this._template, "ExposedPorts", {}) || {};
+      const expTemplates = lodash.get(this._template, "ExposedPorts", {}) || {};
 
-      Object.entries(exp_templates).forEach(([template_name, template_val]) => {
-        Object.entries(template_val).forEach(([node_name, node_val]) => {
-          node_val.forEach(port_inst_name => {
-            // check if template_name is a node template or is a reference to a sub flow
-            const isSubFlow = this._isFlow(template_name);
-            const join_str = isSubFlow ? "__" : "/";
-            const docPath = isSubFlow
-              ? this._template.Container[node_name].ContainerFlow
-              : this._template.NodeInst[node_name].Template;
+      const flattenData = [];
+      // flatten data
+      Object.entries(expTemplates).forEach(([templateName, templateValue]) => {
+        Object.entries(templateValue).forEach(([nodeName, nodeVal]) => {
+          nodeVal.forEach(async portInstName => {
+            flattenData.push({ templateName, nodeName, portInstName });
+          });
+        });
+      });
 
-            // get the port data
-            const PortsInst = this._getPort(port_inst_name, docPath, isSubFlow);
+      await Promise.allSettled(
+        flattenData.map(async value => {
+          const { templateName, nodeName, portInstName } = value;
 
-            if (!PortsInst) {
-              console.error(
-                `Could not find port ${port_inst_name} in node instance "${node_name}" of sub flow "${this.data.ContainerFlow}"`
-              );
-              return;
-            }
+          // check if templateName is a node template or is a reference to a sub flow
+          const isSubFlow = this.isFlow(templateName);
+          const joinStr = isSubFlow ? "__" : "/";
+          const docPath = isSubFlow
+            ? this._template.Container[nodeName]?.ContainerFlow
+            : this._template.NodeInst[nodeName]?.Template;
 
-            Object.keys(PortsInst).forEach(type => {
-              if (!["in", "out"].includes(type.toLocaleLowerCase())) return;
+          // get the port data
 
-              const port_obj = lodash.get(PortsInst, type, {});
+          const portsInst = await this.getPort(
+            portInstName,
+            docPath,
+            isSubFlow
+          );
 
-              Object.keys(port_obj).forEach(port => {
-                if (
-                  port_inst_name.search(`${PortsInst.PortsLabel}/${port}`) < 0
-                )
-                  return;
+          if (!portsInst) {
+            console.error(
+              `Could not find port ${portInstName} in node instance "${nodeName}" of sub flow "${this.data.ContainerFlow}"`
+            );
+            return;
+          }
 
-                const data = lodash.get(PortsInst, `${type}`, {});
+          Object.keys(portsInst).forEach(type => {
+            if (!["in", "out"].includes(type.toLocaleLowerCase())) return;
 
-                Object.keys(data).forEach(port_name => {
-                  const port_data = {
-                    name: `${node_name}${join_str}${port_inst_name}`,
-                    type: type,
-                    Template: lodash.get(PortsInst, `Template`, ""),
-                    origin: node_name,
-                    ...data[port_name]
-                  };
+            const port_obj = lodash.get(portsInst, type, {});
 
-                  // create port instance
-                  const port = new BasePort(this, port_data, events);
+            Object.keys(port_obj).forEach(port => {
+              if (portInstName.search(`${portsInst.PortsLabel}/${port}`) < 0)
+                return;
 
-                  // add port instance
-                  const fmt_port_name = `${node_name}${join_str}${port_inst_name}`;
+              const data = lodash.get(portsInst, `${type}`, {});
 
-                  this._ports.set(fmt_port_name, port);
-                });
+              Object.keys(data).forEach(port_name => {
+                const portData = {
+                  name: `${nodeName}${joinStr}${portInstName}`,
+                  type: type,
+                  Template: lodash.get(portsInst, `Template`, ""),
+                  origin: nodeName,
+                  ...data[port_name]
+                };
+
+                // create port instance
+                const pInst = new BasePort(this, portData, events);
+
+                // add port instance
+                const fmtPortName = `${nodeName}${joinStr}${portInstName}`;
+
+                this._ports.set(fmtPortName, pInst);
               });
             });
           });
-        });
+        })
+      ).catch(error => {
+        console.error(error);
       });
     } catch (error) {
       console.error(error);
@@ -103,7 +132,8 @@ class ContainerNode extends BaseContainerNode {
   };
 
   /**
-   * _isFlow - check if the "template name" is actually a flow instead of a node template
+   * @private
+   * isFlow - check if the "template name" is actually a flow instead of a node template
    * In the exposed ports, flows are marked with the prefix "__" , ex.: __demo1, to differentiate
    * from node templates
    *
@@ -111,50 +141,90 @@ class ContainerNode extends BaseContainerNode {
    *
    * @returns {object} PortsInst
    */
-  _isFlow = name => {
+  isFlow = name => {
     return name?.startsWith("__") || false;
   };
 
   /**
-   * _getPort - tries to recursively get the port instance data
+   * @private
+   * getPort - tries to recursively get the port instance data
    * @param {string} portName port name  ex.: port_name/port_type or node_inst_name/port_name/port_type or flow_name__node_inst_name/port_name/port_type
    * @param {string} docPath the path of the document
    * @param {boolean} isSubFlow true if the doc is a sub-flow; false if it is a node template
    *
    * @returns {object} PortsInst
    */
-  _getPort = (portName, docPath, isSubFlow) => {
+  getPort = async (portName, docPath, isSubFlow) => {
     try {
-      let _docPath = docPath;
       const portParts = portName.split("/");
+      let _docPath = docPath;
       let _portName = portParts.slice(0, -1).join("/");
 
       if (isSubFlow) {
-        // container
-        _docPath = this._flowsDb.getNodeTemplate(docPath, portParts[0]);
+        _docPath = await this.getNodeInstTemplate(docPath, portParts[0]);
         _portName = portParts.slice(1, -1).join("/");
       }
 
-      return this._nodesDb.getPort(_docPath, _portName);
+      return this.getNodePort(_docPath, _portName);
     } catch (error) {
       console.error(error);
     }
   };
+  /**
+   * Returns true if the name represents a NodeInst and false
+   * if it represents a Container (aka sub flow)
+   * A container will always have '__' for ex.: name1__name2__nodeInst1
+   *
+   * @param {String} nodeName node instance name
+   */
+  isNodeInst = nodeName => {
+    return nodeName.split("__").length <= 1;
+  };
 
-  static builder = async (canvas, node, events) => {
-    const flows = new Flows();
-    const tpls = await flows.agetFlow(node.ContainerFlow);
+  getNodeInstTemplate = async (flowName, nodeName) => {
+    try {
+      const { factory, docManager } = this.factory;
 
-    const tpl = tpls[0].value;
+      const _factory = new factory(docManager, factory.OUTPUT.CONTAINER);
+      const flow = await _factory.getTemplate(flowName);
 
-    const promises = _flattenDeep(tpls).map(subFlow => {
-      return ContainerNode.cacheNodeTemplates(
-        Object.values(subFlow.value?.NodeInst || {}).map(obj => obj.Template)
-      );
-    });
-    await Promise.allSettled(promises);
+      if (this.isNodeInst(nodeName)) {
+        const nodeInst = flow.NodeInst[nodeName];
 
-    return new ContainerNode(canvas, node, events, tpl);
+        if (!nodeInst)
+          throw new Error(
+            `Node instance "${nodeName}" does not exist in flow "${flowName}".`
+          );
+
+        // return the nodeInst Template
+        return nodeInst.Template;
+      } else {
+        // it is a container, we need to go down to the subflow
+        // to search for the nodeInst
+        const [containerName, ...subNodeName] = nodeName.split("__");
+
+        const subFlowName = flow.Container[containerName].ContainerFlow;
+
+        return this.getNodeInstTemplate(subFlowName, subNodeName.join("__"));
+      }
+    } catch (error) {
+      const errorMsg = `?*? Could not find the template of the node instance "${nodeName}"`;
+      console.error(`${errorMsg}; \n${error}`);
+    }
+  };
+
+  getNodePort = async (nodeName, portName) => {
+    const { factory, docManager } = this.factory;
+
+    const _factory = new factory(docManager, factory.OUTPUT.NODE);
+    const node = await _factory.getTemplate(nodeName);
+
+    const port = node.PortsInst[portName] || null;
+
+    // hack bc most of the ports do not have PortsLabel and currently PortsLabel value is equal to the name
+    if (port) port["PortsLabel"] = portName;
+
+    return port;
   };
 }
 

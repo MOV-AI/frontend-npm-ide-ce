@@ -46,7 +46,10 @@ test("Serialize TO db", () => {
     align: {
       ContainerFlow: "align_cart",
       ContainerLabel: "align",
-      Visualization: [0.01, 0.02],
+      Visualization: {
+        x: { Value: 0.01 },
+        y: { Value: 0.02 }
+      },
       Parameter: {
         camera: { Value: "back1", Type: "any" }
       }

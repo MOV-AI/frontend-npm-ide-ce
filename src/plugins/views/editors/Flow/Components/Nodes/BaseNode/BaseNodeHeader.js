@@ -11,14 +11,18 @@ class BaseNodeHeader {
     this.text = text;
     this.unselectable = true;
 
-    this.__render();
+    this.render();
   }
 
   destroy = () => {
     this.object.remove();
   };
 
-  __render() {
+  /**
+   * @private
+   * @returns
+   */
+  render() {
     const parsed_text = this.parse_text();
 
     this.object = d3

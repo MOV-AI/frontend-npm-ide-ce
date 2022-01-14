@@ -91,7 +91,7 @@ export default class BaseLink extends BaseLinkStruct {
     const path_points = this.path_points;
     this.object = d3
       .create("svg")
-      .attr("id", `path-${this.canvas.canvasId}-${this.data.id}`)
+      .attr("id", `path-${this.canvas.containerId}-${this.data.id}`)
       .attr("x", 0)
       .attr("y", 0)
       .attr("width", this.maxMovingPixels)
@@ -100,7 +100,7 @@ export default class BaseLink extends BaseLinkStruct {
     this.object
       .append("svg:defs")
       .append("filter")
-      .attr("id", `link-shadow-${this.canvas.canvasId}-${this.data.id}`)
+      .attr("id", `link-shadow-${this.canvas.containerId}-${this.data.id}`)
       .append("feDropShadow")
       .attr("dx", "1")
       .attr("dy", "1")
@@ -175,7 +175,7 @@ export default class BaseLink extends BaseLinkStruct {
   _styleMouseOver = () => {
     this.path
       .attr("stroke", this.style.stroke.over)
-      .attr("marker-mid", `url(#${this.canvas.canvasId}-markerselected)`);
+      .attr("marker-mid", `url(#${this.canvas.containerId}-markerselected)`);
   };
 
   _styleMouseOut = () => {
