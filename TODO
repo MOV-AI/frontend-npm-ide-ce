@@ -27,10 +27,11 @@ RM - Right menu
 - - - - Parameters
 - - - - Groups (aka layers)
 - - Link
-MJ - Dirty
+MJ - Dirty - Done for dragging nodes
 MJ - ReadOnly
 MJ - Replace RestAPI
 - - Save position
 - - Add, delete
 - - - Nodes, subflows, links
-MJ - Remove StateNode
+MJ - Remove StateNode - Done
+- Shortcuts

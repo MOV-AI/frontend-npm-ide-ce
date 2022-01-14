@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { filter } from "rxjs/operators";
 import { makeStyles } from "@material-ui/core/styles";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
@@ -10,6 +11,7 @@ import FlowTopBar from "./Components/FlowTopBar/FlowTopBar";
 import FlowBottomBar from "./Components/FlowBottomBar/FlowBottomBar";
 import Shortcuts from "./Components/interface/Shortcuts";
 import "./Resources/css/Flow.css";
+import { EVT_NAMES, EVT_TYPES } from "./events";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -203,7 +205,7 @@ const Flow = (props, ref) => {
    * @param {*} validationWarnings
    */
   const onFlowValidated = useCallback(validationWarnings => {
-    console.log("TODO: fix warnings");
+    console.log("TODO: fix warnings", validationWarnings);
     setWarnings(validationWarnings);
   }, []);
 
@@ -232,6 +234,55 @@ const Flow = (props, ref) => {
         const persistentWarns = evtData.warnings.filter(el => el.isPersistent);
         onFlowValidated({ warnings: persistentWarns });
       });
+
+      mainInterface.mode.addNode.onClick.subscribe(evtData =>
+        console.log("dlgNewNode", evtData)
+      );
+      mainInterface.mode.addFlow.onClick.subscribe(evtData =>
+        console.log("dlgNewFlow", evtData)
+      );
+      mainInterface.mode.nodeCtxMenu.onEnter.subscribe(evtData =>
+        console.log("onNodeCtxMenu", evtData)
+      );
+      mainInterface.mode.canvasCtxMenu.onEnter.subscribe(evtData =>
+        console.log("onCanvasCtxMenu", evtData)
+      );
+      mainInterface.mode.linkCtxMenu.onEnter.subscribe(evtData =>
+        console.log("onLinkCtxMenu", evtData)
+      );
+      mainInterface.mode.portCtxMenu.onEnter.subscribe(evtData =>
+        console.log("onPortCtxMenu", evtData)
+      );
+
+      mainInterface.canvas.events
+        .pipe(
+          filter(
+            event =>
+              event.name === EVT_NAMES.ON_MOUSE_OVER &&
+              event.type === EVT_TYPES.PORT
+          )
+        )
+        .subscribe(evtData => console.log("onPortMouseOver", evtData));
+
+      mainInterface.canvas.events
+        .pipe(
+          filter(
+            event =>
+              event.name === EVT_NAMES.ON_MOUSE_OUT &&
+              event.type === EVT_TYPES.PORT
+          )
+        )
+        .subscribe(evtData => console.log("onPortMouseOver", evtData));
+
+      mainInterface.canvas.events
+        .pipe(
+          filter(
+            event =>
+              event.name === EVT_NAMES.ON_CHG_MOUSE_OVER &&
+              event.type === EVT_TYPES.LINK
+          )
+        )
+        .subscribe(evtData => console.log("onLinkErrorMouseOver", evtData));
 
       // Enable shortcuts
       const shortcuts = new Shortcuts(mainInterface);
