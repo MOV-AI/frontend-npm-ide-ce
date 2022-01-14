@@ -39,7 +39,7 @@ class StartNode extends BaseNode {
   /**
    * disable all port events except the onClick
    */
-  _portEvents = () => {
+  portEvents = () => {
     return {
       onClick: port => this.onPortClick(port),
       onMouseOver: () => {
