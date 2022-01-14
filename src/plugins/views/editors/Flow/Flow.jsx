@@ -138,14 +138,6 @@ const Flow = (props, ref) => {
   }, []);
 
   /**
-   * On flow validation
-   * @param {*} validationWarnings
-   */
-  const onFlowValidated = useCallback(validationWarnings => {
-    setWarnings(validationWarnings);
-  }, []);
-
-  /**
    * Open document in new tab
    * @param {*} docData
    */
@@ -201,6 +193,28 @@ const Flow = (props, ref) => {
 
   //========================================================================================
   /*                                                                                      *
+   *                                  Handle Flow Events                                  *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * On flow validation
+   * @param {*} validationWarnings
+   */
+  const onFlowValidated = useCallback(validationWarnings => {
+    setWarnings(validationWarnings);
+  }, []);
+
+  /**
+   * On Node Selected
+   * @param {*} node
+   */
+  const onNodeSelected = useCallback(node => {
+    console.log("debug onNodeSelected", node);
+  }, []);
+
+  //========================================================================================
+  /*                                                                                      *
    *                                        Render                                        *
    *                                                                                      */
   //========================================================================================
@@ -231,6 +245,7 @@ const Flow = (props, ref) => {
         ref={baseFlowRef}
         dataFromDB={dataFromDB}
         onFlowValidated={onFlowValidated}
+        onNodeSelected={onNodeSelected}
       />
       <FlowBottomBar
         openFlow={openDoc}

@@ -65,6 +65,14 @@ const BaseFlow = React.forwardRef((props, ref) => {
   );
 });
 
-BaseFlow.propTypes = {};
+BaseFlow.propTypes = {
+  call: PropTypes.func.isRequired,
+  instance: PropTypes.object,
+  id: PropTypes.string,
+  name: PropTypes.string,
+  type: PropTypes.string,
+  model: PropTypes.string,
+  dataFromDB: PropTypes.object
+};
 
 export default BaseFlow;
