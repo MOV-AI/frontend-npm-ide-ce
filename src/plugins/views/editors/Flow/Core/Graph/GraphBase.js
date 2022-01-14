@@ -559,7 +559,6 @@ export default class Graph {
   reset() {
     // Reset all selected nodes
     console.log("RESET");
-    debugger;
     this.nodes.forEach(node => {
       node.obj.selected = false;
     });

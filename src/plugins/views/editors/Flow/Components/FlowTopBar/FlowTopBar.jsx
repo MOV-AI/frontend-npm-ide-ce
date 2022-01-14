@@ -160,7 +160,6 @@ const FlowTopBar = props => {
       helper
         .getDefaultRobot()
         .then(robotId => {
-          console.log("debug store robotId", robotId);
           // Update default robot in state and set as selected if there's none
           if (robotId) {
             setRobotList(prevState => {

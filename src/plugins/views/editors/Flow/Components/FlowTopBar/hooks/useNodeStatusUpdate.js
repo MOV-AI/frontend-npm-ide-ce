@@ -246,7 +246,6 @@ const useNodeStatusUpdate = (props, robotSelected, viewMode) => {
    */
   const robotSubscribe = useCallback(
     robotId => {
-      console.log("debug robotSubscribe", robotId, setRobotStatus);
       const robot = robotManager.getRobot(robotId);
       const robotStatusData = robot.data?.Status;
       // Set robot status from robot manager data (if any)
@@ -281,7 +280,6 @@ const useNodeStatusUpdate = (props, robotSelected, viewMode) => {
    */
   const robotUnsubscribe = useCallback(() => {
     if (selectedRobotRef.current) {
-      console.log("debug robotUnsubscribe", selectedRobotRef.current);
       resetNodeStatus();
       robotManager
         .getRobot(selectedRobotRef.current)
