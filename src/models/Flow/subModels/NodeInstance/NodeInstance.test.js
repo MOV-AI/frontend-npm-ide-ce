@@ -41,7 +41,7 @@ test("Serialize OF db", () => {
     persistent: true,
     launch: true,
     remappable: true,
-    layers: ["0"],
+    groups: ["0"],
     position: { x: 0.01, y: 0.02 },
     parameters: {
       camera: { name: "camera", value: "back1", type: "string" },
@@ -65,7 +65,7 @@ test("Serialize TO db", () => {
     persistent: true,
     launch: true,
     remappable: true,
-    layers: ["0"],
+    groups: ["0"],
     commands: { cmd1: { name: "cmd1", value: "exec.sh" } },
     envVars: { path: { name: "path", value: "/opt/movai" } },
     position: { x: 0.01, y: 0.03 },
