@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import Backdrop from "@material-ui/core/Backdrop";
@@ -78,7 +78,16 @@ const BaseFlow = React.forwardRef((props, ref) => {
   );
 });
 
-BaseFlow.propTypes = {};
+BaseFlow.propTypes = {
+  call: PropTypes.func.isRequired,
+  instance: PropTypes.object,
+  id: PropTypes.string,
+  name: PropTypes.string,
+  type: PropTypes.string,
+  model: PropTypes.string,
+  dataFromDB: PropTypes.object
+};
+
 BaseFlow.defaultProps = {
   onReady: () => console.warning("On ready prop not received")
 };

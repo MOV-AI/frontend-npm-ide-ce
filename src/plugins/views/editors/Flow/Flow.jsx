@@ -139,15 +139,6 @@ const Flow = (props, ref) => {
   }, []);
 
   /**
-   * On flow validation
-   * @param {*} validationWarnings
-   */
-  const onFlowValidated = useCallback(validationWarnings => {
-    console.log("TODO: fix warnings");
-    setWarnings(validationWarnings);
-  }, []);
-
-  /**
    * Open document in new tab
    * @param {*} docData
    */
@@ -201,6 +192,29 @@ const Flow = (props, ref) => {
     getMainInterface()?.nodeStatusUpdated(nodeStatus, robotStatus);
   }, []);
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                  Handle Flow Events                                  *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * On flow validation
+   * @param {*} validationWarnings
+   */
+  const onFlowValidated = useCallback(validationWarnings => {
+    console.log("TODO: fix warnings");
+    setWarnings(validationWarnings);
+  }, []);
+
+  /**
+   * On Node Selected
+   * @param {*} node
+   */
+  const onNodeSelected = useCallback(node => {
+    console.log("debug onNodeSelected", node);
+  }, []);
+
   /**
    * Subscribe to mainInterface and canvas events
    */
@@ -210,7 +224,7 @@ const Flow = (props, ref) => {
       mainInterface.mode.selectNode.onEnter.subscribe(() => {
         const selectedNodes = mainInterface.selectedNodes;
         const node = selectedNodes.length !== 1 ? null : selectedNodes[0];
-        console.log("IMPLEMENT ON NODE SELECTED", node);
+        onNodeSelected(node);
       });
 
       // Subscribe to flow validations
@@ -226,7 +240,7 @@ const Flow = (props, ref) => {
         shortcuts.destroy();
       };
     },
-    [onFlowValidated]
+    [onNodeSelected, onFlowValidated]
   );
 
   //========================================================================================
@@ -253,6 +267,7 @@ const Flow = (props, ref) => {
           onStartStopFlow={onStartStopFlow}
           nodeStatusUpdated={onNodeStatusUpdate}
           onViewModeChange={onViewModeChange}
+          onReady={onReady}
           // nodeCompleteStatusUpdated={this.onMonitoringNodeStatusUpdate}
         ></FlowTopBar>
       </div>
@@ -260,7 +275,6 @@ const Flow = (props, ref) => {
         {...props}
         ref={baseFlowRef}
         dataFromDB={dataFromDB}
-        onFlowValidated={onFlowValidated}
         onReady={onReady}
       />
       <FlowBottomBar
