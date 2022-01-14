@@ -19,7 +19,7 @@ class NodeInstance extends Model {
   persistent = false;
   launch = true;
   remappable = true;
-  layers = [];
+  groups = [];
   position = new Position();
   parameters = new Manager("parameters", Parameter, this.propEvents);
   envVars = new Manager("envVars", EnvVar, this.propEvents);
@@ -70,12 +70,12 @@ class NodeInstance extends Model {
     return this;
   }
 
-  getLayers() {
-    return this.layers;
+  getGroups() {
+    return this.groups;
   }
 
-  setLayers(value) {
-    this.layers = value;
+  setGroups(value) {
+    this.groups = value;
     return this;
   }
 
@@ -112,7 +112,7 @@ class NodeInstance extends Model {
       persistent,
       launch,
       remappable,
-      layers,
+      groups,
       position,
       parameters,
       envVars,
@@ -125,7 +125,7 @@ class NodeInstance extends Model {
       persistent,
       launch,
       remappable,
-      layers
+      groups
     });
 
     this.position.setData(position);
@@ -160,7 +160,7 @@ class NodeInstance extends Model {
       persistent: this.getPersistent(),
       launch: this.getLaunch(),
       remappable: this.getRemappable(),
-      layers: this.getLayers(),
+      groups: this.getGroups(),
       position: this.getPosition().serialize(),
       parameters: this.getParameters().serialize(),
       envvars: this.getEnvVars().serialize(),
@@ -169,7 +169,7 @@ class NodeInstance extends Model {
   }
 
   serializeToDB() {
-    const { name, template, persistent, launch, remappable, layers } =
+    const { name, template, persistent, launch, remappable, groups } =
       this.serialize();
 
     return {
@@ -178,7 +178,7 @@ class NodeInstance extends Model {
       Persistent: persistent,
       Launch: launch,
       Remappable: remappable,
-      NodeLayers: layers,
+      NodeLayers: groups,
       Visualization: {
         ...this.getPosition().serializeToDB()
       },
@@ -197,7 +197,7 @@ class NodeInstance extends Model {
       Persistent: persistent,
       Launch: launch,
       Remappable: remappable,
-      NodeLayers: layers,
+      NodeLayers: groups,
       Visualization: position,
       Parameter: parameters,
       EnvVar: envvars,
@@ -210,7 +210,7 @@ class NodeInstance extends Model {
       persistent,
       launch,
       remappable,
-      layers,
+      groups,
       position: Position.serializeOfDB(position),
       parameters: Manager.serializeOfDB(parameters, Parameter),
       envVars: Manager.serializeOfDB(envvars, EnvVar),
@@ -223,7 +223,7 @@ class NodeInstance extends Model {
     TEMPLATE: "template",
     PERSISTENT: "persistent",
     REMAPPABLE: "remappable",
-    LAYERS: "layers",
+    GROUPS: "groups",
     POSITION: "persistent"
   };
 }

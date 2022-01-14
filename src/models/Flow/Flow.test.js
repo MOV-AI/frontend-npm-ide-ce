@@ -21,7 +21,7 @@ test("Serialize OF db", () => {
         persistent: true,
         launch: true,
         remappable: true,
-        layers: ["0"],
+        groups: ["0"],
         commands: {
           cmd1: { value: "exec.sh" }
         },
@@ -61,7 +61,7 @@ test("Serialize OF db", () => {
         to: "subflow__actuator_v2/trans_in/in"
       }
     },
-    layers: { 0: { id: "0", name: "layer1", enabled: true } },
+    groups: { 0: { id: "0", name: "layer1", enabled: true } },
     parameters: {
       var1: { value: "movai", description: "", type: "any" }
     }

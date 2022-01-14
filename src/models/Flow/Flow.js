@@ -4,12 +4,12 @@ import { Parameter } from "../subModels"; // from shared subModels
 import {
   ExposedPorts,
   ExposedPortsManager,
-  Layer,
+  Group,
   Link,
   NodeInstance,
   SubFlow
 } from "./subModels"; // from internal subModels
-import LayerManager from "./subModels/Layer/LayerManager";
+import GroupManager from "./subModels/Group/GroupManager";
 import schema from "./schema";
 
 class Flow extends Model {
@@ -30,7 +30,7 @@ class Flow extends Model {
     ExposedPorts,
     this.propEvents
   );
-  layers = new LayerManager("layers", Layer, this.propEvents);
+  groups = new GroupManager("groups", Group, this.propEvents);
   links = new Manager("links", Link, this.propEvents);
   nodeInstances = new Manager("nodeInstances", NodeInstance, this.propEvents);
   parameters = new Manager("parameters", Parameter, this.propEvents);
@@ -70,8 +70,8 @@ class Flow extends Model {
     return this.links;
   }
 
-  getLayers() {
-    return this.layers;
+  getGroups() {
+    return this.groups;
   }
 
   getParameters() {
@@ -95,7 +95,7 @@ class Flow extends Model {
       subFlows,
       exposedPorts,
       links,
-      layers,
+      groups,
       parameters
     } = json;
 
@@ -105,7 +105,7 @@ class Flow extends Model {
     this.subFlows.setData(subFlows);
     this.exposedPorts.setData(exposedPorts);
     this.links.setData(links);
-    this.layers.setData(layers);
+    this.groups.setData(groups);
     this.parameters.setData(parameters);
 
     return this;
@@ -136,7 +136,7 @@ class Flow extends Model {
       subFlows: this.getSubFlows().serialize(),
       exposedPorts: this.getExposedPorts().serialize(),
       links: this.getLinks().serialize(),
-      layers: this.getLayers().serialize(),
+      groups: this.getGroups().serialize(),
       parameters: this.getParameters().serialize()
     };
   }
@@ -156,7 +156,7 @@ class Flow extends Model {
       Container: this.getSubFlows().serializeToDB(),
       ExposedPorts: this.getExposedPorts().serializeToDB(),
       Links: this.getLinks().serializeToDB(),
-      Layers: this.getLayers().serializeToDB(),
+      groups: this.getGroups().serializeToDB(),
       Parameter: this.getParameters().serializeToDB()
     };
   }
@@ -178,7 +178,7 @@ class Flow extends Model {
       Container: subFlows,
       ExposedPorts: exposedPorts,
       Links: links,
-      Layers: layers,
+      Layers: groups,
       Parameter: parameters
     } = json;
 
@@ -196,7 +196,7 @@ class Flow extends Model {
         ExposedPorts
       ),
       links: Manager.serializeOfDB(links, Link),
-      layers: Manager.serializeOfDB(layers, Layer),
+      groups: Manager.serializeOfDB(groups, Group),
       parameters: Manager.serializeOfDB(parameters, Parameter)
     };
   }

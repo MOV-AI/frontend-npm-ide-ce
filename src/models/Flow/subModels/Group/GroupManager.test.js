@@ -1,8 +1,8 @@
-import Manager from "./LayerManager";
-import Layer from "./Layer";
+import Manager from "./GroupManager";
+import Group from "./Group";
 
 test("smoke test", () => {
-  const obj = new Manager("layers", Layer);
+  const obj = new Manager("groups", Group);
 
   expect(obj).toBeInstanceOf(Manager);
 });
@@ -30,7 +30,7 @@ test("serialize OF db", () => {
     }
   };
 
-  const data = Manager.serializeOfDB(content, Layer);
+  const data = Manager.serializeOfDB(content, Group);
 
   expect(data).toMatchObject(expected);
 });
@@ -47,22 +47,22 @@ test("serialize TO db", () => {
     }
   };
 
-  const data = Manager.serializeOfDB(content, Layer);
+  const data = Manager.serializeOfDB(content, Group);
 
-  const obj = new Manager("layers", Layer);
+  const obj = new Manager("groups", Group);
 
   obj.setData(data);
-  expect(obj.getItem("0")).toBeInstanceOf(Layer);
+  expect(obj.getItem("0")).toBeInstanceOf(Group);
   expect(obj.getItem("0").getEnabled()).toBe(true);
 
   expect(obj.serializeToDB()).toMatchObject(content);
 });
 
-test("get a layer instance", () => {
-  const obj = new Manager("layers", Layer);
+test("get a group instance", () => {
+  const obj = new Manager("groups", Group);
 
   const content = {
-    name: "layer1",
+    name: "group1",
     on: true
   };
 
@@ -70,5 +70,5 @@ test("get a layer instance", () => {
 
   const subflow = obj.getItem("0");
 
-  expect(subflow).toBeInstanceOf(Layer);
+  expect(subflow).toBeInstanceOf(Group);
 });

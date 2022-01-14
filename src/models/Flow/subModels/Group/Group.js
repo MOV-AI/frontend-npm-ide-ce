@@ -1,7 +1,7 @@
 import Model from "../../../Model";
 import schema from "./schema";
 
-class Layer extends Model {
+class Group extends Model {
   constructor() {
     // inject imported schema and forward constructor arguments
     super({ schema, ...arguments[0] });
@@ -69,4 +69,4 @@ class Layer extends Model {
   }
 }
 
-export default Layer;
+export default Group;

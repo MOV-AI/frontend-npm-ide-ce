@@ -5,7 +5,7 @@ import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlug
 import { FLOW_VIEW_MODE } from "./Constants/constants";
 import InfoIcon from "@material-ui/icons/Info";
 import BaseFlow from "./Views/BaseFlow";
-import Menu from "../Configuration/Menu";
+import Menu from "./Components/Menus/Menu";
 import FlowTopBar from "./Components/FlowTopBar/FlowTopBar";
 import FlowBottomBar from "./Components/FlowBottomBar/FlowBottomBar";
 import "./Resources/css/Flow.css";

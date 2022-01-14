@@ -6,7 +6,8 @@ import IconButton from "@material-ui/core/IconButton";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/styles";
-import { Search, filter } from "../../../_shared/Search/Search";
+import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
+import Search, { filter } from "../../../_shared/Search/Search";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -28,7 +29,7 @@ const useStyles = makeStyles(theme => ({
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
     overflow: "hidden",
-    maxWidth: "50%"
+    maxWidth: "60%"
   },
   valueContainer: {
     textAlign: "center",
@@ -37,8 +38,8 @@ const useStyles = makeStyles(theme => ({
     whiteSpace: "nowrap",
     overflow: "hidden",
     padding: "0px 12px 0px 12px",
-    maxWidth: "50%",
-    width: "50%"
+    maxWidth: "40%",
+    width: "40%"
   },
   valueDefault: {
     color: "grey",
@@ -101,12 +102,9 @@ const TableKeyValue = props => {
   return (
     <Typography component="div" className={classes.root}>
       {props.allowSearch && (
-        <Search
-          style={{ marginBottom: 10 }}
-          onChange={evt => {
-            setSearchValue(evt.target.value);
-          }}
-        ></Search>
+        <div style={{ padding: "5px 10px 15px" }}>
+          <Search onSearch={value => setSearchValue(value)}></Search>
+        </div>
       )}
       {filter(searchValue, list)
         .sort((a, b) => a.key.localeCompare(b.key))
@@ -176,14 +174,14 @@ TableKeyValue.propTypes = {
 TableKeyValue.defaultProps = {
   list: [],
   type: "params", //params, cmdline , env
-  handleParameterEditModal: () => {},
-  handleParameterDeleteModal: () => {},
   allowDelete: false,
   allowEdit: false,
   allowSearch: false,
-  // allow edit/delete functions
-  allowEditFunction: () => {},
-  allowDeleteFunction: () => {}
+  // prop functions
+  handleParameterEditModal: () => DEFAULT_FUNCTION("handleParameterEditModal"),
+  handleParameterDeleteModal: () => DEFAULT_FUNCTION("deleteModal"),
+  allowEditFunction: () => DEFAULT_FUNCTION("allowEditFunction"),
+  allowDeleteFunction: () => DEFAULT_FUNCTION("allowDeleteFunction")
 };
 
 export default TableKeyValue;

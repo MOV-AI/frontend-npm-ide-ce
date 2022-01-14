@@ -1,6 +1,6 @@
 import Manager from "../../../Manager";
 
-class LayerManager extends Manager {
+class GroupManager extends Manager {
   serialize() {
     const output = {};
 
@@ -26,4 +26,4 @@ class LayerManager extends Manager {
   }
 }
 
-export default LayerManager;
+export default GroupManager;

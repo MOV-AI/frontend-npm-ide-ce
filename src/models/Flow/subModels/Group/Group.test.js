@@ -1,9 +1,9 @@
-import Layer from "./Layer";
+import Group from "./Group";
 
 test("Smoke test", () => {
-  const obj = new Layer();
+  const obj = new Group();
 
-  expect(obj).toBeInstanceOf(Layer);
+  expect(obj).toBeInstanceOf(Group);
 });
 
 test("Serialize OF db", () => {
@@ -15,7 +15,7 @@ test("Serialize OF db", () => {
     enabled: true
   };
 
-  expect(Layer.serializeOfDB(data)).toMatchObject(expected);
+  expect(Group.serializeOfDB(data)).toMatchObject(expected);
 });
 
 test("Serialize TO db", () => {
@@ -27,7 +27,7 @@ test("Serialize TO db", () => {
 
   const expected = { name: "layer1", on: true };
 
-  const obj = new Layer();
+  const obj = new Group();
   obj.setData(data);
 
   expect(obj.serializeToDB()).toMatchObject(expected);
