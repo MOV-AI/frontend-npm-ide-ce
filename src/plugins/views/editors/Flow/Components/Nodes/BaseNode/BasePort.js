@@ -187,8 +187,8 @@ class BasePort extends BasePortStruct {
    * @param {string} data port data; undefined sets default opacity
    */
   setLinking = data => {
-    const message = data.message ?? this.data.message;
-    const type = data.type ?? "";
+    const message = data?.message ?? this.data.message;
+    const type = data?.type ?? "";
 
     this.linking = message;
 

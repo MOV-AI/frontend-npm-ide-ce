@@ -362,6 +362,7 @@ export default class BaseLink extends BaseLinkStruct {
    * @returns {bool} link exists
    */
   linkExists = (portA, portB, links) => {
+    if (!links) return false;
     const [src, trg] = this.getSrcTrg(portA, portB);
     const _links = links.values();
 
