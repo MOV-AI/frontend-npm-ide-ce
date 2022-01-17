@@ -259,6 +259,11 @@ const Flow = (props, ref) => {
         onFlowValidated({ warnings: persistentWarns });
       });
 
+      // When enter default mode remove other node/sub-flow bookmarks
+      mainInterface.mode.default.onEnter.subscribe(() => {
+        onNodeSelected(null);
+      });
+
       mainInterface.mode.addNode.onClick.subscribe(evtData =>
         console.log("dlgNewNode", evtData)
       );
