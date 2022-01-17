@@ -4,7 +4,7 @@ import _debounce from "lodash/debounce";
 import IconButton from "@material-ui/core/IconButton";
 import { Tooltip } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
-import { getIconByScope } from "../../../utils/Constants";
+import { getIconByScope } from "../../../utils/Utils";
 
 import { homeTabLinkStyles } from "./styles";
 
@@ -63,7 +63,7 @@ function HomeLink(props) {
         <div className={rowClasses} onClick={handleOpenDocument}>
           <Tooltip title={id}>
             <div className={classes.iconLink}>
-              {getIconByScope[scope || "Default"]()}
+              {getIconByScope(scope)}
               <span href="#" underline="none" className={classes.link}>
                 {name}
               </span>

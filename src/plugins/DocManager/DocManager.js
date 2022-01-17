@@ -1,3 +1,4 @@
+import { Document } from "@mov-ai/mov-fe-lib-core";
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
 import docsFactory from "./docs";
 import TOPICS from "./topics";
@@ -139,6 +140,7 @@ class DocManager extends IDEPlugin {
    */
   save(modelKey, newName) {
     const { name, scope } = modelKey;
+    this.emit(TOPICS.saveDoc, { docManager: this, doc: Document.parsePath(name, scope), newName });
     return this.getStore(scope).saveDoc(name, newName);
   }
 

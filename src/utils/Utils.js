@@ -1,3 +1,10 @@
+import AccountTreeIcon from "@material-ui/icons/AccountTree";
+import BuildIcon from "@material-ui/icons/Build";
+import CodeIcon from "@material-ui/icons/Code";
+import DescriptionIcon from "@material-ui/icons/Description";
+import DeviceHubIcon from "@material-ui/icons/DeviceHub";
+import movaiIcon from "../plugins/views/editors/_shared/Loader/movai_red.svg";
+
 /**
  * Generate random ID
  * @returns {String} Random ID in format : "1c76107c-146e-40bc-93fb-8148750cf50a"
@@ -29,6 +36,28 @@ export const getTabIconColor = scope => {
 };
 
 /**
+ * Get icon for each document type
+ * @param {string} scope : Document type (Callback, Configuration, ...)
+ * @returns {component} Icon by document type
+ */
+export const getIconByScope = (scope = "Default", style) => {
+  const color = getTabIconColor(scope);
+  const icon = {
+    Callback: <CodeIcon style={{ color, ...style }} />,
+    Layout: <i className={`icon-Layouts`} style={{ color, ...style }}></i>,
+    Flow: <AccountTreeIcon style={{ color, ...style }} />,
+    Annotation: <DescriptionIcon style={{ color, ...style }} />,
+    GraphicScene: <DeviceHubIcon style={{ color, ...style }} />,
+    Node: <i className={`icon-Nodes`} style={{ color, ...style }}></i>,
+    Configuration: <BuildIcon style={{ color, ...style }} />,
+    HomeTab: <img src={movaiIcon} alt="MOV.AI Logo" style={{ maxWidth: 12, ...style}} />,
+    Default: <></>
+  };
+  
+  return icon[scope];
+};
+
+/**
  * Document scopes
  */
 export const SCOPES = {
@@ -43,7 +72,7 @@ export const SCOPES = {
  * @param e: event to stop the propagation
  */
 export const stopPropagation = e => {
-  e.stopPropagation();
+  e?.stopPropagation();
 }
 
 /**

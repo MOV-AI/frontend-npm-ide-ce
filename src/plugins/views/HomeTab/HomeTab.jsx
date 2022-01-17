@@ -14,10 +14,9 @@ import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import withAlerts from "../../../decorators/withAlerts";
 import {
   APP_DEFAULT_CONFIG,
-  APP_CUSTOM_CONFIG,
-  getIconByScope
+  APP_CUSTOM_CONFIG
 } from "../../../utils/Constants";
-import { getNameFromURL } from "../../../utils/Utils";
+import { getNameFromURL, getIconByScope } from "../../../utils/Utils";
 import ERROR_MESSAGES from "../../../utils/ErrorMessages";
 import Configuration from "../../../models/Configuration/Configuration";
 import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
@@ -94,7 +93,7 @@ const HomeTab = forwardRef((props, ref) => {
       if (doc.isDeleted) {
         alert({
           message: t(ERROR_MESSAGES.FILE_DOESNT_EXIST, {
-            FILE_URL: `"${doc.id}"`
+            FILE_URL: doc.id
           }),
           severity: alertSeverities.WARNING
         });
@@ -156,11 +155,19 @@ const HomeTab = forwardRef((props, ref) => {
     setRecentDocs(workspaceManager.getRecentDocuments());
 
     on("tabs", "openEditor", data => {
-      addRecentDocument(data.id, data.name, data.scope);
+      if (!data.isNew) addRecentDocument(data.id, data.name, data.scope);
     });
 
     on("docManager", "deleteDoc", data => {
       setDeletedRecentDocument(data.url);
+    });
+
+    on("docManager", "saveDoc", data => {
+      if (data.newName) {
+        const { workspace, type: scope } = data.doc;
+        const id = `${workspace}/${scope}/${data.newName}`;
+        addRecentDocument(id, data.newName, scope);
+      }
     });
   }, [workspaceManager, addRecentDocument, setDeletedRecentDocument, call, on]);
 
@@ -198,7 +205,7 @@ const HomeTab = forwardRef((props, ref) => {
                       }
                     ),
                   element: docType.scope,
-                  icon: getIconByScope[docType.scope](),
+                  icon: getIconByScope(docType.scope),
                   onClose: true
                 }))}
               ></ContextMenu>

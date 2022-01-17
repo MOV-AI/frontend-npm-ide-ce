@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { Tooltip } from "@material-ui/core";
-import { getIconByScope } from "../../../utils/Constants";
+import { getIconByScope } from "../../../utils/Utils";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Workspace from "../../../utils/Workspace";
 import HomeTab from "../HomeTab/HomeTab";
@@ -107,7 +107,7 @@ const useLayout = (props, dockRef) => {
     return (
       <Tooltip title={docData.tabTitle || docData.id}>
         <div onAuxClick={() => onCloseTab(docData.id)}>
-          {getIconByScope[docData.scope || "Default"]({
+          {getIconByScope(docData.scope, {
             fontSize: 13,
             marginTop: 2,
             marginRight: 10,
