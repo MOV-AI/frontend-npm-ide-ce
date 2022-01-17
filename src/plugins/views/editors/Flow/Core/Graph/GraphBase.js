@@ -5,7 +5,6 @@ import GraphValidator from "./GraphValidator";
 import { InvalidLink } from "../../Components/Links/Errors";
 import { FLOW_VIEW_MODE } from "../../Constants/constants";
 import { shouldUpdateExposedPorts } from "./Utils";
-//import { messages } from "../Api/Messages";
 import _debounce from "lodash/debounce";
 import { NODE_TYPES } from "./constants";
 import Factory from "../../Components/Nodes/Factory";
@@ -133,26 +132,7 @@ export default class Graph {
    * @private
    */
   removeLinksModal = () => {
-    // const readOnly = this.mInterface.readOnly;
-    // const title = t("Invalid links found");
-    // const message = readOnly
-    //   ? t("Fix not available in view only mode.")
-    //   : t("Do you want to fix this?");
-
-    // if (this.invalidLinks.length > 0) {
-    //   MasterComponent.confirmAlert(
-    //     title,
-    //     message,
-    //     readOnly ? () => {} : this._getRemoveInvalidLinks(),
-    //     () => {},
-    //     t("Fix"),
-    //     "primary",
-    //     t("Cancel"),
-    //     "secondary",
-    //     [],
-    //     readOnly
-    //   );
-    // }
+    // TODO: implement
     return this;
   };
 
@@ -160,21 +140,7 @@ export default class Graph {
    * @private
    */
   getRemoveInvalidLinks = () => () => {
-    // const msg = messages();
-    // const positiveMsg = msg.onDeleteInvLinkSuccess;
-    // const negativeMsg = msg.onDeleteInvLinkFail;
-    const { api } = this.mInterface;
-    let areLinksDeleted = true;
-    this.invalidLinks.forEach(({ id }) =>
-      api.deleteLink(
-        id,
-        res => (areLinksDeleted = areLinksDeleted && res.success)
-      )
-    );
-    // if (areLinksDeleted) {
-    //   MasterComponent.alert(positiveMsg);
-    //   this.invalidLinks = [];
-    // } else MasterComponent.alert(negativeMsg, MasterComponent.ALERTS.warning);
+    // TODO: implement
   };
 
   /**
@@ -185,38 +151,7 @@ export default class Graph {
    * @returns this graph instance
    */
   invalidContainerParamModal = invalidContainerParams => {
-    //const title = t("Sub-flows with invalid parameters");
-    // let message =
-    //   t("The parameters of the sub-flow should come from the flow template.") +
-    //   t(
-    //     "The following sub-flows contains custom parameters that are not present on its template:"
-    //   );
-
-    // invalidContainerParams.forEach(containerId => {
-    //   message += "\n  " + containerId;
-    // });
-
-    // message +=
-    //   "\n\n" +
-    //   t(
-    //     "To fix it, you can either remove the custom parameter on the sub-flow or add the parameter on the template."
-    //   );
-
-    // if (invalidContainerParams.length > 0) {
-    //   MasterComponent.confirmAlert(
-    //     title,
-    //     message,
-    //     () => {},
-    //     () => {},
-    //     "",
-    //     "",
-    //     "Ok",
-    //     "secondary",
-    //     [],
-    //     true,
-    //     true
-    //   );
-    // }
+    // TODO: implement
     return this;
   };
 

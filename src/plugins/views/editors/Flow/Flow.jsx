@@ -9,7 +9,6 @@ import BaseFlow from "./Views/BaseFlow";
 import Menu from "./Components/Menus/Menu";
 import FlowTopBar from "./Components/FlowTopBar/FlowTopBar";
 import FlowBottomBar from "./Components/FlowBottomBar/FlowBottomBar";
-import Shortcuts from "./Components/interface/Shortcuts";
 import "./Resources/css/Flow.css";
 import { EVT_NAMES, EVT_TYPES } from "./events";
 
@@ -283,13 +282,6 @@ const Flow = (props, ref) => {
           )
         )
         .subscribe(evtData => console.log("onLinkErrorMouseOver", evtData));
-
-      // Enable shortcuts
-      const shortcuts = new Shortcuts(mainInterface);
-
-      return () => {
-        shortcuts.destroy();
-      };
     },
     [onNodeSelected, onFlowValidated]
   );
