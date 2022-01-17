@@ -17,7 +17,6 @@ export default class MainInterface {
     id,
     containerId,
     modelView,
-    type,
     width,
     height,
     data,
@@ -36,7 +35,6 @@ export default class MainInterface {
     this.docManager = call;
 
     // TODO: Review
-    this.type = type ?? "flow";
     this.initialize();
   }
 
