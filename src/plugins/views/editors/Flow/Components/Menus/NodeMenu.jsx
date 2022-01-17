@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
-import { Typography } from "@material-ui/core";
+import { Divider, ListItem, ListItemText, Typography } from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -35,9 +35,10 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const RNodeMenu = props => {
+const NodeMenu = props => {
   const { nodeInst } = props;
   const classes = useStyles();
+  const data = nodeInst.data;
 
   //========================================================================================
   /*                                                                                      *
@@ -47,12 +48,22 @@ const RNodeMenu = props => {
 
   return (
     <Typography component="div" className={classes.root}>
-      {JSON.stringify(nodeInst)}
+      <h2 style={{ textAlign: "center" }}>{data.id}</h2>
+      <ListItem>
+        <ListItemText primary={`Name:`} />
+        <Typography>{data.Template}</Typography>
+      </ListItem>
+      <Divider />
+      <ListItem>
+        <ListItemText primary={`Scope:`} />
+        <Typography>{data.model}</Typography>
+      </ListItem>
+      <Divider />
     </Typography>
   );
 };
 
-RNodeMenu.propTypes = {
+NodeMenu.propTypes = {
   flowName: PropTypes.string.isRequired,
   nodeInst: PropTypes.object.isRequired,
   layers: PropTypes.object,
@@ -60,10 +71,10 @@ RNodeMenu.propTypes = {
   editable: PropTypes.bool
 };
 
-RNodeMenu.defaultProps = {
-  layers: {},
+NodeMenu.defaultProps = {
   openDoc: () => DEFAULT_FUNCTION(),
+  layers: {},
   editable: true
 };
 
-export default RNodeMenu;
+export default NodeMenu;
