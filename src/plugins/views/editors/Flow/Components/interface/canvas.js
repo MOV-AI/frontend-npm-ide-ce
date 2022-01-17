@@ -35,12 +35,9 @@ class Canvas {
   pixMin = 0;
   pixMax = null;
   nodeSize = null;
-  pixelPerPoint = null;
-  pointsLocations = [];
   zoomBehavior = null;
   brushBehavior = null;
   currentZoom = null;
-  bbox = null;
   mouse = [0, 0];
   svg = null;
   canvas = null;
@@ -67,7 +64,6 @@ class Canvas {
     this.minScale = 0.2;
     this.nodeSize =
       0.005 * this.maxMovingPixels < 40 ? 40 : 0.005 * this.maxMovingPixels;
-    this.pixelPerPoint = this.nodeSize;
     this.pixMax = this.maxMovingPixels;
 
     this.zoomBehavior = this.createZoomBehavior();
