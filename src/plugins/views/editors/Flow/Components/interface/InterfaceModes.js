@@ -14,12 +14,15 @@ export default class InterfaceModes {
   constructor(mInterface) {
     this.mInterface = mInterface;
 
-    this._initialize();
+    this.initialize();
     this.mode = this._loading;
     this.previousMode = null;
   }
 
-  _initialize = () => {
+  /**
+   * @private
+   */
+  initialize = () => {
     // loading mode
     this._loading = BaseMode("loading");
 
@@ -157,7 +160,6 @@ export default class InterfaceModes {
    * @param {bool} force : Force mode to run onEnter/onExit
    */
   setMode = (modeId, props, force) => {
-    console.log("event", modeId, props, force);
     // invalid mode
     const nextMode = this[modeId];
     if (!nextMode) throw new Error("Invalid mode", modeId);

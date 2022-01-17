@@ -149,7 +149,6 @@ export default class MainInterface {
   };
 
   addLink = () => {
-    console.log("debug add link");
     const { src, trg, link, toCreate } = this.mode.linking.props;
 
     if (toCreate && link.isValid(src, trg, this.graph.links)) {
