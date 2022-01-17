@@ -7,6 +7,7 @@ import { FLOW_VIEW_MODE } from "./Constants/constants";
 import InfoIcon from "@material-ui/icons/Info";
 import BaseFlow from "./Views/BaseFlow";
 import Menu from "./Components/Menus/Menu";
+import NodeMenu from "./Components/Menus/NodeMenu";
 import FlowTopBar from "./Components/FlowTopBar/FlowTopBar";
 import FlowBottomBar from "./Components/FlowBottomBar/FlowBottomBar";
 import Shortcuts from "./Components/interface/Shortcuts";
@@ -213,9 +214,33 @@ const Flow = (props, ref) => {
    * On Node Selected
    * @param {*} node
    */
-  const onNodeSelected = useCallback(node => {
-    console.log("debug onNodeSelected", node);
-  }, []);
+  const onNodeSelected = useCallback(
+    node => {
+      const nodeMenuName = `${id}-node-menu`;
+      if (!node) call("rightDrawer", "removeBookmark", nodeMenuName);
+      else {
+        call(
+          "rightDrawer",
+          "addBookmark",
+          {
+            icon: <i className="icon-Nodes" />,
+            name: nodeMenuName,
+            view: (
+              <NodeMenu
+                id={id}
+                name={name}
+                nodeInst={node}
+                model={instance}
+                editable={isEditableComponentRef.current}
+              ></NodeMenu>
+            )
+          },
+          true
+        );
+      }
+    },
+    [call, id, instance, name]
+  );
 
   /**
    * Subscribe to mainInterface and canvas events

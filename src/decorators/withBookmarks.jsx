@@ -20,7 +20,6 @@ const useStyles = (side, oppositeSide) =>
       border: `solid 1px ${theme.palette.background.primary} !important`,
       [`border-${side}`]: "none !important",
       borderRadius: "0px !important",
-      color: theme.palette.primary.main,
       background: `${theme.palette.background.secondary} !important`
     }
   }));
@@ -36,6 +35,26 @@ const withBookmarks = Component => {
     const oppositeSide = props.anchor === "left" ? "right" : "left";
     // Style hooks
     const classes = useStyles(props.anchor, oppositeSide)();
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                    Private Methdos                                   *
+     *                                                                                      */
+    //========================================================================================
+
+    /**
+     * @private Get bookmark icon color
+     * @param {string} bookmarkName : Bookmark name
+     * @returns {string} Icon color :
+     *  When returning empty string, it will render the default color (primary)
+     *  Any other color returned will override the default icon color
+     */
+    const getIconColor = React.useCallback(
+      bookmarkName => {
+        return active === bookmarkName ? "" : "white";
+      },
+      [active]
+    );
 
     //========================================================================================
     /*                                                                                      *
@@ -61,7 +80,7 @@ const withBookmarks = Component => {
 
     /**
      * Add bookmark to drawer
-     *  data: {
+     * @param data : {
      *    icon {Element}  : Bookmark icon
      *    name {String}   : Title
      *    view {Element}  : Element to be rendered in menu container
@@ -78,7 +97,7 @@ const withBookmarks = Component => {
 
     /**
      * Remove bookmark by name
-     *  name {String} : bookmark name
+     * @param {string} name : bookmark name
      */
     const removeBookmark = React.useCallback(name => {
       setBookmarks(prevState => {
@@ -98,10 +117,11 @@ const withBookmarks = Component => {
 
     /**
      * Set bookmarks
+     * @param {*} newBookmarks
      */
-    const setBookmark = React.useCallback((bookmarks = {}) => {
-      setBookmarks(bookmarks);
-      const firstBookmark = Object.values(bookmarks)[0];
+    const setBookmark = React.useCallback((newBookmarks = {}) => {
+      setBookmarks(newBookmarks);
+      const firstBookmark = Object.values(newBookmarks)[0];
       if (firstBookmark) {
         setActive(firstBookmark.name);
       }
@@ -121,7 +141,7 @@ const withBookmarks = Component => {
         const view = bookmarks[active].view;
         setRenderedView(view);
       }
-    }, [active, bookmarks, props]);
+    }, [active, bookmarks]);
 
     /**
      * Methods exposed
@@ -156,12 +176,13 @@ const withBookmarks = Component => {
                 <IconButton
                   key={index}
                   onClick={() => selectBookmark(bookmark.name)}
-                  color={active === bookmark.name ? "primary" : "default"}
                   aria-label={bookmark.title}
                   className={classes.bookmark}
                   size="small"
                 >
-                  {bookmark.icon}
+                  <div style={{ color: getIconColor(bookmark.name) }}>
+                    {bookmark.icon}
+                  </div>
                 </IconButton>
               );
             })}
