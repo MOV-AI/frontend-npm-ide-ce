@@ -1,6 +1,6 @@
 import Configuration from "./Configuration";
 
-test("set isDirty on setCode", () => {
+test("Set isDirty on setCode", () => {
   const obj = new Configuration({ name: "test" }).setDirty(false);
 
   obj.setCode("varA: 1");
@@ -8,7 +8,7 @@ test("set isDirty on setCode", () => {
   expect(obj.getDirty()).toBe(true);
 });
 
-test("set isDirty on setExtension", () => {
+test("Set isDirty on setExtension", () => {
   const obj = new Configuration({ name: "test" }).setDirty(false);
 
   obj.setExtension("yaml");
@@ -16,7 +16,7 @@ test("set isDirty on setExtension", () => {
   expect(obj.getDirty()).toBe(true);
 });
 
-test("create new document", () => {
+test("Create new document", () => {
   const obj = new Configuration({ name: "test" });
 
   expect(obj.getIsNew()).toBe(true);
@@ -24,7 +24,7 @@ test("create new document", () => {
   expect(obj.getDirty()).toBe(true);
 });
 
-test("create document of JSON", () => {
+test("Create document of JSON", () => {
   const json = {
     workspace: "myworkspace",
     Label: "test",
@@ -50,7 +50,7 @@ test("create document of JSON", () => {
   expect(obj.getDirty()).toBe(false);
 });
 
-test("serialize to database", () => {
+test("Serialize to database", () => {
   const json = {
     workspace: "myworkspace",
     Label: "test",
@@ -75,7 +75,7 @@ test("serialize to database", () => {
   expect(obj.getDirty()).toBe(false);
 });
 
-test("verify serialize defaults to DB", () => {
+test("Verify serialize defaults to DB", () => {
   const json = {
     workspace: "myworkspace",
     Label: "test",

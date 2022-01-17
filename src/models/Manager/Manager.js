@@ -48,7 +48,7 @@ class Manager {
   /**
    * Returns an item based on a name
    * @param {string} name : The name of the item
-   * @returns {any} : The value of the item or undefined
+   * @returns {object} : The value of the item or undefined
    */
   getItem(name) {
     return this.data.get(name);
@@ -58,7 +58,7 @@ class Manager {
    * Creates a new item
    * Emits the CREATE event
    * @param {object} param0 : An object with the name of the item and the content
-   * @returns : The instance
+   * @returns {Manager} : The instance
    */
   setItem({ name, content }) {
     const obj = new this.model();
@@ -67,6 +67,11 @@ class Manager {
 
     this.data.set(name, obj);
 
+    //subscribe to object changes to emit update event
+    obj.subscribe(() => {
+      this.emit(EVENTS.UPDATE);
+    });
+
     this.emit(EVENTS.CREATE);
 
     return this;
@@ -74,8 +79,8 @@ class Manager {
 
   /**
    * Updates an item
-   * @param {object} param0: An object with the name of the item and the content
-   * @returns : The instance
+   * @param {object} param0 : An object with the name of the item and the content
+   * @returns {Manager} : The instance
    */
   updateItem({ name, content }) {
     this.getItem(name)?.setData(content);
@@ -86,9 +91,27 @@ class Manager {
   }
 
   /**
+   * Renames an item 
+   * @param {object} param0: An object with the old name of the item and the new name for the item
+   * @param {boolean} preventEmit: A boolean to prevent the second EVENTS.UPDATE emission
+   * @returns : The instance
+   */
+  renameItem({ oldName, name }, preventEmit) {
+    const oldItem = this.getItem(oldName);
+    if(oldItem){
+      oldItem.setName(name);
+      this.data.delete(oldName);
+      this.data.set(name, oldItem);
+      !preventEmit && this.emit(EVENTS.UPDATE);
+    }
+
+    return this;
+  }
+
+  /**
    * Deletes an item
-   * @param {string} key The name of the item
-   * @returns : True on success, false otherwise
+   * @param {string} key : The name of the item
+   * @returns {boolean} : True on success, false otherwise
    */
   deleteItem(name) {
     this.getItem(name)?.destroy();
@@ -103,7 +126,7 @@ class Manager {
   /**
    * Creates one or more items
    * @param {object} json : An object with the items to create
-   * @returns : The instance
+   * @returns {Manager} : The instance
    */
   setData(json) {
     Object.entries(json ?? {}).forEach(([name, content]) => {
@@ -167,7 +190,7 @@ class Manager {
 
   //========================================================================================
   /*                                                                                      *
-   *                                        Events                                        *
+   *                                    Events Handlers                                   *
    *                                                                                      */
   //========================================================================================
 

@@ -1,12 +1,12 @@
 import PyLib from "./PyLib";
 
-test("smoke test", () => {
+test("Smoke test", () => {
   const obj = new PyLib();
 
   expect(obj).toBeInstanceOf(PyLib);
 });
 
-test("serialize to DB", () => {
+test("Serialize to DB", () => {
   const lib = new PyLib();
 
   const data = { name: "lib1", module: "mod1", libClass: "class1" };
@@ -20,7 +20,7 @@ test("serialize to DB", () => {
   expect(lib.serializeToDB()).toMatchObject(expected);
 });
 
-test("serialize OF db", () => {
+test("Serialize OF db", () => {
   const content = {
     lib1: { Module: "mod1", Class: "class1" }
   };

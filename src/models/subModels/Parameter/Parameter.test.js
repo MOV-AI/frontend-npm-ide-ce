@@ -1,15 +1,15 @@
 import Parameter from "./Parameter";
 
-test("smoke test", () => {
-  const obj = new Parameter();
+test("Smoke test", () => {
+  const obj = new Parameter({ name: "param1" });
 
   expect(obj).toBeInstanceOf(Parameter);
-  expect(obj.getName()).toBe("");
+  expect(obj.getName()).toBe("param1");
   expect(obj.getDescription()).toBe("");
   expect(obj.getType()).toBe("any");
 });
 
-test("serialize to DB", () => {
+test("Serialize to DB", () => {
   const param = new Parameter();
 
   const data = { name: "param1", value: 1981, description: "best year" };
@@ -24,7 +24,7 @@ test("serialize to DB", () => {
   expect(param.serializeToDB()).toMatchObject(expected);
 });
 
-test("serialize OF db", () => {
+test("Serialize OF db", () => {
   const content = {
     param1: { Value: 1981, Description: "best year", Type: "boolean" }
   };

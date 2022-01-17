@@ -7,6 +7,7 @@ import CodeIcon from "@material-ui/icons/Code";
 import DescriptionIcon from "@material-ui/icons/Description";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import { Tooltip } from "@material-ui/core";
+import { getTabIconColor } from "../../../utils/Utils";
 
 const DEFAULT_LAYOUT = {
   dockbox: {
@@ -102,14 +103,19 @@ const useLayout = (props, dockRef) => {
    * @returns {Element} Tab element to render
    */
   const _getCustomTab = React.useCallback((docData, onCloseTab, isDirty) => {
+    const color = getTabIconColor(docData.scope);
     const getIconByScope = {
-      Callback: style => <CodeIcon style={{ ...style }} />,
-      Layout: style => <i className={`icon-Layouts`} style={{ ...style }}></i>,
-      Flow: style => <AccountTreeIcon style={{ ...style }} />,
-      Annotation: style => <DescriptionIcon style={{ ...style }} />,
-      GraphicScene: style => <DeviceHubIcon style={{ ...style }} />,
-      Node: style => <i className={`icon-Nodes`} style={{ ...style }}></i>,
-      Configuration: style => <BuildIcon style={{ ...style }} />,
+      Callback: style => <CodeIcon style={{ ...style, color }} />,
+      Layout: style => (
+        <i className={`icon-Layouts`} style={{ ...style, color }}></i>
+      ),
+      Flow: style => <AccountTreeIcon style={{ ...style, color }} />,
+      Annotation: style => <DescriptionIcon style={{ ...style, color }} />,
+      GraphicScene: style => <DeviceHubIcon style={{ ...style, color }} />,
+      Node: style => (
+        <i className={`icon-Nodes`} style={{ ...style, color }}></i>
+      ),
+      Configuration: style => <BuildIcon style={{ ...style, color }} />,
       Default: <></>
     };
 
@@ -117,7 +123,7 @@ const useLayout = (props, dockRef) => {
       <Tooltip title={docData.id}>
         <div onAuxClick={() => onCloseTab(docData.id)}>
           {getIconByScope[docData.scope || "Default"]({
-            fontSize: 12,
+            fontSize: 13,
             marginTop: 2,
             marginRight: 10,
             marginLeft: 0
@@ -277,6 +283,7 @@ const useLayout = (props, dockRef) => {
       const newTabData = { ...currentTabData, isDirty: isDirty };
       tabsById.current.set(tabId, newTabData);
       // Trigger tab update
+      if (!dockRef.current) return;
       const currentTab = dockRef.current.find(tabId);
       dockRef.current.updateTab(tabId, currentTab);
     },

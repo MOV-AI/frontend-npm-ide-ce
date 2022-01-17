@@ -3,6 +3,7 @@ import DetailsMenu from "../_shared/DetailsMenu/DetailsMenu";
 import AddImportDialog from "./dialogs/AddImport";
 import EditMessageDialog from "./dialogs/EditMessage";
 import Model from "../../../../models/Callback/Callback";
+import { useTranslation } from "../_shared/mocks";
 import { withDataHandler } from "../../../DocManager/DataHandler";
 import {
   Collapse,
@@ -21,6 +22,7 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 import AddIcon from "@material-ui/icons/Add";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
+import useDataSubscriber from "../../../DocManager/useDataSubscriber";
 
 const useStyles = makeStyles(theme => ({
   itemValue: {
@@ -45,18 +47,17 @@ const ACTIVE_ITEM = {
 
 const Menu = props => {
   // Props
-  const {
-    call,
-    scope,
-    name,
-    instance,
-    data = new Model({}).serialize(),
-    editable = true
-  } = props;
+  const { call, scope, name, instance, editable = true } = props;
   // State hook
   const [activeItem, setActiveItem] = React.useState(0);
-  // Style hook
+  // Other hooks
   const classes = useStyles();
+  const { t } = useTranslation();
+  const { data } = useDataSubscriber({
+    instance,
+    propsData: props.data,
+    keysToDisconsider: [Model.OBSERVABLE_KEYS.CODE]
+  });
 
   //========================================================================================
   /*                                                                                      *
@@ -78,6 +79,7 @@ const Menu = props => {
    */
   const addImports = pyLibs => {
     if (instance.current) instance.current.getPyLibs().setData(pyLibs);
+    setActiveItem(ACTIVE_ITEM.imports);
   };
 
   /**
@@ -86,6 +88,7 @@ const Menu = props => {
    */
   const setMessage = msg => {
     if (instance.current) instance.current.setMessage(msg);
+    setActiveItem(ACTIVE_ITEM.message);
   };
 
   //========================================================================================
@@ -216,7 +219,7 @@ const Menu = props => {
                 primary={pyLib.name}
               />
               <ListItemSecondaryAction>
-                <Tooltip title>
+                <Tooltip title={t("Remove import")}>
                   <IconButton edge="end" onClick={() => deleteImport(pyLib)}>
                     <DeleteIcon fontSize="small" />
                   </IconButton>
@@ -249,13 +252,13 @@ const Menu = props => {
 
   return (
     <div>
-      <DetailsMenu name={name} details={data.details}></DetailsMenu>
+      <DetailsMenu name={name} details={data.details || {}}></DetailsMenu>
       <List>
         {/* ============ IMPORTS ============ */}
         <ListItem button onClick={() => handleExpandClick(ACTIVE_ITEM.imports)}>
           <ListItemText primary="Imports" />
           <IconButton
-            disabled={!editable || instance?.current?.getIsNew()}
+            disabled={!editable}
             onClick={e => {
               e.stopPropagation();
               handleAddImportsClick();
@@ -273,7 +276,7 @@ const Menu = props => {
         <ListItem button onClick={() => handleExpandClick(ACTIVE_ITEM.message)}>
           <ListItemText primary="Message" />
           <IconButton
-            disabled={!editable || instance?.current?.getIsNew()}
+            disabled={!editable}
             onClick={e => {
               e.stopPropagation();
               handleEditMessageClick();

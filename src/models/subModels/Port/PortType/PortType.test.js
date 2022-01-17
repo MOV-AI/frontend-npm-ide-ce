@@ -1,12 +1,12 @@
 import PortType from "./PortType";
 
-test("smoke test", () => {
+test("Smoke test", () => {
   const obj = new PortType();
 
   expect(obj).toBeInstanceOf(PortType);
 });
 
-test("serialize to DB", () => {
+test("Serialize to DB", () => {
   const port = new PortType();
 
   const data = {
@@ -30,7 +30,7 @@ test("serialize to DB", () => {
   expect(port.serializeToDB()).toMatchObject(expected);
 });
 
-test("serialize OF db", () => {
+test("Serialize OF db", () => {
   const content = {
     out: {
       Message: "movai_msgs/TF",

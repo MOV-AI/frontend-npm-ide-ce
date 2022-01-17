@@ -1,49 +1,24 @@
 import React, { memo } from "react";
 import PropTypes from "prop-types";
-import { useTranslation } from "../../../_shared/mocks";
-import { HtmlTooltip } from "../_shared/HtmlTooltip";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import Accordion from "@material-ui/core/Accordion";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
-import Typography from "@material-ui/core/Typography";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import Divider from "@material-ui/core/Divider";
-import MaterialTable from "@material-table/core";
+import { useTranslation, DEFAULT_FUNCTION } from "../../../_shared/mocks";
 import AddBox from "@material-ui/icons/AddBox";
-import IconButton from "@material-ui/core/IconButton";
 import Edit from "@material-ui/icons/Edit";
-import InfoLogo from "@material-ui/icons/Info";
 import _isEqual from "lodash/isEqual";
-
-const useStyles = makeStyles(theme => ({
-  root: {
-    padding: "5px 0px 5px 0px",
-    width: "100%"
-  },
-  heading: {
-    fontSize: "1.5rem"
-  },
-  details: {
-    padding: "8px 24px 24px"
-  },
-  column: {
-    flexBasis: "80%"
-  },
-  logo: {
-    margin: "2px",
-    padding: "0px"
-  },
-  input: {
-    fontSize: "13px"
-  }
-}));
+import CollapsibleHeader from "../_shared/CollapsibleHeader";
+import MaterialTable from "../../../_shared/MaterialTable/MaterialTable";
 
 const KeyValueTable = props => {
   // Props
-  const { varName, data, title, onRowDelete, openEditDialog, editable } = props;
+  const {
+    varName,
+    data,
+    title,
+    onRowDelete,
+    openEditDialog,
+    editable,
+    columns
+  } = props;
   // Hooks
-  const classes = useStyles();
-  const theme = useTheme();
   const { t } = useTranslation();
 
   //========================================================================================
@@ -59,46 +34,15 @@ const KeyValueTable = props => {
    */
   const formatData = _data => {
     if (Array.isArray(_data)) return _data;
-    return Object.keys(_data).map(key => ({
-      name: _data[key].name,
-      value: _data[key].value,
-      info: _data[key].description
-    }));
-  };
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                 Render sub-components                                *
-   *                                                                                      */
-  //========================================================================================
-
-  const renderInfoIcon = rowData => {
-    return (
-      <HtmlTooltip
-        title={
-          <React.Fragment>
-            <Typography color="inherit" component="h3">
-              <b>{rowData.name}</b>
-            </Typography>
-            <p>{rowData.info}</p>
-          </React.Fragment>
-        }
-      >
-        <IconButton className={classes.logo}>
-          <InfoLogo />
-        </IconButton>
-      </HtmlTooltip>
-    );
-  };
-
-  /**
-   * Render of Value column
-   * @param {*} rowData
-   * @returns Row value column
-   */
-  const renderValue = rowData => {
-    if (rowData.type === "string") return JSON.stringify(rowData.value);
-    return rowData.value;
+    return Object.values(_data).map((item, i) => {
+      return {
+        id: `${i}_${item.name}`,
+        name: item.name,
+        value: item.value,
+        type: item.type,
+        description: item.description
+      };
+    });
   };
 
   //========================================================================================
@@ -134,46 +78,6 @@ const KeyValueTable = props => {
     return actions;
   };
 
-  /**
-   * Get table columns definitions
-   *  Info  : Tooltip with name and description
-   *  Name  : Key name
-   *  Value : Key value
-   * @returns {array} Table columns
-   */
-  const getColumns = () => {
-    return [
-      {
-        title: "",
-        field: "description",
-        cellStyle: { padding: "10px", textAlign: "start", width: "5%" },
-        sorting: false,
-        render: renderInfoIcon
-      },
-      {
-        title: t("Name"),
-        field: "name",
-        cellStyle: {
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          width: "40%"
-        }
-      },
-      {
-        title: t("Value"),
-        field: "value",
-        render: renderValue,
-        cellStyle: {
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          width: "40%"
-        }
-      }
-    ];
-  };
-
   //========================================================================================
   /*                                                                                      *
    *                                        Render                                        *
@@ -181,74 +85,25 @@ const KeyValueTable = props => {
   //========================================================================================
 
   return (
-    <Typography component="div" className={classes.root} key={varName}>
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography component="div" className={classes.column}>
-            <Typography className={classes.heading}>{title}</Typography>
-          </Typography>
-        </AccordionSummary>
-        <Divider />
-        <Typography component="div" className={classes.details}>
-          <MaterialTable
-            style={{ boxShadow: "none", justifyContent: "center" }}
-            title=""
-            columns={getColumns()}
-            data={formatData(data)}
-            actions={getActions()}
-            editable={{
-              isEditable: () => editable,
-              isDeletable: () => editable,
-              onRowDelete: rowData => onRowDelete(varName, rowData.name)
-            }}
-            options={{
-              rowStyle: (rowData, index) => {
-                return index % 2 === 0
-                  ? {}
-                  : { backgroundColor: theme.nodeEditor.stripeColor };
-              },
-              search: true,
-              searchFieldAlignment: "left",
-              actionsCellStyle: {
-                textAlign: "right",
-                color: theme.palette.primary.main
-              },
-              actionsColumnIndex: -1,
-              draggable: false,
-              grouping: false,
-              paging: false
-            }}
-            localization={{
-              toolbar: { searchPlaceholder: t("Search") },
-              pagination: {
-                labelDisplayedRows: "{from}-{to} of {count}"
-              },
-              header: {
-                actions: t("Actions")
-              },
-              body: {
-                emptyDataSourceMessage: t("No records to display"),
-                deleteTooltip: t("Delete"),
-                editTooltip: t("Edit"),
-                addTooltip: t("Add"),
-                editRow: {
-                  cancelTooltip: t("Cancel"),
-                  saveTooltip: t("Confirm")
-                }
-              }
-            }}
-          />
-        </Typography>
-      </Accordion>
-    </Typography>
+    <CollapsibleHeader title={title}>
+      <MaterialTable
+        columns={columns}
+        data={formatData(data)}
+        actions={getActions()}
+        editable={{
+          isEditable: () => editable,
+          isDeletable: () => editable,
+          onRowDelete: rowData => onRowDelete(varName, rowData.name)
+        }}
+      />
+    </CollapsibleHeader>
   );
 };
 
-const DEFAULT_FUNCTION = name => console.log(`${name} not implemented`);
-
 KeyValueTable.propTypes = {
   varName: PropTypes.string,
-  data: PropTypes.array,
+  data: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
+  columns: PropTypes.array,
   title: PropTypes.string,
   onRowDelete: PropTypes.func,
   openEditDialog: PropTypes.func,
@@ -258,6 +113,10 @@ KeyValueTable.propTypes = {
 KeyValueTable.defaultProps = {
   varName: "cmdLine",
   data: [],
+  columns: [
+    { field: "name", title: "Name" },
+    { field: "value", title: "Value" }
+  ],
   title: "Title",
   onRowDelete: () => DEFAULT_FUNCTION("onRowDelete"),
   openEditDialog: () => DEFAULT_FUNCTION("openEditDialog"),

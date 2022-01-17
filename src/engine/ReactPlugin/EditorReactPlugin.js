@@ -2,6 +2,7 @@ import React from "react";
 import withAlerts from "../../decorators/withAlerts";
 import withKeyBinds from "../../decorators/withKeyBinds";
 import withMenuHandler from "../../decorators/withMenuHandler";
+import withLoader from "../../decorators/withLoader";
 import { withDataHandler } from "../../plugins/DocManager/DataHandler";
 import { ViewPlugin } from "./ViewReactPlugin";
 
@@ -39,8 +40,11 @@ export function withEditorPlugin(ReactComponent, methods = []) {
     const {
       id,
       on,
+      name,
       call,
+      scope,
       addKeyBind,
+      removeKeyBind,
       save,
       instance,
       activateKeyBind,
@@ -55,15 +59,12 @@ export function withEditorPlugin(ReactComponent, methods = []) {
     const _handleOutdatedSave = React.useCallback(
       action => {
         const getSaveByAction = {
-          updateDoc: () => {
-            const { scope, name } = instance.current.serialize();
-            call("docManager", "reloadDoc", { scope, name });
-          },
+          updateDoc: () => call("docManager", "reloadDoc", { scope, name }),
           overwriteDoc: save
         };
         return action in getSaveByAction ? getSaveByAction[action]() : false;
       },
-      [instance, call, save]
+      [call, save, scope, name]
     );
 
     /**
@@ -75,7 +76,6 @@ export function withEditorPlugin(ReactComponent, methods = []) {
      */
     const saveDocument = React.useCallback(() => {
       // If document is outdated
-      const { scope, name } = instance.current.serialize();
       if (instance.current.getOutdated()) {
         call("dialog", "saveOutdatedDocument", {
           name,
@@ -90,7 +90,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
             })
           : save();
       }
-    }, [call, instance, save, _handleOutdatedSave]);
+    }, [call, instance, save, _handleOutdatedSave, scope, name]);
 
     /**
      * Activate editor : activate editor's keybinds and update right menu
@@ -107,10 +107,21 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       addKeyBind("ctrl+s", saveDocument);
       initRightMenu();
       on("tabs", `${id}-active`, activateEditor);
-    }, [activateEditor, addKeyBind, id, initRightMenu, on, saveDocument]);
+
+      // Remove key bind on component unmount
+      return () => removeKeyBind("ctrl+s");
+    }, [
+      activateEditor,
+      addKeyBind,
+      removeKeyBind,
+      id,
+      initRightMenu,
+      on,
+      saveDocument
+    ]);
 
     return (
-      <div onFocus={activateEditor} style={{ height: "100%" }}>
+      <div onFocus={activateEditor} className={`container-${scope}`}>
         <RefComponent
           {...props}
           activateEditor={activateEditor}
@@ -124,6 +135,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
   // Decorate component
   const DecoratedEditorComponent = composeDecorators(EditorComponent, [
     withMenuHandler,
+    withLoader,
     withKeyBinds,
     withDataHandler,
     withAlerts

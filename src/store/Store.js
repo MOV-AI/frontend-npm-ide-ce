@@ -78,7 +78,7 @@ class Store extends BaseStore {
     const doc = this.getDoc(name);
 
     // rename the document
-    if (newName) doc.setName(newName);
+    if (newName) this.renameDoc(doc, newName);
 
     //get the document data
     const data = doc.serializeToDB();
@@ -100,7 +100,7 @@ class Store extends BaseStore {
       }
     };
 
-    return saveMethodByIsNew[doc.isNew](data).then(res => {
+    return saveMethodByIsNew[doc.getIsNew()](data).then(res => {
       if (res.success) {
         doc.setIsNew(false).setDirty(false);
         this.observer.onDocumentDirty(this.name, doc, doc.getDirty());
@@ -110,12 +110,12 @@ class Store extends BaseStore {
   }
 
   /**
-   *
+   * Create copy of document and save it in DB
    * @param {string} name The name of the document to copy
    * @param {string} newName The name of the new document (copy)
-   * @returns {Promise<>}
+   * @returns {Promise<Model>} Promise resolved after finish copying document
    */
-  copyDoc(name, newName) {
+  async copyDoc(name, newName) {
     return this.readDoc(name).then(doc => {
       const newObj = this.model
         .ofJSON(doc.serializeToDB())
@@ -124,6 +124,14 @@ class Store extends BaseStore {
 
       this.setDoc(newName, newObj);
       this.saveDoc(newName);
+
+      // Add subscriber to update dirty state
+      newObj.subscribe((instance, prop, value) =>
+        this.onDocumentUpdate(instance, prop, value)
+      );
+
+      // Return copied document
+      return newObj;
     });
   }
 

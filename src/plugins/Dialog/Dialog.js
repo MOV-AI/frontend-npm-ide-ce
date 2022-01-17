@@ -5,6 +5,8 @@ import NewDocumentDialog from "./components/FormDialog/NewDocumentDialog";
 import AlertDialog from "./components/AlertDialog/AlertDialog";
 import AlertBeforeAction from "./components/AlertDialog/AlertBeforeAction";
 import AppDialog from "./components/AppDialog/AppDialog";
+import { SelectScopeModal } from "@mov-ai/mov-fe-lib-react";
+import { withTheme } from "../../decorators/withTheme";
 
 class Dialog extends IDEPlugin {
   constructor(profile = {}) {
@@ -18,6 +20,7 @@ class Dialog extends IDEPlugin {
         "confirmation",
         "newDocument",
         "copyDocument",
+        "selectScopeModal",
         "closeDirtyDocument",
         "saveOutdatedDocument"
       ])
@@ -194,6 +197,36 @@ class Dialog extends IDEPlugin {
     );
   }
 
+  /**
+   * Show SelectScopeModal
+   * @param {*} data : Modal props
+   */
+  selectScopeModal(data) {
+    const { onSubmit, message, selected, scopeList } = data;
+    const targetElement = this._handleDialogOpen();
+    const ThemedModal = withTheme(SelectScopeModal);
+
+    // Handle submit
+    const handleDialogSubmit = selectedItem => {
+      onSubmit(selectedItem);
+      this._handleDialogClose();
+    };
+
+    // Show dialog
+    ReactDOM.render(
+      <ThemedModal
+        open={true}
+        message={message}
+        selected={selected}
+        allowArchive={false}
+        scopeList={scopeList}
+        onCancel={this._handleDialogClose}
+        onSubmit={handleDialogSubmit}
+      />,
+      targetElement
+    );
+  }
+
   //========================================================================================
   /*                                                                                      *
    *                                    Private Methods                                   *
@@ -201,7 +234,7 @@ class Dialog extends IDEPlugin {
   //========================================================================================
 
   /**
-   * Handle dialog open : Prepare element where the dialog will be rendered
+   * @private Handle dialog open : Prepare element where the dialog will be rendered
    * @returns {DOMElement} Target element to render dialog
    */
   _handleDialogOpen() {
@@ -214,7 +247,7 @@ class Dialog extends IDEPlugin {
   }
 
   /**
-   * Handle dialog close : Unmount dialog component and remove target element
+   * @private Handle dialog close : Unmount dialog component and remove target element
    */
   _handleDialogClose() {
     document.body.classList.remove(Dialog.BODY_CLASS_NAME);
