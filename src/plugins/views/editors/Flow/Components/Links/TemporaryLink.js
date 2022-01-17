@@ -12,13 +12,15 @@ export default class TemporaryLink extends BaseLink {
     };
     super(canvas, src, trg, _data);
     this.path.attr("stroke-dasharray", "3,3");
-    this._addEvents();
+    this.addEvents();
   }
 
   /**
+   * @private
+   * @override
    * disable default click event
    */
-  _addEvents = () => {
+  addEvents = () => {
     this.path.on("click", null);
     return this;
   };

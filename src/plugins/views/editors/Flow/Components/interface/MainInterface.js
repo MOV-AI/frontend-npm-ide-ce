@@ -4,7 +4,6 @@ import { filter } from "rxjs/operators";
 import Canvas from "./canvas";
 import Graph from "../../Core/Graph/GraphBase";
 import InterfaceModes from "./InterfaceModes";
-import RestApi from "../../Core/Api/RestApi";
 import { maxMovingPixels } from "../../Constants/constants";
 import { EVT_NAMES } from "../../events";
 
@@ -18,7 +17,6 @@ export default class MainInterface {
     id,
     containerId,
     modelView,
-    type,
     width,
     height,
     data,
@@ -37,7 +35,6 @@ export default class MainInterface {
     this.docManager = call;
 
     // TODO: Review
-    this.type = type ?? "flow";
     this.initialize();
   }
 
@@ -63,18 +60,8 @@ export default class MainInterface {
   initialize = () => {
     this.mode.setMode(EVT_NAMES.LOADING);
 
-    const {
-      classes,
-      containerId,
-      docManager,
-      height,
-      id,
-      modelView,
-      width,
-      type
-    } = this;
+    const { classes, containerId, docManager, height, id, width } = this;
 
-    this.api = new RestApi(id, type, modelView.SCOPE);
     this.canvas = new Canvas({
       mInterface: this,
       containerId,
@@ -167,7 +154,6 @@ export default class MainInterface {
 
     if (toCreate && link.isValid(src, trg, this.graph.links)) {
       // TODO: add link
-      this.api.addLink(link.toSave(src, trg));
     }
   };
 
