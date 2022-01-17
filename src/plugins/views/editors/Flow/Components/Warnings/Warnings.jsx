@@ -69,7 +69,7 @@ class Warnings extends Component {
 
   createSnacks = () => {
     const { warnings, classes, className } = this.props;
-    const children = warnings.map((warning, index) => {
+    return warnings.map((warning, index) => {
       const { type, message } = warning;
       const Icon = variantIcon[type];
       const html = warning.html ? warning.html : () => {};
@@ -88,7 +88,6 @@ class Warnings extends Component {
         />
       );
     });
-    return children;
   };
 
   render() {

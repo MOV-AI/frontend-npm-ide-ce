@@ -5,7 +5,7 @@ import GraphValidator from "./GraphValidator";
 import { InvalidLink } from "../../Components/Links/Errors";
 import { FLOW_VIEW_MODE } from "../../Constants/constants";
 import { shouldUpdateExposedPorts } from "./Utils";
-import { messages } from "../Api/Messages";
+//import { messages } from "../Api/Messages";
 import _debounce from "lodash/debounce";
 import { NODE_TYPES } from "./constants";
 import Factory from "../../Components/Nodes/Factory";
@@ -29,12 +29,12 @@ export default class Graph {
    *                                                                                      */
   //========================================================================================
 
-  nodes = new Map(); // node_name : {obj: node_instance, links: []}
-  links = new Map(); // link_id : link_instance
+  nodes = new Map(); // <node name> : {obj: <node instance>, links: []}
+  links = new Map(); // linkId : <link instance>
   exposedPorts = {};
   selectedNodes = [];
   selectedLink = null;
-  temp_node = null;
+  tempNode = null;
   warnings = [];
   warningsVisibility = true;
   validator = new GraphValidator(this);
@@ -122,8 +122,8 @@ export default class Graph {
    */
   loadLinks(links) {
     const _links = links || {};
-    Object.keys(_links).forEach(link_id => {
-      this.addLink({ name: link_id, ..._links[link_id] });
+    Object.keys(_links).forEach(linkId => {
+      this.addLink({ name: linkId, ..._links[linkId] });
     });
     this.removeLinksModal();
     return this;
@@ -133,26 +133,26 @@ export default class Graph {
    * @private
    */
   removeLinksModal = () => {
-    const readOnly = this.mInterface.readOnly;
-    const title = t("Invalid links found");
-    const message = readOnly
-      ? t("Fix not available in view only mode.")
-      : t("Do you want to fix this?");
+    // const readOnly = this.mInterface.readOnly;
+    // const title = t("Invalid links found");
+    // const message = readOnly
+    //   ? t("Fix not available in view only mode.")
+    //   : t("Do you want to fix this?");
 
-    if (this.invalidLinks.length > 0) {
-      // MasterComponent.confirmAlert(
-      //   title,
-      //   message,
-      //   readOnly ? () => {} : this._getRemoveInvalidLinks(),
-      //   () => {},
-      //   t("Fix"),
-      //   "primary",
-      //   t("Cancel"),
-      //   "secondary",
-      //   [],
-      //   readOnly
-      // );
-    }
+    // if (this.invalidLinks.length > 0) {
+    //   MasterComponent.confirmAlert(
+    //     title,
+    //     message,
+    //     readOnly ? () => {} : this._getRemoveInvalidLinks(),
+    //     () => {},
+    //     t("Fix"),
+    //     "primary",
+    //     t("Cancel"),
+    //     "secondary",
+    //     [],
+    //     readOnly
+    //   );
+    // }
     return this;
   };
 
@@ -160,9 +160,9 @@ export default class Graph {
    * @private
    */
   getRemoveInvalidLinks = () => () => {
-    const msg = messages();
-    const positiveMsg = msg.onDeleteInvLinkSuccess;
-    const negativeMsg = msg.onDeleteInvLinkFail;
+    // const msg = messages();
+    // const positiveMsg = msg.onDeleteInvLinkSuccess;
+    // const negativeMsg = msg.onDeleteInvLinkFail;
     const { api } = this.mInterface;
     let areLinksDeleted = true;
     this.invalidLinks.forEach(({ id }) =>
@@ -185,49 +185,49 @@ export default class Graph {
    * @returns this graph instance
    */
   invalidContainerParamModal = invalidContainerParams => {
-    const title = t("Sub-flows with invalid parameters");
-    let message =
-      t("The parameters of the sub-flow should come from the flow template.") +
-      t(
-        "The following sub-flows contains custom parameters that are not present on its template:"
-      );
+    //const title = t("Sub-flows with invalid parameters");
+    // let message =
+    //   t("The parameters of the sub-flow should come from the flow template.") +
+    //   t(
+    //     "The following sub-flows contains custom parameters that are not present on its template:"
+    //   );
 
-    invalidContainerParams.forEach(containerId => {
-      message += "\n  " + containerId;
-    });
+    // invalidContainerParams.forEach(containerId => {
+    //   message += "\n  " + containerId;
+    // });
 
-    message +=
-      "\n\n" +
-      t(
-        "To fix it, you can either remove the custom parameter on the sub-flow or add the parameter on the template."
-      );
+    // message +=
+    //   "\n\n" +
+    //   t(
+    //     "To fix it, you can either remove the custom parameter on the sub-flow or add the parameter on the template."
+    //   );
 
-    if (invalidContainerParams.length > 0) {
-      // MasterComponent.confirmAlert(
-      //   title,
-      //   message,
-      //   () => {},
-      //   () => {},
-      //   "",
-      //   "",
-      //   "Ok",
-      //   "secondary",
-      //   [],
-      //   true,
-      //   true
-      // );
-    }
+    // if (invalidContainerParams.length > 0) {
+    //   MasterComponent.confirmAlert(
+    //     title,
+    //     message,
+    //     () => {},
+    //     () => {},
+    //     "",
+    //     "",
+    //     "Ok",
+    //     "secondary",
+    //     [],
+    //     true,
+    //     true
+    //   );
+    // }
     return this;
   };
 
   /**
    * @private
    */
-  loadExposedPorts = (exposed_ports, update_all) => {
+  loadExposedPorts = (exposedPorts, updateAll) => {
     const updates = shouldUpdateExposedPorts(
       this.exposedPorts,
-      exposed_ports,
-      update_all
+      exposedPorts,
+      updateAll
     );
 
     updates.forEach(obj => {
@@ -238,7 +238,7 @@ export default class Graph {
             `${t("Exposed port: node")} ${obj.node} ${t("not found")}`
           );
     });
-    this.exposedPorts = exposed_ports;
+    this.exposedPorts = exposedPorts;
     return this;
   };
 
@@ -253,18 +253,18 @@ export default class Graph {
   /**
    * @private
    */
-  updateContainersWithTemplate = template_name => {
+  updateContainersWithTemplate = templateName => {
     const containers = [...this.nodes]
       .filter(([id, node]) => node.obj.data.type === "Container")
       .map(([id, node]) => node.obj);
-    // update container with template_name
+    // update container with templateName
     containers.forEach(subFlow => {
-      const container = this.flows.getFlow(subFlow.template_name);
+      const container = this.flows.getFlow(subFlow.templateName);
       const containerNodes = container?.NodeInst || {};
       const hasTemplate = Object.values(containerNodes).filter(
-        el => el.Template === template_name
+        el => el.Template === templateName
       ).length;
-      if (hasTemplate) subFlow.onTemplateUpdate(subFlow.template_name);
+      if (hasTemplate) subFlow.onTemplateUpdate(subFlow.templateName);
     });
   };
 
@@ -368,7 +368,7 @@ export default class Graph {
 
   /**
    * updateNode is called when the subscriber gets changes
-   *  if node_id is not yet part of the graph means we are
+   *  if noId is not yet part of the graph means we are
    *  getting a new node
    *
    * @param {string} nodeId node's unique id
@@ -397,8 +397,8 @@ export default class Graph {
     }
   };
 
-  updateExposedPorts = exposed_ports => {
-    this.loadExposedPorts(exposed_ports);
+  updateExposedPorts = exposedPorts => {
+    this.loadExposedPorts(exposedPorts);
   };
 
   addStartNode = () => {
@@ -436,7 +436,7 @@ export default class Graph {
     const link = this.links.get(data.name);
     if (link) {
       // TODO: rename fn in BaseLink
-      link.update_data({ Dependency: data.Dependency });
+      link.updateData({ Dependency: data.Dependency });
       return;
     }
 
@@ -504,7 +504,7 @@ export default class Graph {
       this.links.delete(linkId);
     });
 
-    // remove links_to_delete from array with links in nodes
+    // remove linksToDelete from array with links in nodes
     Array.from(this.nodes.entries()).forEach(entry => {
       // entry: [key, value]
       // value: {obj: <node instance>, links: <[]>}
@@ -546,9 +546,9 @@ export default class Graph {
   };
 
   nodeStatusUpdated(nodes) {
-    Object.keys(nodes).forEach(node_name => {
-      const status = nodes[node_name];
-      const node = this.nodes.get(node_name);
+    Object.keys(nodes).forEach(nodeName => {
+      const status = nodes[nodeName];
+      const node = this.nodes.get(nodeName);
       if (node)
         node.obj.status = [1, true, "true"].includes(status) ? true : false;
     });
@@ -556,7 +556,6 @@ export default class Graph {
 
   reset() {
     // Reset all selected nodes
-    console.log("RESET");
     this.nodes.forEach(node => {
       node.obj.selected = false;
     });

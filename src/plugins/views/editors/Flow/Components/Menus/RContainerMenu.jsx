@@ -8,9 +8,15 @@ import ParamModal from "../../../NodeEditor/KeyValueTable/ParamModal/ParamModal2
 import lodash from "lodash";
 import RestApi from "../../Core/Api/RestApi";
 import TableKeyValue from "./TableKeyValue";
-import { MasterDB, Document } from "@mov-ai/mov-fe-lib-core";
+import { Document } from "@mov-ai/mov-fe-lib-core";
 import { withTranslation } from "react-i18next";
 import { replaceStringToPyBool } from "../../../NodeEditor/utils/Utils";
+
+// TO REMOVE
+const MasterDB = {
+  subscribe: () => {},
+  unsubscribe: () => {}
+};
 
 class RContainerMenu extends Component {
   // parameter default object

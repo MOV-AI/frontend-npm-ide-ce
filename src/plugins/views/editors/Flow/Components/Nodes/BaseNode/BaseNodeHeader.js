@@ -23,13 +23,12 @@ class BaseNodeHeader {
    * @returns
    */
   render() {
-    const parsed_text = this.parse_text();
+    const parsedText = this.parseText();
 
     this.object = d3
       .create("svg:text")
       .attr("x", this.x)
-      //.attr("y", -(parsed_text.length * this.dy + this.y))
-      .attr("y", this.y - parsed_text.length * this.dy)
+      .attr("y", this.y - parsedText.length * this.dy)
       .attr("fill", this.color)
       .attr("stroke-width", 0)
       .attr("class", this.unselectable ? "unselectable" : "")
@@ -39,7 +38,7 @@ class BaseNodeHeader {
 
     this.object
       .selectAll("tspan")
-      .data(parsed_text)
+      .data(parsedText)
       .enter()
       .append("tspan")
       .style("text-anchor", "middle")
@@ -59,7 +58,7 @@ class BaseNodeHeader {
     return this.object.node();
   }
 
-  parse_text() {
+  parseText() {
     let text = [];
     try {
       text = this.text.split("_");

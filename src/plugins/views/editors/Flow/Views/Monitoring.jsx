@@ -103,7 +103,7 @@ class Monitoring extends Component {
     });
 
     this.interface.mode.default.onEnter.subscribe(data => {
-      if (data && data.event === "_onMouseDown") return;
+      if (data && data.event === "onMouseDown") return;
       this.props.onNodeSelected(null);
     });
 

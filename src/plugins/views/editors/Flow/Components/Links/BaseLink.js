@@ -1,8 +1,6 @@
 import * as d3 from "d3";
-import lodash from "lodash";
+import { baseLinkStyles } from "./styles";
 import { generatePathPoints } from "./generatePathPoints";
-
-import { BaseLinkStyles } from "./BaseLinkStyles";
 import { isLinkeable } from "../Nodes/BaseNode/PortValidator";
 
 class BaseLinkStruct {
@@ -52,12 +50,20 @@ class BaseLinkStruct {
       : this._styleTransparent();
   }
 
-  _calculatePath = (method = undefined) => {
-    this.path_points = generatePathPoints(this.src, this.trg, method);
+  /**
+   * @private
+   */
+  calculatePath = method => {
+    this.pathPoints = generatePathPoints(this.src, this.trg, method);
     return this;
   };
 
-  _calculateLine = path_points => {
+  /**
+   * @private
+   * @param {*} pathPoints
+   * @returns
+   */
+  calculateLine = pathPoints => {
     return d3
       .line()
       .curve(d3.curveBasis)
@@ -66,7 +72,7 @@ class BaseLinkStruct {
       })
       .y(function (d2) {
         return d2.y;
-      })(path_points);
+      })(pathPoints);
   };
 }
 
@@ -76,19 +82,26 @@ export default class BaseLink extends BaseLinkStruct {
     this.object = null;
     this.onLinkErrorMouseOver = onLinkErrorMouseOver;
 
-    this._initialize();
+    this.initialize();
   }
 
-  _initialize = () => {
-    this._calculatePath()._renderPath()._addEvents();
+  /**
+   * @private
+   */
+  initialize = () => {
+    this.calculatePath().renderPath().addEvents();
   };
 
   destroy = () => {
     this.object.remove();
   };
 
-  _renderPath = () => {
-    const path_points = this.path_points;
+  /**
+   * @private
+   * @returns {BaseLink}
+   */
+  renderPath = () => {
+    const { pathPoints } = this;
     this.object = d3
       .create("svg")
       .attr("id", `path-${this.canvas.containerId}-${this.data.id}`)
@@ -110,47 +123,47 @@ export default class BaseLink extends BaseLinkStruct {
       .append("path")
       .attr("class", "nodeLink")
       .attr("d", () => {
-        return this._calculateLine(path_points);
+        return this.calculateLine(pathPoints);
       })
-      //.attr("points", d => d.points)
-      /*.attr("stroke-dasharray", d => {
-        if (d.tempLink) {
-          return "3, 3";
-        }
-        return null;
-      })*/
       .attr("stroke", this.style.stroke.default)
       .attr("stroke-width", this.style.stroke.width)
-      //.attr("fill", "transparent")
       .attr("pointer-events", "visibleStroke")
       .attr("fill-opacity", "0");
-    // link shadows disabled bc horizontal links are hidden
-    /*.attr(
-        "filter",
-        `url(#${this.canvas.type}-${this.canvas.uid}-link-shadow-${this.data.id}`
-      );*/
 
     return this;
   };
 
-  _addEvents = () => {
+  /**
+   * @private
+   * @returns {BaseLink}
+   */
+  addEvents = () => {
     this.path
-      .on("mouseover", () => this._eventsOn(this._onMouseOver))
-      .on("mouseout", () => this._eventsOn(this._onMouseOut))
-      .on("click", () => this._eventsOn(this._onClick))
-      .on("contextmenu", () => this._eventsOn(this._onContextMenu));
+      .on("mouseover", () => this.eventsOn(this.onMouseOver))
+      .on("mouseout", () => this.eventsOn(this.onMouseOut))
+      .on("click", () => this.eventsOn(this.onClick))
+      .on("contextmenu", () => this.eventsOn(this.onContextMenu));
     return this;
   };
 
-  _refreshPath = () => {
-    const path_points = this.path_points;
+  /**
+   * @private
+   * @returns {BaseLink}
+   */
+  refreshPath = () => {
+    const { pathPoints } = this;
     this.object.select("path").attr("d", () => {
-      return this._calculateLine(path_points);
+      return this.calculateLine(pathPoints);
     });
     return this;
   };
 
-  _eventsOn = (fn, availableInReadOnly = true) => {
+  /**
+   * @private
+   * @param {*} fn
+   * @param {*} availableInReadOnly
+   */
+  eventsOn = (fn, availableInReadOnly = true) => {
     d3.event.preventDefault();
     d3.event.stopPropagation();
 
@@ -159,26 +172,34 @@ export default class BaseLink extends BaseLinkStruct {
   };
 
   /**
+   * @private
    * Fade out other links (keeping only this link active)
    */
-  _fadeOtherLinks = () => {
+  fadeOtherLinks = () => {
     this.canvas.events.next({ name: "onMouseOver", type: "Link", data: this });
   };
 
   /**
+   * @private
    * Remove fade from other links (let all links active)
    */
-  _removeLinksFade = () => {
+  removeLinksFade = () => {
     this.canvas.events.next({ name: "onMouseOut", type: "Link", data: this });
   };
 
-  _styleMouseOver = () => {
+  /**
+   * @private
+   */
+  styleMouseOver = () => {
     this.path
       .attr("stroke", this.style.stroke.over)
       .attr("marker-mid", `url(#${this.canvas.containerId}-markerselected)`);
   };
 
-  _styleMouseOut = () => {
+  /**
+   * @private
+   */
+  styleMouseOut = () => {
     this.path
       .attr(
         "stroke",
@@ -188,19 +209,23 @@ export default class BaseLink extends BaseLinkStruct {
   };
 
   /**
+   * @private
    * Style to fade link out
    */
-  _styleTransparent() {
+  styleTransparent() {
     const opacity = this.transparent === true ? 0.2 : 1;
     this.path.attr("opacity", opacity);
   }
 
-  _onMouseOver = () => {
+  /**
+   * @private
+   */
+  onMouseOver = () => {
     if (this.canvas.mode.current.id === "default") {
-      this._styleMouseOver();
+      this.styleMouseOver();
     }
     // Fade out other links
-    if (!this.canvas.selectedLink) this._fadeOtherLinks();
+    if (!this.canvas.selectedLink) this.fadeOtherLinks();
     // show error tooltip (if any)
     if (this.error) {
       const message = this.error.message;
@@ -215,32 +240,42 @@ export default class BaseLink extends BaseLinkStruct {
     }
   };
 
-  _onMouseOut = () => {
+  /**
+   * @private
+   */
+  onMouseOut = () => {
     if (!this._isSelected) {
-      this._styleMouseOut();
+      this.styleMouseOut();
     }
     // Remove fade out from other links
-    if (!this.canvas.selectedLink) this._removeLinksFade();
+    if (!this.canvas.selectedLink) this.removeLinksFade();
     // hide tooltip
     if (this.error)
       this.onLinkErrorMouseOver({ link: this.data, mouseover: false }, "Link");
   };
 
-  _onClick = () => {
+  /**
+   * @private
+   * @returns
+   */
+  onClick = () => {
     if (d3.event.shiftKey) return;
 
     this.canvas.events.next({ name: "onClick", type: "Link", data: this });
     this.onSelected(!this._isSelected);
   };
 
-  _onContextMenu = () => {
+  /**
+   * @private
+   */
+  onContextMenu = () => {
     this.canvas.setMode(
       "linkCtxMenu",
       {
         event: d3.event,
-        link_id: this.data.id, //this.data has the link_id
+        linkId: this.data.id, //this.data has the linkId
         ...this.data,
-        link_type: lodash.get(this.src, "data.message", "Default")
+        linkType: this.src.data?.message ?? "_default"
       },
       true
     );
@@ -255,13 +290,8 @@ export default class BaseLink extends BaseLinkStruct {
   }
 
   get style() {
-    const type = lodash.get(this.src, "data.message", "Default");
-    const out = lodash.get(
-      BaseLinkStyles,
-      type,
-      lodash.get(BaseLinkStyles, "Default")
-    );
-    return out;
+    const type = this.src.data?.message;
+    return baseLinkStyles[type] ?? baseLinkStyles._default;
   }
 
   get readOnly() {
@@ -275,26 +305,26 @@ export default class BaseLink extends BaseLinkStruct {
 
   onSelected = selected => {
     this._isSelected = selected;
-    if (selected) this._styleMouseOver();
+    if (selected) this.styleMouseOver();
     else {
-      this._styleMouseOut();
-      this._removeLinksFade();
+      this.styleMouseOut();
+      this.removeLinksFade();
     }
   };
 
   update = (src, trg) => {
     this.src = src || this.src;
     this.trg = trg || this.trg;
-    this._calculatePath()._refreshPath();
+    this.calculatePath().refreshPath();
   };
 
-  update_data = data => {
+  updateData = data => {
     this.data = { ...this.data, ...data };
   };
 
-  update_error = error => {
+  updateError = error => {
     this.error = error;
-    this._styleMouseOut();
+    this.styleMouseOut();
   };
 
   /**
@@ -302,78 +332,78 @@ export default class BaseLink extends BaseLinkStruct {
    * @param {object} src - port instance
    * @param {object} trg - port instance
    */
-  is_valid = (src, trg, links) => {
-    return (
-      isLinkeable(src.data, trg.data) && !this.link_exists(src, trg, links)
-    );
+  isValid = (src, trg, links) => {
+    return isLinkeable(src.data, trg.data) && !this.linkExists(src, trg, links);
   };
 
-  ports_any = (src, trg) => {
+  portsAny = (src, trg) => {
     return [src, trg].some(port => port.acceptsAny);
   };
 
   /**
    * Given 2 ports, returns the source and the target
-   * @param {obj} port_a port instance
-   * @param {obj} port_b port instance
+   * @param {obj} portA port instance
+   * @param {obj} portB port instance
    *
-   * @returns {array} [src_port_instance, trg_port_instance]
+   * @returns {array} [<src port instance>, <trg port instance>]
    */
-  get_src_trg = (port_a, port_b) => {
+  getSrcTrg = (portA, portB) => {
     return ["Out", "In"].map(type => {
-      return [port_a, port_b].find(port => port.type === type);
+      return [portA, portB].find(port => port.type === type);
     });
   };
 
   /**
    * Check if a link between the same ports already exists
-   * @param {obj} port_a port instance a
-   * @param {obj} port_b port instance b
-   * @param {Map} links  {link_id, link_instance}
+   * @param {obj} portA port instance a
+   * @param {obj} portB port instance b
+   * @param {Map} links  {linkId, <link instance>}
    *
    * @returns {bool} link exists
    */
-  link_exists = (port_a, port_b, links) => {
-    // no links to test
-    if (!links) return false;
-    let output = false;
-    const [src, trg] = this.get_src_trg(port_a, port_b);
+  linkExists = (portA, portB, links) => {
+    const [src, trg] = this.getSrcTrg(portA, portB);
     const _links = links.values();
 
-    let next_link = _links.next();
-    while (!next_link.done) {
-      const link = next_link.value.data;
-      const from_cond = [
+    let nextLink = _links.next();
+    while (!nextLink.done) {
+      const link = nextLink.value.data;
+
+      const fromCond = [
         `${link.sourceNode}/${link.sourcePort}`,
         `${src.node.data.id}/${src.data.name}`
       ];
-      const to_cond = [
+      const toCond = [
         `${link.targetNode}/${link.targetPort}`,
         `${trg.node.data.id}/${trg.data.name}`
       ];
-      output = [from_cond, to_cond].every(cond => cond[0] === cond[1]);
-      if (output) break;
 
-      next_link = _links.next();
+      if ([fromCond, toCond].every(cond => cond[0] === cond[1])) {
+        return true;
+      }
+
+      nextLink = _links.next();
     }
-    return output;
+
+    return false;
   };
 
   /**
    * Given 2 ports, constructs the object to save the link
-   * @param {obj} port_a port instance a
-   * @param {obj} port_b port instance b
+   * @param {obj} portA port instance a
+   * @param {obj} portB port instance b
    */
-  to_save(port_a, port_b) {
+  toSave(portA, portB) {
     // find which port is the source and the target
-    const [src, trg] = this.get_src_trg(port_a, port_b);
+    const [src, trg] = this.getSrcTrg(portA, portB);
+
     return {
-      source_node: src.node.data.id,
-      source_type: src.node._template.template.Type || "",
-      source_port: src.data.name,
-      target_node: trg.node.data.id,
-      target_type: trg.node._template.template.Type || "",
-      target_port: trg.data.name
+      sourceNode: src.node.data.id,
+      sourceType: src.node._template.template.Type ?? "",
+      sourcePort: src.data.name,
+      targetNode: trg.node.data.id,
+      targetType: trg.node._template.template.Type ?? "",
+      targetPort: trg.data.name
     };
   }
 
@@ -402,20 +432,20 @@ export default class BaseLink extends BaseLinkStruct {
    */
   static getNodePort = plink => {
     // source and target nodes can have the following format
-    // nodes : <node_name>
+    // nodes : <node name>
     // flows : <container1>__<nodeInContainer> or <Container2>__<Container1>__<nodeNameInContainer1>
 
-    const [_node, ...r_port] = plink.split("/");
+    const [_node, ...rPort] = plink.split("/");
     const nodes = _node.split("__");
-    const [node, ...l_port] = nodes;
+    const [node, ...lPort] = nodes;
 
     const subFlow = values => {
       return values.length ? values.join("__").concat("/") : "";
     };
 
-    const fn_port = (x, y) => subFlow(x).concat(y.join("/"));
+    const fnPort = (x, y) => subFlow(x).concat(y.join("/"));
 
     // [node, port]
-    return [node, fn_port(l_port, r_port), nodes];
+    return [node, fnPort(lPort, rPort), nodes];
   };
 }

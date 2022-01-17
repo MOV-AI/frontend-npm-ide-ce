@@ -102,7 +102,7 @@ class BaseFlow extends Component {
     });
 
     this.mainInterface.mode.default.onEnter.subscribe(data => {
-      if (data && data.event === "_onMouseDown") return;
+      if (data && data.event === "onMouseDown") return;
       this.props.onNodeSelected(null);
       this.props.onLinkSelected(null);
     });
@@ -210,7 +210,7 @@ class BaseFlow extends Component {
   };
 
   deleteLink = data => {
-    this.mainInterface.api.deleteLink(data.link_id);
+    this.mainInterface.api.deleteLink(data.linkId);
   };
 
   debugTopic = data => {

@@ -1,4 +1,4 @@
-import { convert_visualization } from "../Utils";
+import { convertVisualization } from "../Utils";
 import { maxMovingPixels } from "../../../Constants/constants";
 
 export default class BaseNodeStruct {
@@ -10,7 +10,7 @@ export default class BaseNodeStruct {
       name: data.NodeLabel, // standard way to get NodeLabel, StateLabel, ContainerLabel
       Parameter: data.Parameter || {},
       Template: data.Template || "",
-      Visualization: convert_visualization(data.Visualization) || [50, 50],
+      Visualization: convertVisualization(data.Visualization) || [50, 50],
       NodeLayers: data.NodeLayers || [],
       Persistent: data.Persistent,
       Remappable: data.Remappable,
@@ -18,27 +18,17 @@ export default class BaseNodeStruct {
       type: "NodeInst",
       model: "Node"
     };
-    // these keys are required i norder to maintain the node valid
-    // if any is deleted then the node must be deleted
-    this.required_keys = ["NodeLabel", "Template", "Visualization"];
-    this.no_reload_required = [
-      "Dummy",
-      "Persistent",
-      "NodeLayers",
-      "Parameter",
-      "CmdLine",
-      "EnvVar",
-      "Visualization"
-    ];
-    this._template = null;
-    this._ports = new Map();
-    this._header = null;
-    this.min_size = { h: 50, w: 50 };
-    this.padding = { x: 25, y: 3 };
-    this.ports_spacing = 10;
-    this._status = false; // true -> running: flase -> stopped
-    this._visible = true;
   }
+
+  // these keys are required in order to maintain the node valid
+  // if any is deleted then the node must be deleted
+  requiredKeys = ["NodeLabel", "Template", "Visualization"];
+
+  _ports = new Map();
+  minSize = { h: 50, w: 50 };
+  padding = { x: 25, y: 3 };
+  portsSpacing = 10;
+  _visible = true;
 
   get posX() {
     const x = this.data.Visualization[0];
@@ -51,17 +41,19 @@ export default class BaseNodeStruct {
   }
 
   get width() {
-    return this.min_size.w;
+    return this.minSize.w;
   }
 
   get height() {
-    return Math.max(this.getHeight(), this.min_size.h);
+    return Math.max(this.getHeight(), this.minSize.h);
   }
 
   get center() {
+    const { posX, posY, width, height } = this;
+
     return {
-      xCenter: this.posX + this.width / 2,
-      yCenter: this.posY + this.height / 2
+      xCenter: posX + width / 2,
+      yCenter: posY + height / 2
     };
   }
 
@@ -78,14 +70,17 @@ export default class BaseNodeStruct {
    * Calculate max number of ports between in and out
    * Returns: {max, in, out}
    */
-  // TODO: Refactor
   getNrOfPorts = () => {
-    let ctr_in = 0;
-    let ctr_out = 0;
+    const output = { In: 0, Out: 0 };
+
     this._ports.forEach(port => {
-      port.type === "In" ? (ctr_in += 1) : (ctr_out += 1);
+      output[port.type] += 1;
     });
-    return { Max: Math.max(ctr_in, ctr_out), In: ctr_in, Out: ctr_out };
+
+    return {
+      Max: Math.max(output.In, output.Out),
+      ...output
+    };
   };
 
   /**
@@ -93,10 +88,12 @@ export default class BaseNodeStruct {
    * Calculate node height based on the max nr. of ports per type
    */
   getHeight = () => {
-    const min_ports = 5;
-    const min_height = this.ports_spacing * min_ports;
-    const height = (this.getNrOfPorts().Max + 1) * this.ports_spacing;
-    return Math.max(min_height, height);
+    const { portsSpacing } = this;
+    const minPorts = 5;
+    const minHeight = portsSpacing * minPorts;
+    const height = (this.getNrOfPorts().Max + 1) * portsSpacing;
+
+    return Math.max(minHeight, height);
   };
 
   /**
@@ -105,26 +102,22 @@ export default class BaseNodeStruct {
    * @returns
    */
   getPortsInitialPos = type => {
-    const nr_of_ports = this.getNrOfPorts();
-    const Height = this.getHeight();
-    const init_x = {
-      In: this.padding.x / 2,
-      Out: this.width + this.padding.x / 2
+    const nrOfPorts = this.getNrOfPorts();
+    const height = this.getHeight();
+    const { width, portsSpacing } = this;
+    const { x, y } = this.padding;
+
+    const initX = {
+      In: x / 2,
+      Out: width + x / 2
     };
 
-    const init_y =
-      Height / 2 -
-      ((nr_of_ports[type] - 1) * this.ports_spacing) / 2 +
-      this.padding.y;
+    const initY = height / 2 - ((nrOfPorts[type] - 1) * portsSpacing) / 2 + y;
 
-    return [init_x[type], init_y];
+    return [initX[type], initY];
   };
 
-  getPortPos = port_name => {
-    const port = this._ports.get(port_name);
-    if (port) {
-      return port.position;
-    }
-    return undefined;
+  getPortPos = portName => {
+    return this._ports.get(portName)?.position;
   };
 }

@@ -51,7 +51,7 @@ class TreeNode extends BaseNode {
       this.headerPos.x,
       this.headerPos.y,
       this.name,
-      this.template_name,
+      this.templateName,
       this._type
     );
 
@@ -119,9 +119,9 @@ class TreeNode extends BaseNode {
   };
 
   /**
-   * @override _updatePosition: Update x and y position of main svg object
+   * @override updatePosition: Update x and y position of main svg object
    */
-  _updatePosition(x = 0, y = 0) {
+  updatePosition(x = 0, y = 0) {
     this.object.attr("x", x).attr("y", y);
   }
 
@@ -130,7 +130,7 @@ class TreeNode extends BaseNode {
    */
   update = (addLinks = false) => {
     this.addPorts((node, data, events) => new TreeNodePort(node, data, events))
-      ._renderPortsHeader()
+      .renderPortsHeader()
       .renderStatus();
 
     if (addLinks) this.updateLinks();
@@ -158,13 +158,14 @@ class TreeNode extends BaseNode {
   }
 
   /**
+   * @private
    * Get x and y lines to draw belong lines
    * @param {Object} offset: {x, y}
    * @param {Object} childPos: {x, y}
    * @param {Object} parentPos: {x, y}
    * @returns {Array} Containing x and y lines with x1,y1,x2,y2 points to be drawn
    */
-  _getBelongLinePoints(offset, childPos, parentPos) {
+  getBelongLinePoints(offset, childPos, parentPos) {
     const lineY = {
       x1: parentPos.x - offset.x + this.width / 2 + this.padding.x / 2,
       y1: parentPos.y - offset.y + this.height + this.padding.y,
@@ -181,21 +182,22 @@ class TreeNode extends BaseNode {
   }
 
   /**
-   * _getRootNode: Get root node (initial flow node)
+   * getRootNode: Get root node (initial flow node)
    *  - Iterate recursively on the tree to find the node without parent (root node)
    *
    * @param {TreeNode} node: Can be any node in the tree
    */
-  _getRootNode(node = this) {
+  getRootNode(node = this) {
     if (!node.parent) return node;
-    return this._getRootNode(node.parent);
+    return this.getRootNode(node.parent);
   }
 
   /**
+   * @private
    * Find TreeNode that is rendered right before this node
    * @returns {TreeNode} Tree node object right before this node
    */
-  _getPreviousBrother() {
+  getPreviousBrother() {
     let previousBrother = this.parent;
     const siblings = [...this.parent.children.keys()];
     siblings.forEach((sibling, index) => {
@@ -211,12 +213,13 @@ class TreeNode extends BaseNode {
   }
 
   /**
+   * @private
    * Get position to be used as reference to draw belong lines
    * @param {*} parentPos : Object containing x/y position of parent node
    * @param {*} previousBrotherPos : Object containing x/y position of previous sibling node
    * @returns {Object} Position {x : number, y: number}
    */
-  _getReferenceOriginPos = (parentPos, previousBrotherPos) => {
+  getReferenceOriginPos = (parentPos, previousBrotherPos) => {
     // To avoid lines drawn on top of others
     previousBrotherPos.x -= this.width / 2;
     previousBrotherPos.y += this.padding.x - this.padding.y - this.height;
@@ -240,7 +243,7 @@ class TreeNode extends BaseNode {
   };
 
   /**
-   * @override _eventsOn - call the function if the node's events are enabled
+   * @override eventsOn - call the function if the node's events are enabled
    *  - Exclude events on external elements that aren't inside the main node rect
    *
    * @param {function} fn function to call if the node's events are enabled
@@ -370,12 +373,12 @@ class TreeNode extends BaseNode {
    * onTemplateUpdate - on template update event handler
    * templates only change when edited while in redis
    *
-   * @param {string} template_name node's template name
+   * @param {string} templateName node's template name
    */
-  onTemplateUpdate = template_name => {
-    if (template_name !== this.template_name) return; //not my template
+  onTemplateUpdate = templateName => {
+    if (templateName !== this.templateName) return; //not my template
     this._template = undefined;
-    this._update(true);
+    this.update(true);
   };
 
   /**
@@ -498,15 +501,15 @@ class TreeNode extends BaseNode {
   drawBelongLine() {
     if (!this.parent) return;
     if (this._belongLine) this._belongLine.remove();
-    const rootNode = this._getRootNode();
-    const previousBrother = this._getPreviousBrother();
+    const rootNode = this.getRootNode();
+    const previousBrother = this.getPreviousBrother();
     const previousBrotherPos = this.getAbsolutePosition(previousBrother);
     const childPos = this.getAbsolutePosition(this);
     const offset = this.getAbsolutePosition(rootNode);
     const parentPos = this.getAbsolutePosition(this.parent);
-    const refPos = this._getReferenceOriginPos(parentPos, previousBrotherPos);
+    const refPos = this.getReferenceOriginPos(parentPos, previousBrotherPos);
     // Build line
-    const [lineX, lineY] = this._getBelongLinePoints(offset, childPos, refPos);
+    const [lineX, lineY] = this.getBelongLinePoints(offset, childPos, refPos);
     // Create lines container
     this._belongLine = d3
       .create("svg")

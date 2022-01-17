@@ -6,7 +6,7 @@ import lodash from "lodash";
  * @param {obj}  Visualization object or [x,y]
  * @return {array}  Array with position x,y
  */
-export function convert_visualization(obj) {
+export function convertVisualization(obj) {
   if (!obj) return undefined;
   let output;
 
@@ -21,7 +21,7 @@ export function convert_visualization(obj) {
   return output;
 }
 
-export function convert_type_css(template, isMiniature = false) {
+export function convertTypeCss(template, isMiniature = false) {
   const clickableAreaClass = !isMiniature ? " node-inst-click-area" : "";
   const templateClass = template.Type?.replace(/\//g, "-") ?? "unknown";
   const css = template.Label === "start" ? "start" : templateClass;
@@ -29,7 +29,7 @@ export function convert_type_css(template, isMiniature = false) {
   return `${css}${clickableAreaClass}`;
 }
 
-export function port_convert_type_css(message) {
+export function portConvertTypeCss(message) {
   return `port-default port-${message.replace(/\//g, "-")}`.toLowerCase();
 }
 

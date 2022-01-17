@@ -51,7 +51,7 @@ class ContainerNode extends BaseContainerNode {
     }
 
     try {
-      // ExposedPorts {node_template: {node_name: <[ports]>}, }
+      // ExposedPorts {<node template>: {<node name>: <[ports]>}, }
       const expTemplates = lodash.get(this._template, "ExposedPorts", {}) || {};
 
       const flattenData = [];
@@ -93,21 +93,21 @@ class ContainerNode extends BaseContainerNode {
           Object.keys(portsInst).forEach(type => {
             if (!["in", "out"].includes(type.toLocaleLowerCase())) return;
 
-            const port_obj = lodash.get(portsInst, type, {});
+            const portObj = lodash.get(portsInst, type, {});
 
-            Object.keys(port_obj).forEach(port => {
+            Object.keys(portObj).forEach(port => {
               if (portInstName.search(`${portsInst.PortsLabel}/${port}`) < 0)
                 return;
 
               const data = lodash.get(portsInst, `${type}`, {});
 
-              Object.keys(data).forEach(port_name => {
+              Object.keys(data).forEach(portName => {
                 const portData = {
                   name: `${nodeName}${joinStr}${portInstName}`,
                   type: type,
                   Template: lodash.get(portsInst, `Template`, ""),
                   origin: nodeName,
-                  ...data[port_name]
+                  ...data[portName]
                 };
 
                 // create port instance
@@ -148,7 +148,9 @@ class ContainerNode extends BaseContainerNode {
   /**
    * @private
    * getPort - tries to recursively get the port instance data
-   * @param {string} portName port name  ex.: port_name/port_type or node_inst_name/port_name/port_type or flow_name__node_inst_name/port_name/port_type
+   * @param {string} portName port name  ex.:
+   *  <port name>/<port type> or <node inst name>/<port name>/<port type>
+   *  or <flow name>__<node inst name>/<port name>/<port type>
    * @param {string} docPath the path of the document
    * @param {boolean} isSubFlow true if the doc is a sub-flow; false if it is a node template
    *

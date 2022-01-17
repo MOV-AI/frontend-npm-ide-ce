@@ -1,6 +1,7 @@
 import { flattenObject } from "../../Utils/utils";
 
 /**
+ * // TODO: review
  * shouldUpdateExposedPorts - compare exposed ports states and update only what changed
  * @param {object} _prevState exposed ports previous state
  * @param {object} _newState exposed ports new state
@@ -14,10 +15,10 @@ const shouldUpdateExposedPorts = (_prevState, _newState, updatedAll) => {
 
   /**
    * transform path and exposed value in object
-   * @param {string} obj "<template_name>.<node_name>.<array_index>.<port_name>"
+   * @param {string} obj "<template name>.<node name>.<array index>.<port name>"
    * @param {bool} value port is exposed
    *
-   * @returns {object} {node: <node_name>, port: <port_name>, value: <exposed>}
+   * @returns {object} {node: <node name>, port: <port name>, value: <exposed>}
    */
   const format = (obj, value) => {
     const [, node, , port] = obj.split(separator);

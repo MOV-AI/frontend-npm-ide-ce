@@ -24,7 +24,7 @@ class TemporaryNode extends BaseNode {
   /**
    * @override
    */
-  _onClick = () => {
+  onClick = () => {
     // Empty on purpose
   };
 }

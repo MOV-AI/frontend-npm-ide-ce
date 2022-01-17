@@ -11,8 +11,13 @@ import LinkIcon from "@material-ui/icons/Link";
 import Box from "@material-ui/core/Box";
 
 import MasterComponent from "../../../MasterComponent/MasterComponent";
-import { MasterDB } from "@mov-ai/mov-fe-lib-core";
 import { withTranslation } from "react-i18next";
+
+// TO REMOVE
+const MasterDB = {
+  delete: () => {},
+  post: () => {}
+};
 
 const styles = theme => ({});
 

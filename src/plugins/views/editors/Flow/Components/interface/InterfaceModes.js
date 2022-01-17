@@ -159,8 +159,8 @@ export default class InterfaceModes {
   setMode = (modeId, props, force) => {
     console.log("event", modeId, props, force);
     // invalid mode
-    const next_mode = this[modeId];
-    if (!next_mode) throw new Error("Invalid mode", modeId);
+    const nextMode = this[modeId];
+    if (!nextMode) throw new Error("Invalid mode", modeId);
 
     if (this.mode.id === modeId && !force) return;
 
@@ -169,9 +169,9 @@ export default class InterfaceModes {
     this.previousMode.onExit.next(this.previousMode.props);
 
     // trigger onEnter
-    this.mode = next_mode;
-    next_mode.props = props;
-    next_mode.onEnter.next(props);
+    this.mode = nextMode;
+    nextMode.props = props;
+    nextMode.onEnter.next(props);
   };
 
   setPrevious = () => {

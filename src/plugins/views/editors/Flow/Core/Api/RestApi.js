@@ -1,10 +1,14 @@
 import _cloneDeep from "lodash/cloneDeep";
 import _set from "lodash/set";
 import _get from "lodash/get";
-// import MasterComponent from "../../../MasterComponent/MasterComponent";
 import { MasterDB, Document, Rest } from "@mov-ai/mov-fe-lib-core";
-import { Clipboard } from "../../toRemove/api/Clipboard";
+import { Clipboard } from "./Clipboard";
 import { messages } from "./Messages";
+
+// T Remove
+const MasterComponent = {
+  alert: (message, alertType = "info") => console[alertType](message)
+};
 
 export default class RestApi {
   constructor(uid, type, model = "Flow") {
@@ -12,9 +16,7 @@ export default class RestApi {
     this.type = type;
     this.extension = ".flo";
     this.dataModel = model || "Flow";
-    //this.nodeInstLbl = "NodeInst";
-    //this.containerLbl = "Container";
-    this.default_cf = "backend.FlowAPI"; // default cloud function
+    this.defaultCf = "backend.FlowAPI"; // default cloud function
     this.db = MasterDB;
     this.messages = messages();
     this._clipboard = {};
@@ -28,7 +30,7 @@ export default class RestApi {
     Clipboard.write(this.type, value);
   }
 
-  _callCloudFunction(args, fn, message, cloudFn = this.default_cf) {
+  _callCloudFunction(args, fn, message, cloudFn = this.defaultCf) {
     Rest.cloudFunction({
       cbName: cloudFn,
       func: fn,
@@ -36,9 +38,9 @@ export default class RestApi {
     }).then(res => {
       if (res.success === false) {
         const errorMsg = res.error ? res.error : res.statusText;
-        // MasterComponent.alert(errorMsg, "error");
+        MasterComponent.alert(errorMsg, "error");
       } else {
-        // MasterComponent.alert(message);
+        MasterComponent.alert(message);
       }
     });
   }
@@ -104,7 +106,9 @@ export default class RestApi {
     // hack to be removed after reviewing the cb backend.flowapi
 
     const _data = { data: { args: { ...data, ...flow }, func: "setNodePos" } };
-    MasterDB.execute(this.default_cf, _data, data => {});
+    MasterDB.execute(this.defaultCf, _data, () => {
+      // On purpose
+    });
   };
 
   copyNode = (name, position, nodeToCopy) => {
@@ -142,7 +146,7 @@ export default class RestApi {
    * @param {*} linkId: Integer
    * @param {*} retLambda: Function: res => {}
    */
-  deleteLink = (linkId, retLambda = DEFAULT_DELETE_RET_FUNC) => {
+  deleteLink = (linkId, retLambda = defaultDeleteRetFunc) => {
     const args = {
       scope: this.dataModel,
       flowId: this.uid,
@@ -170,44 +174,44 @@ export default class RestApi {
       args
     }).then(res => {
       if (res.success === false) {
-        // MasterComponent.alert(res.error, "error");
+        MasterComponent.alert(res.error, "error");
       } else {
-        // MasterComponent.alert(`Link successfully created.`);
+        MasterComponent.alert(`Link successfully created.`);
       }
     });
   };
 
   toggleExposed = data => {
     try {
-      const exposed_ports = _cloneDeep(data.exposedPorts);
-      const node_name = data.port.node.data.id;
-      const exposed_template_name = data.port.node.getExposedName(
+      const exposedPorts = _cloneDeep(data.exposedPorts);
+      const nodeName = data.port.node.data.id;
+      const exposedTemplateName = data.port.node.getExposedName(
         data.port.data.origin
       );
-      const path = [exposed_template_name, node_name];
+      const path = [exposedTemplateName, nodeName];
 
       _set(
-        exposed_ports,
+        exposedPorts,
         path,
         this.updateExposedPorts(
-          _get(exposed_ports, path, []),
+          _get(exposedPorts, path, []),
           data.port.data.name,
           !data.port.data.exposed
         )
       );
 
-      const new_exposed_ports = this.rmEmpties(exposed_ports);
+      const newExposedPorts = this.rmEmpties(exposedPorts);
 
-      if (Object.keys(new_exposed_ports).length > 0) {
+      if (Object.keys(newExposedPorts).length > 0) {
         MasterDB.post(
           this.dataModel,
           this.uid,
           { ExposedPorts: "*" },
-          { ...new_exposed_ports },
-          (data, res) =>
+          { ...newExposedPorts },
+          (cbData, res) =>
             RestApi.parseResponse(
               this.messages[this.type].onExposedPortsSuccess,
-              data,
+              cbData,
               res
             )
         );
@@ -215,10 +219,10 @@ export default class RestApi {
         MasterDB.delete(
           this.dataModel,
           this.uid,
-          (data, res) =>
+          (cbData, res) =>
             RestApi.parseResponse(
               this.messages[this.type].onExposedPortsSuccess,
-              data,
+              cbData,
               res
             ),
           { ExposedPorts: "" }
@@ -229,10 +233,10 @@ export default class RestApi {
     }
   };
 
-  updateExposedPorts = (ports, port_name, value) => {
+  updateExposedPorts = (ports, portName, value) => {
     return value
-      ? [...new Set([...ports, port_name])]
-      : ports.filter(port => port !== port_name);
+      ? [...new Set([...ports, portName])]
+      : ports.filter(port => port !== portName);
   };
 
   rmEmpties = _ports => {
@@ -240,8 +244,8 @@ export default class RestApi {
     Object.keys(_ports).forEach(template => {
       const nodes = _ports[template];
       Object.keys(nodes).forEach(node => {
-        const n_ports = nodes[node];
-        if (n_ports.length > 0) _set(ports, [template, node], n_ports);
+        const nPorts = nodes[node];
+        if (nPorts.length > 0) _set(ports, [template, node], nPorts);
       });
     });
     return ports;
@@ -249,36 +253,42 @@ export default class RestApi {
 
   static parseResponse = (message, data, res) => {
     const defaultError = "Server could not be reached";
-    let msgType = "success";
+    let msgType = "info";
     let msg = message;
 
     if ((data?.success || false) === false) {
       msgType = "error";
       msg = res?.statusText || defaultError;
     }
-    // MasterComponent.alert(msg, msgType);
+    MasterComponent.alert(msg, msgType);
   };
 
   /**
    * saveFlowDescription - save the description value of a flow
-   * @param {string} flow_id flow id
+   * @param {string} flowId flow id
    * @param {string} value description value
    */
-  static saveFlowDescription(flow_id, value) {
-    MasterDB.put("Flow", flow_id, { Description: value }, (data, res) =>
+  static saveFlowDescription(flowId, value) {
+    MasterDB.put("Flow", flowId, { Description: value }, (data, res) =>
       RestApi.parseResponse(messages().flow.onSaveSuccess, data, res)
     );
   }
 
   /**
    * saveFlowParam create/update a flow parameter
-   * @param {string} flow_id flow id
+   * @param {string} flowId flow id
    * @param {object} param parameter to save {dataName: <value>, dataInfo: <value>, dataValue: <value>}
    */
-  static saveFlowParam(flow_id, param, onSave = () => {}) {
+  static saveFlowParam(
+    flowId,
+    param,
+    onSave = () => {
+      // On purpose
+    }
+  ) {
     MasterDB.put(
       "Flow",
-      flow_id,
+      flowId,
       {
         Parameter: {
           [param.dataName]: {
@@ -311,13 +321,20 @@ export default class RestApi {
   ) {
     // If parameter value is empty then delete the param in the DB
     if (modal.dataValue === "") {
-      MasterDB.delete("Flow", flowId, (data, res) => {}, {
-        NodeInst: {
-          [nodeInst]: {
-            [type]: { [modal.dataName]: { Value: "", Type: "" } }
+      MasterDB.delete(
+        "Flow",
+        flowId,
+        () => {
+          // On purpsoe
+        },
+        {
+          NodeInst: {
+            [nodeInst]: {
+              [type]: { [modal.dataName]: { Value: "", Type: "" } }
+            }
           }
         }
-      });
+      );
     } else {
       MasterDB.post(
         "Flow",
@@ -333,21 +350,28 @@ export default class RestApi {
 
   /**
    * saveNodeInstInfo create/update a flow parameter
-   * @param {string} flow_id flow id
+   * @param {string} flowId flow id
    * @param {string} nodeInst node instance name
    * @param {object} data in either true or false
    * @param {object} type either Dummy or Permistent
    */
-  static saveNodeInstInfo(flow_id, nodeInst, data, type) {
+  static saveNodeInstInfo(flowId, nodeInst, data, type) {
     // If user selected the empty option then delete the key in the DB
     if (data === "") {
-      MasterDB.delete("Flow", flow_id, (data, res) => {}, {
-        NodeInst: {
-          [nodeInst]: {
-            [type]: ""
+      MasterDB.delete(
+        "Flow",
+        flowId,
+        () => {
+          // On purpose
+        },
+        {
+          NodeInst: {
+            [nodeInst]: {
+              [type]: ""
+            }
           }
         }
-      });
+      );
     } else {
       // convert slector value to boolean values, "true" -> true
       let value = undefined;
@@ -356,11 +380,11 @@ export default class RestApi {
       } catch (error) {}
       MasterDB.post(
         "Flow",
-        flow_id, // name
+        flowId, // name
         { NodeInst: { [nodeInst]: type } }, // key
         { [type]: value }, // data
-        (data, res) => {
-          RestApi.parseResponse(messages().flow.onSaveSuccess, data, res);
+        (cbdata, res) => {
+          RestApi.parseResponse(messages().flow.onSaveSuccess, cbdata, res);
         }
       );
     }
@@ -368,14 +392,14 @@ export default class RestApi {
 
   /**
    * saveNodeInstLayers create/update a NodeLayers
-   * @param {string} flow_id flow id
+   * @param {string} flowId flow id
    * @param {string} nodeInst node instance name
    * @param {object} data in either true or false
    */
-  static saveNodeInstLayers(flow_id, nodeInst, data) {
+  static saveNodeInstLayers(flowId, nodeInst, data) {
     MasterDB.put(
       "Flow",
-      flow_id, // name
+      flowId, // name
       {
         NodeInst: {
           [nodeInst]: {
@@ -383,25 +407,25 @@ export default class RestApi {
           }
         }
       },
-      (data, res) => {
-        RestApi.parseResponse(messages().flow.onSaveSuccess, data, res);
+      (cbData, res) => {
+        RestApi.parseResponse(messages().flow.onSaveSuccess, cbData, res);
       }
     );
   }
 
   /**
    * saveContainerParam create/update a flow parameter
-   * @param {string} flow_id flow id
-   * @param {string} container_id container id
+   * @param {string} flowId flow id
+   * @param {string} containerId container id
    * @param {object} param parameter to save {dataName: <value>, dataInfo: <value>, dataValue: <value>}
    */
-  static saveContainerParam(flow_id, container_id, param) {
+  static saveContainerParam(flowId, containerId, param) {
     MasterDB.put(
       "Flow",
-      flow_id,
+      flowId,
       {
         Container: {
-          [container_id]: {
+          [containerId]: {
             Parameter: {
               [param.dataName]: {
                 Value: param.dataValue,
@@ -418,13 +442,19 @@ export default class RestApi {
 
   /**
    * deleteFlowParam delete a flow parameter
-   * @param {string} flow_id flow id
+   * @param {string} flowId flow id
    * @param {object} param parameter to delete
    */
-  static deleteFlowParam(flow_id, param, onDelete = () => {}) {
+  static deleteFlowParam(
+    flowId,
+    param,
+    onDelete = () => {
+      // On purpose
+    }
+  ) {
     MasterDB.delete(
       "Flow",
-      flow_id,
+      flowId,
       (data, res) => {
         if (data?.success) onDelete();
         RestApi.parseResponse(
@@ -443,19 +473,21 @@ export default class RestApi {
 
   /**
    * deleteContainerParam delete a flow parameter
-   * @param {string} flow_id flow id
-   * @param {string} container_id container id
+   * @param {string} flowId flow id
+   * @param {string} containerId container id
    * @param {object} param parameter to delete
    */
   static deleteContainerParam(
-    flow_id,
-    container_id,
+    flowId,
+    containerId,
     param,
-    onDelete = () => {}
+    onDelete = () => {
+      // On purpose
+    }
   ) {
     MasterDB.delete(
       "Flow",
-      flow_id,
+      flowId,
       (data, res) => {
         if (data?.success) onDelete();
         RestApi.parseResponse(
@@ -466,7 +498,7 @@ export default class RestApi {
       },
       {
         Container: {
-          [container_id]: {
+          [containerId]: {
             Parameter: {
               [param]: "*"
             }
@@ -477,10 +509,8 @@ export default class RestApi {
   }
 }
 
-const DEFAULT_DELETE_RET_FUNC = res => {
-  if (res.success === false) {
-    // MasterComponent.alert(res.error, "error");
-  } else {
-    // MasterComponent.alert(`Link successfully deleted.`);
-  }
+const defaultDeleteRetFunc = res => {
+  res.success === false
+    ? MasterComponent.alert(res.error, "error")
+    : MasterComponent.alert(`Link successfully deleted.`);
 };

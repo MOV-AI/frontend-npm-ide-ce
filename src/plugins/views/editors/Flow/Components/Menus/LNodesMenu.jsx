@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
-import MasterDB from "../../Core/Api/MasterDB";
 import PropTypes from "prop-types";
 import BasicWorkspaceTree from "../../../_shared/BasicWorkspaceTree/BasicWorkspaceTree";
 import _get from "lodash/get";
@@ -8,6 +7,12 @@ import _set from "lodash/set";
 import _cloneDeep from "lodash/cloneDeep";
 
 const styles = theme => ({});
+
+// TO REMOVE
+const MasterDB = {
+  subscribe: () => {},
+  unsubscribe: () => {}
+};
 
 class LNodesMenu extends Component {
   state = {

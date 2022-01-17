@@ -13,7 +13,7 @@ import Select from "@material-ui/core/Select";
 import { withStyles } from "@material-ui/core/styles";
 import Layers from "@material-ui/icons/Layers";
 import LayersClear from "@material-ui/icons/LayersClear";
-import { Document, MasterDB } from "@mov-ai/mov-fe-lib-core";
+import { Document } from "@mov-ai/mov-fe-lib-core";
 import _get from "lodash/get";
 import _isEqual from "lodash/isEqual";
 import PropTypes from "prop-types";
@@ -27,6 +27,12 @@ import { Item } from "../../../_shared/ListItems/Item";
 import { mergeDeep } from "../../../_shared/Utils/Utils";
 import RestApi from "../../Core/Api/RestApi";
 import TableKeyValue from "./TableKeyValue";
+
+// TO REMOVE
+const MasterDB = {
+  subscribe: () => {},
+  unsubscribe: () => {}
+};
 
 const styles = theme => ({
   checkedLayer: {

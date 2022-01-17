@@ -1,11 +1,10 @@
 import * as d3 from "d3";
-import _get from "lodash/get";
 
-import { port_convert_type_css } from "../Utils";
+import { portConvertTypeCss } from "../Utils";
 import { isLinkeable } from "./PortValidator";
 
 // ports that accept links with any other message type
-const ports_any = ["movai_msgs/Any"];
+const portsAny = ["movai_msgs/Any"];
 
 class BasePortStruct {
   constructor(
@@ -34,10 +33,10 @@ class BasePortStruct {
       exposed: Exposed || false,
       origin: origin || null
     };
-    this.requiredKeys = ["message", "template"];
-    this._selected = false;
-    this._visible = true;
   }
+
+  requiredKeys = ["message", "template"];
+  _visible = true;
 
   get visible() {
     return this._visible;
@@ -52,29 +51,30 @@ class BasePort extends BasePortStruct {
   constructor(node, data, events) {
     super(node, data);
     this.events = events;
-    this.object = null;
-    this.color = "white";
-    this.radius = 10;
-    this.cx = 0;
-    this.cy = 0;
-    this.links = new Map();
     this.css = {
       default: () =>
-        `${port_convert_type_css(this.data.message)} ${this.cssExposed}`,
+        `${portConvertTypeCss(this.data.message)} ${this.cssExposed}`,
       unlinkeable: () => `port-disabled ${this.cssExposed}`,
       //mouseover: ()=>`port-over ${this.cssExposed}`,
       opacity: { default: 1, unlinkeable: 0.5 }
     };
-    this.linking = false;
 
-    this._render()._addEvents();
+    this.render().addEvents();
   }
+
+  object = null;
+  color = "white";
+  radius = 10;
+  cx = 0;
+  cy = 0;
+  links = new Map();
+  linking = false;
 
   destroy = () => {
     this.object.remove();
   };
 
-  _render() {
+  render() {
     const css = this.css.default();
     this.object = d3
       .create("svg:circle")
@@ -87,20 +87,20 @@ class BasePort extends BasePortStruct {
     return this;
   }
 
-  _addEvents() {
-    this.object.on("click", () => this._eventsOn(this._onClick, false));
+  addEvents() {
+    this.object.on("click", () => this.eventsOn(this.onClick, false));
     this.object.on("mouseenter", () => {
-      this._eventsOn(this._onMouseOver);
+      this.eventsOn(this.onMouseOver);
     });
     this.object.on("mouseout", () => {
-      this._eventsOn(this._onMouseOut);
+      this.eventsOn(this.onMouseOut);
     });
-    this.object.on("contextmenu", () => this._eventsOn(this._onContext));
+    this.object.on("contextmenu", () => this.eventsOn(this.onContext));
 
     return this;
   }
 
-  _eventsOn = (fn, availableInReadOnly = true) => {
+  eventsOn = (fn, availableInReadOnly = true) => {
     d3.event.preventDefault();
     d3.event.stopPropagation();
 
@@ -108,20 +108,20 @@ class BasePort extends BasePortStruct {
     if (visible && (availableInReadOnly || !readOnly)) fn();
   };
 
-  _onClick = () => {
-    _get(this.events, "onClick", () => {})(this);
+  onClick = () => {
+    this.callFunction(this.events.onClick, this);
   };
 
-  _onMouseOver = () => {
-    _get(this.events, "onMouseOver", () => {})(this);
+  onMouseOver = () => {
+    this.callFunction(this.events.onMouseOver, this);
   };
 
-  _onMouseOut = () => {
-    _get(this.events, "onMouseOut", () => {})(this);
+  onMouseOut = () => {
+    this.callFunction(this.events.onMouseOut, this);
   };
 
-  _onContext = () => {
-    _get(this.events, "onContext", () => {})(this);
+  onContext = () => {
+    this.callFunction(this.events.onContext, this);
   };
 
   get el() {
@@ -133,9 +133,9 @@ class BasePort extends BasePortStruct {
   }
 
   get position() {
-    const node = this.node;
+    const { node, data } = this;
     return {
-      data: this.data,
+      data,
       nodeSize: { height: node.height, width: node.width },
       center: node.center,
       x: node.posX + this.cx,
@@ -147,7 +147,7 @@ class BasePort extends BasePortStruct {
    * Check if port message accepts links from ports with different message type
    */
   get acceptsAny() {
-    return ports_any.includes(this.data.message);
+    return portsAny.includes(this.data.message);
   }
 
   get exposed() {
@@ -167,8 +167,8 @@ class BasePort extends BasePortStruct {
     return this.data.exposed ? "port-exposed" : "";
   }
 
-  checkAny = (msg_PA, msg_PB) => {
-    return [msg_PA, msg_PB].some(msg => ports_any.includes(msg));
+  checkAny = (msgPA, msgPB) => {
+    return [msgPA, msgPB].some(msg => portsAny.includes(msg));
   };
 
   setPosition(x = this.cx, y = this.cy, r = this.radius) {
@@ -187,8 +187,8 @@ class BasePort extends BasePortStruct {
    * @param {string} data port data; undefined sets default opacity
    */
   setLinking = data => {
-    const message = _get(data, "message", this.data.message);
-    const type = _get(data, "type", "");
+    const message = data.message ?? this.data.message;
+    const type = data.type ?? "";
 
     this.linking = message;
 
@@ -203,10 +203,18 @@ class BasePort extends BasePortStruct {
    * Delete node if true
    */
   isValid = () => {
-    return !this.requiredKeys.some(key => {
-      // null: key was already deleted
-      return [null, undefined, ""].includes(this.data[key]);
-    });
+    return this.requiredKeys.every(key => !!this.data[key]);
+  };
+
+  /**
+   * Call a function
+   * @param  {...any} args : First argument should be a function and the other
+   *  arguments will be passed to it
+   * @returns The output of the called function
+   */
+  callFunction = (...args) => {
+    const [fn, ...otherArgs] = args;
+    if (typeof fn === "function") return fn(...otherArgs);
   };
 
   static parsePortname = name => {

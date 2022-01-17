@@ -2,7 +2,7 @@ import BaseNode from "./BaseNode/BaseNode";
 
 class ClassicNode extends BaseNode {
   constructor(args) {
-    super({ ...args, type: "node" });
+    super({ ...args });
 
     this.init();
   }

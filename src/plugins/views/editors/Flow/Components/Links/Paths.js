@@ -32,7 +32,7 @@ export const relaxPath = (src, trg) => {
 
 export const orthoPath = (src, trg) => {
   const sigma = 0.5;
-  const MIN_DISTANCE_TO_LINE = 50;
+  const minDistanceToLine = 50;
   const { x0, x1, xSc, xTc, srcSize, trgSize, isLink } = getBaseVars(src, trg);
 
   if (isFeedBack(xSc, xTc, isLink)) return simplePotentialV(src, trg);
@@ -40,7 +40,7 @@ export const orthoPath = (src, trg) => {
   let x01 = handleInOut(x0, srcSize, src);
   let x11 = handleInOut(x1, trgSize, trg);
 
-  if (x01.sub(x11).length() < MIN_DISTANCE_TO_LINE) return linePath(src, trg);
+  if (x01.sub(x11).length() < minDistanceToLine) return linePath(src, trg);
   const dx0 = x01.sub(x0);
   const dx01 = x11.sub(x01);
   const dot0 = dx0.dot(dx01);
@@ -76,7 +76,7 @@ export const orthoPath = (src, trg) => {
   const ans = [x0, x01];
   const dx2 = x12.sub(x02);
   const isEntangled =
-    dx2.dot(ortho0) < 0 && dx2.length() < 4 * MIN_DISTANCE_TO_LINE;
+    dx2.dot(ortho0) < 0 && dx2.length() < 4 * minDistanceToLine;
   if (dot0 < 0 && !isEntangled) ans.push(x02);
   if (dot1 < 0 && !isEntangled) ans.push(x12);
   ans.push(x11, x1);

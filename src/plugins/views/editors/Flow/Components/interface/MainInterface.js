@@ -5,12 +5,8 @@ import Canvas from "./canvas";
 import Graph from "../../Core/Graph/GraphBase";
 import InterfaceModes from "./InterfaceModes";
 import RestApi from "../../Core/Api/RestApi";
-import { maxMovingPixels, FLOW_VIEW_MODE } from "../../Constants/constants";
+import { maxMovingPixels } from "../../Constants/constants";
 import { EVT_NAMES } from "../../events";
-
-import GraphValidator from "../../Core/Graph/GraphValidator";
-// to remove
-const t = v => v;
 
 const TYPES = {
   NODE: "NodeInst",
@@ -51,7 +47,7 @@ export default class MainInterface {
    *                                                                                      */
   //========================================================================================
 
-  state_sub = new BehaviorSubject(0);
+  stateSub = new BehaviorSubject(0);
   mode = new InterfaceModes(this);
   api = null;
   canvas = null;
@@ -166,11 +162,12 @@ export default class MainInterface {
   };
 
   addLink = () => {
-    const { src, trg, link, to_create } = this.mode.linking.props;
+    console.log("debug add link");
+    const { src, trg, link, toCreate } = this.mode.linking.props;
 
-    if (to_create && link.is_valid(src, trg, this.graph.links)) {
+    if (toCreate && link.isValid(src, trg, this.graph.links)) {
       // TODO: add link
-      this.api.addLink(link.to_save(src, trg));
+      this.api.addLink(link.toSave(src, trg));
     }
   };
 
@@ -274,25 +271,25 @@ export default class MainInterface {
   };
 
   onStateChange = fn => {
-    return this.state_sub.subscribe(fn);
+    return this.stateSub.subscribe(fn);
   };
 
   onLayersChange = layers => {
-    const visited_links = new Set();
+    const visitedLinks = new Set();
 
     this.graph.nodes.forEach(node => {
       node.obj.onLayersChange(layers);
 
-      node.links.forEach(link_id => {
-        const link = this.graph.links.get(link_id);
+      node.links.forEach(linkId => {
+        const link = this.graph.links.get(linkId);
         if (
           // link was not yet visited or is visible
-          !visited_links.has(link_id) ||
+          !visitedLinks.has(linkId) ||
           link.visible
         ) {
           link.visibility = node.obj.visible;
         }
-        visited_links.add(link_id);
+        visitedLinks.add(linkId);
       });
     });
   };

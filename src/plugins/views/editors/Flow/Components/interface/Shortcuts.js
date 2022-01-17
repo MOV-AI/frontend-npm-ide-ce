@@ -107,7 +107,7 @@ export default class Shortcuts {
   onDeleteSelectedNodes = () => {
     const { selectedNodes, mainInterface } = this;
     if (selectedNodes.length > 1) {
-      const copySelectedNodes = [...selectedNodes];
+      //const copySelectedNodes = [...selectedNodes];
       // MasterComponent.confirmAlert(
       //   "Delete nodes",
       //   `Are you sure you want to delete all selected nodes?`,
@@ -132,7 +132,7 @@ export default class Shortcuts {
   };
 
   onDeleteSelectedLink = () => {
-    const { selectedLink, mainInterface } = this;
+    const { selectedLink } = this;
     if (selectedLink) {
       // MasterComponent.confirmAlert(
       //   "Delete link",
@@ -225,8 +225,8 @@ export default class Shortcuts {
 
   onRandomFocus = () => {
     const entries = Array.from(this.mainInterface.graph.nodes.entries());
-    const r_index = Math.floor(Math.random() * entries.length);
-    const node = entries[r_index][1].obj;
+    const rIndex = Math.floor(Math.random() * entries.length);
+    const node = entries[rIndex][1].obj;
     const svg = this.canvas.getSvg();
     const { xCenter, yCenter } = node.center;
     this.mainInterface.setMode("default", null, true);

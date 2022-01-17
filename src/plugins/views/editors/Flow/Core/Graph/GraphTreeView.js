@@ -79,7 +79,7 @@ class GraphTreeView extends GraphBase {
       this._loadNodes(flow.Container, "Container", parent)
     ]).then(() => {
       // Add parent children to canvas
-      this._loadLinks(flow.Links, parent)._update(parent);
+      this._loadLinks(flow.Links, parent).update(parent);
       // Update children position
       if (!flow.Container || Object.keys(flow.Container).length === 0) {
         setTimeout(() => {
@@ -155,21 +155,19 @@ class GraphTreeView extends GraphBase {
    * @param {*} robotStatus
    */
   nodeStatusUpdated(nodes, robotStatus) {
-    Object.keys(nodes).forEach(node_name => {
-      const status = nodes[node_name];
-      this._updateNodeStatus(node_name, status);
+    Object.keys(nodes).forEach(nodeName => {
+      const status = nodes[nodeName];
+      this._updateNodeStatus(nodeName, status);
     });
   }
 
   /**
    * @override onTemplateUpdate
-   * is called when the subscriber gets changes
    *
-   * @param {string} node_id node's unique id
-   * @param {obj} data node's data that has changed
+   * @param {string} name Template name
    */
-  onTemplateUpdate = template_name => {
-    this._updateTemplates(template_name);
+  onTemplateUpdate = name => {
+    this.updateTemplates(name);
   };
 
   /**
@@ -219,14 +217,14 @@ class GraphTreeView extends GraphBase {
 
   /**
    * @override deleteLinks from GraphBase class
-   * @param {Array} links_to_keep : Array of link ids that should keep
+   * @param {Array} linksToKeep : Array of link ids that should keep
    * @param {String} nodeId : Parent node ID
    */
-  deleteLinks = (links_to_keep, nodeId) => {
+  deleteLinks = (linksToKeep, nodeId) => {
     const parent = this.findNodeById(nodeId);
     const deletedLinks = new Map([...parent.childrenLinks]);
     parent.childrenLinks.forEach(link => {
-      if (links_to_keep.includes(link.id)) deletedLinks.delete(link.id);
+      if (linksToKeep.includes(link.id)) deletedLinks.delete(link.id);
     });
     deletedLinks.forEach(deletedLink => {
       parent.children.forEach(child => {
@@ -237,13 +235,13 @@ class GraphTreeView extends GraphBase {
 
   /**
    * @override updateNode is called when the subscriber gets changes
-   *  if node_id is not yet part of the graph means we are
+   *  if nodeId is not yet part of the graph means we are
    *  getting a new node
    *
-   * @param {string} node_id node's unique id
+   * @param {string} nodeId node's unique id
    * @param {obj} data node's data that has changed
    */
-  updateNode = (event, node_id, data, _type = "NodeInst") => {
+  updateNode = (event, nodeId, data, _type = "NodeInst") => {
     // TODO: Handle changes in nodes from main flow
     return;
   };
@@ -274,18 +272,18 @@ class GraphTreeView extends GraphBase {
   };
 
   /**
-   * _updateTemplates: Update templates of ${template_name}
+   * @private
+   * updateTemplates: Update templates of template
    *
-   * @param {String} template_name
+   * @param {String} templateName
    * @param {TreeNode} node
    */
-  _updateTemplates = (template_name, node = this.rootNode) => {
+  updateTemplates = (templateName, node = this.rootNode) => {
     // Update template with name
-    if (node.template_name === template_name)
-      node.onTemplateUpdate(template_name);
+    if (node.templateName === templateName) node.onTemplateUpdate(templateName);
     // Check all children
     node.children.forEach(child => {
-      this._updateTemplates(template_name, child);
+      this.updateTemplates(templateName, child);
     });
   };
 
@@ -319,8 +317,8 @@ class GraphTreeView extends GraphBase {
    */
   _loadLinks(links, parent) {
     const _links = links || {};
-    Object.keys(_links).forEach(link_id => {
-      const linksData = { name: link_id, ..._links[link_id] };
+    Object.keys(_links).forEach(linkId => {
+      const linksData = { name: linkId, ..._links[linkId] };
       const parsedLink = BaseLink.parseLink(linksData);
       parent.children.forEach(child => {
         this._addLinkToNode(child, parsedLink);
@@ -330,7 +328,7 @@ class GraphTreeView extends GraphBase {
         this._addLinksToChildren(parent, parsedLink);
       }
       // update local link list
-      this.links.set(link_id, { data: parsedLink });
+      this.links.set(linkId, { data: parsedLink });
     });
     return this;
   }
@@ -367,10 +365,10 @@ class GraphTreeView extends GraphBase {
       link.sourceFullPath.includes(childId)
     ) {
       link.sourceTemplatePath = link.sourceFullPath.map(
-        nodeName => this.nodes.get(nodeName)?.obj?.template_name || nodeName
+        nodeName => this.nodes.get(nodeName)?.obj?.templateName || nodeName
       );
       link.targetTemplatePath = link.targetFullPath.map(
-        nodeName => this.nodes.get(nodeName)?.obj?.template_name || nodeName
+        nodeName => this.nodes.get(nodeName)?.obj?.templateName || nodeName
       );
       child.addLink(link);
     }
@@ -410,11 +408,12 @@ class GraphTreeView extends GraphBase {
   }
 
   /**
-   * @override _update : Add to canvas all children of parent node
+   * @private
+   * @override update : Add to canvas all children of parent node
    *
    * @param {TreeContainerNode} parent
    */
-  _update(parent) {
+  update(parent) {
     // Order children
     parent.children = new Map(
       [...parent.children.entries()].sort(([_aKey, a], [_bKey, b]) => {

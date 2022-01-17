@@ -1,5 +1,5 @@
-export const BaseLinkStyles = {
-  Default: {
+export const baseLinkStyles = {
+  _default: {
     stroke: {
       default: "white",
       over: "red",
@@ -8,9 +8,9 @@ export const BaseLinkStyles = {
     }
   },
   get "movai_msgs/Transition"() {
-    return { stroke: { ...this.Default.stroke, default: "#a74165" } };
+    return { stroke: { ...this._default.stroke, default: "#a74165" } };
   },
   get "movai_msgs/Nodelet"() {
-    return { ...this.Default };
+    return { ...this._default };
   }
 };

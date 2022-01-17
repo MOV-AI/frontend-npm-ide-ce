@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import lodash from "lodash";
-import { convert_visualization, convert_type_css } from "../Utils";
+import { convertVisualization, convertTypeCss } from "../Utils";
 
 import { flattenObject } from "../../../Utils/utils";
 
@@ -25,7 +25,7 @@ const MINI = {
 /**
  * class representing a node
  * BaseNode should not be used directly
- * Extend it and call _init in the constructor
+ * Extend it and call init in the constructor
  */
 class BaseNode extends BaseNodeStruct {
   /**
@@ -33,18 +33,21 @@ class BaseNode extends BaseNodeStruct {
    * @param {object} canvas the canvas where the node will be added
    * @param {object} node node's data
    * @param {object} events functions to be called on node's events
+   * @param {object} template the template data
    */
-  constructor({ canvas, node, events, _type, template }) {
+  constructor({ canvas, node, events, template }) {
     super(node);
     this.canvas = canvas;
     this.events = events;
-    this._type = _type || "node";
-    this.object = null;
-    this._selected = false;
-    this._drag = { handler: null, debounce: null, delta: { x: 0, y: 0 } };
-    this.db_click_timeout = null;
     this._template = template;
   }
+
+  dbClickTimeout = null;
+  object = null;
+  _drag = { handler: null, debounce: null, delta: { x: 0, y: 0 } };
+  _header = null;
+  _selected = false;
+  _status = false; // true -> running: flase -> stopped
 
   /**
    * initialize the node element
@@ -92,7 +95,7 @@ class BaseNode extends BaseNodeStruct {
       .attr("ry", 6)
       .attr("width", this.width)
       .attr("height", this.height)
-      .attr("class", convert_type_css(this._template))
+      .attr("class", convertTypeCss(this._template))
       .attr("filter", `url(#shadow-${this.canvas.containerId})`)
       .attr("stroke", stroke.color.default)
       .attr("stroke-width", stroke.width.default);
@@ -122,13 +125,13 @@ class BaseNode extends BaseNodeStruct {
    */
   addEvents = () => {
     // node event listeners
-    this.object.on("click", () => this.eventsOn(this._onClick));
-    this.object.on("mousedown", () => this.eventsOn(this._onMouseDown));
-    this.object.on("mouseenter", () => this.eventsOn(this._onMouseEnter));
-    this.object.on("mouseleave", () => this.eventsOn(this._onMouseLeave));
-    this.object.on("dblclick", () => this.eventsOn(this._onDblClick));
+    this.object.on("click", () => this.eventsOn(this.onClick));
+    this.object.on("mousedown", () => this.eventsOn(this.onMouseDown));
+    this.object.on("mouseenter", () => this.eventsOn(this.onMouseEnter));
+    this.object.on("mouseleave", () => this.eventsOn(this.onMouseLeave));
+    this.object.on("dblclick", () => this.eventsOn(this.onDblClick));
 
-    this.object.on("contextmenu", () => this.eventsOn(this._onContext));
+    this.object.on("contextmenu", () => this.eventsOn(this.onContext));
 
     this.addDrag();
 
@@ -144,9 +147,9 @@ class BaseNode extends BaseNodeStruct {
     // assign drag handler to node object
     this._drag.handler = d3
       .drag()
-      .on("start", () => this.eventsOn(this._onDragStart))
-      .on("end", () => this.eventsOn(this._onDragEnd))
-      .on("drag", () => this.eventsOn(this._onDrag));
+      .on("start", () => this.eventsOn(this.onDragStart))
+      .on("end", () => this.eventsOn(this.onDragEnd))
+      .on("drag", () => this.eventsOn(this.onDrag));
     this._drag.handler(this.object);
     return this;
   };
@@ -258,7 +261,7 @@ class BaseNode extends BaseNodeStruct {
 
           Object.keys(data).forEach(portName => {
             // customize port data for the instance
-            const port_data = {
+            const portData = {
               name: `${portInstName}/${portName}`,
               type: type,
               Template: ports[portInstName]?.Template ?? "",
@@ -266,7 +269,7 @@ class BaseNode extends BaseNodeStruct {
             };
 
             // create port instance
-            const port = builder(this, port_data, portEvents);
+            const port = builder(this, portData, portEvents);
 
             // check if the create port is valid
             if (port.isValid()) {
@@ -289,7 +292,7 @@ class BaseNode extends BaseNodeStruct {
    * renderPorts - render ports. should be called after adding the ports
    */
   renderPorts() {
-    const radius = this.port_size;
+    const radius = this.portSize;
     const position = {
       In: this.getPortsInitialPos("In"),
       Out: this.getPortsInitialPos("Out")
@@ -303,7 +306,7 @@ class BaseNode extends BaseNodeStruct {
       });
 
       // increment ports position
-      position[port.type][1] += this.ports_spacing;
+      position[port.type][1] += this.portsSpacing;
     });
 
     return this;
@@ -326,7 +329,7 @@ class BaseNode extends BaseNodeStruct {
   }
 
   /**
-   * name - returns the name of the node
+   * Returns the name of the node
    *
    * @returns {string} name of the node
    */
@@ -335,12 +338,12 @@ class BaseNode extends BaseNodeStruct {
   }
 
   /**
-   * port_size - returns the port size
+   * Returns the port size
    *
    * @returns {number} port size
    */
-  get port_size() {
-    return this.min_size.w * 0.07;
+  get portSize() {
+    return this.minSize.w * 0.07;
   }
 
   /**
@@ -447,7 +450,7 @@ class BaseNode extends BaseNodeStruct {
   };
 
   /**
-   * _eventsOn - call the function if the node's events are enabled
+   * eventsOn - call the function if the node's events are enabled
    *
    * @param {function} fn function to call if the node's events are enabled
    */
@@ -456,23 +459,25 @@ class BaseNode extends BaseNodeStruct {
   };
 
   /**
-   * _isPort - check if event target element is a node port
+   * @private
+   * Check if event target element is a node port
    *
    * @param {node} target element target of the event to be checked
    */
-  _isPort = target => {
+  isPort = target => {
     const targetElementType = target.nodeName;
     const targetClasses = target.className.baseVal;
     return targetElementType === "circle" && targetClasses.includes("port");
   };
 
   /**
-   * _onMouseDown - on mouse down event
+   * @private
+   * On mouse down event
    *
    */
-  _onMouseDown = () => {
+  onMouseDown = () => {
     // Exit function if click is on port
-    if (this._isPort(d3.event.target)) return;
+    if (this.isPort(d3.event.target)) return;
     // Continue otherwise
     d3.event.stopPropagation();
 
@@ -480,38 +485,41 @@ class BaseNode extends BaseNodeStruct {
     const { shiftKey } = d3.event;
 
     if (!this.selected && !shiftKey) {
-      this.canvas.setMode("default", { event: "_onMouseDown" });
+      this.canvas.setMode("default", { event: "onMouseDown" });
     }
   };
 
   /**
-   * _onMouseEnter - on mouse enter node event
+   * @private
+   * On mouse enter node event
    */
-  _onMouseEnter = () => {
+  onMouseEnter = () => {
     this.canvas.hoveredNode = this;
   };
 
   /**
-   * _onMouseLeave - on mouse leave node event
+   * @private
+   * On mouse leave node event
    */
-  _onMouseLeave = () => {
+  onMouseLeave = () => {
     this.canvas.hoveredNode = null;
   };
 
   /**
-   * _onClick - on click event
+   * @private
+   * onClick - on click event
    *
    */
-  _onClick = () => {
+  onClick = () => {
     d3.event.stopPropagation();
 
     // shift key pressed
     const { shiftKey } = d3.event;
 
     // debounce timeout
-    clearTimeout(this.db_click_timeout);
+    clearTimeout(this.dbClickTimeout);
 
-    this.db_click_timeout = setTimeout(() => {
+    this.dbClickTimeout = setTimeout(() => {
       // toggle node selection
       const selection = !this.selected;
 
@@ -527,25 +535,27 @@ class BaseNode extends BaseNodeStruct {
   };
 
   /**
-   * _onDblClick - double click event
+   * @private
+   * Double click event
    *
    */
-  _onDblClick = () => {
+  onDblClick = () => {
     d3.event.preventDefault();
     d3.event.stopPropagation();
 
     // clear click timeout
-    clearTimeout(this.db_click_timeout);
+    clearTimeout(this.dbClickTimeout);
 
     // set mode to double click
     this.canvas.setMode("onDblClick", { node: this }, true);
   };
 
   /**
-   * _onContext - context event
+   * @private
+   * On context event
    *
    */
-  _onContext = () => {
+  onContext = () => {
     d3.event.preventDefault();
     d3.event.stopPropagation();
 
@@ -554,10 +564,11 @@ class BaseNode extends BaseNodeStruct {
   };
 
   /**
-   * _onDragStart - start dragging node event
+   * @private
+   * On start dragging node event
    *
    */
-  _onDragStart = () => {
+  onDragStart = () => {
     // change the cursor style
     this.object.style("cursor", "move");
 
@@ -566,9 +577,10 @@ class BaseNode extends BaseNodeStruct {
   };
 
   /**
-   * _onDragEnd - stop dragging node event
+   * @private
+   * On stop dragging node event
    */
-  _onDragEnd = () => {
+  onDragEnd = () => {
     // change the cursor style
     this.object.style("cursor", "default");
 
@@ -580,10 +592,11 @@ class BaseNode extends BaseNodeStruct {
   };
 
   /**
-   * _onDrag - while dragging node event
+   * @private
+   * On drag node event
    *
    */
-  _onDrag = () => {
+  onDrag = () => {
     // this will only set the mode once
     // done here to filter from click events
     this.canvas.setMode("drag", this);
@@ -602,18 +615,19 @@ class BaseNode extends BaseNodeStruct {
   };
 
   /**
-   * _updatePosition - update the node position
+   * @private
+   * On update the node position
    *
    */
-  _updatePosition(data) {
+  updatePosition(data) {
     // ignore position update if dragging
     if (this.canvas.mode.current.id === "drag") return;
 
     // keys x and y are received separatly
-    const updated_pos = { ...this.data.Visualization, ...data.Visualization };
+    const updatedPos = { ...this.data.Visualization, ...data.Visualization };
 
     // convert format
-    const _data = { Visualization: convert_visualization(updated_pos) };
+    const _data = { Visualization: convertVisualization(updatedPos) };
 
     // set object new position
     this.data = lodash.merge(this.data, _data);
@@ -627,19 +641,21 @@ class BaseNode extends BaseNodeStruct {
   }
 
   /**
-   * _updateTemplate -
+   * @private
+   * updateTemplate
    */
-  _updateTemplate = () => {
-    this.object.select("rect").attr("class", convert_type_css(this._template));
-    this._update();
+  updateTemplate = () => {
+    this.object.select("rect").attr("class", convertTypeCss(this._template));
+    this.update();
 
     return this;
   };
 
   /**
-   * _update - update graphical representation
+   * @private
+   * Update graphical representation
    */
-  _update = () => {
+  update = () => {
     this.addPorts().renderPorts().updateSize().renderStatus();
 
     return this;
@@ -651,10 +667,10 @@ class BaseNode extends BaseNodeStruct {
    * @param {object} port port object
    */
   onPortClick = port => {
-    const curr_mode = this.canvas.mode.current;
+    const currMode = this.canvas.mode.current;
 
     // skip event if pressing shift while on selectNode mode
-    if (d3.event.shiftKey && curr_mode.id === "selectNode") return;
+    if (d3.event.shiftKey && currMode.id === "selectNode") return;
 
     const actions = {
       // start linking mode if on default mode
@@ -663,7 +679,7 @@ class BaseNode extends BaseNodeStruct {
           src: port,
           link: null,
           trg: null,
-          to_create: false
+          toCreate: false
         });
       },
       selectNode: () => {
@@ -672,23 +688,23 @@ class BaseNode extends BaseNodeStruct {
           src: port,
           link: null,
           trg: null,
-          to_create: false
+          toCreate: false
         });
       },
       // finish linking
       linking: () => {
-        const { src } = curr_mode.props;
+        const { src } = currMode.props;
         // validate here to keep linking if it is not valid
-        if (!curr_mode.props.link.is_valid(src, port)) return;
-        curr_mode.props.trg = port;
-        curr_mode.props.to_create = true;
+        if (!currMode.props.link.isValid(src, port)) return;
+        currMode.props.trg = port;
+        currMode.props.toCreate = true;
         this.canvas.setMode("default");
       }
     };
 
     // call an action
     lodash
-      .get(actions, curr_mode.id, () => {
+      .get(actions, currMode.id, () => {
         console.debug("Default mode required to start linking");
       })
       .call();
@@ -750,7 +766,7 @@ class BaseNode extends BaseNodeStruct {
   onTemplateUpdate = name => {
     if (name !== this.templateName) return; //not my template
     this._template = undefined;
-    this._update();
+    this.update();
   };
 
   /**
@@ -787,7 +803,7 @@ class BaseNode extends BaseNodeStruct {
    */
   update = data => {
     const fn = {
-      Visualization: data => this._updatePosition(data), // Position changes when dragging or when adding a new node
+      Visualization: data => this.updatePosition(data), // Position changes when dragging or when adding a new node
       default: () => {
         lodash.merge(this.data, data);
         this.data.name = this.name;
@@ -795,7 +811,7 @@ class BaseNode extends BaseNodeStruct {
     };
     Object.keys(data).forEach(key => {
       (fn[key] || fn["default"])(data);
-      if (!this.no_reload_required.includes(key)) this.init().addToCanvas();
+      this.init().addToCanvas();
     });
     return true;
   };
@@ -818,7 +834,7 @@ class BaseNode extends BaseNodeStruct {
    * Delete node if true
    */
   isValid = () => {
-    return !this.required_keys.some(key => {
+    return !this.requiredKeys.some(key => {
       // null: key was already deleted
       return this.data[key] === null || !(key in this.data);
     });
@@ -827,22 +843,22 @@ class BaseNode extends BaseNodeStruct {
   /**
    * linking - enable/disable ports linking state
    *
-   * @param {object} port_data port data object, pass undefined to set port to default state
+   * @param {object} portData port data object, pass undefined to set port to default state
    */
-  linking = port_data => {
+  linking = portData => {
     this._ports.forEach(port => {
-      port.setLinking(port_data);
+      port.setLinking(portData);
     });
   };
 
   /**
    * setExposedPort - toggle exposed port value
    *
-   * @param {string} port_name name of the port
+   * @param {string} portName name of the port
    * @param {boolean} value true to set to exposed, false otherwise
    */
-  setExposedPort = (port_name, value) => {
-    const port = this._ports.get(port_name);
+  setExposedPort = (portName, value) => {
+    const port = this._ports.get(portName);
     if (port) port.exposed = value;
   };
 
@@ -889,7 +905,7 @@ class BaseNode extends BaseNodeStruct {
       .attr("ry", 3)
       .attr("width", width)
       .attr("height", height)
-      .attr("class", convert_type_css(template, true))
+      .attr("class", convertTypeCss(template, true))
       .attr("stroke", stroke.color.default)
       .attr("stroke-width", stroke.width.default);
     // Add status

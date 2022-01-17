@@ -64,15 +64,15 @@ class TreeContainerNode extends TreeNode {
   }
 
   /**
-   * @override _getBelongLinePoints
+   * @override getBelongLinePoints
    * @param {Object} offset: {x, y}
    * @param {Object} childPos: {x, y}
    * @param {Object} parentPos: {x, y}
    * @returns {Array} Containing x and y lines with x1,y1,x2,y2 points to be drawn
    */
-  _getBelongLinePoints(offset, childPos, parentPos) {
+  getBelongLinePoints(offset, childPos, parentPos) {
     if (this._renderingMode === RENDERING_MODE.tree)
-      return super._getBelongLinePoints(offset, childPos, parentPos);
+      return super.getBelongLinePoints(offset, childPos, parentPos);
     const lineX = {
       x1: parentPos.x - offset.x + this.width + this.padding.x / 2,
       y1: parentPos.y - offset.y + this.height / 2 + this.padding.y / 2,
@@ -141,12 +141,13 @@ class TreeContainerNode extends TreeNode {
   }
 
   /**
-   * template_name - returns the container's associated flow name
+   * @override
+   * templateName - returns the container's associated flow name
    *
    * @returns {string} the flow name
    */
-  get template_name() {
-    return this.base.template_name;
+  get templateName() {
+    return this.base.templateName;
   }
 
   /**
@@ -173,7 +174,7 @@ class TreeContainerNode extends TreeNode {
     // Unset width/height
     this.object.attr("width", null).attr("height", null);
     // Align and Render child
-    child._updatePosition(-15);
+    child.updatePosition(-15);
     this._collapsableItem.addChild(child);
   }
 

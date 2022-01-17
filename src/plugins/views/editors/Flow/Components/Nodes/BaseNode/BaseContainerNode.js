@@ -1,5 +1,5 @@
 import BaseNode from "./BaseNode";
-import { convert_visualization } from "../Utils";
+import { convertVisualization } from "../Utils";
 
 /**
  * BaseContainerNode: Class containing all base properties and methods
@@ -20,7 +20,7 @@ class BaseContainerNode extends BaseNode {
       ContainerLabel: node.ContainerLabel || "",
       ContainerFlow: node.ContainerFlow || "",
       name: node.ContainerLabel, // standard way to get NodeLabel, StateLabel, ContainerLabel
-      Visualization: convert_visualization(node.Visualization) || [50, 50],
+      Visualization: convertVisualization(node.Visualization) || [50, 50],
       Parameter: node.Parameter || {},
       type: "Container",
       model: "Flow"
@@ -38,7 +38,7 @@ class BaseContainerNode extends BaseNode {
   }
 
   /**
-   * template_name - returns the container's associated flow name
+   * templateName - returns the container's associated flow name
    *
    * @returns {string} the flow name
    */

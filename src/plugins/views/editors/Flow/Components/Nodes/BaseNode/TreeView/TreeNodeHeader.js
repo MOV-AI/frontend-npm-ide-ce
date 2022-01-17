@@ -21,7 +21,7 @@ class TreeNodeHeader extends BaseNodeHeader {
    *  Place node name and template name besides the node rect
    */
   render() {
-    const parsed_text = this.parse_text();
+    const parsedText = this.parseText();
 
     this.object = d3
       .create("svg:text")
@@ -35,7 +35,7 @@ class TreeNodeHeader extends BaseNodeHeader {
 
     this.object
       .selectAll("tspan")
-      .data(parsed_text)
+      .data(parsedText)
       .enter()
       .append("tspan")
       .style("dominant-baseline", "central")
@@ -51,13 +51,11 @@ class TreeNodeHeader extends BaseNodeHeader {
   }
 
   /**
-   * @override parse_text - Parse text
+   * @override parseText - Parse text
    *  Add two lines: Node name and Node template
    */
-  parse_text() {
-    // let text = [this.text, this.template];
-    let text = [this.text];
-    return text;
+  parseText() {
+    return [this.text];
   }
 }
 

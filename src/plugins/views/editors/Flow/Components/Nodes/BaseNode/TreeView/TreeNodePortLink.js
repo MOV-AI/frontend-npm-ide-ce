@@ -17,13 +17,14 @@ class TreeNodePortLink {
     };
     this.type = type;
     this.object = d3.create("svg").style("pointer-events", "none");
-    this._render();
+    this.render();
   }
 
   /**
-   * _render - render the port links information
+   * @private
+   * render - render the port links information
    */
-  _render() {
+  render() {
     let xPosition = 0;
     // Add port icon
     this.object.append(() => {
@@ -34,8 +35,8 @@ class TreeNodePortLink {
     });
     // Add node miniature
     const data = this.type === "Out" ? this.target : this.source;
-    const templates = this._getTemplates(data);
-    const [nodeName, nodePort] = this._parseNodePort(data);
+    const templates = this.getTemplates(data);
+    const [nodeName, nodePort] = this.parseNodePort(data);
     templates.forEach(item => {
       BaseNode.getMiniature(item.name, item.type, xPosition).then(miniature => {
         this.object.append(() => {
@@ -62,9 +63,9 @@ class TreeNodePortLink {
       xPosition += 25;
     });
     // Add node name
-    this._textBuilder(nodeName, xPosition, 4);
+    this.textBuilder(nodeName, xPosition, 4);
     // Add port name
-    this._textBuilder(nodePort, xPosition, 14);
+    this.textBuilder(nodePort, xPosition, 14);
   }
 
   /**
@@ -83,13 +84,14 @@ class TreeNodePortLink {
   //========================================================================================
 
   /**
-   * _textBuilder - Create text element
+   * @private
+   * textBuilder - Create text element
    *
    * @param {string} text: Text content in element
    * @param {number} x: X position
    * @param {number} y: Y position
    */
-  _textBuilder(text, x = 55, y = 4) {
+  textBuilder(text, x = 55, y = 4) {
     this.object
       .append("text")
       .attr("class", "text unselectable")
@@ -102,7 +104,8 @@ class TreeNodePortLink {
   }
 
   /**
-   * _parseNodePort - Parse node name and linked port
+   * @private
+   * parseNodePort - Parse node name and linked port
    *
    * @param {Object} data:
    * {
@@ -110,7 +113,7 @@ class TreeNodePortLink {
    *  node: string
    * }
    */
-  _parseNodePort(data) {
+  parseNodePort(data) {
     const pathLength = data.templatePath.length;
     const portArray = data.port.split("/");
     const port = portArray.slice(pathLength - 1).join("/");
@@ -119,14 +122,15 @@ class TreeNodePortLink {
   }
 
   /**
-   * _getTemplates - Get template list from template path array
+   * @private
+   * getTemplates - Get template list from template path array
    *
    * @param {Object} data:
    * {
    *  templatePath: Array [flow, sub-flow, node]
    * }
    */
-  _getTemplates(data) {
+  getTemplates(data) {
     const pathLength = data.templatePath.length - 1;
     return data.templatePath.map((node, index) => {
       let type = "flow";

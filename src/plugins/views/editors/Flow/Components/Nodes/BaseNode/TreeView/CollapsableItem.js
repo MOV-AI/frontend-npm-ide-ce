@@ -19,13 +19,14 @@ class CollapsableItem {
     this._header = null;
     this._childrenContainer = null;
     // Render header
-    this._render();
+    this.render();
   }
 
   /**
-   * _render: render collapsable item with header and children container
+   * @private
+   * render: render collapsable item with header and children container
    */
-  _render() {
+  render() {
     // Reset collapsable item
     if (this.object) this.destroy();
     // Create collapsable item
@@ -35,15 +36,16 @@ class CollapsableItem {
       .attr("y", "65")
       .attr("class", "children-container");
     // Add header
-    this._renderHeader();
+    this.renderHeader();
     // Add children container object
-    this._renderChildren();
+    this.renderChildren();
   }
 
   /**
-   * _renderHeader: render header used to expand/collapse children
+   * @private
+   * renderHeader: render header used to expand/collapse children
    */
-  _renderHeader() {
+  renderHeader() {
     // Reset header
     if (this._header) this._header.remove();
     this._header = d3
@@ -71,21 +73,22 @@ class CollapsableItem {
       this.isExpanded = !this.isExpanded;
       this.onToggleCollapsePorts();
       // Update header to toggle expand/collapse icon
-      this._renderHeader();
+      this.renderHeader();
       // Show/Hide children
-      if (this.isExpanded) this._renderChildren();
-      else this._collapse();
+      if (this.isExpanded) this.renderChildren();
+      else this.collapse();
       // Update position
-      this._updatePosition();
+      this.updatePosition();
     });
     // Add header to main object
     this.object.append(() => this._header.node());
   }
 
   /**
-   * _renderChildren: render children container
+   * @private
+   * renderChildren: render children container
    */
-  _renderChildren() {
+  renderChildren() {
     // Reset children container
     if (this._childrenContainer) this._childrenContainer.remove();
     this._childrenContainer = d3
@@ -103,13 +106,14 @@ class CollapsableItem {
     }
     // Add children container to main object
     this.object.append(() => this._childrenContainer.node());
-    this._updateBelongLines(this.children);
+    this.updateBelongLines(this.children);
   }
 
   /**
-   * _collapse: Collapse children (removing children container)
+   * @private
+   * collapse: Collapse children (removing children container)
    */
-  _collapse() {
+  collapse() {
     // Remove belong line
     this.children.forEach(child => {
       if (child.removeBelongLine) child.removeBelongLine();
@@ -119,21 +123,23 @@ class CollapsableItem {
   }
 
   /**
-   * _updatePosition: Ask parent (TreeContainerNode) to update its children position
+   * @private
+   * updatePosition: Ask parent (TreeContainerNode) to update its children position
    */
-  _updatePosition() {
+  updatePosition() {
     if (this.parent) this.parent.updateChildrenPosition();
   }
 
   /**
-   * _updateBelongLines: Update belong lines that connects each nodes with its Container parent
+   * @private
+   * updateBelongLines: Update belong lines that connects each nodes with its Container parent
    */
-  _updateBelongLines(children) {
+  updateBelongLines(children) {
     // Update belong lines
     if (!children) return;
     children.forEach(child => {
       if (child.updateBelongLines) child.updateBelongLines();
-      this._updateBelongLines(child.children);
+      this.updateBelongLines(child.children);
     });
   }
 

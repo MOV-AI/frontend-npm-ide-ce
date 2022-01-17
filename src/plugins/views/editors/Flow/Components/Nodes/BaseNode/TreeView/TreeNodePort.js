@@ -21,7 +21,7 @@ class TreeNodePort extends BasePort {
    * @override _render - render node port information
    *  - Includes input/output icon, name and links information
    */
-  _render() {
+  render() {
     this.object = d3
       .create("svg")
       .attr("width", "800")
@@ -49,12 +49,12 @@ class TreeNodePort extends BasePort {
   }
 
   /**
-   * @override _addEvents - Add port events
+   * @override addEvents - Add port events
    *  - Limit events to mouseenter/mouseout
    */
-  _addEvents() {
-    this.object.on("mouseenter", this._onMouseOver);
-    this.object.on("mouseout", this._onMouseOut);
+  addEvents() {
+    this.object.on("mouseenter", this.onMouseOver);
+    this.object.on("mouseout", this.onMouseOut);
     return this;
   }
 
