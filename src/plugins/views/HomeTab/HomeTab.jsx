@@ -107,6 +107,7 @@ const HomeTab = forwardRef((props, ref) => {
   const openAppConfig = evt => {
     const name = APP_CUSTOM_CONFIG;
     const scope = Configuration.SCOPE;
+    
     call("docManager", "checkDocumentExists", {
       name,
       scope
@@ -130,13 +131,6 @@ const HomeTab = forwardRef((props, ref) => {
       });
     });
   };
-
-  // const handleDebugLogs = () => {
-  // };
-  // const handleDebugTopics = () => {
-  // };
-  // const handleDebugCompare = () => {
-  // };
 
   //========================================================================================
   /*                                                                                      *
