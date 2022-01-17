@@ -7,7 +7,12 @@ class Position extends Model {
     super({ schema, ...arguments[0] });
   }
 
-  // Model properties
+  //========================================================================================
+  /*                                                                                      *
+   *                                      Properties                                      *
+   *                                                                                      */
+  //========================================================================================
+
   x = 0;
   y = 0;
 
@@ -54,17 +59,31 @@ class Position extends Model {
   serializeToDB() {
     const { x, y } = this.serialize();
 
-    return [x, y];
+    return {
+      x: { Value: x },
+      y: { Value: y }
+    };
   }
 
-  static serializeOfDB(arr) {
-    const output = {};
+  /**
+   *
+   * @param {array or object} data : The data with the position
+   * @returns {array} : The position
+   */
+  static serializeOfDB(data) {
+    if (Array.isArray(data)) {
+      const position = data ?? [0, 0];
 
-    const position = arr ?? [0, 0];
-    output.x = position[0];
-    output.y = position[1];
+      return { x: position[0], y: position[1] };
+    } else {
+      const output = {};
 
-    return output;
+      Object.entries(data ?? {}).forEach(([name, content]) => {
+        output[name] = content.Value ?? 0;
+      });
+
+      return output;
+    }
   }
 }
 

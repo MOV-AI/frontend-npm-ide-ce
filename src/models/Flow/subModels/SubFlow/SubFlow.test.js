@@ -50,7 +50,10 @@ test("Serialize TO db", () => {
   const expected = {
     ContainerFlow: "align_cart",
     ContainerLabel: "align",
-    Visualization: [0.01, 0.03],
+    Visualization: {
+      x: { Value: 0.01 },
+      y: { Value: 0.03 }
+    },
     Parameter: {
       camera: { Value: "back1", Type: "any" },
       move_distance_to_car: { Value: "0.30", Type: "number" }

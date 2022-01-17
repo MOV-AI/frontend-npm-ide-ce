@@ -56,7 +56,7 @@ class ExposedPortsManager extends Manager {
   setData(json) {
     // clean up any items added previously
     this.destroy();
-    debugger;
+
     Object.entries(json ?? {}).forEach(([nodeTemplate, nodeInstances]) => {
       Object.entries(nodeInstances ?? {}).forEach(([nodeInstanceName, obj]) => {
         const ports = obj.ports ?? [];

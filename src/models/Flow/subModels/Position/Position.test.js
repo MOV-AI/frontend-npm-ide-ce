@@ -21,13 +21,16 @@ test("Serialize OF db", () => {
   expect(data).toMatchObject(expected);
 });
 
-test("Serialize TO db", () => {
+test("serialize TO db", () => {
   const content = {
     x: 1,
     y: 2
   };
 
-  const expected = [1, 2];
+  const expected = {
+    x: { Value: 1 },
+    y: { Value: 2 }
+  };
 
   const obj = new Position();
 

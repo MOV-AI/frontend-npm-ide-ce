@@ -4,9 +4,7 @@ import {
   FlowStore,
   NodeStore
 } from "../../store";
-import Configuration from "../views/editors/Configuration/Configuration";
-import Callback from "../views/editors/Callback/Callback";
-import Node from "../views/editors/Node/Node";
+import { Callback, Configuration, Flow, Node } from "../views/editors";
 
 /**
  * Returns a list of interfaces
@@ -30,7 +28,7 @@ const factory = (workspace, observer) => {
     },
     [FlowStore.SCOPE]: {
       store: new FlowStore(workspace, observer),
-      plugin: Node
+      plugin: Flow
     }
   };
 };

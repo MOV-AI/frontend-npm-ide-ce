@@ -1,6 +1,6 @@
 import Model from "../../../Model";
 import schema from "./schema";
-import Position from "./Position/Position";
+import Position from "../Position/Position";
 import { Command, EnvVar, Parameter } from "../../../subModels";
 import Manager from "../../../Manager";
 
@@ -19,20 +19,14 @@ class NodeInstance extends Model {
   persistent = false;
   launch = true;
   remappable = true;
-  layers = [];
+  groups = [];
   position = new Position();
   parameters = new Manager("parameters", Parameter, this.propEvents);
   envVars = new Manager("envVars", EnvVar, this.propEvents);
   commands = new Manager("commands", Command, this.propEvents);
 
-  observables = [
-    "name",
-    "template",
-    "persistent",
-    "remappable",
-    "layers",
-    "position"
-  ];
+  // Define observable properties
+  observables = Object.values(NodeInstance.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -76,17 +70,27 @@ class NodeInstance extends Model {
     return this;
   }
 
-  getLayers() {
-    return this.layers;
+  getGroups() {
+    return this.groups;
   }
 
-  setLayers(value) {
-    this.layers = value;
+  setGroups(value) {
+    this.groups = value;
     return this;
   }
 
   getPosition() {
     return this.position;
+  }
+
+  setPosition(x, y) {
+    this.position.setData({ x, y });
+    this.dispatch(
+      NodeInstance.OBSERVABLE_KEYS.POSITION,
+      this.getPosition().serialize()
+    );
+
+    return this;
   }
 
   getParameters() {
@@ -108,7 +112,7 @@ class NodeInstance extends Model {
       persistent,
       launch,
       remappable,
-      layers,
+      groups,
       position,
       parameters,
       envVars,
@@ -121,7 +125,7 @@ class NodeInstance extends Model {
       persistent,
       launch,
       remappable,
-      layers
+      groups
     });
 
     this.position.setData(position);
@@ -156,7 +160,7 @@ class NodeInstance extends Model {
       persistent: this.getPersistent(),
       launch: this.getLaunch(),
       remappable: this.getRemappable(),
-      layers: this.getLayers(),
+      groups: this.getGroups(),
       position: this.getPosition().serialize(),
       parameters: this.getParameters().serialize(),
       envvars: this.getEnvVars().serialize(),
@@ -165,7 +169,7 @@ class NodeInstance extends Model {
   }
 
   serializeToDB() {
-    const { name, template, persistent, launch, remappable, layers } =
+    const { name, template, persistent, launch, remappable, groups } =
       this.serialize();
 
     return {
@@ -174,7 +178,7 @@ class NodeInstance extends Model {
       Persistent: persistent,
       Launch: launch,
       Remappable: remappable,
-      NodeLayers: layers,
+      NodeLayers: groups,
       Visualization: {
         ...this.getPosition().serializeToDB()
       },
@@ -193,7 +197,7 @@ class NodeInstance extends Model {
       Persistent: persistent,
       Launch: launch,
       Remappable: remappable,
-      NodeLayers: layers,
+      NodeLayers: groups,
       Visualization: position,
       Parameter: parameters,
       EnvVar: envvars,
@@ -206,13 +210,22 @@ class NodeInstance extends Model {
       persistent,
       launch,
       remappable,
-      layers,
+      groups,
       position: Position.serializeOfDB(position),
       parameters: Manager.serializeOfDB(parameters, Parameter),
       envVars: Manager.serializeOfDB(envvars, EnvVar),
       commands: Manager.serializeOfDB(commands, Command)
     };
   }
+
+  static OBSERVABLE_KEYS = {
+    NAME: "name",
+    TEMPLATE: "template",
+    PERSISTENT: "persistent",
+    REMAPPABLE: "remappable",
+    GROUPS: "groups",
+    POSITION: "persistent"
+  };
 }
 
 export default NodeInstance;
