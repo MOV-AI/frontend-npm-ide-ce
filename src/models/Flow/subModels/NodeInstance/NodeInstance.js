@@ -10,11 +10,22 @@ class NodeInstance extends Model {
     super({ schema, ...arguments[0] });
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Events                                        *
+   *                                                                                      */
+  //========================================================================================
+
   propEvents = {
     onAny: (event, name, value) => this.propsUpdate(event, name, value)
   };
 
-  // Model properties
+  //========================================================================================
+  /*                                                                                      *
+   *                                   Model Properties                                   *
+   *                                                                                      */
+  //========================================================================================
+
   template = "";
   persistent = false;
   launch = true;
@@ -34,57 +45,113 @@ class NodeInstance extends Model {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Returns the template property
+   * @returns {string}
+   */
   getTemplate() {
     return this.template;
   }
 
+  /**
+   * Sets the template property
+   * @param {string} value : The new value
+   * @returns {NodeInstance}
+   */
   setTemplate(value) {
     this.template = value;
     return this;
   }
 
+  /**
+   * Returns the persistent property
+   * @returns {boolena}
+   */
   getPersistent() {
     return this.persistent;
   }
 
+  /**
+   * Sets the persistent property
+   * @param {boolean} value : The new value
+   * @returns {NodeInstance}
+   */
   setPersistent(value) {
     this.persistent = value;
     return this;
   }
 
+  /**
+   * Returns the launch property
+   * @returns {boolean}
+   */
   getLaunch() {
     return this.launch;
   }
 
+  /**
+   * Sets the launch property
+   * @param {boolean} value : The new value
+   * @returns {NodeInstance}
+   */
   setLaunch(value) {
     this.launch = value;
     return this;
   }
 
+  /**
+   * Returns the remappable property
+   * @returns {string}
+   */
   getRemappable() {
     return this.remappable;
   }
 
+  /**
+   * Sets the remappable property
+   * @param {boolean} value : The new value
+   * @returns {NodeInstance}
+   */
   setRemappable(value) {
     this.remappable = value;
     return this;
   }
 
+  /**
+   * Returns the groups property
+   * @returns {array}
+   */
   getGroups() {
     return this.groups;
   }
 
+  /**
+   * Sets the new value of the groups
+   * @param {array} value : The groups
+   * @returns {NodeInstance} : The instance
+   */
   setGroups(value) {
     this.groups = value;
     return this;
   }
 
+  /**
+   * Returns the node's position object
+   * @returns {Position}
+   */
   getPosition() {
     return this.position;
   }
 
+  /**
+   * Sets the node's position
+   * @param {number} x : Coordinate x
+   * @param {number} y : Coordinate y
+   * @returns
+   */
   setPosition(x, y) {
     this.position.setData({ x, y });
+
     this.dispatch(
       NodeInstance.OBSERVABLE_KEYS.POSITION,
       this.getPosition().serialize()
@@ -93,18 +160,35 @@ class NodeInstance extends Model {
     return this;
   }
 
+  /**
+   * Returns the parameters manager
+   * @returns {Manager}
+   */
   getParameters() {
     return this.parameters;
   }
 
+  /**
+   * Returns the env. vars manager
+   * @returns {Manager}
+   */
   getEnvVars() {
     return this.envVars;
   }
 
+  /**
+   * Returns the commands mnager
+   * @returns {Manager}
+   */
   getCommands() {
     return this.commands;
   }
 
+  /**
+   * Updates the properties of the instance
+   * @param {object} json : The data to update the instance
+   * @returns {NodeInstance} : The instance
+   */
   setData(json) {
     const {
       name,
@@ -138,10 +222,17 @@ class NodeInstance extends Model {
 
   //========================================================================================
   /*                                                                                      *
-   *                                        Events                                        *
+   *                                    Event Handlers                                    *
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * @private
+   * Forces the events dispatcher
+   * @param {string} event : The name of the event
+   * @param {string} prop : The of the property updated
+   * @param {any} value : The new value of the property
+   */
   propsUpdate(event, prop, value) {
     // force dispatch
     this.dispatch(prop, value);
@@ -153,6 +244,10 @@ class NodeInstance extends Model {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Returns the instance properties serialized
+   * @returns {object}
+   */
   serialize() {
     return {
       name: this.getName(),
@@ -168,6 +263,11 @@ class NodeInstance extends Model {
     };
   }
 
+  /**
+   * Returns the instance properties serialized to
+   * the database format
+   * @returns {object}
+   */
   serializeToDB() {
     const { name, template, persistent, launch, remappable, groups } =
       this.serialize();
@@ -188,6 +288,17 @@ class NodeInstance extends Model {
     };
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Static                                        *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Returns properties serialized from the database format
+   * @param {object} json : The data received from the database
+   * @returns {object}
+   */
   static serializeOfDB(json) {
     const name = Object.keys(json)[0];
     const content = Object.values(json)[0];

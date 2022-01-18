@@ -10,6 +10,7 @@ import {
   SubFlow
 } from "./subModels"; // from internal subModels
 import GroupManager from "./subModels/Group/GroupManager";
+import { randomId } from "../../utils/Utils";
 import schema from "./schema";
 
 class Flow extends Model {
@@ -18,11 +19,22 @@ class Flow extends Model {
     super({ schema, ...arguments[0] });
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Events                                        *
+   *                                                                                      */
+  //========================================================================================
+
   propEvents = {
     onAny: (event, name, value) => this.propsUpdate(event, name, value)
   };
 
-  // Extend Model properties and assign defaults
+  //========================================================================================
+  /*                                                                                      *
+   *                                   Model Properties                                   *
+   *                                                                                      */
+  //========================================================================================
+
   description = "";
 
   exposedPorts = new ExposedPortsManager(
@@ -37,7 +49,7 @@ class Flow extends Model {
   subFlows = new Manager("subFlows", SubFlow, this.propEvents);
 
   // Define observable properties
-  observables = ["name", "details", "description"];
+  observables = Object.values(Flow.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -45,47 +57,93 @@ class Flow extends Model {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Returns the description property
+   * @returns {string}
+   */
   getDescription() {
     return this.description;
   }
 
+  /**
+   * Sets the description property
+   * @param {string} value : The new value
+   * @returns {Flow}
+   */
   setDescription(value) {
     this.description = value;
     return this;
   }
 
+  /**
+   * Returns the node instances manager
+   * @returns {Manager}
+   */
   getNodeInstances() {
     return this.nodeInstances;
   }
 
+  /**
+   * Returns the sub-flows manager
+   * @returns {Manager}
+   */
   getSubFlows() {
     return this.subFlows;
   }
 
+  /**
+   * Returns the exposed ports manager
+   * @returns {Manager}
+   */
   getExposedPorts() {
     return this.exposedPorts;
   }
 
+  /**
+   * Returns the links manager
+   * @returns {Manager}
+   */
   getLinks() {
     return this.links;
   }
 
+  /**
+   * Returns the groups manager
+   * @returns {Manager}
+   */
   getGroups() {
     return this.groups;
   }
 
+  /**
+   * Returns the parameters manager
+   * @returns {Manager}
+   */
   getParameters() {
     return this.parameters;
   }
 
+  /**
+   * Returns the scope property
+   * @returns {string}
+   */
   getScope() {
     return Flow.SCOPE;
   }
 
+  /**
+   * Returns the extension property
+   * @returns {string}
+   */
   getFileExtension() {
     return Flow.EXTENSION;
   }
 
+  /**
+   * Updates the properties of the instance
+   * @param {object} json : The data to update the instance
+   * @returns {Flow} : The instance
+   */
   setData(json) {
     const {
       description,
@@ -111,9 +169,24 @@ class Flow extends Model {
     return this;
   }
 
+  /**
+   * Add a new link
+   * @param {array} link : Link with format [<from>, <to>]
+   */
+  addLink(link) {
+    const [from, to] = link;
+    const id = randomId();
+
+    this.getLinks().setItem({ name: id, content: { from, to } });
+
+    const links = this.getLinks().serializeToDB();
+
+    return { id, ...links[id] };
+  }
+
   //========================================================================================
   /*                                                                                      *
-   *                                        Events                                        *
+   *                                    Event Handlers                                    *
    *                                                                                      */
   //========================================================================================
 
@@ -128,6 +201,10 @@ class Flow extends Model {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Returns the instance properties serialized
+   * @returns {object}
+   */
   serialize() {
     return {
       ...super.serialize(),
@@ -142,8 +219,9 @@ class Flow extends Model {
   }
 
   /**
-   * Serialize model properties to database format
-   * @returns {object} Database data
+   * Returns the instance properties serialized to
+   * the database format
+   * @returns {object}
    */
   serializeToDB() {
     const { name, description, details } = this.serialize();
@@ -160,6 +238,12 @@ class Flow extends Model {
       Parameter: this.getParameters().serializeToDB()
     };
   }
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Static                                        *
+   *                                                                                      */
+  //========================================================================================
 
   /**
    * Serialize database data to model properties
@@ -204,6 +288,12 @@ class Flow extends Model {
   static SCOPE = "Flow";
 
   static EXTENSION = ".flo";
+
+  static OBSERVABLE_KEYS = {
+    NAME: "name",
+    DETAILS: "details",
+    DESCRIPTION: "description"
+  };
 }
 
 Flow.defaults = {};

@@ -5,6 +5,7 @@ import Canvas from "./canvas";
 import Graph from "../../Core/Graph/GraphBase";
 import InterfaceModes from "./InterfaceModes";
 import { maxMovingPixels } from "../../Constants/constants";
+import Events from "./Events";
 import { EVT_NAMES } from "../../events";
 
 const TYPES = {
@@ -34,7 +35,6 @@ export default class MainInterface {
     this.classes = classes;
     this.docManager = call;
 
-    // TODO: Review
     this.initialize();
   }
 
@@ -45,6 +45,7 @@ export default class MainInterface {
   //========================================================================================
 
   stateSub = new BehaviorSubject(0);
+  events = new Events();
   mode = new InterfaceModes(this);
   api = null;
   canvas = null;
@@ -152,7 +153,14 @@ export default class MainInterface {
     const { src, trg, link, toCreate } = this.mode.linking.props;
 
     if (toCreate && link.isValid(src, trg, this.graph.links)) {
-      // TODO: add link
+      // create new link
+      const newLink = this.modelView.current.addLink(link.toSave(src, trg));
+
+      // render new link localy
+      this.graph.addLink(newLink);
+      this.graph.validateFlow();
+
+      this.events.onAddLink.next(newLink);
     }
   };
 
