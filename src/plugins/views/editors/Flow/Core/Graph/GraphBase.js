@@ -100,14 +100,9 @@ export default class Graph {
   /**
    * @private
    */
-  async loadNodes(nodes, nodeType = NODE_TYPES.NODE, startNode = true) {
-    const _nodes = nodes || {};
-    const value = Math.random();
-    const pNodes = [];
-
-    Object.keys(_nodes).forEach(node => {
-      const _node = { ..._nodes[node], id: node };
-      pNodes.push(this.addNode(_node, nodeType, value));
+  async loadNodes(nodes = {}, nodeType = NODE_TYPES.NODE, startNode = true) {
+    const pNodes = Object.entries(nodes).map(([id, value]) => {
+      return this.addNode({ ...value, id }, nodeType);
     });
 
     await Promise.all(pNodes);
@@ -260,9 +255,9 @@ export default class Graph {
    * @param {BaseLink} link : hovered link
    */
   onMouseOverLink = link => {
-    this.links.forEach(_link => {
-      if (_link.id !== link.data.id) {
-        _link.transparent = true;
+    this.links.forEach(value => {
+      if (value.id !== link.data.id) {
+        value.transparent = true;
       }
     });
   };
@@ -272,8 +267,8 @@ export default class Graph {
    *  Remove transparency from all links (let all active)
    */
   onMouseOutLink = () => {
-    this.links.forEach(_link => {
-      _link.transparent = false;
+    this.links.forEach(value => {
+      value.transparent = false;
     });
   };
 
