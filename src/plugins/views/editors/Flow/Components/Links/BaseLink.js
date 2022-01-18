@@ -3,6 +3,12 @@ import { baseLinkStyles } from "./styles";
 import { generatePathPoints } from "./generatePathPoints";
 import { isLinkeable } from "../Nodes/BaseNode/PortValidator";
 
+const SUBFLOW_TYPE = "MovAI/Flow";
+const SEPARATOR = {
+  SUBFLOW: "__",
+  NODE: "/"
+};
+
 class BaseLinkStruct {
   constructor(
     canvas,
@@ -46,8 +52,8 @@ class BaseLinkStruct {
   set transparent(value) {
     this._transparent = value;
     this._transparent === true
-      ? setTimeout(() => this._styleTransparent(), 300)
-      : this._styleTransparent();
+      ? setTimeout(() => this.styleTransparent(), 300)
+      : this.styleTransparent();
   }
 
   /**
@@ -213,7 +219,7 @@ export default class BaseLink extends BaseLinkStruct {
    * Style to fade link out
    */
   styleTransparent() {
-    const opacity = this.transparent === true ? 0.2 : 1;
+    const opacity = this.transparent ? 0.2 : 1;
     this.path.attr("opacity", opacity);
   }
 
@@ -402,7 +408,8 @@ export default class BaseLink extends BaseLinkStruct {
       const node = item.node.data.id;
       const type = item.node._template?.Type ?? "";
       const port = item.data.name;
-      const separator = type === "MovAI/Flow" ? "__" : "/";
+      const separator =
+        type === SUBFLOW_TYPE ? SEPARATOR.SUBFLOW : SEPARATOR.NODE;
 
       return [node, port].join(separator);
     });
@@ -435,15 +442,17 @@ export default class BaseLink extends BaseLinkStruct {
     // nodes : <node name>
     // flows : <container1>__<nodeInContainer> or <Container2>__<Container1>__<nodeNameInContainer1>
 
-    const [_node, ...rPort] = plink.split("/");
-    const nodes = _node.split("__");
+    const [_node, ...rPort] = plink.split(SEPARATOR.NODE);
+    const nodes = _node.split(SEPARATOR.SUBFLOW);
     const [node, ...lPort] = nodes;
 
     const subFlow = values => {
-      return values.length ? values.join("__").concat("/") : "";
+      return values.length
+        ? values.join(SEPARATOR.SUBFLOW).concat(SEPARATOR.NODE)
+        : "";
     };
 
-    const fnPort = (x, y) => subFlow(x).concat(y.join("/"));
+    const fnPort = (x, y) => subFlow(x).concat(y.join(SEPARATOR.NODE));
 
     // [node, port]
     return [node, fnPort(lPort, rPort), nodes];

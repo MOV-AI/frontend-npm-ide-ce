@@ -294,6 +294,26 @@ const Flow = (props, ref) => {
           filter(
             event =>
               event.name === EVT_NAMES.ON_MOUSE_OVER &&
+              event.type === EVT_TYPES.LINK
+          )
+        )
+        .subscribe(evtData => mainInterface.graph.onMouseOverLink(evtData));
+
+      mainInterface.canvas.events
+        .pipe(
+          filter(
+            event =>
+              event.name === EVT_NAMES.ON_MOUSE_OUT &&
+              event.type === EVT_TYPES.LINK
+          )
+        )
+        .subscribe(evtData => mainInterface.graph.onMouseOutLink(evtData));
+
+      mainInterface.canvas.events
+        .pipe(
+          filter(
+            event =>
+              event.name === EVT_NAMES.ON_MOUSE_OVER &&
               event.type === EVT_TYPES.PORT
           )
         )

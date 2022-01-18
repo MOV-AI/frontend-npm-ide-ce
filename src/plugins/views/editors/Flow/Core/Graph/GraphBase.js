@@ -255,11 +255,9 @@ export default class Graph {
    * @param {BaseLink} link : hovered link
    */
   onMouseOverLink = link => {
-    this.links.forEach(value => {
-      if (value.id !== link.data.id) {
-        value.transparent = true;
-      }
-    });
+    this.links.forEach(
+      value => (value.transparent = value.id !== link.data.id)
+    );
   };
 
   /**
@@ -267,9 +265,7 @@ export default class Graph {
    *  Remove transparency from all links (let all active)
    */
   onMouseOutLink = () => {
-    this.links.forEach(value => {
-      value.transparent = false;
-    });
+    this.links.forEach(value => (value.transparent = false));
   };
 
   loadData(flow) {
