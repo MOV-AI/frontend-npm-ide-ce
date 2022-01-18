@@ -434,3 +434,23 @@ Languages:
       "Versioning": "Versões"
       "Workspace": "Área de trabalho"
       "Yes": "Sim"
+Samples:
+  - title: battery_monitor_init
+    description: Nunc varius ultrices velit, in maximus purus maximus et. Curabitur libero diam, finibus nec dictum sed, facilisis a nisi. Duis ultricies efficitur est at pellentesque.
+    url: global/Callback/battery_monitor_init
+    scope: "Callback"
+    externalLink: "https://rdmd.readme.io/docs"
+    externalLinkLabel: "How to"
+    certified: true
+  - title: backend
+    description: Aenean arcu quam, tristique sed accumsan nec, lacinia sed quam. Mauris porta est eros. Sed aliquet, purus ac vulputate placerat, nibh lectus vestibulum eros
+    url: global/Node/backend
+    scope: "Node"
+    certified: false
+  - title: actuator_init
+    description: Nulla dictum est ut elit lobortis, ut fermentum tellus maximus. Nulla libero lectus, semper eget eleifend vel, interdum vel ligula. Donec eget tellus tristique, dapibus felis vitae, interdum orci. Nam dapibus nibh orci, in luctus mi aliquet ut. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.
+    url: global/Callback/actuator_init
+    scope: "Callback"
+    externalLink: "https://rdmd.readme.io/docs"
+    externalLinkLabel: "How to"
+    certified: true
