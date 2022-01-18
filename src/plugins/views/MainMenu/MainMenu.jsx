@@ -14,6 +14,7 @@ import { Tooltip } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MainContext } from "../../../main-context";
 import { VERSION } from "../../../utils/Constants";
+import { getIconByScope } from "../../../utils/Utils";
 
 const useStyles = makeStyles(theme => ({
   icon: {
@@ -119,6 +120,7 @@ const MainMenu = props => {
                     }
                   ),
                 element: docType.scope,
+                icon: getIconByScope(docType.scope),
                 onClose: true
               }))}
             ></ContextMenu>

@@ -1,18 +1,18 @@
-import React from "react";
-import Workspace from "../../../utils/Workspace";
-import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
-import AccountTreeIcon from "@material-ui/icons/AccountTree";
-import BuildIcon from "@material-ui/icons/Build";
-import CodeIcon from "@material-ui/icons/Code";
-import DescriptionIcon from "@material-ui/icons/Description";
-import DeviceHubIcon from "@material-ui/icons/DeviceHub";
+import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { Tooltip } from "@material-ui/core";
-import { getTabIconColor } from "../../../utils/Utils";
+import { getIconByScope } from "../../../utils/Utils";
+import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
+import Workspace from "../../../utils/Workspace";
+import HomeTab from "../HomeTab/HomeTab";
+import TOPICS from "./topics";
 
+const HomeTabProfile = { name: "HomeTab", title: "Welcome" };
 const DEFAULT_LAYOUT = {
   dockbox: {
     mode: "horizontal",
-    children: []
+    children: [{tabs: [{
+      id: HomeTabProfile.name,
+    }]}]
   },
   windowbox: { children: [] },
   maxbox: { children: [] },
@@ -21,9 +21,9 @@ const DEFAULT_LAYOUT = {
 
 const useLayout = (props, dockRef) => {
   const { emit, call, on } = props;
-  const workspaceManager = React.useMemo(() => new Workspace(), []);
-  const tabsById = React.useRef(new Map());
-  const [layout, setLayout] = React.useState({ ...DEFAULT_LAYOUT });
+  const workspaceManager = useMemo(() => new Workspace(), []);
+  const tabsById = useRef(new Map());
+  const [layout, setLayout] = useState({ ...DEFAULT_LAYOUT });
 
   //========================================================================================
   /*                                                                                      *
@@ -35,7 +35,7 @@ const useLayout = (props, dockRef) => {
    * Apply layout and save changes
    * @param {LayoutData} layout
    */
-  const _applyLayout = React.useCallback(
+  const _applyLayout = useCallback(
     _layout => {
       setLayout(_layout);
       workspaceManager.setLayout(_layout);
@@ -46,7 +46,7 @@ const useLayout = (props, dockRef) => {
   /**
    * Get first container in dockbox
    */
-  const _getFirstContainer = React.useCallback(dockbox => {
+  const _getFirstContainer = useCallback(dockbox => {
     const boxData = dockbox.children[0];
     if (boxData?.tabs) return boxData;
     else return _getFirstContainer(boxData);
@@ -57,7 +57,7 @@ const useLayout = (props, dockRef) => {
    * @param {BoxData} box : Layout box data (can be dockbox, maxbox, floatbox or windowbox)
    * @param {String} tabId : Tab Id
    */
-  const _getTabContainer = React.useCallback((box, tabId) => {
+  const _getTabContainer = useCallback((box, tabId) => {
     if (box?.tabs?.map(el => el.id).includes(tabId)) return box;
     else if (box.children) {
       let containerBox = null;
@@ -78,7 +78,7 @@ const useLayout = (props, dockRef) => {
    * @param {TabData} tabData : New tab data to update previous tab id
    * @returns {{newLayout: LayoutData, box: BoxData}} : Returns new layout and box data (if any)
    */
-  const _setTabInLayout = React.useCallback(
+  const _setTabInLayout = useCallback(
     (prevLayout, prevTabId, location, tabData) => {
       const newLayout = { ...prevLayout };
       const box = _getTabContainer(newLayout[location], prevTabId);
@@ -102,27 +102,12 @@ const useLayout = (props, dockRef) => {
    * @param {Boolean} isDirty : Document dirty state
    * @returns {Element} Tab element to render
    */
-  const _getCustomTab = React.useCallback((docData, onCloseTab, isDirty) => {
-    const color = getTabIconColor(docData.scope);
-    const getIconByScope = {
-      Callback: style => <CodeIcon style={{ ...style, color }} />,
-      Layout: style => (
-        <i className={`icon-Layouts`} style={{ ...style, color }}></i>
-      ),
-      Flow: style => <AccountTreeIcon style={{ ...style, color }} />,
-      Annotation: style => <DescriptionIcon style={{ ...style, color }} />,
-      GraphicScene: style => <DeviceHubIcon style={{ ...style, color }} />,
-      Node: style => (
-        <i className={`icon-Nodes`} style={{ ...style, color }}></i>
-      ),
-      Configuration: style => <BuildIcon style={{ ...style, color }} />,
-      Default: <></>
-    };
+  const _getCustomTab = useCallback((docData, onCloseTab, isDirty) => {
 
     return (
-      <Tooltip title={docData.id}>
+      <Tooltip title={docData.tabTitle || docData.id}>
         <div onAuxClick={() => onCloseTab(docData.id)}>
-          {getIconByScope[docData.scope || "Default"]({
+          {getIconByScope(docData.scope, {
             fontSize: 13,
             marginTop: 2,
             marginRight: 10,
@@ -140,7 +125,7 @@ const useLayout = (props, dockRef) => {
    * @param {{name: string, scope: string}} docData
    * @param {LayoutData} newLayout : New layout to apply (optional)
    */
-  const _saveDoc = React.useCallback(
+  const _saveDoc = useCallback(
     (docData, newLayout) => {
       const { name, scope } = docData;
       call("docManager", "save", { name, scope })
@@ -169,7 +154,7 @@ const useLayout = (props, dockRef) => {
    * @param {{name: string, scope: string}} docData
    * @param {LayoutData} newLayout : New layout to apply (optional)
    */
-  const _discardChanges = React.useCallback(
+  const _discardChanges = useCallback(
     (docData, newLayout) => {
       const { name, scope } = docData;
       call("docManager", "discardDocChanges", { name, scope }).then(() => {
@@ -185,7 +170,7 @@ const useLayout = (props, dockRef) => {
    * @param {string} scope : Document scope
    * @param {LayoutData} newLayout : New layout
    */
-  const _closeDirtyTab = React.useCallback(
+  const _closeDirtyTab = useCallback(
     (name, scope, newLayout) => {
       call("dialog", "closeDirtyDocument", {
         name,
@@ -209,7 +194,7 @@ const useLayout = (props, dockRef) => {
    * @param {LayoutData} newLayout : New layout data
    * @param {string} tabId : Tab id
    */
-  const _onLayoutRemoveTab = React.useCallback(
+  const _onLayoutRemoveTab = useCallback(
     (newLayout, tabId) => {
       const { name, scope, isNew, isDirty } = tabsById.current.get(tabId);
       if (isDirty) {
@@ -235,7 +220,7 @@ const useLayout = (props, dockRef) => {
    * @param {String} location : Layout data location (one of: "dockbox", "floatbox", "maxbox", "windowbox")
    * @returns {BoxData} Return found box data or null if not found in location
    */
-  const _deleteTabFromLayout = React.useCallback(
+  const _deleteTabFromLayout = useCallback(
     (prevLayout, tabId, location) => {
       const newLayout = { ...prevLayout };
       const box = _getTabContainer(newLayout[location], tabId);
@@ -253,7 +238,7 @@ const useLayout = (props, dockRef) => {
    * @param {string} tabId : Tab ID (document URL)
    * @returns {LayoutData} : Layout without tab
    */
-  const _closeTab = React.useCallback(
+  const _closeTab = useCallback(
     tabId => {
       const tabData = dockRef.current.find(tabId);
       if (!tabData) return;
@@ -272,7 +257,7 @@ const useLayout = (props, dockRef) => {
    * Update document dirty state
    * @param {{instance: Model, value: Boolean}} data
    */
-  const _updateDocDirty = React.useCallback(
+  const _updateDocDirty = useCallback(
     data => {
       const { instance: model, value: isDirty } = data;
       const tabId = model.getUrl();
@@ -295,7 +280,7 @@ const useLayout = (props, dockRef) => {
    * @param {{id: String, title: String, name: String, scope: String}} docData : document basic data
    * @returns {TabData} Tab data to be set in Layout
    */
-  const _getTabData = React.useCallback(
+  const _getTabData = useCallback(
     async docData => {
       return props
         .call("docManager", "getDocFactory", docData.scope)
@@ -329,45 +314,30 @@ const useLayout = (props, dockRef) => {
     [props, _getCustomTab, _closeTab]
   );
 
-  //========================================================================================
-  /*                                                                                      *
-   *                                   React lifecycles                                   *
-   *                                                                                      */
-  //========================================================================================
-
   /**
-   * Add Events Listeners
+   * Installs the HomeTab Plugin
+   * @private
+   * @returns the HomeTab
    */
-  React.useEffect(() => {
-    // Update doc dirty state
-    on("docManager", "updateDocDirty", data => _updateDocDirty(data));
-    // On delete document
-    on("docManager", "deleteDoc", data => _closeTab(data.url));
-  }, [on, _updateDocDirty, _closeTab]);
+  const installHomeTabPlugin = useCallback(() => {
+    const viewPlugin = new HomeTab(
+      HomeTabProfile,
+      { workspaceManager }
+    );
 
-  /**
-   * Load workspace
-   */
-  React.useEffect(() => {
-    const lastTabs = workspaceManager.getTabs();
-    const lastLayout = workspaceManager.getLayout(DEFAULT_LAYOUT);
-    const tabs = [];
-    tabsById.current = lastTabs;
-    // Install current tabs plugins
-    [...lastTabs.keys()].forEach(tabId => {
-      const { id, name, scope } = lastTabs.get(tabId);
-      tabs.push(_getTabData({ id, name, scope }));
+    return PluginManagerIDE.install(HomeTabProfile.name, viewPlugin).then(() => {
+      // Create and return tab data
+      // Return TabData
+      return {
+        id: HomeTabProfile.name,
+        name: HomeTabProfile.title,
+        tabTitle: HomeTabProfile.title,
+        scope: HomeTabProfile.name,
+        extension: "",
+        content: viewPlugin.render()
+      };
     });
-    // after all plugins are installed
-    Promise.all(tabs).then(_tabs => {
-      _tabs.forEach(tab => tabsById.current.set(tab.id, tab));
-      setLayout(lastLayout);
-    });
-    // Destroy local workspace manager instance on unmount
-    return () => {
-      workspaceManager.destroy();
-    };
-  }, [workspaceManager, _getTabData]);
+  }, [workspaceManager]);
 
   //========================================================================================
   /*                                                                                      *
@@ -379,7 +349,7 @@ const useLayout = (props, dockRef) => {
    * Open/Focus tab
    * @param {TabData} tabData : Set Tab data in Layout
    */
-  const open = React.useCallback(
+  const open = useCallback(
     tabData => {
       tabsById.current.set(tabData.id, tabData);
       workspaceManager.setTabs(tabsById.current);
@@ -409,19 +379,20 @@ const useLayout = (props, dockRef) => {
    * Open Editor tab from document data
    * @param {{id: String, title: String, name: String, scope: String}} docData : document basic data
    */
-  const openEditor = React.useCallback(
+  const openEditor = useCallback(
     docData => {
       _getTabData(docData).then(tabData => {
+        emit(TOPICS.openEditor, tabData);
         open(tabData);
       });
     },
-    [_getTabData, open]
+    [emit, _getTabData, open]
   );
 
   /**
    * Close Tab
    */
-  const close = React.useCallback(() => {
+  const close = useCallback(() => {
     // Close tab dynamically
     console.log("removeTab");
     call("rightDrawer", "resetBookmarks");
@@ -432,22 +403,23 @@ const useLayout = (props, dockRef) => {
    * @param {TabData} data : Tab data to load in Layout (might be missing information)
    * @returns {TabData} Complete tab data
    */
-  const loadTab = React.useCallback(
+  const loadTab = useCallback(
     data => {
       const tabFromMemory = tabsById.current.get(data.id);
       if (!tabFromMemory && !data.content) return;
-      const { id, content, scope, name, extension, isDirty, isNew } =
+      const { id, content, scope, name, tabTitle, extension, isDirty, isNew } =
         tabFromMemory ?? data;
       tabsById.current.set(id, {
         id,
         scope,
         name,
+        tabTitle,
         content,
         extension,
         isNew,
         isDirty
       });
-      const tabData = { id, scope, name, extension };
+      const tabData = { id, scope, name, tabTitle, extension };
       return {
         id: id,
         title: _getCustomTab(tabData, _closeTab, isDirty),
@@ -464,7 +436,7 @@ const useLayout = (props, dockRef) => {
    * @param {String} tabId : Tab ID
    * @param {String} direction : (one of: "left" | "right" | "bottom" | "top" | "middle" | "remove" | "before-tab" | "after-tab" | "float" | "front" | "maximize" | "new-window")
    */
-  const onLayoutChange = React.useCallback(
+  const onLayoutChange = useCallback(
     (newLayout, tabId, direction) => {
       const firstContainer = _getFirstContainer(newLayout.dockbox);
       const newActiveTab =
@@ -489,7 +461,7 @@ const useLayout = (props, dockRef) => {
    * @param {String} prevTabId : Old tab ID
    * @param {{id: String, name: String, scope: String}} docData : document basic data
    */
-  const updateTabId = React.useCallback(
+  const updateTabId = useCallback(
     (prevTabId, newTabData) => {
       _getTabData(newTabData).then(tabData => {
         setLayout(prevState => {
@@ -505,6 +477,55 @@ const useLayout = (props, dockRef) => {
     },
     [_getTabData, _setTabInLayout]
   );
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                   React lifecycles                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Add Events Listeners
+   */
+  useEffect(() => {
+    // Update doc dirty state
+    on("docManager", "updateDocDirty", data => _updateDocDirty(data));
+    // On delete document
+    on("docManager", "deleteDoc", data => _closeTab(data.url));
+  }, [on, emit, _updateDocDirty, _closeTab]);
+
+  /**
+   * Load workspace
+   */
+  useEffect(() => {
+    const lastTabs = workspaceManager.getTabs();
+    const lastLayout = workspaceManager.getLayout(DEFAULT_LAYOUT);
+    const tabs = [];
+
+    if(!lastTabs.size){
+      lastTabs.set(HomeTabProfile.name, {});
+    }
+
+    tabsById.current = lastTabs;
+    // Install current tabs plugins
+    lastTabs.forEach(tab => {
+      const { id, name, scope } = tab;
+      
+      if(id === HomeTabProfile.name)
+        tabs.push(installHomeTabPlugin());
+      else
+        tabs.push(_getTabData({ id, name, scope }));
+    });
+    // after all plugins are installed
+    Promise.allSettled(tabs).then(_tabs => {
+      _tabs.forEach(tab => tab.status === "fulfilled" && tabsById.current.set(tab.value.id, tab.value));
+      setLayout(lastLayout);
+    });
+    // Destroy local workspace manager instance on unmount
+    return () => {
+      workspaceManager.destroy();
+    };
+  }, [workspaceManager, on, call, installHomeTabPlugin, _closeTab, _getTabData, open]);
 
   //========================================================================================
   /*                                                                                      *
