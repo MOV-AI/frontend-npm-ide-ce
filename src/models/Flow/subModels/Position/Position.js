@@ -9,14 +9,15 @@ class Position extends Model {
 
   //========================================================================================
   /*                                                                                      *
-   *                                      Properties                                      *
+   *                                   Model Properties                                   *
    *                                                                                      */
   //========================================================================================
 
   x = 0;
   y = 0;
 
-  observables = ["x", "y"];
+  // Define observable properties
+  observables = Object.values(Position.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -24,19 +25,37 @@ class Position extends Model {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Returns the x property
+   * @returns {number}
+   */
   getX() {
     return this.x;
   }
 
+  /**
+   * Sets the x property
+   * @param {number} value : The new value
+   * @returns {Position}
+   */
   setX(value) {
     this.x = value;
     return this;
   }
 
+  /**
+   * Returns the y property
+   * @returns {number}
+   */
   getY() {
     return this.y;
   }
 
+  /**
+   * Sets the y property
+   * @param {number} value : The new value
+   * @returns {Position}
+   */
   setY(value) {
     this.y = value;
     return this;
@@ -48,6 +67,10 @@ class Position extends Model {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Returns the instance properties serialized
+   * @returns {object}
+   */
   serialize() {
     return {
       name: this.getName(),
@@ -56,6 +79,11 @@ class Position extends Model {
     };
   }
 
+  /**
+   * Returns the instance properties serialized to
+   * the database format
+   * @returns {object}
+   */
   serializeToDB() {
     const { x, y } = this.serialize();
 
@@ -65,10 +93,16 @@ class Position extends Model {
     };
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Static                                        *
+   *                                                                                      */
+  //========================================================================================
+
   /**
-   *
-   * @param {array or object} data : The data with the position
-   * @returns {array} : The position
+   * Returns properties serialized from the database format
+   * @param {object} json : The data received from the database
+   * @returns {object}
    */
   static serializeOfDB(data) {
     if (Array.isArray(data)) {
@@ -85,6 +119,11 @@ class Position extends Model {
       return output;
     }
   }
+
+  static OBSERVABLE_KEYS = {
+    X: "x",
+    Y: "y"
+  };
 }
 
 export default Position;

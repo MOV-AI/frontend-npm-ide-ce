@@ -7,11 +7,18 @@ class Link extends Model {
     super({ schema, ...arguments[0] });
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                   Model Properties                                   *
+   *                                                                                      */
+  //========================================================================================
+
   from = "";
   to = "";
   dependency = 0;
 
-  observables = ["id", "from", "to", "dependecy"];
+  // Define observable properties
+  observables = Object.values(Link.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -71,6 +78,12 @@ class Link extends Model {
     };
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Static                                        *
+   *                                                                                      */
+  //========================================================================================
+
   static serializeOfDB(json) {
     const id = Object.keys(json)[0];
     const content = Object.values(json)[0];
@@ -78,6 +91,13 @@ class Link extends Model {
 
     return { id, from, to, dependency };
   }
+
+  static OBSERVABLE_KEYS = {
+    ID: "id",
+    FROM: "from",
+    TO: "to",
+    DEPENDENCY: "dependecy"
+  };
 }
 
 export default Link;
