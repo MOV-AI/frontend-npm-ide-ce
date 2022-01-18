@@ -20,15 +20,10 @@ const withAlerts = Component => {
 
     /**
      * Create snackbar alert
-     * @param {{message: String, severity: String}} alertData
+     * @param {{title: String, message: String, location: String, severity: String}} alertData
      */
-    const alert = ({
-      title,
-      message,
-      location,
-      severity = SEVERITIES.SUCCESS
-    }) => {
-      call("alert", "show", { title, message, severity, location });
+    const alert = options => {
+      call("alert", "show", options);
     };
 
     return (

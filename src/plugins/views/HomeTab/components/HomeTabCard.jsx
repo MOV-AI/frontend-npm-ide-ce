@@ -2,19 +2,17 @@ import React, { useCallback } from "react";
 import CodeIcon from "@material-ui/icons/Code";
 import CallMadeIcon from "@material-ui/icons/CallMade";
 import Button from "@material-ui/core/Button";
-import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
-import { stopPropagation } from "../../../utils/Utils";
+import movaiIcon from "../../editors/_shared/Loader/movai_red.svg";
+import { stopPropagation } from "../../../../utils/Utils";
 
-import { homeTabCardStyles } from "./styles";
+import { homeTabCardStyles } from "../styles";
 
 function HomeTabCard(props) {
   const classes = homeTabCardStyles();
   const { sample, openDocument } = props;
 
   const handleOnClick = useCallback(
-    _ => {
-      openDocument({ id: sample.url, scope: sample.scope });
-    },
+    () => openDocument({ id: sample.url, scope: sample.scope }),
     [sample, openDocument]
   );
 

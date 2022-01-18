@@ -498,7 +498,7 @@ const useLayout = (props, dockRef) => {
    * Load workspace
    */
   useEffect(() => {
-    let lastTabs = workspaceManager.getTabs();
+    const lastTabs = workspaceManager.getTabs();
     const lastLayout = workspaceManager.getLayout(DEFAULT_LAYOUT);
     const tabs = [];
 
@@ -508,18 +508,17 @@ const useLayout = (props, dockRef) => {
 
     tabsById.current = lastTabs;
     // Install current tabs plugins
-    [...lastTabs.keys()].forEach(tabId => {
-      const { id, name, scope } = lastTabs.get(tabId);
+    lastTabs.forEach(tab => {
+      const { id, name, scope } = tab;
       
-      if(tabId === HomeTabProfile.name)
+      if(id === HomeTabProfile.name)
         tabs.push(installHomeTabPlugin());
       else
         tabs.push(_getTabData({ id, name, scope }));
-      
     });
     // after all plugins are installed
-    Promise.all(tabs).then(_tabs => {
-      _tabs.forEach(tab => tabsById.current.set(tab.id, tab));
+    Promise.allSettled(tabs).then(_tabs => {
+      _tabs.forEach(tab => tab.status === "fulfilled" && tabsById.current.set(tab.value.id, tab.value));
       setLayout(lastLayout);
     });
     // Destroy local workspace manager instance on unmount

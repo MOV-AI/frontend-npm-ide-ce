@@ -1,5 +1,22 @@
 import { makeStyles } from "@material-ui/core/styles";
 
+const sharedStyles = {
+  paper: {
+    margin: 10,
+    flex: 1,
+    borderRadius: 5
+  },
+  columnTitle: {
+    padding: 14,
+    fontSize: 24
+  },
+  columnBody: {
+    margin: 7,
+    display: "flex",
+    flexFlow: "column"
+  },
+}
+
 export const homeTabStyles = makeStyles(theme => ({
     root: {
       height: "100%",
@@ -21,32 +38,6 @@ export const homeTabStyles = makeStyles(theme => ({
       display: "flex",
       flexDirection: "column"
     },
-    columnTitle: {
-      padding: 14,
-      fontSize: 24
-    },
-    flexTitle: {
-      display: "flex",
-      justifyContent: "space-between"
-    },
-    columnBody: {
-      margin: 7,
-      display: "flex",
-      flexFlow: "column"
-    },
-    columnSample: {
-      margin: 3,
-      overflow: "auto",
-      maxHeight: "calc(100% - 90px)"
-    },
-    paper: {
-      margin: 10,
-      flex: 1,
-      borderRadius: 5
-    },
-    samplePaper: {
-      maxHeight: "calc(100% - 20px)"
-    },
     footer: {
       display: "flex",
       justifyContent: "center",
@@ -63,24 +54,6 @@ export const homeTabStyles = makeStyles(theme => ({
       padding: 15,
       paddingBottom: 0
     },
-    link: {
-      color: "#3db5e6",
-      fontSize: 16,
-      padding: "5px 10px",
-      fontWeight: 600,
-      display: "flex",
-      "&:hover": {
-        cursor: "pointer",
-        backgroundColor: `${theme.palette.primary.main}26`,
-        color: theme.palette.text.primary,
-        textDecoration: "none"
-      }
-    },
-    linkIcon: {
-      color: theme.palette.text.primary,
-      marginRight: 10,
-      fontSize: 20
-    },
     movaiLogo: {
       padding: 15,
       paddingBottom: 0,
@@ -91,18 +64,61 @@ export const homeTabStyles = makeStyles(theme => ({
       width: 24,
       height: 24
     },
-    cardDivider: {
-      height: 3,
-      margin: "0 20px"
-    },
-    recentPaper: {
-      maxHeight: "calc(100% - 78px)",
-      overflow: "auto"
-    },
-    clearIcon: {
+}));
+
+export const quickAccessStyles = makeStyles(theme => ({
+  ...sharedStyles,
+  link: {
+    color: "#3db5e6",
+    fontSize: 16,
+    padding: "5px 10px",
+    fontWeight: 600,
+    display: "flex",
+    "&:hover": {
+      cursor: "pointer",
+      backgroundColor: `${theme.palette.primary.main}26`,
       color: theme.palette.text.primary,
-      fontSize: 8
+      textDecoration: "none"
     }
+  },
+  linkIcon: {
+    color: theme.palette.text.primary,
+    marginRight: 10,
+    fontSize: 20
+  },
+}));
+
+export const recentDocumentsStyles = makeStyles(theme => ({
+  ...sharedStyles,
+  flexTitle: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  recentPaper: {
+    maxHeight: "calc(100% - 78px)",
+    overflow: "auto"
+  },
+  clearIcon: {
+    color: theme.palette.text.primary,
+    fontSize: 8
+  }
+}));
+
+export const samplesDocumentsStyles = makeStyles(theme => ({
+  ...sharedStyles,
+  samplePaper: {
+    maxHeight: "calc(100% - 20px)"
+  },
+  cardDivider: {
+    height: 3,
+    margin: "0 20px"
+  },
+  columnSample: {
+    margin: 3,
+    overflow: "auto",
+    maxHeight: "calc(100% - 90px)"
+  }
 }));
 
 export const homeTabCardStyles = makeStyles(theme => ({
