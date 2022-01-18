@@ -119,12 +119,12 @@ export default class Graph {
   /**
    * @private
    */
-  loadLinks(links) {
-    const _links = links || {};
-    Object.keys(_links).forEach(linkId => {
-      this.addLink({ name: linkId, ..._links[linkId] });
+  loadLinks(links = {}) {
+    Object.entries(links).forEach(([id, value]) => {
+      this.addLink({ id, ...value });
     });
     this.removeLinksModal();
+
     return this;
   }
 
@@ -368,9 +368,8 @@ export default class Graph {
 
   addLink = data => {
     // link already exists, update
-    const link = this.links.get(data.name);
+    const link = this.links.get(data.id);
     if (link) {
-      // TODO: rename fn in BaseLink
       link.updateData({ Dependency: data.Dependency });
       return;
     }

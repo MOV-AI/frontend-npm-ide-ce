@@ -396,31 +396,30 @@ export default class BaseLink extends BaseLinkStruct {
    */
   toSave(portA, portB) {
     // find which port is the source and the target
-    const [src, trg] = this.getSrcTrg(portA, portB);
+    const values = this.getSrcTrg(portA, portB);
 
-    return {
-      sourceNode: src.node.data.id,
-      sourceType: src.node._template.template.Type ?? "",
-      sourcePort: src.data.name,
-      targetNode: trg.node.data.id,
-      targetType: trg.node._template.template.Type ?? "",
-      targetPort: trg.data.name
-    };
+    return values.map(item => {
+      const node = item.node.data.id;
+      const type = item.node._template?.Type ?? "";
+      const port = item.data.name;
+      const separator = type === "MovAI/Flow" ? "__" : "/";
+
+      return [node, port].join(separator);
+    });
   }
 
-  static parseLink({ name, From, To, Dependency }) {
+  static parseLink({ id, From, To, Dependency }) {
     const [sourceNode, sourcePort, sourceFullPath] = BaseLink.getNodePort(From);
     const [targetNode, targetPort, targetFullPath] = BaseLink.getNodePort(To);
 
     return {
-      id: name,
+      id,
       sourceNode,
       sourcePort,
       sourceFullPath,
       targetNode,
       targetPort,
       targetFullPath,
-      error: null,
       dependency: Dependency
     };
   }

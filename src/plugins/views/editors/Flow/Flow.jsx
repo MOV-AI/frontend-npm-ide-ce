@@ -282,6 +282,12 @@ const Flow = (props, ref) => {
       mainInterface.mode.portCtxMenu.onEnter.subscribe(evtData =>
         console.log("onPortCtxMenu", evtData)
       );
+      mainInterface.events.onAddLink.subscribe(evtData =>
+        alert({
+          location: "snackbar",
+          message: "Link created"
+        })
+      );
 
       mainInterface.canvas.events
         .pipe(
@@ -313,7 +319,7 @@ const Flow = (props, ref) => {
         )
         .subscribe(evtData => console.log("onLinkErrorMouseOver", evtData));
     },
-    [onNodeSelected, onFlowValidated]
+    [onNodeSelected, onFlowValidated, alert]
   );
 
   //========================================================================================

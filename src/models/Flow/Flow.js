@@ -10,6 +10,7 @@ import {
   SubFlow
 } from "./subModels"; // from internal subModels
 import GroupManager from "./subModels/Group/GroupManager";
+import { randomId } from "../../utils/Utils";
 import schema from "./schema";
 
 class Flow extends Model {
@@ -109,6 +110,21 @@ class Flow extends Model {
     this.parameters.setData(parameters);
 
     return this;
+  }
+
+  /**
+   * Add a new link
+   * @param {array} link : Link with format [<from>, <to>]
+   */
+  addLink(link) {
+    const [from, to] = link;
+    const id = randomId();
+
+    this.getLinks().setItem({ name: id, content: { from, to } });
+
+    const links = this.getLinks().serializeToDB();
+
+    return { id, ...links[id] };
   }
 
   //========================================================================================

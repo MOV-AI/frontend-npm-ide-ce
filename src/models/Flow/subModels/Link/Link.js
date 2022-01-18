@@ -7,12 +7,11 @@ class Link extends Model {
     super({ schema, ...arguments[0] });
   }
 
-  // Model properties
-  name = "";
   from = "";
   to = "";
+  dependency = 0;
 
-  observables = ["name", "from", "to"];
+  observables = ["id", "from", "to", "dependecy"];
 
   //========================================================================================
   /*                                                                                      *
@@ -38,6 +37,15 @@ class Link extends Model {
     return this;
   }
 
+  getDependency() {
+    return this.dependency;
+  }
+
+  setDependency(value) {
+    this.dependency = value;
+    return this;
+  }
+
   //========================================================================================
   /*                                                                                      *
    *                                      Serializers                                     *
@@ -46,27 +54,29 @@ class Link extends Model {
 
   serialize() {
     return {
-      name: this.getName(),
+      id: this.getId(),
       from: this.getFrom(),
-      to: this.getTo()
+      to: this.getTo(),
+      dependency: this.getDependency()
     };
   }
 
   serializeToDB() {
-    const { from, to } = this.serialize();
+    const { from, to, dependency } = this.serialize();
 
     return {
       From: from,
-      To: to
+      To: to,
+      Dependency: dependency
     };
   }
 
   static serializeOfDB(json) {
-    const name = Object.keys(json)[0];
+    const id = Object.keys(json)[0];
     const content = Object.values(json)[0];
-    const { From: from, To: to } = content;
+    const { From: from, To: to, Dependency: dependency } = content;
 
-    return { name, from, to };
+    return { id, from, to, dependency };
   }
 }
 
