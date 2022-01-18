@@ -7,7 +7,7 @@ const styles = theme => ({
     whiteSpace: "nowrap",
     textOverflow: "ellipsis",
     overflow: "hidden",
-    fontSize: 14
+    fontSize: "14px"
   },
   disabled: {
     color: "gray"
@@ -54,7 +54,7 @@ const styles = theme => ({
   portRow: {
     display: "flex",
     flexDirection: "column",
-    paddingLeft: "16px"
+    padding: "0 16px"
   },
   portName: {
     textAlign: "end",

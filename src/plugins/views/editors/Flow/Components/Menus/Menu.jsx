@@ -19,7 +19,7 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import useDataSubscriber from "../../../../../DocManager/useDataSubscriber";
 import DetailsMenu from "../../../_shared/DetailsMenu/DetailsMenu";
-import TableKeyValue from "./TableKeyValue";
+import TableKeyValue from "./sub-components/TableKeyValue";
 import styles from "./styles";
 
 const useStyles = makeStyles(styles);

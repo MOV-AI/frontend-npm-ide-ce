@@ -12,6 +12,7 @@ import FlowTopBar from "./Components/FlowTopBar/FlowTopBar";
 import FlowBottomBar from "./Components/FlowBottomBar/FlowBottomBar";
 import "./Resources/css/Flow.css";
 import { EVT_NAMES, EVT_TYPES } from "./events";
+import ContainerMenu from "./Components/Menus/ContainerMenu";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -114,11 +115,25 @@ const Flow = (props, ref) => {
   //========================================================================================
 
   /**
+   * @private Get Menu component based on node model (Flow or Node)
+   * @param {Stringimport("lodash").NullableChain} model : One of each "Flow" or "Node"
+   * @returns {ReactComponent} Reference to menu component
+   */
+  const getMenuComponent = useCallback((model = "") => {
+    const componentByModel = {
+      Node: NodeMenu,
+      Flow: ContainerMenu
+    };
+    return model in componentByModel ? componentByModel[model] : null;
+  }, []);
+
+  /**
    * Add node menu if any
    */
   const addNodeMenu = useCallback(
     node => {
-      if (!node) return;
+      const MenuComponent = getMenuComponent(node?.data?.model);
+      if (!node || !MenuComponent) return;
       call(
         "rightDrawer",
         "addBookmark",
@@ -126,20 +141,20 @@ const Flow = (props, ref) => {
           icon: <i className="icon-Nodes" />,
           name: NODE_MENU_NAME,
           view: (
-            <NodeMenu
+            <MenuComponent
               id={id}
               call={call}
               nodeInst={node}
               model={instance}
               openDoc={openDoc}
               editable={isEditableComponentRef.current}
-            ></NodeMenu>
+            />
           )
         },
         true
       );
     },
-    [NODE_MENU_NAME, call, id, instance, openDoc]
+    [NODE_MENU_NAME, call, id, instance, openDoc, getMenuComponent]
   );
 
   const renderRightMenu = useCallback(() => {
