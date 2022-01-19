@@ -1,4 +1,5 @@
 import { Authentication } from "@mov-ai/mov-fe-lib-core";
+import { DEFAULT_LAYOUT, DEFAULT_TABS } from "./Constants";
 import LocalStorage from "./LocalStorage";
 
 class Workspace {
@@ -14,26 +15,24 @@ class Workspace {
     this.LAYOUT_KEY = `movai.${USER_NAME}.${APP_NAME}.layout`;
     this.SELECTED_ROBOT_KEY = `movai.${USER_NAME}.${APP_NAME}.selectedRobot`;
     this.RECENT_DOCUMENTS_KEY = `movai.${USER_NAME}.${APP_NAME}.recentDocuments`;
-    this.layout = this.getLayout();
-    this.tabs = this.getTabs();
+    this.layoutAndTabs = this.getLayoutAndTabs();
+    this.layout = this.layoutAndTabs[0];
+    this.tabs = this.layoutAndTabs[1];
     this.recentDocuments = this.getRecentDocuments();
     this.selectedRobot = this.getSelectedRobot();
     this.defaultRecentDocuments = [];
   }
 
+  /**
+   * Destroys the instance of workspace
+   */
   destroy() {
     instance = null;
   }
 
-  //========================================================================================
-  /*                                                                                      *
-   *                                         Tabs                                         *
-   *                                                                                      */
-  //========================================================================================
-
   /**
-   * Set tabs Layout in local storage
-   * @param {LayoutData} layout : RC-Dock layout data
+   * Sets the layout
+   * @param {Object} layout 
    */
   setLayout(layout) {
     this.storage.set(this.LAYOUT_KEY, layout);
@@ -41,17 +40,22 @@ class Workspace {
   }
 
   /**
-   * Get tabs layout from local storage
-   * @param {LayoutData} defaultLayout : Default Layout data to be returned in case there's nothing in local storage
-   * @returns {LayoutData} Layout from local storage or defaultLayout value
+   * Gets layout and tabs for the Layout
+   * @returns {Array} with the layout and tabs
    */
-  getLayout(defaultLayout) {
-    return this.storage.get(this.LAYOUT_KEY) ?? defaultLayout;
+  getLayoutAndTabs() {
+    const tabs = this.getTabs();
+
+    if(!tabs.size){
+      return [DEFAULT_LAYOUT, DEFAULT_TABS];
+    }
+
+    return [this.storage.get(this.LAYOUT_KEY), tabs];
   }
 
   /**
-   * Set open tabs info in local storage
-   * @param {Map<TabData>} tabs Map of tab data currently open
+   * Sets the tabs for the Layout
+   * @param {Map} tabs 
    */
   setTabs(tabs) {
     const tabsObj = Object.fromEntries(tabs);
@@ -99,22 +103,21 @@ class Workspace {
 
   /**
    * Sets the Recent Documents in the layout
-   * @param {*} layout 
+   * @param {Object} recentDocuments 
    */
-  setRecentDocuments(layout) {
-    this.storage.set(this.RECENT_DOCUMENTS_KEY, layout);
-    this.recentDocuments = layout;
+  setRecentDocuments(recentDocuments) {
+    this.storage.set(this.RECENT_DOCUMENTS_KEY, recentDocuments);
+    this.recentDocuments = recentDocuments;
   }
 
   /**
-   * Gets the Recent Documents 
-   * @param {*} defaultLayout 
-   * @returns 
+   * Gets the Recent Documents or the default if it doesn't exist in the local storage
+   * @param {Object} defaultRecentDocuments 
+   * @returns {Object} with the Recent Documents
    */
-  getRecentDocuments(defaultLayout = this.defaultRecentDocuments) {
-    return this.storage.get(this.RECENT_DOCUMENTS_KEY) ?? defaultLayout;
+  getRecentDocuments(defaultRecentDocuments = this.defaultRecentDocuments) {
+    return this.storage.get(this.RECENT_DOCUMENTS_KEY) ?? defaultRecentDocuments;
   }
-
 }
 
 let instance = null;

@@ -1,23 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { Tooltip } from "@material-ui/core";
+import { HOMETAB_PROFILE, DEFAULT_LAYOUT } from "../../../utils/Constants";
 import { getIconByScope } from "../../../utils/Utils";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Workspace from "../../../utils/Workspace";
 import HomeTab from "../HomeTab/HomeTab";
 import TOPICS from "./topics";
-
-const HomeTabProfile = { name: "HomeTab", title: "Welcome" };
-const DEFAULT_LAYOUT = {
-  dockbox: {
-    mode: "horizontal",
-    children: [{tabs: [{
-      id: HomeTabProfile.name,
-    }]}]
-  },
-  windowbox: { children: [] },
-  maxbox: { children: [] },
-  floatbox: { children: [] }
-};
 
 const useLayout = (props, dockRef) => {
   const { emit, call, on } = props;
@@ -321,18 +309,18 @@ const useLayout = (props, dockRef) => {
    */
   const installHomeTabPlugin = useCallback(() => {
     const viewPlugin = new HomeTab(
-      HomeTabProfile,
+      HOMETAB_PROFILE,
       { workspaceManager }
     );
 
-    return PluginManagerIDE.install(HomeTabProfile.name, viewPlugin).then(() => {
+    return PluginManagerIDE.install(HOMETAB_PROFILE.name, viewPlugin).then(() => {
       // Create and return tab data
       // Return TabData
       return {
-        id: HomeTabProfile.name,
-        name: HomeTabProfile.title,
-        tabTitle: HomeTabProfile.title,
-        scope: HomeTabProfile.name,
+        id: HOMETAB_PROFILE.name,
+        name: HOMETAB_PROFILE.title,
+        tabTitle: HOMETAB_PROFILE.title,
+        scope: HOMETAB_PROFILE.name,
         extension: "",
         content: viewPlugin.render()
       };
@@ -498,20 +486,15 @@ const useLayout = (props, dockRef) => {
    * Load workspace
    */
   useEffect(() => {
-    const lastTabs = workspaceManager.getTabs();
-    const lastLayout = workspaceManager.getLayout(DEFAULT_LAYOUT);
+    const [ lastLayout, lastTabs ] = workspaceManager.getLayoutAndTabs();
     const tabs = [];
-
-    if(!lastTabs.size){
-      lastTabs.set(HomeTabProfile.name, {});
-    }
 
     tabsById.current = lastTabs;
     // Install current tabs plugins
     lastTabs.forEach(tab => {
       const { id, name, scope } = tab;
       
-      if(id === HomeTabProfile.name)
+      if(id === HOMETAB_PROFILE.name)
         tabs.push(installHomeTabPlugin());
       else
         tabs.push(_getTabData({ id, name, scope }));
