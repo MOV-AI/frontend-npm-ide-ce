@@ -17,37 +17,12 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 import Add from "@material-ui/icons/Add";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
-import TableKeyValue from "./TableKeyValue";
-import DetailsMenu from "../../../_shared/DetailsMenu/DetailsMenu";
 import useDataSubscriber from "../../../../../DocManager/useDataSubscriber";
+import DetailsMenu from "../../../_shared/DetailsMenu/DetailsMenu";
+import TableKeyValue from "./sub-components/TableKeyValue";
+import styles from "./styles";
 
-const useStyles = makeStyles(theme => ({
-  itemValue: {
-    padding: "15px 15px 15px 25px",
-    whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
-    overflow: "hidden",
-    fontSize: 14
-  },
-  disabled: {
-    color: "gray"
-  },
-  parametersContainer: {
-    overflowY: "auto",
-    overflowX: "hidden",
-    padding: "0px 6px 0px 6px",
-    flexGrow: 1,
-    minHeight: 0
-  },
-  groupRow: {
-    display: "flex",
-    flexDirection: "row"
-  },
-  groupItem: {
-    flexGrow: 1,
-    padding: "10px 25px"
-  }
-}));
+const useStyles = makeStyles(styles);
 
 const ACTIVE_ITEM = {
   description: 1,

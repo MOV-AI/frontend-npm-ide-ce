@@ -76,9 +76,9 @@ const FlowBottomBar = props => {
 
     props.openFlow({
       id: name,
+      scope: type,
       workspace,
       name,
-      type,
       version,
       ctrlKey: event.ctrlKey
     });
