@@ -1,4 +1,5 @@
 import { Authentication } from "@mov-ai/mov-fe-lib-core";
+import { DEFAULT_LAYOUT, DEFAULT_TABS } from "./Constants";
 import LocalStorage from "./LocalStorage";
 
 class Workspace {
@@ -13,40 +14,75 @@ class Workspace {
     this.TABS_KEY = `movai.${USER_NAME}.${APP_NAME}.tabs`;
     this.LAYOUT_KEY = `movai.${USER_NAME}.${APP_NAME}.layout`;
     this.RECENT_DOCUMENTS_KEY = `movai.${USER_NAME}.${APP_NAME}.recentDocuments`;
-    this.layout = this.getLayout();
-    this.tabs = this.getTabs();
+    this.layoutAndTabs = this.getLayoutAndTabs();
+    this.layout = this.layoutAndTabs[0];
+    this.tabs = this.layoutAndTabs[1];
     this.recentDocuments = this.getRecentDocuments();
     this.defaultRecentDocuments = [];
   }
 
+  /**
+   * Destroys the instance of workspace
+   */
   destroy() {
     instance = null;
   }
 
-  setRecentDocuments(layout) {
-    this.storage.set(this.RECENT_DOCUMENTS_KEY, layout);
-    this.recentDocuments = layout;
+  /**
+   * Sets the Recent Documents
+   * @param {Object} recentDocuments 
+   */
+  setRecentDocuments(recentDocuments) {
+    this.storage.set(this.RECENT_DOCUMENTS_KEY, recentDocuments);
+    this.recentDocuments = recentDocuments;
   }
 
-  getRecentDocuments(defaultLayout = this.defaultRecentDocuments) {
-    return this.storage.get(this.RECENT_DOCUMENTS_KEY) ?? defaultLayout;
+  /**
+   * Gets the Recent Documents or the default if it doesn't exist in the local storage
+   * @param {Object} defaultRecentDocuments 
+   * @returns {Object} with the Recent Documents
+   */
+  getRecentDocuments(defaultRecentDocuments = this.defaultRecentDocuments) {
+    return this.storage.get(this.RECENT_DOCUMENTS_KEY) ?? defaultRecentDocuments;
   }
 
+  /**
+   * Sets the layout
+   * @param {Object} layout 
+   */
   setLayout(layout) {
     this.storage.set(this.LAYOUT_KEY, layout);
     this.layout = layout;
   }
 
-  getLayout(defaultLayout) {
-    return this.storage.get(this.LAYOUT_KEY) ?? defaultLayout;
+  /**
+   * Gets layout and tabs for the Layout
+   * @returns {Array} with the layout and tabs
+   */
+  getLayoutAndTabs() {
+    const tabs = this.getTabs();
+
+    if(!tabs.size){
+      return [DEFAULT_LAYOUT, DEFAULT_TABS];
+    }
+
+    return [this.storage.get(this.LAYOUT_KEY), tabs];
   }
 
+  /**
+   * Sets the tabs for the Layout
+   * @param {Map} tabs 
+   */
   setTabs(tabs) {
     const tabsObj = Object.fromEntries(tabs);
     this.storage.set(this.TABS_KEY, tabsObj);
     this.tabs = tabs;
   }
 
+  /**
+   * Gets the tabs for the Layout
+   * @returns {Map} with the Stored Tabs
+   */
   getTabs() {
     const storedTabs = this.storage.get(this.TABS_KEY) ?? {};
     return new Map(Object.entries(storedTabs));

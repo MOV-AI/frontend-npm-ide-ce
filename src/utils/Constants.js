@@ -13,3 +13,25 @@ export const SCOPES = {
   Flow: "Flow",
   Node: "Node"
 };
+
+//========================================================================================
+/*                                                                                      *
+ *                                   Layout Constants                                   *
+ *                                                                                      */
+//========================================================================================
+
+export const HOMETAB_PROFILE = { name: "HomeTab", title: "Welcome" };
+
+export const DEFAULT_TABS = new Map(Object.entries({[HOMETAB_PROFILE.name]: { id: HOMETAB_PROFILE.name }}));
+
+export const DEFAULT_LAYOUT = {
+  dockbox: {
+    mode: "horizontal",
+    children: [{tabs: [{
+      id: HOMETAB_PROFILE.name,
+    }]}]
+  },
+  windowbox: { children: [] },
+  maxbox: { children: [] },
+  floatbox: { children: [] }
+};
