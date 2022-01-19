@@ -498,12 +498,13 @@ const useLayout = (props, dockRef) => {
    * Load workspace
    */
   useEffect(() => {
+    let lastLayout = workspaceManager.getLayout(DEFAULT_LAYOUT);
     const lastTabs = workspaceManager.getTabs();
-    const lastLayout = workspaceManager.getLayout(DEFAULT_LAYOUT);
     const tabs = [];
 
     if(!lastTabs.size){
-      lastTabs.set(HomeTabProfile.name, {});
+      lastTabs.set(HomeTabProfile.name, { id: HomeTabProfile.name });
+      lastLayout = DEFAULT_LAYOUT;
     }
 
     tabsById.current = lastTabs;
