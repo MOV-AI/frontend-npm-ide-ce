@@ -7,6 +7,7 @@ import {
   MenuItem,
   Select
 } from "@material-ui/core";
+import NodeModel from "../../../../../../../../models/Node/Node";
 import { DEFAULT_FUNCTION } from "../../../../../_shared/mocks";
 import { useTranslation } from "react-i18next";
 
@@ -159,6 +160,9 @@ PropertiesSection.propTypes = {
 PropertiesSection.defaultProps = {
   editable: false,
   templateData: {},
+  persistent: NodeModel.defaults.persistent,
+  remappable: NodeModel.defaults.remappable,
+  launch: NodeModel.defaults.launch,
   onChangeProperties: () => DEFAULT_FUNCTION("onChangeProperties")
 };
 

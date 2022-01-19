@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { Divider, Link, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -12,8 +12,8 @@ const PortsDetails = props => {
   // Props
   const { openDoc, templateData } = props;
   // State Hooks
-  const [inputPorts, setInputPorts] = React.useState([]);
-  const [outputPorts, setOutputPorts] = React.useState([]);
+  const [inputPorts, setInputPorts] = useState([]);
+  const [outputPorts, setOutputPorts] = useState([]);
   // Other Hooks
   const classes = useStyles();
   const { t } = useTranslation();
@@ -36,15 +36,16 @@ const PortsDetails = props => {
       const port = ports[portName];
       const inputs = Object.values(port.In);
       const outputs = Object.values(port.Out);
-      if (inputs.length) {
+      const callbacks = inputs.map(el => el.Callback).filter(cb => cb);
+      // Add input ports
+      inputs.some(() =>
         _inputPorts.push({
           name: portName,
-          value: inputs.map(el => el.Callback)
-        });
-      }
-      if (outputs.length) {
-        _outputPorts.push({ name: portName });
-      }
+          value: callbacks
+        })
+      );
+      // Add output ports
+      outputs.some(() => _outputPorts.push({ name: portName }));
     });
     // Set input/output ports
     setInputPorts(_inputPorts);

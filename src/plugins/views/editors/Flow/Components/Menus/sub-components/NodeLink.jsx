@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import styles from "../styles";
 import { makeStyles } from "@material-ui/styles";
 import { Link } from "@material-ui/core";
@@ -24,7 +24,7 @@ const NodeLink = props => {
    * On click link : open document
    * @param {Event} event : Click event
    */
-  const onClickLink = React.useCallback(
+  const onClickLink = useCallback(
     event => {
       openDoc({
         name,

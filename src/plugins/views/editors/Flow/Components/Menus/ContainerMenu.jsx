@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { Collapse, Divider, ListItem, ListItemText } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
@@ -11,8 +11,8 @@ const ContainerMenu = props => {
   // Props
   const { nodeInst, call, openDoc, editable } = props;
   // State hooks
-  const [templateData, setTemplateData] = React.useState({});
-  const [expanded, setExpanded] = React.useState(false);
+  const [templateData, setTemplateData] = useState({});
+  const [expanded, setExpanded] = useState(false);
   // Other hooks
   const { t } = useTranslation();
   const data = nodeInst.data;
