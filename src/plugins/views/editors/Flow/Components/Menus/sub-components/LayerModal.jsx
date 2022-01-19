@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import TextField from "@material-ui/core/TextField";
 import { validateDocumentName } from "../../../_shared/Utils/Utils";
 import { useTranslation } from "react-i18next";
+import { DEFAULT_FUNCTION } from "../../../../_shared/mocks";
 
 const useStyles = makeStyles(theme => ({
   input: {
@@ -59,7 +60,7 @@ const LayerModal = props => {
         props.handleCloseModal();
         setValidation(DEFAULT_VALIDATION);
       }}
-      onEnter={() => {}}
+      onEnter={() => DEFAULT_FUNCTION("onEnter")}
       open={props.openModal}
       title={props.isNewLayer === true ? t("New Group") : t("Edit Group")}
       submitText={t("Save")}
@@ -105,8 +106,8 @@ LayerModal.propTypes = {
 LayerModal.defaultProps = {
   dataName: "",
   dataId: "0",
-  handleModalConfirm: () => {},
-  handleCloseModal: () => {},
+  handleModalConfirm: () => DEFAULT_FUNCTION("handleModalConfirm"),
+  handleCloseModal: () => DEFAULT_FUNCTION("handleCloseModal"),
   handleValidation: () => true,
   isNewLayer: false,
   openModal: false
