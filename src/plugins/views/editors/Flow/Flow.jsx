@@ -5,6 +5,7 @@ import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { FLOW_VIEW_MODE } from "./Constants/constants";
 import InfoIcon from "@material-ui/icons/Info";
+import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import BaseFlow from "./Views/BaseFlow";
 import Menu from "./Components/Menus/Menu";
 import NodeMenu from "./Components/Menus/NodeMenu";
@@ -13,6 +14,7 @@ import FlowBottomBar from "./Components/FlowBottomBar/FlowBottomBar";
 import "./Resources/css/Flow.css";
 import { EVT_NAMES, EVT_TYPES } from "./events";
 import ContainerMenu from "./Components/Menus/ContainerMenu";
+import LinkMenu from "./Components/Menus/LinkMenu";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -39,9 +41,11 @@ const Flow = (props, ref) => {
   const mainInterfaceRef = React.useRef();
   const debounceSelection = React.useRef();
   const selectedNodeRef = React.useRef();
+  const selectedLinkRef = React.useRef();
   const isEditableComponentRef = React.useRef(true);
   // Global consts
   const NODE_MENU_NAME = `${id}-node-menu`;
+  const LINK_MENU_NAME = `${id}-link-menu`;
 
   //========================================================================================
   /*                                                                                      *
@@ -157,6 +161,34 @@ const Flow = (props, ref) => {
     [NODE_MENU_NAME, call, id, instance, openDoc, getMenuComponent]
   );
 
+  /**
+   * Add link right menu if any
+   * @param {Link} link : Link to be rendered in menu
+   */
+  const addLinkMenu = useCallback(
+    link => {
+      if (!link) return;
+      call(
+        "rightDrawer",
+        "addBookmark",
+        {
+          icon: <CompareArrowsIcon />,
+          name: LINK_MENU_NAME,
+          view: (
+            <LinkMenu
+              id={id}
+              call={call}
+              link={link.data}
+              sourceMessage={link?.src?.data?.message}
+            />
+          )
+        },
+        true
+      );
+    },
+    [LINK_MENU_NAME, call, id]
+  );
+
   const renderRightMenu = useCallback(() => {
     const details = props.data?.details || {};
     const menuName = `${id}-detail-menu`;
@@ -178,7 +210,8 @@ const Flow = (props, ref) => {
     });
     // Add node menu if any is selected
     addNodeMenu(selectedNodeRef.current);
-  }, [call, id, name, instance, props.data, addNodeMenu]);
+    addLinkMenu(selectedLinkRef.current);
+  }, [call, id, name, instance, props.data, addNodeMenu, addLinkMenu]);
 
   usePluginMethods(ref, {
     renderRightMenu
@@ -280,6 +313,22 @@ const Flow = (props, ref) => {
   );
 
   /**
+   * On Link selected
+   * @param {BaseLink} link : Link instance
+   */
+  const onLinkSelected = useCallback(
+    link => {
+      selectedLinkRef.current = link;
+      if (!link) {
+        call("rightDrawer", "removeBookmark", LINK_MENU_NAME);
+      } else {
+        addLinkMenu(link);
+      }
+    },
+    [call, LINK_MENU_NAME, addLinkMenu]
+  );
+
+  /**
    * Subscribe to mainInterface and canvas events
    */
   const onReady = useCallback(
@@ -300,6 +349,7 @@ const Flow = (props, ref) => {
       // When enter default mode remove other node/sub-flow bookmarks
       mainInterface.mode.default.onEnter.subscribe(() => {
         onNodeSelected(null);
+        onLinkSelected(null);
       });
 
       mainInterface.mode.addNode.onClick.subscribe(evtData =>
@@ -320,6 +370,13 @@ const Flow = (props, ref) => {
       mainInterface.mode.portCtxMenu.onEnter.subscribe(evtData =>
         console.log("onPortCtxMenu", evtData)
       );
+
+      // Select Link event
+      mainInterface.canvas.events
+        .pipe(
+          filter(event => event.name === "onClick" && event.type === "Link")
+        )
+        .subscribe(event => onLinkSelected(event.data));
 
       mainInterface.canvas.events
         .pipe(
@@ -351,7 +408,7 @@ const Flow = (props, ref) => {
         )
         .subscribe(evtData => console.log("onLinkErrorMouseOver", evtData));
     },
-    [onNodeSelected, onFlowValidated]
+    [onNodeSelected, onFlowValidated, onLinkSelected]
   );
 
   //========================================================================================
