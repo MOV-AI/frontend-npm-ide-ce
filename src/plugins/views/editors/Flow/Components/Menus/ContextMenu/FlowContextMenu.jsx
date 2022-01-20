@@ -29,21 +29,21 @@ const FlowContextMenu = props => {
 
   const getNodeOptions = [
     {
-      element: t("Delete"),
+      label: t("Delete"),
       icon: <DeleteOutlineIcon />,
       onClick: () => handleOptionsClick(onNodeDelete)
     }
   ];
   const getSubFlowOptions = [
     {
-      element: t("Delete"),
+      label: t("Delete"),
       icon: <DeleteOutlineIcon />,
       onClick: () => handleOptionsClick(onSubFlowDelete)
     }
   ];
   const getLinkOptions = [
     {
-      element: t("Delete"),
+      label: t("Delete"),
       icon: <DeleteOutlineIcon />,
       onClick: () => handleOptionsClick(onLinkDelete)
     }
