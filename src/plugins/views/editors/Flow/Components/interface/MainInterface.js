@@ -164,6 +164,26 @@ export default class MainInterface {
     }
   };
 
+  deleteLink = linkId => {
+    this.modelView.current.deleteLink(linkId);
+    this.graph.deleteLinks([linkId]);
+  };
+
+  deleteNode = (nodeId, deletedLinks) => {
+    this.graph.deleteNode(nodeId);
+    this.graph.deleteLinks(deletedLinks);
+  };
+
+  deleteNodeInst = nodeId => {
+    const deletedLinks = this.modelView.current.deleteNode(nodeId);
+    this.deleteNode(nodeId, deletedLinks);
+  };
+
+  deleteSubFlow = subFlowId => {
+    const deletedLinks = this.modelView.current.deleteSubFlow(subFlowId);
+    this.deleteNode(subFlowId, deletedLinks);
+  };
+
   //========================================================================================
   /*                                                                                      *
    *                                      Subscribers                                     *

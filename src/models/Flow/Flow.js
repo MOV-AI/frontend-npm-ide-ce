@@ -169,6 +169,41 @@ class Flow extends Model {
     return this;
   }
 
+  addNode() {}
+
+  deleteNode(nodeId) {
+    this.getNodeInstances().deleteItem(nodeId);
+    return this.deleteNodeLinks(nodeId);
+  }
+
+  addSubFlow() {}
+
+  deleteSubFlow(subFlowId) {
+    this.getSubFlows().deleteItem(subFlowId);
+    return this.deleteNodeLinks(subFlowId);
+  }
+
+  /**
+   * Deletes links connected to the node (nodeInst or subFlow)
+   * @param {string} id : The node (nodeInst or subFlow) id
+   * @returns
+   */
+  deleteNodeLinks = id => {
+    const deletedLinks = [];
+
+    // delete all links connected to the node
+    this.getLinks().data.forEach((item, key) => {
+      // check if the link belongs to the node
+      if (item.getNodes().includes(id)) {
+        this.deleteLink(key);
+
+        deletedLinks.push(key);
+      }
+    });
+
+    return deletedLinks;
+  };
+
   /**
    * Add a new link
    * @param {array} link : Link with format [<from>, <to>]
@@ -182,6 +217,16 @@ class Flow extends Model {
     const links = this.getLinks().serializeToDB();
 
     return { id, ...links[id] };
+  }
+
+  deleteLink(id) {
+    this.getLinks().deleteItem(id);
+  }
+
+  addExposedPort() {}
+
+  deleteExposedPort(id) {
+    this.getExposedPorts().deleteItem(id);
   }
 
   //========================================================================================
