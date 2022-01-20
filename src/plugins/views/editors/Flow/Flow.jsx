@@ -179,6 +179,7 @@ const Flow = (props, ref) => {
               id={id}
               call={call}
               link={link.data}
+              flowModel={instance}
               sourceMessage={link?.src?.data?.message}
             />
           )
@@ -186,7 +187,7 @@ const Flow = (props, ref) => {
         true
       );
     },
-    [LINK_MENU_NAME, call, id]
+    [LINK_MENU_NAME, call, id, instance]
   );
 
   const renderRightMenu = useCallback(() => {
@@ -319,6 +320,7 @@ const Flow = (props, ref) => {
   const onLinkSelected = useCallback(
     link => {
       selectedLinkRef.current = link;
+      getMainInterface().selectedLink = link;
       if (!link) {
         call("rightDrawer", "removeBookmark", LINK_MENU_NAME);
       } else {
@@ -400,7 +402,10 @@ const Flow = (props, ref) => {
       // Select Link event
       mainInterface.canvas.events
         .pipe(
-          filter(event => event.name === "onClick" && event.type === "Link")
+          filter(
+            event =>
+              event.name === EVT_NAMES.ON_CLICK && event.type === EVT_TYPES.LINK
+          )
         )
         .subscribe(event => onLinkSelected(event.data));
 

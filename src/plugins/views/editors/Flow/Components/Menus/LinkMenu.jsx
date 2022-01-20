@@ -29,7 +29,7 @@ const useStyles = makeStyles(theme => ({
 
 const LinkMenu = props => {
   // Props
-  const { link, editable, sourceMessage } = props;
+  const { link, editable, sourceMessage, flowModel } = props;
   // State Hooks
   const [dependencyLevel, setDependencyLevel] = useState(0);
   // Other Hooks
@@ -61,10 +61,14 @@ const LinkMenu = props => {
    * Handle change event on dependency select box
    * @param {Event} evt : Change event
    */
-  const onChangeDependency = useCallback(evt => {
-    const value = evt.target.value;
-    setDependencyLevel(value);
-  }, []);
+  const onChangeDependency = useCallback(
+    evt => {
+      const value = evt.target.value;
+      flowModel.current.setLinkDependency(link.id, value);
+      setDependencyLevel(value);
+    },
+    [flowModel, link]
+  );
 
   //========================================================================================
   /*                                                                                      *
@@ -74,8 +78,9 @@ const LinkMenu = props => {
 
   // On component mount or change Link prop
   useEffect(() => {
-    setDependencyLevel(link.Dependency || 0);
-  }, [link]);
+    const dependency = flowModel.current.getLinkDependency(link.id);
+    setDependencyLevel(dependency);
+  }, [link, flowModel]);
 
   //========================================================================================
   /*                                                                                      *

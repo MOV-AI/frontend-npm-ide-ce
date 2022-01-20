@@ -184,6 +184,24 @@ class Flow extends Model {
     return { id, ...links[id] };
   }
 
+  /**
+   * Set link dependency level
+   * @param {string} linkId : Link ID
+   * @param {number} dependecyLevel : Dependency level
+   */
+  setLinkDependency(linkId, dependecyLevel) {
+    this.getLinks().getItem(linkId).setDependency(dependecyLevel);
+  }
+
+  /**
+   *
+   * @param {*} linkId
+   * @returns
+   */
+  getLinkDependency(linkId) {
+    return this.getLinks().getItem(linkId).getDependency();
+  }
+
   //========================================================================================
   /*                                                                                      *
    *                                    Event Handlers                                    *
