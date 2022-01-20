@@ -2,7 +2,8 @@ const TOPICS = {
   updateDocs: "updateDocs",
   loadDocs: "loadDocs",
   updateDocDirty: "updateDocDirty",
-  deleteDoc: "deleteDoc"
+  deleteDoc: "deleteDoc",
+  saveDoc: "saveDoc"
 };
 
 export default TOPICS;

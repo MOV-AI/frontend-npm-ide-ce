@@ -10,11 +10,22 @@ class SubFlow extends Model {
     super({ schema, ...arguments[0] });
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Events                                        *
+   *                                                                                      */
+  //========================================================================================
+
   propEvents = {
     onAny: (event, name, value) => this.propsUpdate(event, name, value)
   };
 
-  // Model properties
+  //========================================================================================
+  /*                                                                                      *
+   *                                   Model Properties                                   *
+   *                                                                                      */
+  //========================================================================================
+
   template = "";
   position = new Position();
   parameters = new Manager("parameters", Parameter, this.propEvents);
@@ -28,19 +39,38 @@ class SubFlow extends Model {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Returns the template property
+   * @returns {string}
+   */
   getTemplate() {
     return this.template;
   }
 
+  /**
+   * Sets the template property
+   * @param {string} value : The new value
+   * @returns {SubFlow}
+   */
   setTemplate(value) {
     this.template = value;
     return this;
   }
 
+  /**
+   * Returns the subflow's position object
+   * @returns {Position}
+   */
   getPosition() {
     return this.position;
   }
 
+  /**
+   * Sets the subflow's position
+   * @param {number} x : Coordinate x
+   * @param {number} y : Coordinate y
+   * @returns
+   */
   setPosition(x, y) {
     this.position.setData({ x, y });
     this.dispatch(
@@ -51,10 +81,19 @@ class SubFlow extends Model {
     return this;
   }
 
+  /**
+   * Returns the parameters manager
+   * @returns {Manager}
+   */
   getParameters() {
     return this.parameters;
   }
 
+  /**
+   * Updates the properties of the instance
+   * @param {object} json : The data to update the instance
+   * @returns {SubFlow} : The instance
+   */
   setData(json) {
     const { name, template, position, parameters } = json;
     super.setData({ name, template });
@@ -65,7 +104,7 @@ class SubFlow extends Model {
 
   //========================================================================================
   /*                                                                                      *
-   *                                        Events                                        *
+   *                                    Event Handlers                                    *
    *                                                                                      */
   //========================================================================================
 
@@ -80,6 +119,10 @@ class SubFlow extends Model {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Returns the instance properties serialized
+   * @returns {object}
+   */
   serialize() {
     return {
       name: this.getName(),
@@ -89,6 +132,11 @@ class SubFlow extends Model {
     };
   }
 
+  /**
+   * Returns the instance properties serialized to
+   * the database format
+   * @returns {object}
+   */
   serializeToDB() {
     const { name, template } = this.serialize();
 
@@ -100,6 +148,17 @@ class SubFlow extends Model {
     };
   }
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Static                                        *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Returns properties serialized from the database format
+   * @param {object} json : The data received from the database
+   * @returns {object}
+   */
   static serializeOfDB(json) {
     const name = Object.keys(json)[0];
     const content = Object.values(json)[0];

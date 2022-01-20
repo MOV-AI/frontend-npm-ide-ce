@@ -4,9 +4,6 @@ test("Smoke test", () => {
   const obj = new Link();
 
   expect(obj).toBeInstanceOf(Link);
-  expect(obj.getName()).toBe("");
-  expect(obj.getFrom()).toBe("");
-  expect(obj.getTo()).toBe("");
 });
 
 test("Serialize OF db", () => {
@@ -19,7 +16,7 @@ test("Serialize OF db", () => {
   };
 
   const expected = {
-    name: id,
+    id,
     from: "test2/p2/out",
     to: "test/p1/in"
   };
@@ -29,7 +26,7 @@ test("Serialize OF db", () => {
 
 test("Serialize TO db", () => {
   const data = {
-    name: "5f148e55-38d0-4bbf-a66a-da2c99dd56ae",
+    id: "5f148e55-38d0-4bbf-a66a-da2c99dd56ae",
     from: "test2/p2/out",
     to: "test/p1/in"
   };
@@ -56,7 +53,7 @@ test("serialize", () => {
   const obj = new Link();
   obj.setData(Link.serializeOfDB(content));
 
-  const expected = { name: id, from: content[id].From, to: content[id].To };
+  const expected = { id, from: content[id].From, to: content[id].To };
 
   expect(obj.serialize()).toMatchObject(expected);
 });
