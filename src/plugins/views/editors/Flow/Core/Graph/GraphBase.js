@@ -323,6 +323,22 @@ export default class Graph {
     }
   };
 
+  /**
+   * Deletes a node and the connected links
+   * @param {string} nodeId : The node id
+   * @returns {boolean} : True on success, false otherwise
+   */
+  deleteNode = nodeId => {
+    const node = this.nodes.get(nodeId);
+
+    // Delete the links connected with the node
+    this.deleteLinks(node.links);
+
+    // Delete the node
+    node.obj.destroy();
+    return this.nodes.delete(nodeId);
+  };
+
   updateExposedPorts = exposedPorts => {
     this.loadExposedPorts(exposedPorts);
   };
@@ -414,28 +430,19 @@ export default class Graph {
   };
 
   /**
-   * @param {array} links array of ids to KEEP
+   * Deletes the links and remove references in nodes
+   * @param {array} linksToDelete : Array of link ids to delete
    */
-  deleteLinks = linksToKeep => {
-    // get which links we need to delete
-    // links to delete = existing links - links to keep
-    const linksToDelete = Array.from(this.links.keys()).filter(
-      val => !linksToKeep.includes(val)
-    );
-
+  deleteLinks = linksToDelete => {
     // delete the links
     linksToDelete.forEach(linkId => {
-      this.links.get(linkId).destroy();
+      this.links.get(linkId)?.destroy();
       this.links.delete(linkId);
     });
 
-    // remove linksToDelete from array with links in nodes
-    Array.from(this.nodes.entries()).forEach(entry => {
-      // entry: [key, value]
-      // value: {obj: <node instance>, links: <[]>}
-      entry[1].links = entry[1].links.filter(
-        val => !linksToDelete.includes(val)
-      );
+    // delete the reference to the links
+    this.nodes.forEach(node => {
+      node.links = node.links.filter(linkId => !linksToDelete.includes(linkId));
     });
   };
 

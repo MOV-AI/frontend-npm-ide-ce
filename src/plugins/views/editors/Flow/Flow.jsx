@@ -11,10 +11,14 @@ import Menu from "./Components/Menus/Menu";
 import NodeMenu from "./Components/Menus/NodeMenu";
 import FlowTopBar from "./Components/FlowTopBar/FlowTopBar";
 import FlowBottomBar from "./Components/FlowBottomBar/FlowBottomBar";
+import FlowContextMenu from "./Components/Menus/ContextMenu/FlowContextMenu";
+
 import "./Resources/css/Flow.css";
 import { EVT_NAMES, EVT_TYPES } from "./events";
 import ContainerMenu from "./Components/Menus/ContainerMenu";
 import LinkMenu from "./Components/Menus/LinkMenu";
+
+const t = v => v;
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -34,6 +38,11 @@ const Flow = (props, ref) => {
   const [runningFlow, setRunningFlow] = useState("");
   const [warnings, setWarnings] = useState([]);
   const [viewMode, setViewMode] = useState(FLOW_VIEW_MODE.default);
+  const [contextMenuOptions, setContextMenuOptions] = useState({
+    open: false,
+    position: { x: 0, y: 0 }
+  });
+
   // Other Hooks
   const classes = useStyles();
   // Refs
@@ -330,12 +339,18 @@ const Flow = (props, ref) => {
     [call, LINK_MENU_NAME, addLinkMenu]
   );
 
+  const handleContextClose = useCallback(() => {
+    setContextMenuOptions({ anchorPosition: null });
+    getMainInterface().setMode("default");
+  }, []);
+
   /**
    * Subscribe to mainInterface and canvas events
    */
   const onReady = useCallback(
     mainInterface => {
       // Subscribe to on node select event
+
       mainInterface.mode.selectNode.onEnter.subscribe(() => {
         const selectedNodes = mainInterface.selectedNodes;
         const node = selectedNodes.length !== 1 ? null : selectedNodes[0];
@@ -354,29 +369,55 @@ const Flow = (props, ref) => {
         onLinkSelected(null);
       });
 
+      // Subscribe to node instance/sub flow context menu events
+      mainInterface.mode.nodeCtxMenu.onEnter.subscribe(evtData => {
+        const anchorPosition = {
+          left: evtData.event.clientX,
+          top: evtData.event.clientY
+        };
+        setContextMenuOptions({
+          args: evtData.node,
+          mode: evtData.node?.data?.type,
+          anchorPosition,
+          onClose: handleContextClose
+        });
+      });
+
       mainInterface.mode.addNode.onClick.subscribe(evtData =>
         console.log("dlgNewNode", evtData)
       );
+
       mainInterface.mode.addFlow.onClick.subscribe(evtData =>
         console.log("dlgNewFlow", evtData)
       );
-      mainInterface.mode.nodeCtxMenu.onEnter.subscribe(evtData =>
-        console.log("onNodeCtxMenu", evtData)
-      );
-      mainInterface.mode.canvasCtxMenu.onEnter.subscribe(evtData =>
-        console.log("onCanvasCtxMenu", evtData)
-      );
-      mainInterface.mode.linkCtxMenu.onEnter.subscribe(evtData =>
-        console.log("onLinkCtxMenu", evtData)
-      );
-      mainInterface.mode.portCtxMenu.onEnter.subscribe(evtData =>
-        console.log("onPortCtxMenu", evtData)
-      );
+
+      // Subscribe to link context menu events
+      mainInterface.mode.linkCtxMenu.onEnter.subscribe(evtData => {
+        const anchorPosition = {
+          left: evtData.event.clientX,
+          top: evtData.event.clientY
+        };
+        setContextMenuOptions({
+          args: evtData,
+          mode: "Link",
+          anchorPosition,
+          onClose: handleContextClose
+        });
+      });
+
+      // Subscribe to add link event
       mainInterface.events.onAddLink.subscribe(evtData =>
         alert({
           location: "snackbar",
           message: "Link created"
         })
+      );
+
+      mainInterface.mode.canvasCtxMenu.onEnter.subscribe(evtData =>
+        console.log("onCanvasCtxMenu", evtData)
+      );
+      mainInterface.mode.portCtxMenu.onEnter.subscribe(evtData =>
+        console.log("onPortCtxMenu", evtData)
       );
 
       mainInterface.canvas.events
@@ -439,8 +480,46 @@ const Flow = (props, ref) => {
         )
         .subscribe(evtData => console.log("onLinkErrorMouseOver", evtData));
     },
-    [onNodeSelected, onFlowValidated, onLinkSelected, alert]
+    [onNodeSelected, onFlowValidated, onLinkSelected, alert, handleContextClose]
   );
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                       Handlers                                       *
+   *                                                                                      */
+  //========================================================================================
+
+  const handleDelete = useCallback(
+    ({ nodeId, callback }) => {
+      call("dialog", "confirmation", {
+        submitText: t("Delete"),
+        title: t("Confirm to delete"),
+        onSubmit: callback,
+        message: `Are you sure you want to delete "${nodeId}"?`
+      });
+    },
+    [call]
+  );
+
+  const handleNodeDelete = useCallback(() => {
+    const { args: node } = contextMenuOptions;
+    const callback = () => getMainInterface().deleteNodeInst(node.data.id);
+
+    handleDelete({ nodeId: node.data.id, callback });
+    setContextMenuOptions(prevValue => ({ ...prevValue, anchorEl: null }));
+  }, [handleDelete, contextMenuOptions]);
+
+  const handleSubFlowDelete = useCallback(() => {
+    const { args: node } = contextMenuOptions;
+    const callback = () => getMainInterface().deleteSubFlow(node.data.id);
+
+    handleDelete({ nodeId: node.data.id, callback });
+  }, [contextMenuOptions, handleDelete]);
+
+  const handleLinkDelete = useCallback(() => {
+    const { args: link } = contextMenuOptions;
+    getMainInterface().deleteLink(link.id);
+  }, [contextMenuOptions]);
 
   //========================================================================================
   /*                                                                                      *
@@ -482,12 +561,18 @@ const Flow = (props, ref) => {
         runningFlow={runningFlow}
         warnings={warnings}
       />
+      <FlowContextMenu
+        {...contextMenuOptions}
+        onNodeDelete={handleNodeDelete}
+        onLinkDelete={handleLinkDelete}
+        onSubFlowDelete={handleSubFlowDelete}
+      />
     </div>
   );
 };
 
 Flow.defaultProps = {
-  name: "a6"
+  name: ""
 };
 
 export default withEditorPlugin(Flow);

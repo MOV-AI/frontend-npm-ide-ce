@@ -53,6 +53,12 @@ class Link extends Model {
     return this;
   }
 
+  getNodes() {
+    return [this.getFrom(), this.getTo()].map(value => {
+      return value.split("/")[0].split("__")[0];
+    });
+  }
+
   //========================================================================================
   /*                                                                                      *
    *                                      Serializers                                     *
