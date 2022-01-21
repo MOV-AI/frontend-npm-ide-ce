@@ -329,11 +329,12 @@ export default class Graph {
    * @returns {boolean} : True on success, false otherwise
    */
   deleteNode = nodeId => {
+    const node = this.nodes.get(nodeId);
+
     // Delete the links connected with the node
-    this.deleteNodeLinks(nodeId);
+    this.deleteLinks(node.links);
 
     // Delete the node
-    const node = this.nodes.get(nodeId);
     node.obj.destroy();
     return this.nodes.delete(nodeId);
   };
@@ -429,22 +430,20 @@ export default class Graph {
   };
 
   /**
-   * Deletes the links connected to a node
-   * @param {string} nodeId : The node id
-   * @returns {boolean} : True on success, false otherwise
+   * Deletes the links and remove references in nodes
+   * @param {array} linksToDelete : Array of link ids to delete
    */
-  deleteNodeLinks = nodeId => {
-    const node = this.nodes.get(nodeId);
-
-    const output = [];
-    node.links.forEach(linkId => {
+  deleteLinks = linksToDelete => {
+    // delete the links
+    linksToDelete.forEach(linkId => {
       this.links.get(linkId)?.destroy();
-      output.push(this.links.delete(linkId));
+      this.links.delete(linkId);
     });
 
-    node.links = [];
-
-    return output.every(x => x);
+    // delete the reference to the links
+    this.nodes.forEach(node => {
+      node.links = node.links.filter(linkId => !linksToDelete.includes(linkId));
+    });
   };
 
   /**
