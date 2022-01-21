@@ -409,7 +409,7 @@ const FlowTopBar = props => {
           extension: "",
           content: viewPlugin.render(),
           dockPosition: DOCK_POSITIONS.FLOAT,
-          position: { h: 1000, w: 370, x: 1600, y: 100, z: 99 }
+          position: { h: 1000, w: 370, x: 1000, y: 100, z: 5 }
         });
       } else {
         call("tabs", "close", {

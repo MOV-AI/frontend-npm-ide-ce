@@ -421,7 +421,6 @@ const useLayout = (props, dockRef) => {
    */
   const close = useCallback(data => {
     const { tabId, keepBookmarks } = data;
-    console.log("data", data);
     // Close tab dynamically
     console.log("removeTab");
     _closeTab(tabId);
