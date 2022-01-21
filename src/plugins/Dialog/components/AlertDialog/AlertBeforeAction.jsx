@@ -31,11 +31,15 @@ const AlertBeforeAction = props => {
     onClose();
   };
 
-  const getAcions = () => {
+  const getActions = () => {
     return (
       <DialogActions>
         {Object.keys(actions).map(key => (
-          <Button onClick={() => handleConfirmation(key)} color="default">
+          <Button
+            key={key}
+            onClick={() => handleConfirmation(key)}
+            color="default"
+          >
             {t(actions[key].label)}
           </Button>
         ))}
@@ -48,7 +52,7 @@ const AlertBeforeAction = props => {
       hasCloseButton={false}
       title={title}
       onClose={onClose}
-      actions={getAcions()}
+      actions={getActions()}
     >
       {showAlertIcon && (
         <WarningIcon fontSize={"large"} className={classes.icon} />
@@ -63,14 +67,14 @@ const AlertBeforeAction = props => {
 AlertBeforeAction.propTypes = {
   message: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
-  actions: PropTypes.array,
+  actions: PropTypes.object,
   showAlertIcon: PropTypes.bool,
   onClose: PropTypes.func
 };
 
 AlertBeforeAction.defaultProps = {
   message: "",
-  actions: [],
+  actions: {},
   showAlertIcon: true,
   onClose: () => console.log("not implemented")
 };

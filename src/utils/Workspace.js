@@ -1,34 +1,38 @@
 import { Authentication } from "@mov-ai/mov-fe-lib-core";
+import { DEFAULT_LAYOUT, DEFAULT_TABS } from "./Constants";
 import LocalStorage from "./LocalStorage";
 
 class Workspace {
   constructor() {
     if (instance) return instance;
     instance = this;
-    this.storage = new LocalStorage();
-    const userName = Authentication.getTokenData().message.name ?? "";
+
     const APP_NAME = "movai-ide-ce";
-    this.SELECTED_ROBOT_KEY = `movai.${userName}.${APP_NAME}.selectedRobot`;
-    this.TABS_KEY = `movai.${userName}.${APP_NAME}.tabs`;
-    this.LAYOUT_KEY = `movai.${userName}.${APP_NAME}.layout`;
-    this.layout = this.getLayout();
-    this.tabs = this.getTabs();
+    const USER_NAME = Authentication.getTokenData().message.name ?? "";
+    
+    this.storage = new LocalStorage();
+    this.TABS_KEY = `movai.${USER_NAME}.${APP_NAME}.tabs`;
+    this.LAYOUT_KEY = `movai.${USER_NAME}.${APP_NAME}.layout`;
+    this.SELECTED_ROBOT_KEY = `movai.${USER_NAME}.${APP_NAME}.selectedRobot`;
+    this.RECENT_DOCUMENTS_KEY = `movai.${USER_NAME}.${APP_NAME}.recentDocuments`;
+    this.layoutAndTabs = this.getLayoutAndTabs();
+    this.layout = this.layoutAndTabs[0];
+    this.tabs = this.layoutAndTabs[1];
+    this.recentDocuments = this.getRecentDocuments();
     this.selectedRobot = this.getSelectedRobot();
+    this.defaultRecentDocuments = [];
   }
 
+  /**
+   * Destroys the instance of workspace
+   */
   destroy() {
     instance = null;
   }
 
-  //========================================================================================
-  /*                                                                                      *
-   *                                         Tabs                                         *
-   *                                                                                      */
-  //========================================================================================
-
   /**
-   * Set tabs Layout in local storage
-   * @param {LayoutData} layout : RC-Dock layout data
+   * Sets the layout
+   * @param {Object} layout 
    */
   setLayout(layout) {
     this.storage.set(this.LAYOUT_KEY, layout);
@@ -36,17 +40,22 @@ class Workspace {
   }
 
   /**
-   * Get tabs layout from local storage
-   * @param {LayoutData} defaultLayout : Default Layout data to be returned in case there's nothing in local storage
-   * @returns {LayoutData} Layout from local storage or defaultLayout value
+   * Gets layout and tabs for the Layout
+   * @returns {Array} with the layout and tabs
    */
-  getLayout(defaultLayout) {
-    return this.storage.get(this.LAYOUT_KEY) ?? defaultLayout;
+  getLayoutAndTabs() {
+    const tabs = this.getTabs();
+
+    if(!tabs.size){
+      return [DEFAULT_LAYOUT, DEFAULT_TABS];
+    }
+
+    return [this.storage.get(this.LAYOUT_KEY), tabs];
   }
 
   /**
-   * Set open tabs info in local storage
-   * @param {Map<TabData>} tabs Map of tab data currently open
+   * Sets the tabs for the Layout
+   * @param {Map} tabs 
    */
   setTabs(tabs) {
     const tabsObj = Object.fromEntries(tabs);
@@ -84,6 +93,30 @@ class Workspace {
    */
   getSelectedRobot() {
     return this.storage.get(this.SELECTED_ROBOT_KEY) ?? "";
+  }
+
+  //========================================================================================
+/*                                                                                      *
+ *                        Recent Documents : Used in Welcome Tab                        *
+ *                                                                                      */
+//========================================================================================
+
+  /**
+   * Sets the Recent Documents in the layout
+   * @param {Object} recentDocuments 
+   */
+  setRecentDocuments(recentDocuments) {
+    this.storage.set(this.RECENT_DOCUMENTS_KEY, recentDocuments);
+    this.recentDocuments = recentDocuments;
+  }
+
+  /**
+   * Gets the Recent Documents or the default if it doesn't exist in the local storage
+   * @param {Object} defaultRecentDocuments 
+   * @returns {Object} with the Recent Documents
+   */
+  getRecentDocuments(defaultRecentDocuments = this.defaultRecentDocuments) {
+    return this.storage.get(this.RECENT_DOCUMENTS_KEY) ?? defaultRecentDocuments;
   }
 }
 

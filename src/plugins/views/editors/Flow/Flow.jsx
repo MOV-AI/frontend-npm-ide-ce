@@ -5,6 +5,7 @@ import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { FLOW_VIEW_MODE } from "./Constants/constants";
 import InfoIcon from "@material-ui/icons/Info";
+import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import BaseFlow from "./Views/BaseFlow";
 import Menu from "./Components/Menus/Menu";
 import NodeMenu from "./Components/Menus/NodeMenu";
@@ -14,6 +15,8 @@ import FlowContextMenu from "./Components/Menus/ContextMenu/FlowContextMenu";
 
 import "./Resources/css/Flow.css";
 import { EVT_NAMES, EVT_TYPES } from "./events";
+import ContainerMenu from "./Components/Menus/ContainerMenu";
+import LinkMenu from "./Components/Menus/LinkMenu";
 
 const t = v => v;
 
@@ -45,38 +48,13 @@ const Flow = (props, ref) => {
   // Refs
   const baseFlowRef = React.useRef();
   const mainInterfaceRef = React.useRef();
+  const debounceSelection = React.useRef();
+  const selectedNodeRef = React.useRef();
+  const selectedLinkRef = React.useRef();
   const isEditableComponentRef = React.useRef(true);
-
-  //========================================================================================
-  /*                                                                                      *
-   *                               Right menu initialization                              *
-   *                                                                                      */
-  //========================================================================================
-
-  const renderRightMenu = useCallback(() => {
-    const details = props.data?.details || {};
-    const menuName = `${id}-detail-menu`;
-    // add bookmark
-    call("rightDrawer", "setBookmark", {
-      [menuName]: {
-        icon: <InfoIcon></InfoIcon>,
-        name: menuName,
-        view: (
-          <Menu
-            id={id}
-            name={name}
-            details={details}
-            model={instance}
-            editable={isEditableComponentRef.current}
-          ></Menu>
-        )
-      }
-    });
-  }, [call, id, name, instance, props.data]);
-
-  usePluginMethods(ref, {
-    renderRightMenu
-  });
+  // Global consts
+  const NODE_MENU_NAME = `${id}-node-menu`;
+  const LINK_MENU_NAME = `${id}-link-menu`;
 
   //========================================================================================
   /*                                                                                      *
@@ -123,6 +101,132 @@ const Flow = (props, ref) => {
     getMainInterface().setMode(mode);
   }, []);
 
+  /**
+   * Open document in new tab
+   * @param {*} docData
+   */
+  const openDoc = useCallback(
+    docData => {
+      call("docManager", "read", {
+        scope: docData.scope,
+        name: docData.name
+      }).then(doc => {
+        call("tabs", "openEditor", {
+          id: doc.getUrl(),
+          name: doc.getName(),
+          scope: doc.getScope()
+        });
+      });
+    },
+    [call]
+  );
+
+  //========================================================================================
+  /*                                                                                      *
+   *                               Right menu initialization                              *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * @private Get Menu component based on node model (Flow or Node)
+   * @param {Stringimport("lodash").NullableChain} model : One of each "Flow" or "Node"
+   * @returns {ReactComponent} Reference to menu component
+   */
+  const getMenuComponent = useCallback((model = "") => {
+    const componentByModel = {
+      Node: NodeMenu,
+      Flow: ContainerMenu
+    };
+    return model in componentByModel ? componentByModel[model] : null;
+  }, []);
+
+  /**
+   * Add node menu if any
+   */
+  const addNodeMenu = useCallback(
+    node => {
+      const MenuComponent = getMenuComponent(node?.data?.model);
+      if (!node || !MenuComponent) return;
+      call(
+        "rightDrawer",
+        "addBookmark",
+        {
+          icon: <i className="icon-Nodes" />,
+          name: NODE_MENU_NAME,
+          view: (
+            <MenuComponent
+              id={id}
+              call={call}
+              nodeInst={node}
+              model={instance}
+              openDoc={openDoc}
+              editable={isEditableComponentRef.current}
+            />
+          )
+        },
+        true
+      );
+    },
+    [NODE_MENU_NAME, call, id, instance, openDoc, getMenuComponent]
+  );
+
+  /**
+   * Add link right menu if any
+   * @param {Link} link : Link to be rendered in menu
+   */
+  const addLinkMenu = useCallback(
+    link => {
+      if (!link) return;
+      call(
+        "rightDrawer",
+        "addBookmark",
+        {
+          icon: <CompareArrowsIcon />,
+          name: LINK_MENU_NAME,
+          view: (
+            <LinkMenu
+              id={id}
+              call={call}
+              link={link.data}
+              flowModel={instance}
+              sourceMessage={link?.src?.data?.message}
+            />
+          )
+        },
+        true
+      );
+    },
+    [LINK_MENU_NAME, call, id, instance]
+  );
+
+  const renderRightMenu = useCallback(() => {
+    const details = props.data?.details || {};
+    const menuName = `${id}-detail-menu`;
+    // add bookmark
+    call("rightDrawer", "setBookmark", {
+      [menuName]: {
+        icon: <InfoIcon></InfoIcon>,
+        name: menuName,
+        view: (
+          <Menu
+            id={id}
+            name={name}
+            details={details}
+            model={instance}
+            editable={isEditableComponentRef.current}
+          ></Menu>
+        )
+      }
+    });
+    // Add node menu if any is selected
+    addNodeMenu(selectedNodeRef.current);
+    addLinkMenu(selectedLinkRef.current);
+  }, [call, id, name, instance, props.data, addNodeMenu, addLinkMenu]);
+
+  usePluginMethods(ref, {
+    renderRightMenu
+  });
+
   //========================================================================================
   /*                                                                                      *
    *                                     Handle Events                                    *
@@ -148,26 +252,6 @@ const Flow = (props, ref) => {
       return flow;
     });
   }, []);
-
-  /**
-   * Open document in new tab
-   * @param {*} docData
-   */
-  const openDoc = useCallback(
-    docData => {
-      call("docManager", "read", {
-        scope: docData.type,
-        name: docData.name
-      }).then(doc => {
-        call("tabs", "openEditor", {
-          id: doc.getUrl(),
-          name: doc.getName(),
-          scope: doc.getScope()
-        });
-      });
-    },
-    [call]
-  );
 
   /**
    * On view mode change
@@ -224,30 +308,35 @@ const Flow = (props, ref) => {
    */
   const onNodeSelected = useCallback(
     node => {
-      const nodeMenuName = `${id}-node-menu`;
-      if (!node) call("rightDrawer", "removeBookmark", nodeMenuName);
-      else {
-        call(
-          "rightDrawer",
-          "addBookmark",
-          {
-            icon: <i className="icon-Nodes" />,
-            name: nodeMenuName,
-            view: (
-              <NodeMenu
-                id={id}
-                name={name}
-                nodeInst={node}
-                model={instance}
-                editable={isEditableComponentRef.current}
-              ></NodeMenu>
-            )
-          },
-          true
-        );
+      clearTimeout(debounceSelection.current);
+      debounceSelection.current = setTimeout(() => {
+        if (!node) {
+          call("rightDrawer", "removeBookmark", NODE_MENU_NAME);
+          selectedNodeRef.current = null;
+        } else {
+          selectedNodeRef.current = node;
+          addNodeMenu(node);
+        }
+      }, 300);
+    },
+    [addNodeMenu, call, NODE_MENU_NAME]
+  );
+
+  /**
+   * On Link selected
+   * @param {BaseLink} link : Link instance
+   */
+  const onLinkSelected = useCallback(
+    link => {
+      selectedLinkRef.current = link;
+      getMainInterface().selectedLink = link;
+      if (!link) {
+        call("rightDrawer", "removeBookmark", LINK_MENU_NAME);
+      } else {
+        addLinkMenu(link);
       }
     },
-    [call, id, instance, name]
+    [call, LINK_MENU_NAME, addLinkMenu]
   );
 
   const handleContextClose = useCallback(() => {
@@ -277,6 +366,7 @@ const Flow = (props, ref) => {
       // When enter default mode remove other node/sub-flow bookmarks
       mainInterface.mode.default.onEnter.subscribe(() => {
         onNodeSelected(null);
+        onLinkSelected(null);
       });
 
       mainInterface.mode.addNode.onClick.subscribe(evtData =>
@@ -348,6 +438,16 @@ const Flow = (props, ref) => {
         )
         .subscribe(evtData => mainInterface.graph.onMouseOutLink(evtData));
 
+      // Select Link event
+      mainInterface.canvas.events
+        .pipe(
+          filter(
+            event =>
+              event.name === EVT_NAMES.ON_CLICK && event.type === EVT_TYPES.LINK
+          )
+        )
+        .subscribe(event => onLinkSelected(event.data));
+
       mainInterface.canvas.events
         .pipe(
           filter(
@@ -378,7 +478,7 @@ const Flow = (props, ref) => {
         )
         .subscribe(evtData => console.log("onLinkErrorMouseOver", evtData));
     },
-    [onNodeSelected, onFlowValidated, alert, handleContextClose]
+    [onNodeSelected, onFlowValidated, onLinkSelected, alert, handleContextClose]
   );
 
   const handleDelete = useCallback(
@@ -433,7 +533,6 @@ const Flow = (props, ref) => {
           defaultViewMode={viewMode}
           version={instance.current?.version}
           mainInterface={mainInterfaceRef}
-          openFlow={openDoc}
           onRobotChange={onRobotChange}
           onStartStopFlow={onStartStopFlow}
           nodeStatusUpdated={onNodeStatusUpdate}

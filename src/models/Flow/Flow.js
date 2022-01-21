@@ -169,14 +169,10 @@ class Flow extends Model {
     return this;
   }
 
-  addNode() {}
-
   deleteNode(nodeId) {
     this.getNodeInstances().deleteItem(nodeId);
     return this.deleteNodeLinks(nodeId);
   }
-
-  addSubFlow() {}
 
   deleteSubFlow(subFlowId) {
     this.getSubFlows().deleteItem(subFlowId);
@@ -223,10 +219,22 @@ class Flow extends Model {
     this.getLinks().deleteItem(id);
   }
 
-  addExposedPort() {}
+  /**
+   * Set link dependency level
+   * @param {string} linkId : Link ID
+   * @param {number} dependecyLevel : Dependency level
+   */
+  setLinkDependency(linkId, dependecyLevel) {
+    this.getLinks().getItem(linkId).setDependency(dependecyLevel);
+  }
 
-  deleteExposedPort(id) {
-    this.getExposedPorts().deleteItem(id);
+  /**
+   *
+   * @param {*} linkId
+   * @returns
+   */
+  getLinkDependency(linkId) {
+    return this.getLinks().getItem(linkId).getDependency();
   }
 
   //========================================================================================
