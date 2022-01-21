@@ -66,7 +66,7 @@ function App(props) {
 }
 
 /**
- * Install app plugins
+ * Install app plugins 
  */
 function installAppPlugins() {
   const plugins = [
@@ -89,6 +89,9 @@ function installAppPlugins() {
   });
 }
 
+/**
+ * 
+ */
 function installViewPlugins() {
   const plugins = [
     {
