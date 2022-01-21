@@ -369,16 +369,8 @@ const Flow = (props, ref) => {
         onLinkSelected(null);
       });
 
-      mainInterface.mode.addNode.onClick.subscribe(evtData =>
-        console.log("dlgNewNode", evtData)
-      );
-
-      mainInterface.mode.addFlow.onClick.subscribe(evtData =>
-        console.log("dlgNewFlow", evtData)
-      );
-
+      // Subscribe to node instance/sub flow context menu events
       mainInterface.mode.nodeCtxMenu.onEnter.subscribe(evtData => {
-        console.log("onNodeCtxMenu", evtData);
         const anchorPosition = {
           left: evtData.event.clientX,
           top: evtData.event.clientY
@@ -391,12 +383,16 @@ const Flow = (props, ref) => {
         });
       });
 
-      mainInterface.mode.canvasCtxMenu.onEnter.subscribe(evtData =>
-        console.log("onCanvasCtxMenu", evtData)
+      mainInterface.mode.addNode.onClick.subscribe(evtData =>
+        console.log("dlgNewNode", evtData)
       );
 
+      mainInterface.mode.addFlow.onClick.subscribe(evtData =>
+        console.log("dlgNewFlow", evtData)
+      );
+
+      // Subscribe to link context menu events
       mainInterface.mode.linkCtxMenu.onEnter.subscribe(evtData => {
-        console.log("onLinkCtxMenu", evtData);
         const anchorPosition = {
           left: evtData.event.clientX,
           top: evtData.event.clientY
@@ -408,14 +404,20 @@ const Flow = (props, ref) => {
           onClose: handleContextClose
         });
       });
-      mainInterface.mode.portCtxMenu.onEnter.subscribe(evtData =>
-        console.log("onPortCtxMenu", evtData)
-      );
+
+      // Subscribe to add link event
       mainInterface.events.onAddLink.subscribe(evtData =>
         alert({
           location: "snackbar",
           message: "Link created"
         })
+      );
+
+      mainInterface.mode.canvasCtxMenu.onEnter.subscribe(evtData =>
+        console.log("onCanvasCtxMenu", evtData)
+      );
+      mainInterface.mode.portCtxMenu.onEnter.subscribe(evtData =>
+        console.log("onPortCtxMenu", evtData)
       );
 
       mainInterface.canvas.events
@@ -481,6 +483,12 @@ const Flow = (props, ref) => {
     [onNodeSelected, onFlowValidated, onLinkSelected, alert, handleContextClose]
   );
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                       Handlers                                       *
+   *                                                                                      */
+  //========================================================================================
+
   const handleDelete = useCallback(
     ({ nodeId, callback }) => {
       call("dialog", "confirmation", {
@@ -494,7 +502,6 @@ const Flow = (props, ref) => {
   );
 
   const handleNodeDelete = useCallback(() => {
-    console.log(contextMenuOptions);
     const { args: node } = contextMenuOptions;
     const callback = () => getMainInterface().deleteNodeInst(node.data.id);
 

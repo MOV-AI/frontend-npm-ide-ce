@@ -323,10 +323,19 @@ export default class Graph {
     }
   };
 
+  /**
+   * Deletes a node and the connected links
+   * @param {string} nodeId : The node id
+   * @returns {boolean} : True on success, false otherwise
+   */
   deleteNode = nodeId => {
+    // Delete the links connected with the node
+    this.deleteNodeLinks(nodeId);
+
+    // Delete the node
     const node = this.nodes.get(nodeId);
     node.obj.destroy();
-    this.nodes.delete(nodeId);
+    return this.nodes.delete(nodeId);
   };
 
   updateExposedPorts = exposedPorts => {
@@ -419,17 +428,23 @@ export default class Graph {
     }
   };
 
-  deleteLinks = linksToDelete => {
-    // delete the links
-    linksToDelete.forEach(linkId => {
+  /**
+   * Deletes the links connected to a node
+   * @param {string} nodeId : The node id
+   * @returns {boolean} : True on success, false otherwise
+   */
+  deleteNodeLinks = nodeId => {
+    const node = this.nodes.get(nodeId);
+
+    const output = [];
+    node.links.forEach(linkId => {
       this.links.get(linkId)?.destroy();
-      this.links.delete(linkId);
+      output.push(this.links.delete(linkId));
     });
 
-    // delete the reference to the links
-    this.nodes.forEach(node => {
-      node.links = node.links.filter(linkId => !linksToDelete.includes(linkId));
-    });
+    node.links = [];
+
+    return output.every(x => x);
   };
 
   /**

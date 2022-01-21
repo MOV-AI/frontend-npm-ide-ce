@@ -169,14 +169,24 @@ class Flow extends Model {
     return this;
   }
 
+  /**
+   * Deletes a node instance and connected links
+   * @param {string} nodeId : The node instance id
+   * @returns {boolean} : True on success, false otherwise
+   */
   deleteNode(nodeId) {
-    this.getNodeInstances().deleteItem(nodeId);
-    return this.deleteNodeLinks(nodeId);
+    this.deleteNodeLinks(nodeId);
+    return this.getNodeInstances().deleteItem(nodeId);
   }
 
+  /**
+   * Deletes a sub flow and connected links
+   * @param {string} subFlowId : The sub flow id
+   * @returns {boolean} : True on success, false otherwise
+   */
   deleteSubFlow(subFlowId) {
-    this.getSubFlows().deleteItem(subFlowId);
-    return this.deleteNodeLinks(subFlowId);
+    this.deleteNodeLinks(subFlowId);
+    return this.getSubFlows().deleteItem(subFlowId);
   }
 
   /**

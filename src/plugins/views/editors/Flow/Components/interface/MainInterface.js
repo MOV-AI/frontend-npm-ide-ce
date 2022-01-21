@@ -171,7 +171,6 @@ export default class MainInterface {
 
   deleteNode = (nodeId, deletedLinks) => {
     this.graph.deleteNode(nodeId);
-    this.graph.deleteLinks(deletedLinks);
   };
 
   deleteNodeInst = nodeId => {
