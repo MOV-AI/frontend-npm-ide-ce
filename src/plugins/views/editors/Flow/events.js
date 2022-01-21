@@ -4,6 +4,7 @@ const EVT_NAMES = {
   ADD_STATE: "addState",
   DEFAULT: "default",
   LOADING: "loading",
+  ON_CLICK: "onClick",
   ON_CANVAS_CTX_MENU: "onCanvasCtxMenu",
   ON_CHG_MOUSE_OVER: "onChangeMouseOver",
   ON_LINK_CTX_MENU: "onLinkCtxMenu",
