@@ -83,10 +83,14 @@ class BaseLinkStruct {
 }
 
 export default class BaseLink extends BaseLinkStruct {
-  constructor(canvas, src, trg, data, onLinkErrorMouseOver = () => {}) {
+  constructor(canvas, src, trg, data, onLinkErrorMouseOver) {
     super(canvas, src, trg, data);
     this.object = null;
-    this.onLinkErrorMouseOver = onLinkErrorMouseOver;
+    this.onLinkErrorMouseOver =
+      onLinkErrorMouseOver ||
+      (() => {
+        // On purpose
+      });
 
     this.initialize();
   }

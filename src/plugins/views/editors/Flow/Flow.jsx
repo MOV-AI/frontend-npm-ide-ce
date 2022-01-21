@@ -252,6 +252,7 @@ const Flow = (props, ref) => {
 
   const handleContextClose = useCallback(() => {
     setContextMenuOptions({ anchorPosition: null });
+    getMainInterface().setMode("default");
   }, []);
 
   /**
@@ -381,12 +382,12 @@ const Flow = (props, ref) => {
   );
 
   const handleDelete = useCallback(
-    ({ id, callback }) => {
+    ({ nodeId, callback }) => {
       call("dialog", "confirmation", {
         submitText: t("Delete"),
         title: t("Confirm to delete"),
         onSubmit: callback,
-        message: `Are you sure you want to delete "${id}"?`
+        message: `Are you sure you want to delete "${nodeId}"?`
       });
     },
     [call]
@@ -395,19 +396,17 @@ const Flow = (props, ref) => {
   const handleNodeDelete = useCallback(() => {
     console.log(contextMenuOptions);
     const { args: node } = contextMenuOptions;
-    const { id } = node.data;
-    const callback = () => getMainInterface().deleteNodeInst(id);
+    const callback = () => getMainInterface().deleteNodeInst(node.data.id);
 
-    handleDelete({ id, callback });
+    handleDelete({ nodeId: node.data.id, callback });
     setContextMenuOptions(prevValue => ({ ...prevValue, anchorEl: null }));
   }, [handleDelete, contextMenuOptions]);
 
   const handleSubFlowDelete = useCallback(() => {
     const { args: node } = contextMenuOptions;
-    const { id } = node.data;
-    const callback = () => getMainInterface().deleteSubFlow(id);
+    const callback = () => getMainInterface().deleteSubFlow(node.data.id);
 
-    handleDelete({ id, callback });
+    handleDelete({ nodeId: node.data.id, callback });
   }, [contextMenuOptions, handleDelete]);
 
   const handleLinkDelete = useCallback(() => {
@@ -467,7 +466,7 @@ const Flow = (props, ref) => {
 };
 
 Flow.defaultProps = {
-  name: "a6"
+  name: ""
 };
 
 export default withEditorPlugin(Flow);
