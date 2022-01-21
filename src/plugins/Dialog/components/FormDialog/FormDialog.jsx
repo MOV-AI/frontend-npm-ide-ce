@@ -10,10 +10,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import { CircularProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { withTheme } from "../../../../decorators/withTheme";
-
-function useTranslation() {
-  return { t: s => s };
-}
+import { useTranslation } from "react-i18next";
 
 const useStyles = makeStyles(theme => ({
   loadingContainer: {
@@ -28,6 +25,7 @@ const useStyles = makeStyles(theme => ({
 const FormDialog = props => {
   // Props
   const {
+    size,
     onClose,
     title,
     message,
@@ -36,6 +34,7 @@ const FormDialog = props => {
     onPostValidation,
     submitText,
     inputLabel,
+    multiline,
     loadingMessage,
     defaultValue,
     maxLength
@@ -101,7 +100,12 @@ const FormDialog = props => {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose}>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      fullWidth={!!size}
+      maxWidth={size}
+    >
       <DialogTitle>
         {loadingMessage && isLoading ? loadingMessage : title}
       </DialogTitle>
@@ -120,6 +124,7 @@ const FormDialog = props => {
             label={t(inputLabel)}
             InputLabelProps={{ shrink: true }}
             defaultValue={value}
+            multiline={multiline}
             onPaste={event => {
               event.preventDefault();
               // Trim pasted text
@@ -140,7 +145,7 @@ const FormDialog = props => {
               }
             }}
             onChange={event => onChange(event.target.value)}
-            inputProps={{ maxLength: maxLength }} // limit of characters here
+            inputProps={{ maxLength: multiline ? "" : maxLength }} // limit of characters here
             margin="normal"
           />
         )}
@@ -169,7 +174,9 @@ FormDialog.propTypes = {
   inputLabel: PropTypes.string,
   submitText: PropTypes.string,
   defaultValue: PropTypes.string,
-  maxLength: PropTypes.number
+  maxLength: PropTypes.number,
+  multiline: PropTypes.bool,
+  size: PropTypes.string
 };
 
 FormDialog.defaultProps = {
@@ -177,5 +184,6 @@ FormDialog.defaultProps = {
   inputLabel: "Name",
   submitText: "Submit",
   defaultValue: "",
+  multiline: false,
   maxLength: 40
 };
