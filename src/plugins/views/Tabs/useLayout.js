@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { Tooltip } from "@material-ui/core";
-import { HOMETAB_PROFILE, DEFAULT_LAYOUT } from "../../../utils/Constants";
+import { HOMETAB_PROFILE, DEFAULT_LAYOUT, DOCK_POSITIONS } from "../../../utils/Constants";
 import { getIconByScope } from "../../../utils/Utils";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Workspace from "../../../utils/Workspace";
+import { FLOW_EXPLORER_PROFILE } from "../../../utils/Constants";
+import Explorer from "../editors/Flow/Components/Explorer/Explorer";
 import HomeTab from "../HomeTab/HomeTab";
 import TOPICS from "./topics";
 
@@ -46,6 +48,8 @@ const useLayout = (props, dockRef) => {
    * @param {String} tabId : Tab Id
    */
   const _getTabContainer = useCallback((box, tabId) => {
+    console.log("box", box);
+    console.log("tabId", tabId);
     if (box?.tabs?.map(el => el.id).includes(tabId)) return box;
     else if (box.children) {
       let containerBox = null;
@@ -231,7 +235,7 @@ const useLayout = (props, dockRef) => {
       const tabData = dockRef.current.find(tabId);
       if (!tabData) return;
       const currentLayout = dockRef.current.saveLayout();
-      const locations = ["windowbox", "maxbox", "floatbox", "dockbox"];
+      const locations = Object.values(DOCK_POSITIONS);
       // look for tab in layout locations
       for (const location of locations) {
         const found = _deleteTabFromLayout(currentLayout, tabId, location);
@@ -327,6 +331,31 @@ const useLayout = (props, dockRef) => {
     });
   }, [workspaceManager]);
 
+  /**
+   * Installs the Flow Explorer Plugin
+   * @private
+   * @returns the Flow Explorer
+   */
+  const installExplorerTabPlugin = () => {
+    const viewPlugin = new Explorer(FLOW_EXPLORER_PROFILE);
+
+    return PluginManagerIDE.install(
+      FLOW_EXPLORER_PROFILE.name,
+      viewPlugin
+    ).then(() => {
+      // Create and return tab data
+      // Return TabData
+      return {
+        id: FLOW_EXPLORER_PROFILE.name,
+        name: FLOW_EXPLORER_PROFILE.title,
+        tabTitle: FLOW_EXPLORER_PROFILE.title,
+        scope: FLOW_EXPLORER_PROFILE.name,
+        extension: "",
+        content: viewPlugin.render()
+      };
+    });
+  };
+
   //========================================================================================
   /*                                                                                      *
    *                                    Exposed Methods                                   *
@@ -339,23 +368,33 @@ const useLayout = (props, dockRef) => {
    */
   const open = useCallback(
     tabData => {
+      const tabPosition = tabData.dockPosition ?? DOCK_POSITIONS.DOCK;
+      const position = tabData.position ?? { h: 500, w: 600, x: 145, y: 100, z: 1 };
       tabsById.current.set(tabData.id, tabData);
       workspaceManager.setTabs(tabsById.current);
 
+      if(tabData.scope === "Flow"){
+        installExplorerTabPlugin();
+      }
+
       setLayout(prevState => {
         const newState = { ...prevState };
-        // If is first tab
-        if (newState.dockbox.children.length === 0) {
-          newState.dockbox.children = [{ tabs: [tabData] }];
+        if (newState[tabPosition].children.length === 0) {
+          newState[tabPosition].children = [{ ...position, tabs: [tabData] }];
         } else {
           const existingTab = dockRef.current.find(tabData.id);
           if (existingTab) dockRef.current.updateTab(tabData.id, tabData);
           else {
-            const firstContainer = _getFirstContainer(newState.dockbox);
-            firstContainer.tabs.push(tabData);
-            firstContainer.activeId = tabData.id;
+            if(tabPosition === DOCK_POSITIONS.FLOAT){
+              newState[tabPosition].children.push({ ...position, tabs: [tabData] })
+            }else{
+              const firstContainer = _getFirstContainer(newState[tabPosition]);
+              firstContainer.tabs.push(tabData);
+              firstContainer.activeId = tabData.id;
+            }
           }
         }
+
         workspaceManager.setLayout(newState);
         return { ...newState };
       });
@@ -380,11 +419,14 @@ const useLayout = (props, dockRef) => {
   /**
    * Close Tab
    */
-  const close = useCallback(() => {
+  const close = useCallback(data => {
+    const { tabId, keepBookmarks } = data;
+    console.log("data", data);
     // Close tab dynamically
     console.log("removeTab");
-    call("rightDrawer", "resetBookmarks");
-  }, [call]);
+    _closeTab(tabId);
+    !keepBookmarks && call("rightDrawer", "resetBookmarks");
+  }, [call, _closeTab]);
 
   /**
    * Load tab data
@@ -429,6 +471,7 @@ const useLayout = (props, dockRef) => {
       const firstContainer = _getFirstContainer(newLayout.dockbox);
       const newActiveTab =
         direction !== "remove" ? tabId : firstContainer.activeId;
+
       // Attempt to close tab
       if (direction === "remove") {
         _onLayoutRemoveTab(newLayout, tabId);
@@ -454,7 +497,7 @@ const useLayout = (props, dockRef) => {
       _getTabData(newTabData).then(tabData => {
         setLayout(prevState => {
           // look for tab in windowbox
-          const locations = ["windowbox", "maxbox", "floatbox", "dockbox"];
+          const locations = Object.values(DOCK_POSITIONS);
           for (const location of locations) {
             const f = _setTabInLayout(prevState, prevTabId, location, tabData);
             if (f.box) return f.newLayout;
@@ -489,6 +532,9 @@ const useLayout = (props, dockRef) => {
     const [ lastLayout, lastTabs ] = workspaceManager.getLayoutAndTabs();
     const tabs = [];
 
+    console.log("lastLayout", lastLayout);
+    console.log("lastTabs", lastTabs);    
+
     tabsById.current = lastTabs;
     // Install current tabs plugins
     lastTabs.forEach(tab => {
@@ -496,8 +542,11 @@ const useLayout = (props, dockRef) => {
       
       if(id === HOMETAB_PROFILE.name)
         tabs.push(installHomeTabPlugin());
-      else
+      else if(id === FLOW_EXPLORER_PROFILE.name)
+        tabs.push(installExplorerTabPlugin());
+      else  
         tabs.push(_getTabData({ id, name, scope }));
+      
     });
     // after all plugins are installed
     Promise.allSettled(tabs).then(_tabs => {

@@ -20,6 +20,15 @@ export const SCOPES = {
  *                                                                                      */
 //========================================================================================
 
+export const DOCK_POSITIONS = {
+  DOCK: "dockbox",
+  WINDOW: "windowbox",
+  MAX: "maxbox",
+  FLOAT: "floatbox",
+}
+
+export const FLOW_EXPLORER_PROFILE = { name: "FlowExplorer", title: "Flow Explorer" };
+
 export const HOMETAB_PROFILE = { name: "HomeTab", title: "Welcome" };
 
 export const DEFAULT_TABS = new Map(Object.entries({[HOMETAB_PROFILE.name]: { id: HOMETAB_PROFILE.name }}));
