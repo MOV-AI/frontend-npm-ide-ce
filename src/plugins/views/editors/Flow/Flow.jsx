@@ -383,13 +383,19 @@ const Flow = (props, ref) => {
         });
       });
 
-      mainInterface.mode.addNode.onClick.subscribe(evtData =>
-        console.log("dlgNewNode", evtData)
-      );
+      mainInterface.mode.addNode.onClick.subscribe(() => {
+        call("dialog", "newDocument", {
+          scope: "node",
+          onSubmit: newName => getMainInterface().addNode(newName)
+        });
+      });
 
-      mainInterface.mode.addFlow.onClick.subscribe(evtData =>
-        console.log("dlgNewFlow", evtData)
-      );
+      mainInterface.mode.addFlow.onClick.subscribe(() => {
+        call("dialog", "newDocument", {
+          scope: "sub-flow",
+          onSubmit: newName => getMainInterface().addFlow(newName)
+        });
+      });
 
       // Subscribe to link context menu events
       mainInterface.mode.linkCtxMenu.onEnter.subscribe(evtData => {
@@ -480,7 +486,14 @@ const Flow = (props, ref) => {
         )
         .subscribe(evtData => console.log("onLinkErrorMouseOver", evtData));
     },
-    [onNodeSelected, onFlowValidated, onLinkSelected, alert, handleContextClose]
+    [
+      onNodeSelected,
+      onFlowValidated,
+      onLinkSelected,
+      handleContextClose,
+      call,
+      alert
+    ]
   );
 
   //========================================================================================

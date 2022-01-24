@@ -3,10 +3,9 @@ import StartNode from "../../Components/Nodes/StartNode";
 import BaseLink from "../../Components/Links/BaseLink";
 import GraphValidator from "./GraphValidator";
 import { InvalidLink } from "../../Components/Links/Errors";
-import { FLOW_VIEW_MODE } from "../../Constants/constants";
+import { FLOW_VIEW_MODE, NODE_TYPES } from "../../Constants/constants";
 import { shouldUpdateExposedPorts } from "./Utils";
 import _debounce from "lodash/debounce";
-import { NODE_TYPES } from "./constants";
 import Factory from "../../Components/Nodes/Factory";
 
 // to remove

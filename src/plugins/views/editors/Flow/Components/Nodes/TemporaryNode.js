@@ -1,7 +1,7 @@
 import BaseNode from "./BaseNode/BaseNode";
 
 class TemporaryNode extends BaseNode {
-  constructor(canvas, node, template) {
+  constructor({ canvas, node, template }) {
     const customNode = {
       id: "",
       NodeLabel: node.Template,
@@ -12,7 +12,7 @@ class TemporaryNode extends BaseNode {
       },
       ...node
     };
-    super(canvas, customNode, {}, "node", template);
+    super({ canvas, node: customNode, events: {}, template });
 
     this.init().postInit();
   }

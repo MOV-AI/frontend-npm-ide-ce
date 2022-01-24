@@ -24,6 +24,11 @@ const EMPTY_MESSAGE = {
   CmdLine: "No Command Lines"
 };
 
+const NODE_TYPES = {
+  NODE: "NODE",
+  CONTAINER: "CONTAINER"
+};
+
 export {
   maxMovingPixels,
   canvasLimits,
@@ -31,5 +36,6 @@ export {
   TRANSITION_LINK,
   TABLE_KEYS_NAMES,
   EMPTY_MESSAGE,
-  ROBOT_BLACKLIST
+  ROBOT_BLACKLIST,
+  NODE_TYPES
 };
