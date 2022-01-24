@@ -169,6 +169,59 @@ class Flow extends Model {
     return this;
   }
 
+  addNode(node) {
+    const { name } = node;
+    const content = NodeInstance.serializeOfDB({ [name]: { ...node } });
+    this.getNodeInstances().setItem({ name, content });
+  }
+
+  addSubFlow(node) {
+    const { name } = node;
+    const content = SubFlow.serializeOfDB({ [name]: { ...node } });
+    this.getSubFlows().setItem({ name, content });
+  }
+
+  /**
+   * Deletes a node instance and connected links
+   * @param {string} nodeId : The node instance id
+   * @returns {boolean} : True on success, false otherwise
+   */
+  deleteNode(nodeId) {
+    this.deleteNodeLinks(nodeId);
+    return this.getNodeInstances().deleteItem(nodeId);
+  }
+
+  /**
+   * Deletes a sub flow and connected links
+   * @param {string} subFlowId : The sub flow id
+   * @returns {boolean} : True on success, false otherwise
+   */
+  deleteSubFlow(subFlowId) {
+    this.deleteNodeLinks(subFlowId);
+    return this.getSubFlows().deleteItem(subFlowId);
+  }
+
+  /**
+   * Deletes links connected to the node (nodeInst or subFlow)
+   * @param {string} id : The node (nodeInst or subFlow) id
+   * @returns
+   */
+  deleteNodeLinks = id => {
+    const deletedLinks = [];
+
+    // delete all links connected to the node
+    this.getLinks().data.forEach((item, key) => {
+      // check if the link belongs to the node
+      if (item.getNodes().includes(id)) {
+        this.deleteLink(key);
+
+        deletedLinks.push(key);
+      }
+    });
+
+    return deletedLinks;
+  };
+
   /**
    * Add a new link
    * @param {array} link : Link with format [<from>, <to>]
@@ -182,6 +235,28 @@ class Flow extends Model {
     const links = this.getLinks().serializeToDB();
 
     return { id, ...links[id] };
+  }
+
+  deleteLink(id) {
+    this.getLinks().deleteItem(id);
+  }
+
+  /**
+   * Set link dependency level
+   * @param {string} linkId : Link ID
+   * @param {number} dependecyLevel : Dependency level
+   */
+  setLinkDependency(linkId, dependecyLevel) {
+    this.getLinks().getItem(linkId).setDependency(dependecyLevel);
+  }
+
+  /**
+   *
+   * @param {*} linkId
+   * @returns
+   */
+  getLinkDependency(linkId) {
+    return this.getLinks().getItem(linkId).getDependency();
   }
 
   //========================================================================================

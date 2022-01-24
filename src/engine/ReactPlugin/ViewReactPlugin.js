@@ -78,6 +78,7 @@ export function withViewPlugin(ReactComponent, methods = []) {
           call={this.call}
           profile={this.profile}
           emit={this.emit}
+          off={this.off}
           on={this.on}
           onTopic={this.onTopic}
         />

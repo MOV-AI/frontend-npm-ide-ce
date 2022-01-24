@@ -21,7 +21,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Explorer = props => {
-  const { call, on, height } = props;
+  const { on, emit, height } = props;
   const classes = useStyles();
   const [data, setData] = React.useState([]);
 
@@ -67,18 +67,14 @@ const Explorer = props => {
           });
         },
         1: () => {
-          call("tabs", "openEditor", {
-            id: node.url,
-            name: node.name,
-            scope: node.scope
-          });
+          emit("addNode", node);
         }
       };
       _get(deepnessToAction, node.deepness, () => {
         console.log("action not implemented");
       })();
     },
-    [call]
+    [emit]
   );
 
   //========================================================================================

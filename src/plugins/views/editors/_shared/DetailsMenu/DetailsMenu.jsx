@@ -11,13 +11,7 @@ const DetailsMenu = ({ name, details }) => {
   return (
     <div>
       <h2 style={{ textAlign: "center" }}>{name}</h2>
-      <List
-        sx={{
-          width: "100%",
-          bgcolor: "background.paper"
-        }}
-        component="nav"
-      >
+      <List sx={{ width: "100%", bgcolor: "background.paper" }} component="nav">
         <ListItem>
           <ListItemText primary={`Name:`} />
           <Typography>{name}</Typography>

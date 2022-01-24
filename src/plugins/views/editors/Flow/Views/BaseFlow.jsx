@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import Backdrop from "@material-ui/core/Backdrop";
@@ -19,6 +19,8 @@ const BaseFlow = React.forwardRef((props, ref) => {
     type,
     model,
     dataFromDB,
+    off,
+    on,
     onNodeSelected,
     onReady
   } = props;
@@ -43,8 +45,25 @@ const BaseFlow = React.forwardRef((props, ref) => {
     call
   });
 
+  const getMainInterface = useCallback(() => {
+    return mainInterface.current;
+  }, [mainInterface]);
+
   useEffect(() => {
-    const mInt = mainInterface.current;
+    on("FlowExplorer", "addNode", node => {
+      const scopes = {
+        Node: "addNode",
+        Flow: "addFlow"
+      };
+      const templateId = node.name;
+      getMainInterface()?.setMode(scopes[node.scope], { templateId }, true);
+    });
+
+    return () => off("FlowExplorer", "addNode");
+  }, [getMainInterface, off, on]);
+
+  useEffect(() => {
+    const mInt = getMainInterface();
     if (!mInt) return;
 
     // Subscribe to on loading exit (finish) event
@@ -54,7 +73,7 @@ const BaseFlow = React.forwardRef((props, ref) => {
 
     // Dispatch on ready event
     onReady(mInt);
-  }, [mainInterface, dataFromDB, onNodeSelected, onReady]);
+  }, [getMainInterface, dataFromDB, onNodeSelected, onReady]);
 
   usePluginMethods(ref, { mainInterface });
 
