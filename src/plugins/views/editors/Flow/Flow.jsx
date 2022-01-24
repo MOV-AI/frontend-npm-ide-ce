@@ -158,7 +158,7 @@ const Flow = (props, ref) => {
               id={id}
               call={call}
               nodeInst={node}
-              model={instance}
+              flowModel={instance}
               openDoc={openDoc}
               editable={isEditableComponentRef.current}
             />
@@ -210,6 +210,7 @@ const Flow = (props, ref) => {
         view: (
           <Menu
             id={id}
+            call={call}
             name={name}
             details={details}
             model={instance}

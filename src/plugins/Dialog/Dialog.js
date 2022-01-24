@@ -2,6 +2,7 @@ import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
 import ReactDOM from "react-dom";
 import ConfirmationDialog from "./components/ConfirmationDialog/ConfirmationDialog";
 import NewDocumentDialog from "./components/FormDialog/NewDocumentDialog";
+import FormDialog from "./components/FormDialog/FormDialog";
 import AlertDialog from "./components/AlertDialog/AlertDialog";
 import AlertBeforeAction from "./components/AlertDialog/AlertBeforeAction";
 import AppDialog from "./components/AppDialog/AppDialog";
@@ -19,6 +20,7 @@ class Dialog extends IDEPlugin {
         "customDialog",
         "confirmation",
         "newDocument",
+        "formDialog",
         "copyDocument",
         "selectScopeModal",
         "closeDirtyDocument",
@@ -101,6 +103,30 @@ class Dialog extends IDEPlugin {
         loadingMessage={"Copying document"}
         submitText={"Copy"}
         onSubmit={data.onSubmit}
+        onClose={this._handleDialogClose}
+      />,
+      targetElement
+    );
+  }
+
+  /**
+   * Open modal with basic input form
+   * @param {*} data
+   */
+  formDialog(data) {
+    const targetElement = this._handleDialogOpen();
+    const { title, submitText, onSubmit, size, multiline, inputLabel, value } =
+      data;
+    ReactDOM.render(
+      <FormDialog
+        call={this.call}
+        size={size}
+        title={title}
+        multiline={multiline}
+        defaultValue={value}
+        inputLabel={inputLabel}
+        submitText={submitText}
+        onSubmit={onSubmit}
         onClose={this._handleDialogClose}
       />,
       targetElement
