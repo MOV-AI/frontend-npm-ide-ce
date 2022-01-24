@@ -52,4 +52,3 @@ A typical usage are described in [plugins/hosts](./plugins/hosts/)
 A view plugin is any class that extends [ViewReactPlugin](./ReactPlugin/ViewReactPlugin.js). A view plugin is able to be rendered in host plugins. A way to transform any React Component into a view plugin is to use `withPlugin: ReactComponent -> ReactComponent`.
 
 A typical usage are described in [plugins/views](./plugins/views/)
-1
