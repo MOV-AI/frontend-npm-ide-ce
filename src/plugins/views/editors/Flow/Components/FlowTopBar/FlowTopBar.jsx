@@ -19,14 +19,8 @@ import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import StopIcon from "@material-ui/icons/Stop";
 import { RobotManager } from "@mov-ai/mov-fe-lib-core";
 import Workspace from "../../../../../../utils/Workspace";
-import { getIconByScope } from "../../../../../../utils/Utils";
-import {
-  DOCK_POSITIONS,
-  FLOW_EXPLORER_PROFILE
-} from "../../../../../../utils/Constants";
 import { DEFAULT_FUNCTION, useTranslation } from "../../../_shared/mocks";
 import { FLOW_VIEW_MODE, ROBOT_BLACKLIST } from "../../Constants/constants";
-import Explorer from "../Explorer/Explorer";
 import useNodeStatusUpdate from "./hooks/useNodeStatusUpdate";
 
 const useStyles = makeStyles(theme => ({
@@ -99,7 +93,6 @@ const FlowTopBar = props => {
   const [robotSelected, setRobotSelected] = React.useState("");
   const [robotList, setRobotList] = React.useState({});
   const [viewMode, setViewMode] = React.useState(defaultViewMode);
-  const [flowExplorerToggle, setFlowExplorerToggle] = React.useState(true);
   // Other hooks
   const classes = useStyles();
   const { t } = useTranslation();
@@ -396,31 +389,6 @@ const FlowTopBar = props => {
     [onViewModeChange]
   );
 
-  const handleShowFlowExplorer = useCallback(() => {
-    setFlowExplorerToggle(prevState => {
-      if (!prevState) {
-        const viewPlugin = new Explorer(FLOW_EXPLORER_PROFILE);
-
-        call("tabs", "open", {
-          id: FLOW_EXPLORER_PROFILE.name,
-          name: FLOW_EXPLORER_PROFILE.title,
-          tabTitle: FLOW_EXPLORER_PROFILE.title,
-          scope: FLOW_EXPLORER_PROFILE.name,
-          extension: "",
-          content: viewPlugin.render(),
-          dockPosition: DOCK_POSITIONS.FLOAT,
-          position: { h: 1000, w: 370, x: 1000, y: 100, z: 5 }
-        });
-      } else {
-        call("tabs", "close", {
-          tabId: FLOW_EXPLORER_PROFILE.name,
-          keepBookmarks: true
-        });
-      }
-      return !prevState;
-    });
-  }, [call]);
-
   //========================================================================================
   /*                                                                                      *
    *                                        Render                                        *
@@ -499,19 +467,6 @@ const FlowTopBar = props => {
               {renderStartButton()}
             </ButtonTopBar>
           )}
-        </Typography>
-        <Typography component="div" className={classes.visualizationToggle}>
-          <ToggleButton
-            size="small"
-            selected={flowExplorerToggle}
-            onChange={handleShowFlowExplorer}
-          >
-            <Tooltip title={t("Toggle Flow Explorer")}>
-              {getIconByScope(FLOW_EXPLORER_PROFILE.name, {
-                fontSize: "1.2rem"
-              })}
-            </Tooltip>
-          </ToggleButton>
         </Typography>
         <Typography component="div" className={classes.visualizationToggle}>
           <ToggleButtonGroup

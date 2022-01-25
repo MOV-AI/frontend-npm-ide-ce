@@ -33,7 +33,7 @@ export const getTabIconColor = scope => {
     Configuration: "goldenrod"
   };
   // Return color by scope
-  return scope in TAB_ICON_COLORS ? TAB_ICON_COLORS[scope] : "white";
+  return scope in TAB_ICON_COLORS ? TAB_ICON_COLORS[scope] : "inherit";
 };
 
 /**

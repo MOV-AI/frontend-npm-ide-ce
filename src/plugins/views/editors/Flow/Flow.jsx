@@ -3,6 +3,8 @@ import { filter } from "rxjs/operators";
 import { makeStyles } from "@material-ui/core/styles";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
+import { getIconByScope } from "../../../../utils/Utils";
+import { FLOW_EXPLORER_PROFILE } from "../../../../utils/Constants";
 import { FLOW_VIEW_MODE } from "./Constants/constants";
 import InfoIcon from "@material-ui/icons/Info";
 import BaseFlow from "./Views/BaseFlow";
@@ -13,6 +15,7 @@ import FlowBottomBar from "./Components/FlowBottomBar/FlowBottomBar";
 import "./Resources/css/Flow.css";
 import { EVT_NAMES, EVT_TYPES } from "./events";
 import ContainerMenu from "./Components/Menus/ContainerMenu";
+import Explorer from "./Components/Explorer/Explorer";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -128,6 +131,19 @@ const Flow = (props, ref) => {
   }, []);
 
   /**
+   * Add Flow Explorer Bookmark
+   */
+  const addFlowExplorer = useCallback(() => {
+    const viewPlugin = new Explorer(FLOW_EXPLORER_PROFILE);
+
+    call("rightDrawer", "addBookmark", {
+      icon: getIconByScope(FLOW_EXPLORER_PROFILE.name),
+      name: FLOW_EXPLORER_PROFILE.name,
+      view: viewPlugin.render()
+    });
+  }, [call]);
+
+  /**
    * Add node menu if any
    */
   const addNodeMenu = useCallback(
@@ -176,9 +192,11 @@ const Flow = (props, ref) => {
         )
       }
     });
+    // Add flow explorer
+    addFlowExplorer();
     // Add node menu if any is selected
     addNodeMenu(selectedNodeRef.current);
-  }, [call, id, name, instance, props.data, addNodeMenu]);
+  }, [call, id, name, instance, props.data, addFlowExplorer, addNodeMenu]);
 
   usePluginMethods(ref, {
     renderRightMenu

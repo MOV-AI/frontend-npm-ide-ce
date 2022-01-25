@@ -4,8 +4,6 @@ import { HOMETAB_PROFILE, DEFAULT_LAYOUT, DOCK_POSITIONS } from "../../../utils/
 import { getIconByScope } from "../../../utils/Utils";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Workspace from "../../../utils/Workspace";
-import { FLOW_EXPLORER_PROFILE } from "../../../utils/Constants";
-import Explorer from "../editors/Flow/Components/Explorer/Explorer";
 import HomeTab from "../HomeTab/HomeTab";
 import TOPICS from "./topics";
 
@@ -331,31 +329,6 @@ const useLayout = (props, dockRef) => {
     });
   }, [workspaceManager]);
 
-  /**
-   * Installs the Flow Explorer Plugin
-   * @private
-   * @returns the Flow Explorer
-   */
-  const installExplorerTabPlugin = () => {
-    const viewPlugin = new Explorer(FLOW_EXPLORER_PROFILE);
-
-    return PluginManagerIDE.install(
-      FLOW_EXPLORER_PROFILE.name,
-      viewPlugin
-    ).then(() => {
-      // Create and return tab data
-      // Return TabData
-      return {
-        id: FLOW_EXPLORER_PROFILE.name,
-        name: FLOW_EXPLORER_PROFILE.title,
-        tabTitle: FLOW_EXPLORER_PROFILE.title,
-        scope: FLOW_EXPLORER_PROFILE.name,
-        extension: "",
-        content: viewPlugin.render()
-      };
-    });
-  };
-
   //========================================================================================
   /*                                                                                      *
    *                                    Exposed Methods                                   *
@@ -372,10 +345,6 @@ const useLayout = (props, dockRef) => {
       const position = tabData.position ?? { h: 500, w: 600, x: 145, y: 100, z: 1 };
       tabsById.current.set(tabData.id, tabData);
       workspaceManager.setTabs(tabsById.current);
-
-      if(tabData.scope === "Flow"){
-        installExplorerTabPlugin();
-      }
 
       setLayout(prevState => {
         const newState = { ...prevState };
@@ -541,8 +510,6 @@ const useLayout = (props, dockRef) => {
       
       if(id === HOMETAB_PROFILE.name)
         tabs.push(installHomeTabPlugin());
-      else if(id === FLOW_EXPLORER_PROFILE.name)
-        tabs.push(installExplorerTabPlugin());
       else  
         tabs.push(_getTabData({ id, name, scope }));
       
