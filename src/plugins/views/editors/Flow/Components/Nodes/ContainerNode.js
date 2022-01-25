@@ -17,21 +17,37 @@ class ContainerNode extends BaseContainerNode {
     super(otherArgs);
 
     this.factory = factory;
-
-    // initialize the container
-    this.init();
   }
 
   /**
-   * initialize the node element
+   * @override
+   * Remove init method of the base class
    */
   init() {
     // Empty on purpose
   }
 
+  /**
+   * Async initialization of the sub-flow.
+   * The sub-flow initialization needs to be async because it
+   * depends on the flow it references.
+   * @returns {ContainerNode} : The instance
+   */
   aInit = async () => {
     await this.addPorts();
-    this.renderBody().renderHeader().renderStatus().renderPorts().addEvents();
+    this.renderBody()
+      .renderHeader()
+      .renderStatus()
+      .renderPorts()
+      .addEvents()
+      .postInit();
+    return this;
+  };
+
+  /**
+   * Hook to run any post init action when extending the class
+   */
+  postInit = () => {
     return this;
   };
 

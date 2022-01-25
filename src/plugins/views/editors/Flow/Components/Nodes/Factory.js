@@ -49,7 +49,11 @@ class Factory {
       factory: { factory: Factory, docManager }
     });
 
-    if (output.cls === Factory.OUTPUT.CONTAINER.cls) {
+    if (
+      [Factory.OUTPUT.CONTAINER.cls, Factory.OUTPUT.TMP_CONTAINER.cls].includes(
+        output.cls
+      )
+    ) {
       await obj.aInit();
     }
 
