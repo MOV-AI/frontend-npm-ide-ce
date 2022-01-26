@@ -10,6 +10,7 @@ import {
   Typography,
   Tooltip
 } from "@material-ui/core";
+import { useTranslation } from "react-i18next";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/DeleteOutline";
 import ExpandLess from "@material-ui/icons/ExpandLess";
@@ -30,7 +31,7 @@ const ACTIVE_ITEM = {
   groups: 3
 };
 
-const Menu = ({ name, model, details: detailsProp, editable }) => {
+const Menu = ({ name, model, details: detailsProp, editable, call }) => {
   // State hook
   const [activeItem, setActiveItem] = React.useState(0);
   const { data } = useDataSubscriber({
@@ -39,6 +40,7 @@ const Menu = ({ name, model, details: detailsProp, editable }) => {
   });
   // Other hooks
   const classes = useStyles();
+  const { t } = useTranslation();
 
   //========================================================================================
   /*                                                                                      *
@@ -97,9 +99,19 @@ const Menu = ({ name, model, details: detailsProp, editable }) => {
     });
   }, []);
 
+  /**
+   * Open dialog to edit flow description
+   */
   const handleEditDescriptionClick = useCallback(() => {
-    console.log("debug handleEditDescriptionClick");
-  }, []);
+    call("dialog", "formDialog", {
+      size: "md",
+      multiline: true,
+      title: t("Edit Description"),
+      inputLabel: t("Description"),
+      value: model.current.getDescription(),
+      onSubmit: description => model.current.setDescription(description)
+    });
+  }, [call, t, model]);
 
   const handleAddParameterClick = useCallback(() => {
     console.log("debug handleAddParameterClick");
@@ -137,7 +149,9 @@ const Menu = ({ name, model, details: detailsProp, editable }) => {
    */
   const renderDescription = useCallback(() => {
     return data.description ? (
-      <Typography className={classes.itemValue}>{data.description}</Typography>
+      <Typography className={`${classes.itemValue} ${classes.description}`}>
+        {data.description}
+      </Typography>
     ) : (
       <Typography className={`${classes.itemValue} ${classes.disabled}`}>
         N/A
@@ -205,14 +219,14 @@ const Menu = ({ name, model, details: detailsProp, editable }) => {
               )}
             </IconButton>
             {editable && (
-              <Tooltip title="Edit Group">
+              <Tooltip title={t("Edit Group")}>
                 <IconButton onClick={() => handleGroupEdit(key)}>
                   <EditIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
             )}
             {editable && (
-              <Tooltip title="Delete Group">
+              <Tooltip title={t("Delete Group")}>
                 <IconButton onClick={() => handleGroupDelete(key)}>
                   <DeleteIcon fontSize="small" />
                 </IconButton>
@@ -232,7 +246,8 @@ const Menu = ({ name, model, details: detailsProp, editable }) => {
     editable,
     handleGroupActive,
     handleGroupEdit,
-    handleGroupDelete
+    handleGroupDelete,
+    t
   ]);
 
   return (
@@ -244,7 +259,7 @@ const Menu = ({ name, model, details: detailsProp, editable }) => {
           button
           onClick={() => handleExpandClick(ACTIVE_ITEM.description)}
         >
-          <ListItemText primary="Description" />
+          <ListItemText primary={t("Description")} />
           <IconButton
             disabled={!editable}
             onClick={e => {
@@ -269,7 +284,7 @@ const Menu = ({ name, model, details: detailsProp, editable }) => {
           button
           onClick={() => handleExpandClick(ACTIVE_ITEM.parameters)}
         >
-          <ListItemText primary="Parameters" />
+          <ListItemText primary={t("Parameters")} />
           <IconButton
             disabled={!editable}
             onClick={e => {
@@ -291,7 +306,7 @@ const Menu = ({ name, model, details: detailsProp, editable }) => {
         </Collapse>
         {/* ============ GROUPS ============ */}
         <ListItem button onClick={() => handleExpandClick(ACTIVE_ITEM.groups)}>
-          <ListItemText primary="Groups" />
+          <ListItemText primary={t("Groups")} />
           <IconButton
             disabled={!editable}
             onClick={e => {

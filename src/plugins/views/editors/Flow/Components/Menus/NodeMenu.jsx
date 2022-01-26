@@ -44,7 +44,7 @@ const useStyles = makeStyles(styles);
  */
 const NodeMenu = props => {
   // Props
-  const { nodeInst, call, openDoc, editable, model } = props;
+  const { nodeInst, call, openDoc, editable, flowModel } = props;
   // State hooks
   const [templateData, setTemplateData] = React.useState({});
   const [activeItem, setActiveItem] = React.useState(0);
@@ -208,7 +208,7 @@ const NodeMenu = props => {
       </ListItem>
       <Collapse in={activeItem === ACTIVE_ITEM.group} unmountOnExit>
         <NodeGroupSection
-          flowGroups={model.current.getGroups().serialize()}
+          flowGroups={flowModel.current.getGroups().serialize()}
           nodeGroups={data.NodeLayers}
           handleBelongGroup={handleBelongGroup}
         />

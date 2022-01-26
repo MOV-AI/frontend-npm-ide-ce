@@ -9,6 +9,10 @@ const styles = theme => ({
     overflow: "hidden",
     fontSize: "14px"
   },
+  description: {
+    whiteSpace: "normal !important",
+    textAlign: "justify"
+  },
   disabled: {
     color: "gray"
   },

@@ -6,6 +6,7 @@
  *
  */
 
+import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
 import { MisMatchMessageLink } from "../../Components/Links/Errors";
 import { isLinkeable } from "../../Components/Nodes/BaseNode/PortValidator";
 
@@ -32,12 +33,12 @@ export default class GraphValidator {
   }
 
   /**
-   * check if links to the start node
+   * @private check if links to the start node
    * @param {object} link object
    *
    * @returns {bool}
    */
-  _isLinkFromStart = link => {
+  isLinkFromStart = link => {
     return link.data.sourceNode === "start";
   };
 
@@ -56,7 +57,7 @@ export default class GraphValidator {
     let linksMismatches = false;
 
     links.forEach((link, _, _links) => {
-      linksStart = linksStart ?? this._isLinkFromStart(link);
+      linksStart = linksStart || this.isLinkFromStart(link);
       // Validate links message mismatch
       const error = GraphValidator.validateLinkMismatch(link.data, nodes);
       link.updateError(error);
@@ -168,7 +169,7 @@ export default class GraphValidator {
       ? new MisMatchMessageLink(
           link,
           { source: sourcePortPos, target: targetPortPos },
-          () => {}
+          () => DEFAULT_FUNCTION("")
         )
       : null;
 
