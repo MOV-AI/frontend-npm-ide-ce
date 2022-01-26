@@ -14,6 +14,15 @@ export const SCOPES = {
   Node: "Node"
 };
 
+export const TOPICS = {
+  RIGHT_DRAWER: {
+    CHANGE_BOOKMARK: "changeBookmark",
+    ADD_BOOKMARK: "addBookmark",
+    SET_BOOKMARK: "setBookmark",
+    REMOVE_BOOKMARK: "removeBookmark",
+  }, 
+}
+
 //========================================================================================
 /*                                                                                      *
  *                                   Layout Constants                                   *

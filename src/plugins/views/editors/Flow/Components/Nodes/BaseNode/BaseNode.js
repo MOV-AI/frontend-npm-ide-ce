@@ -360,6 +360,15 @@ class BaseNode extends BaseNodeStruct {
   }
 
   /**
+   * template - returns node template data
+   *
+   * @returns {object} node template data
+   */
+  get template() {
+    return this._template;
+  }
+
+  /**
    * status - set the status of the node
    *
    * @param {boolean} value true if running, false otherwise

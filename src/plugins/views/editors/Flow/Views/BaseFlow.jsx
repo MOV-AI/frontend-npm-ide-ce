@@ -2,10 +2,11 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import Backdrop from "@material-ui/core/Backdrop";
+import { usePluginMethods } from "../../../../../engine/ReactPlugin/ViewReactPlugin";
+import Loader from "../../_shared/Loader/Loader";
+import { generateContentId } from "../Constants/constants";
 import useMainInterface from "./hooks/useMainInterface";
 import styles from "./styles";
-import Loader from "../../_shared/Loader/Loader";
-import { usePluginMethods } from "../../../../../engine/ReactPlugin/ViewReactPlugin";
 
 const useStyles = makeStyles(styles);
 
@@ -29,7 +30,7 @@ const BaseFlow = React.forwardRef((props, ref) => {
   // State Hooks
   const [loading, setLoading] = useState(true);
 
-  const containerId = useMemo(() => `base-${id.replace(/\//g, "-")}`, [id]);
+  const containerId = useMemo(() => generateContentId(id), [id]);
 
   const { mainInterface } = useMainInterface({
     classes,

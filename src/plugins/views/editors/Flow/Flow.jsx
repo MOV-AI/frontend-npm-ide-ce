@@ -1,27 +1,26 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { filter } from "rxjs/operators";
 import { makeStyles } from "@material-ui/core/styles";
-import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
-import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
-import { getIconByScope } from "../../../../utils/Utils";
-import { FLOW_EXPLORER_PROFILE } from "../../../../utils/Constants";
-import { FLOW_VIEW_MODE } from "./Constants/constants";
 import InfoIcon from "@material-ui/icons/Info";
 import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
+import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
+import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
+import { FLOW_EXPLORER_PROFILE, TOPICS } from "../../../../utils/Constants";
+import { getIconByScope } from "../../../../utils/Utils";
 import BaseFlow from "./Views/BaseFlow";
 import Menu from "./Components/Menus/Menu";
 import NodeMenu from "./Components/Menus/NodeMenu";
 import FlowTopBar from "./Components/FlowTopBar/FlowTopBar";
 import FlowBottomBar from "./Components/FlowBottomBar/FlowBottomBar";
 import FlowContextMenu from "./Components/Menus/ContextMenu/FlowContextMenu";
-
-import "./Resources/css/Flow.css";
-import { EVT_NAMES, EVT_TYPES } from "./events";
 import ContainerMenu from "./Components/Menus/ContainerMenu";
 import Explorer from "./Components/Explorer/Explorer";
 import LinkMenu from "./Components/Menus/LinkMenu";
+import { EVT_NAMES, EVT_TYPES } from "./events";
+import { FLOW_VIEW_MODE } from "./Constants/constants";
 
-const t = v => v;
+import "./Resources/css/Flow.css";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -33,8 +32,17 @@ const useStyles = makeStyles(theme => ({
 
 const Flow = (props, ref) => {
   // Props
-  const { id, call, scope, name, instance, data, alert, confirmationAlert } =
-    props;
+  const {
+    id,
+    call,
+    scope,
+    name,
+    instance,
+    data,
+    alert,
+    confirmationAlert,
+    on
+  } = props;
   // State Hooks
   const [dataFromDB, setDataFromDB] = useState();
   const [robotSelected, setRobotSelected] = useState("");
@@ -48,22 +56,33 @@ const Flow = (props, ref) => {
 
   // Other Hooks
   const classes = useStyles();
+  const { t } = useTranslation();
   // Refs
   const baseFlowRef = React.useRef();
   const mainInterfaceRef = React.useRef();
   const debounceSelection = React.useRef();
+  const activeBookmark = React.useRef();
   const selectedNodeRef = React.useRef();
   const selectedLinkRef = React.useRef();
   const isEditableComponentRef = React.useRef(true);
   // Global consts
-  const NODE_MENU_NAME = `${id}-node-menu`;
-  const LINK_MENU_NAME = `${id}-link-menu`;
+  const NODE_MENU_NAME = `node-menu`;
+  const LINK_MENU_NAME = `link-menu`;
 
   //========================================================================================
   /*                                                                                      *
    *                                    React Lifecycle                                   *
    *                                                                                      */
   //========================================================================================
+
+  /**
+   * Component did mount
+   */
+  useEffect(() => {
+    on("rightDrawer", TOPICS.RIGHT_DRAWER.CHANGE_BOOKMARK, bookmark => {
+      activeBookmark.current = bookmark.name;
+    });
+  }, [on]);
 
   /**
    * Initialize data
@@ -144,28 +163,15 @@ const Flow = (props, ref) => {
   }, []);
 
   /**
-   * Add Flow Explorer Bookmark
-   */
-  const addFlowExplorer = useCallback(() => {
-    const viewPlugin = new Explorer(FLOW_EXPLORER_PROFILE);
-
-    call("rightDrawer", "addBookmark", {
-      icon: getIconByScope(FLOW_EXPLORER_PROFILE.name),
-      name: FLOW_EXPLORER_PROFILE.name,
-      view: viewPlugin.render()
-    });
-  }, [call]);
-
-  /**
    * Add node menu if any
    */
   const addNodeMenu = useCallback(
-    node => {
+    (node, nodeSelection) => {
       const MenuComponent = getMenuComponent(node?.data?.model);
       if (!node || !MenuComponent) return;
       call(
         "rightDrawer",
-        "addBookmark",
+        TOPICS.RIGHT_DRAWER.ADD_BOOKMARK,
         {
           icon: <i className="icon-Nodes" />,
           name: NODE_MENU_NAME,
@@ -180,7 +186,8 @@ const Flow = (props, ref) => {
             />
           )
         },
-        true
+        nodeSelection,
+        activeBookmark.current
       );
     },
     [NODE_MENU_NAME, call, id, instance, openDoc, getMenuComponent]
@@ -191,11 +198,11 @@ const Flow = (props, ref) => {
    * @param {Link} link : Link to be rendered in menu
    */
   const addLinkMenu = useCallback(
-    link => {
+    (link, linkSelection) => {
       if (!link) return;
       call(
         "rightDrawer",
-        "addBookmark",
+        TOPICS.RIGHT_DRAWER.ADD_BOOKMARK,
         {
           icon: <CompareArrowsIcon />,
           name: LINK_MENU_NAME,
@@ -209,47 +216,48 @@ const Flow = (props, ref) => {
             />
           )
         },
-        true
+        linkSelection,
+        activeBookmark.current
       );
     },
     [LINK_MENU_NAME, call, id, instance]
   );
 
   const renderRightMenu = useCallback(() => {
+    const explorerView = new Explorer(FLOW_EXPLORER_PROFILE);
     const details = props.data?.details || {};
-    const menuName = `${id}-detail-menu`;
+    const menuName = `detail-menu`;
     // add bookmark
-    call("rightDrawer", "setBookmark", {
-      [menuName]: {
-        icon: <InfoIcon></InfoIcon>,
-        name: menuName,
-        view: (
-          <Menu
-            id={id}
-            name={name}
-            details={details}
-            model={instance}
-            editable={isEditableComponentRef.current}
-          ></Menu>
-        )
-      }
-    });
-    // Add flow explorer
-    addFlowExplorer();
+    call(
+      "rightDrawer",
+      TOPICS.RIGHT_DRAWER.SET_BOOKMARK,
+      {
+        [menuName]: {
+          icon: <InfoIcon></InfoIcon>,
+          name: menuName,
+          view: (
+            <Menu
+              id={id}
+              name={name}
+              details={details}
+              model={instance}
+              editable={isEditableComponentRef.current}
+            ></Menu>
+          )
+        },
+        FlowExplorer: {
+          icon: getIconByScope(FLOW_EXPLORER_PROFILE.name),
+          name: FLOW_EXPLORER_PROFILE.name,
+          view: explorerView.render({ flowId: id })
+        }
+      },
+      activeBookmark.current
+    );
     // Add node menu if any is selected
     addNodeMenu(selectedNodeRef.current);
     // Add link menu if any is selected
     addLinkMenu(selectedLinkRef.current);
-  }, [
-    call,
-    id,
-    name,
-    instance,
-    props.data,
-    addFlowExplorer,
-    addNodeMenu,
-    addLinkMenu
-  ]);
+  }, [call, id, name, instance, props.data, addNodeMenu, addLinkMenu]);
 
   usePluginMethods(ref, {
     renderRightMenu
@@ -339,11 +347,17 @@ const Flow = (props, ref) => {
       clearTimeout(debounceSelection.current);
       debounceSelection.current = setTimeout(() => {
         if (!node) {
-          call("rightDrawer", "removeBookmark", NODE_MENU_NAME);
+          call(
+            "rightDrawer",
+            TOPICS.RIGHT_DRAWER.REMOVE_BOOKMARK,
+            NODE_MENU_NAME,
+            activeBookmark.current
+          );
           selectedNodeRef.current = null;
         } else {
           selectedNodeRef.current = node;
-          addNodeMenu(node);
+          activeBookmark.current = NODE_MENU_NAME;
+          addNodeMenu(node, true);
         }
       }, 300);
     },
@@ -359,9 +373,15 @@ const Flow = (props, ref) => {
       selectedLinkRef.current = link;
       getMainInterface().selectedLink = link;
       if (!link) {
-        call("rightDrawer", "removeBookmark", LINK_MENU_NAME);
+        call(
+          "rightDrawer",
+          TOPICS.RIGHT_DRAWER.REMOVE_BOOKMARK,
+          LINK_MENU_NAME,
+          activeBookmark.current
+        );
       } else {
-        addLinkMenu(link);
+        activeBookmark.current = LINK_MENU_NAME;
+        addLinkMenu(link, true);
       }
     },
     [call, LINK_MENU_NAME, addLinkMenu]
@@ -539,7 +559,7 @@ const Flow = (props, ref) => {
         message: `Are you sure you want to delete "${nodeId}"?`
       });
     },
-    [call]
+    [t, call]
   );
 
   const handleNodeDelete = useCallback(() => {

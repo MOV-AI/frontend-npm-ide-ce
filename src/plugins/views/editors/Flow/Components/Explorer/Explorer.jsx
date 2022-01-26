@@ -3,29 +3,17 @@ import PropTypes from "prop-types";
 import _get from "lodash/get";
 import _set from "lodash/set";
 import { Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
 import { withViewPlugin } from "../../../../../../engine/ReactPlugin/ViewReactPlugin";
-import { useTranslation } from "../../../_shared/mocks";
 import VirtualizedTree from "./../../../../Explorer/components/VirtualizedTree/VirtualizedTree";
+import Preview from "./Preview";
 
-const useStyles = makeStyles(theme => ({
-  typography: {
-    overflowY: "auto",
-    overflowX: "hidden",
-    justifyContent: "center",
-    width: "100%"
-  },
-  header: {
-    marginBottom: 6
-  }
-}));
+import { explorerStyles } from "./styles";
 
 const Explorer = props => {
-  const { on, emit, height } = props;
-  const classes = useStyles();
+  const { flowId, call, on, emit, height } = props;
+  const classes = explorerStyles();
   const [data, setData] = React.useState([]);
-
-  const { t } = useTranslation();
+  const [selectedNode, setSelectedNode] = React.useState({});
 
   //========================================================================================
   /*                                                                                      *
@@ -79,6 +67,28 @@ const Explorer = props => {
 
   //========================================================================================
   /*                                                                                      *
+   *                                       Handlers                                       *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Handle Mouse Enter on Node
+   * @param {NodeObject} node
+   */
+  const handleMouseEnterNode = useCallback(node => {
+    setSelectedNode(node);
+  }, []);
+
+  /**
+   * Handle Mouse Leave on Node
+   * @param {NodeObject} node
+   */
+  const handleMouseLeaveNode = useCallback(node => {
+    setSelectedNode({});
+  }, []);
+
+  //========================================================================================
+  /*                                                                                      *
    *                                   React callbacks                                    *
    *                                                                                      */
   //========================================================================================
@@ -129,11 +139,15 @@ const Explorer = props => {
 
   return (
     <Typography component="div">
-      <h1 className={classes.header}>{t("Explorer")}</h1>
+      <Typography component="div" className={classes.typography}>
+        <Preview node={selectedNode} flowId={flowId} call={call} />
+      </Typography>
       <Typography component="div" className={classes.typography}>
         <VirtualizedTree
           data={data}
           onClickNode={requestScopeVersions}
+          onMouseEnter={handleMouseEnterNode}
+          onMouseLeave={handleMouseLeaveNode}
           height={height}
         ></VirtualizedTree>
       </Typography>

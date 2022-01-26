@@ -500,9 +500,6 @@ const useLayout = (props, dockRef) => {
     const [ lastLayout, lastTabs ] = workspaceManager.getLayoutAndTabs();
     const tabs = [];
 
-    console.log("lastLayout", lastLayout);
-    console.log("lastTabs", lastTabs);    
-
     tabsById.current = lastTabs;
     // Install current tabs plugins
     lastTabs.forEach(tab => {

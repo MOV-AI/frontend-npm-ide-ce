@@ -7,10 +7,11 @@ const TEMPLATE_LABEL = {
 };
 
 class TreeNodeHeader extends BaseNodeHeader {
-  constructor(x, y, text, template, type = "node") {
+  constructor(x, y, text, template, templateType = "node", type) {
     super(x, y, text);
     this.dy = 18;
-    this.template = `${TEMPLATE_LABEL[type]}: ${template}`;
+    this.type = type;
+    this.template = `${TEMPLATE_LABEL[templateType]}: ${template}`;
     // Update rendered header
     this.render();
   }
@@ -55,7 +56,10 @@ class TreeNodeHeader extends BaseNodeHeader {
    *  Add two lines: Node name and Node template
    */
   parseText() {
-    return [this.text];
+    const ret = [this.text];
+
+    if(this.type) ret.push(this.type);
+    return ret;
   }
 }
 
