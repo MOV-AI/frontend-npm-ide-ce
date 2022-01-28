@@ -1,16 +1,18 @@
 import BaseNode from "../BaseNode";
 import TreeNodeHeader from "../TreeView/TreeNodeHeader";
-import BaseNodeStatus from "../BaseNodeStatus";
 
 class PreviewNode extends BaseNode {
   constructor(canvas, node, events, _type, template, parent) {
     super(canvas, node, events, _type, template);
+    this._template = template || this._template;
     this.parent = parent;
     this.children = new Map();
     this._links = new Map();
     this._displayPorts = false;
     this._collapsablePorts = null;
     this._belongLine = null;
+    // Mount node svg
+    this.init();
   }
 
   //========================================================================================
@@ -24,9 +26,7 @@ class PreviewNode extends BaseNode {
    * @override init: initialize the node element
    */
   init() {
-    this.renderBody()
-      .renderHeader()
-      .renderStatus()
+    this.renderBody().renderHeader().renderStatus();
 
     return this;
   }
@@ -55,28 +55,6 @@ class PreviewNode extends BaseNode {
 
     return this;
   }
-
-  /**
-   * renderStatus - render the status of the node (circle on the body)
-   */
-  renderStatus = () => {
-    const currentStatus = this.status;
-    // status already exists; probably an update request;
-    if (this._status) this._status.destroy();
-
-    // create the node status instance with fixed position
-    this._status = new BaseNodeStatus(37.5, 28);
-
-    // append to the svg element
-    this.object.append(() => {
-      return this._status.el;
-    });
-
-    // Reset status to its original value
-    this.status = currentStatus;
-
-    return this;
-  };
 
   //========================================================================================
   /*                                                                                      *

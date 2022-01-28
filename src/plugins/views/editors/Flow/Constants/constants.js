@@ -29,14 +29,14 @@ const NODE_TYPES = {
   CONTAINER: "CONTAINER"
 };
 
-const generateContentId = (flowId) => {
+const generateContainerId = flowId => {
   return `base-${flowId?.replace(/\//g, "-")}`;
-}
+};
 
 export {
   maxMovingPixels,
   canvasLimits,
-  generateContentId,
+  generateContainerId,
   FLOW_VIEW_MODE,
   TRANSITION_LINK,
   TABLE_KEYS_NAMES,

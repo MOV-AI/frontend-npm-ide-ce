@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Backdrop from "@material-ui/core/Backdrop";
 import { usePluginMethods } from "../../../../../engine/ReactPlugin/ViewReactPlugin";
 import Loader from "../../_shared/Loader/Loader";
-import { generateContentId } from "../Constants/constants";
+import { generateContainerId } from "../Constants/constants";
 import useMainInterface from "./hooks/useMainInterface";
 import styles from "./styles";
 
@@ -30,7 +30,7 @@ const BaseFlow = React.forwardRef((props, ref) => {
   // State Hooks
   const [loading, setLoading] = useState(true);
 
-  const containerId = useMemo(() => generateContentId(id), [id]);
+  const containerId = useMemo(() => generateContainerId(id), [id]);
 
   const { mainInterface } = useMainInterface({
     classes,
@@ -50,6 +50,7 @@ const BaseFlow = React.forwardRef((props, ref) => {
     return mainInterface.current;
   }, [mainInterface]);
 
+  // Enter in add node/sub-flow mode
   useEffect(() => {
     on("FlowExplorer", "addNode", node => {
       const scopes = {
@@ -57,11 +58,15 @@ const BaseFlow = React.forwardRef((props, ref) => {
         Flow: "addFlow"
       };
       const templateId = node.name;
+      // If user tries to add the flow as a sub-flow to itself,
+      //  it's considered a forbidden operation
+      if (dataFromDB.Label === templateId) return;
+      // Add interface mode to add node/sub-flow
       getMainInterface()?.setMode(scopes[node.scope], { templateId }, true);
     });
 
     return () => off("FlowExplorer", "addNode");
-  }, [getMainInterface, off, on]);
+  }, [getMainInterface, off, on, dataFromDB]);
 
   useEffect(() => {
     const mInt = getMainInterface();
@@ -85,15 +90,7 @@ const BaseFlow = React.forwardRef((props, ref) => {
           <Loader />
         </Backdrop>
       )}
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          flexGrow: 1
-        }}
-        id={containerId}
-        tagindex="0"
-      ></div>
+      <div className={classes.flowCanvas} id={containerId} tagindex="0"></div>
     </div>
   );
 });

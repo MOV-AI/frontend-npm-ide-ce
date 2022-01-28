@@ -3,7 +3,6 @@ import BuildIcon from "@material-ui/icons/Build";
 import CodeIcon from "@material-ui/icons/Code";
 import DescriptionIcon from "@material-ui/icons/Description";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
-import ListAltIcon from "@material-ui/icons/ListAlt";
 import movaiIcon from "../plugins/views/editors/_shared/Loader/movai_red.svg";
 
 /**
@@ -41,8 +40,12 @@ export const getTabIconColor = scope => {
  * @param {string} scope : Document type (Callback, Configuration, ...)
  * @returns {component} Icon by document type
  */
-export const getIconByScope = (scope = "Default", style) => {
+export const getIconByScope = (scope, style) => {
+  scope = scope || "Default";
   const color = getTabIconColor(scope);
+  const homeTabIcon = (
+    <img src={movaiIcon} alt="MOV.AI Logo" style={{ maxWidth: 12, ...style }} />
+  );
   const icon = {
     Callback: <CodeIcon style={{ color, ...style }} />,
     Layout: <i className={`icon-Layouts`} style={{ color, ...style }}></i>,
@@ -51,11 +54,10 @@ export const getIconByScope = (scope = "Default", style) => {
     GraphicScene: <DeviceHubIcon style={{ color, ...style }} />,
     Node: <i className={`icon-Nodes`} style={{ color, ...style }}></i>,
     Configuration: <BuildIcon style={{ color, ...style }} />,
-    HomeTab: <img src={movaiIcon} alt="MOV.AI Logo" style={{ maxWidth: 12, ...style}} />,
-    FlowExplorer: <ListAltIcon style={{ ...style, color }} />,
+    HomeTab: homeTabIcon,
     Default: <></>
   };
-  
+
   return icon[scope];
 };
 
@@ -75,7 +77,7 @@ export const SCOPES = {
  */
 export const stopPropagation = e => {
   e?.stopPropagation();
-}
+};
 
 /**
  * Returns the document name from an URL
@@ -84,5 +86,5 @@ export const stopPropagation = e => {
  */
 export function getNameFromURL(url) {
   console.log("url", url);
-  return url?.substring(url.lastIndexOf("/") +1);
+  return url?.substring(url.lastIndexOf("/") + 1);
 }

@@ -1,10 +1,9 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import Factory from "../Nodes/Factory";
-import { generateContentId } from "../../Constants/constants";
+import { generateContainerId } from "../../Constants/constants";
 import { previewStyles } from "./styles";
-import { useCallback } from "react";
 
 const Preview = props => {
   const { flowId, node, call } = props;
@@ -22,16 +21,22 @@ const Preview = props => {
    * Render the Node and add it to the svg
    */
   const renderNodePreview = useCallback(
-    nodeName => {
-      if (!nodeName) return;
+    (name, scope) => {
+      if (!name || !scope) return;
+      const factoryOutput = {
+        Node: Factory.OUTPUT.PREV_NODE,
+        Flow: Factory.OUTPUT.PREV_FLOW
+      };
       // Add temp node
-      Factory.create(call, Factory.OUTPUT.PREV_NODE, {
+      Factory.create(call, factoryOutput[scope], {
         canvas: {
-          containerId: generateContentId(flowId),
-          setMode: () => {}
+          containerId: generateContainerId(flowId),
+          setMode: () => {
+            /* empty */
+          }
         },
         node: {
-          Template: nodeName
+          Template: name
         },
         events: {}
       }).then(obj => {
@@ -54,8 +59,8 @@ const Preview = props => {
    * Renders Node Preview when node.name changes
    */
   useEffect(() => {
-    renderNodePreview(node.name);
-  }, [node.name, call, renderNodePreview]);
+    renderNodePreview(node.name, node.scope);
+  }, [node.name, node.scope, renderNodePreview]);
 
   return (
     <div className={classes.previewHolder}>

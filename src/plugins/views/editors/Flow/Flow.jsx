@@ -3,11 +3,11 @@ import { useTranslation } from "react-i18next";
 import { filter } from "rxjs/operators";
 import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from "@material-ui/icons/Info";
+import Add from "@material-ui/icons/Add";
 import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { FLOW_EXPLORER_PROFILE, TOPICS } from "../../../../utils/Constants";
-import { getIconByScope } from "../../../../utils/Utils";
 import BaseFlow from "./Views/BaseFlow";
 import Menu from "./Components/Menus/Menu";
 import NodeMenu from "./Components/Menus/NodeMenu";
@@ -247,7 +247,7 @@ const Flow = (props, ref) => {
           )
         },
         FlowExplorer: {
-          icon: getIconByScope(FLOW_EXPLORER_PROFILE.name),
+          icon: <Add />,
           name: FLOW_EXPLORER_PROFILE.name,
           view: explorerView.render({ flowId: id })
         }

@@ -618,7 +618,9 @@ class BaseNode extends BaseNodeStruct {
     if ("onDrag" in this.events) this.events.onDrag(this, d3.event);
     lodash
       .get(this.canvas.mode.current, "onDrag", {
-        next: () => {}
+        next: () => {
+          /* empty method */
+        }
       })
       .next(this);
   };
@@ -812,7 +814,7 @@ class BaseNode extends BaseNodeStruct {
    */
   update = data => {
     const fn = {
-      Visualization: data => this.updatePosition(data), // Position changes when dragging or when adding a new node
+      Visualization: docData => this.updatePosition(docData), // Position changes when dragging or when adding a new node
       default: () => {
         lodash.merge(this.data, data);
         this.data.name = this.name;
