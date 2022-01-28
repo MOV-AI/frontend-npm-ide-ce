@@ -37,6 +37,7 @@ const Flow = (props, ref) => {
   const [robotSelected, setRobotSelected] = useState("");
   const [runningFlow, setRunningFlow] = useState("");
   const [warnings, setWarnings] = useState([]);
+  const [warningsVisibility, setWarningsVisibility] = useState(true);
   const [viewMode, setViewMode] = useState(FLOW_VIEW_MODE.default);
   const [contextMenuOptions, setContextMenuOptions] = useState({
     open: false,
@@ -277,6 +278,7 @@ const Flow = (props, ref) => {
    */
   const onToggleWarnings = useCallback(isVisible => {
     getMainInterface()?.onToggleWarnings({ data: isVisible });
+    setWarningsVisibility(isVisible);
   }, []);
 
   /**
@@ -299,8 +301,10 @@ const Flow = (props, ref) => {
    * @param {*} validationWarnings
    */
   const onFlowValidated = useCallback(validationWarnings => {
-    console.log("TODO: fix warnings", validationWarnings);
-    setWarnings(validationWarnings);
+    const persistentWarns = validationWarnings.warnings.filter(
+      el => el.isPersistent
+    );
+    setWarnings(persistentWarns);
   }, []);
 
   /**
@@ -553,6 +557,8 @@ const Flow = (props, ref) => {
         {...props}
         ref={baseFlowRef}
         dataFromDB={dataFromDB}
+        warnings={warnings}
+        warningsVisibility={warningsVisibility}
         onReady={onReady}
       />
       <FlowBottomBar

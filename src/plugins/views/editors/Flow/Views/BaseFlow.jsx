@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import Backdrop from "@material-ui/core/Backdrop";
@@ -6,11 +6,11 @@ import useMainInterface from "./hooks/useMainInterface";
 import styles from "./styles";
 import Loader from "../../_shared/Loader/Loader";
 import { usePluginMethods } from "../../../../../engine/ReactPlugin/ViewReactPlugin";
+import Warnings from "../Components/Warnings/Warnings";
 
 const useStyles = makeStyles(styles);
 
 const BaseFlow = React.forwardRef((props, ref) => {
-  const classes = useStyles(props);
   const {
     call,
     instance,
@@ -20,6 +20,8 @@ const BaseFlow = React.forwardRef((props, ref) => {
     model,
     dataFromDB,
     onNodeSelected,
+    warnings,
+    warningsVisibility,
     onReady
   } = props;
   const readOnly = false;
@@ -28,6 +30,12 @@ const BaseFlow = React.forwardRef((props, ref) => {
   const [loading, setLoading] = useState(true);
 
   const containerId = useMemo(() => `base-${id.replace(/\//g, "-")}`, [id]);
+
+  // Refs
+  const warningsRef = useRef();
+  const containerRef = useRef();
+  // Other hooks
+  const classes = useStyles(props);
 
   const { mainInterface } = useMainInterface({
     classes,
@@ -71,9 +79,19 @@ const BaseFlow = React.forwardRef((props, ref) => {
           height: "100%",
           flexGrow: 1
         }}
+        ref={containerRef}
         id={containerId}
         tagindex="0"
-      ></div>
+      >
+        <React.Fragment>
+          <Warnings
+            ref={warningsRef}
+            warnings={warnings}
+            isVisible={warningsVisibility}
+            domNode={containerRef}
+          />
+        </React.Fragment>
+      </div>
     </div>
   );
 });
