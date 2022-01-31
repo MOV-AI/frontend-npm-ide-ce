@@ -508,6 +508,7 @@ const Flow = (props, ref) => {
         )
         .subscribe(event => onLinkSelected(event.data));
 
+      // onPortMouseOver
       mainInterface.canvas.events
         .pipe(
           filter(
@@ -517,11 +518,10 @@ const Flow = (props, ref) => {
           )
         )
         .subscribe(evtData => {
-          const { port } = evtData.data;
-          const { x, y } = port.position;
+          const { port, event } = evtData;
           const anchorPosition = {
-            left: x + 8,
-            top: y
+            left: event.layerX + 8,
+            top: event.layerY
           };
           setTooltipConfig({
             port,
@@ -529,6 +529,7 @@ const Flow = (props, ref) => {
           });
         });
 
+      // onPortMouseOut
       mainInterface.canvas.events
         .pipe(
           filter(
@@ -537,7 +538,7 @@ const Flow = (props, ref) => {
               event.type === EVT_TYPES.PORT
           )
         )
-        .subscribe(evtData => {
+        .subscribe(() => {
           setTooltipConfig(null);
         });
 

@@ -16,7 +16,6 @@ const SIZES = {
 const PortTooltip = props => {
   const { t } = useTranslation();
   const { anchorPosition, port } = props;
-  const open = Boolean(anchorPosition);
   const title = t("Port");
 
   const getRows = useCallback(() => {
@@ -45,10 +44,7 @@ const PortTooltip = props => {
   }, [port]);
 
   return (
-    <Card
-      style={{ position: "absolute", width: getSize(), ...anchorPosition }}
-      open={open}
-    >
+    <Card style={{ position: "absolute", width: getSize(), ...anchorPosition }}>
       <CardContent>
         <Grid container spacing={0}>
           <Grid item xs={12}>
