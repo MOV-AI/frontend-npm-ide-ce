@@ -18,6 +18,15 @@ const variantIcon = {
 };
 
 const useStyles = makeStyles(theme => ({
+  root: {
+    position: "absolute",
+    top: "20px",
+    right: "50px"
+  },
+  snackbar: {
+    margin: "5px",
+    minWidth: "200px"
+  },
   success: {
     backgroundColor: green[600]
   },
@@ -74,7 +83,7 @@ const Warnings = React.forwardRef((props, ref) => {
       return (
         <SnackbarContent
           key={index}
-          className={clsx(classes[type])}
+          className={`${clsx(classes[type])} ${classes.snackbar}`}
           message={
             <span className={classes.message}>
               <Icon className={clsx(classes.icon, classes.iconVariant)} />
@@ -82,7 +91,6 @@ const Warnings = React.forwardRef((props, ref) => {
               {html()}
             </span>
           }
-          style={{ margin: "5px", minWidth: "200px" }}
         />
       );
     });
@@ -95,11 +103,9 @@ const Warnings = React.forwardRef((props, ref) => {
   //========================================================================================
 
   useEffect(() => {
-    el.current.style.position = "absolute";
-    el.current.style.right = `${20}px`;
-    el.current.style.top = `${20}px`;
+    el.current.classList.add(classes.root);
     domNode.current.appendChild(el.current);
-  }, [domNode]);
+  }, [classes.root, domNode]);
 
   //========================================================================================
   /*                                                                                      *

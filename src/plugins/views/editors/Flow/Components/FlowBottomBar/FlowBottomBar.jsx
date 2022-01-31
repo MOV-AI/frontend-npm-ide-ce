@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import WarningIcon from "@material-ui/icons/Warning";
 import { makeStyles } from "@material-ui/styles";
@@ -63,11 +63,9 @@ const FlowBottomBar = props => {
     if (!warnings.length) return;
     // Toggle warnings if there's any
     setWarningVisibility(prevState => {
-      const isVisible = !prevState;
-      onToggleWarnings(isVisible);
-      return isVisible;
+      return !prevState;
     });
-  }, [onToggleWarnings, warnings]);
+  }, [warnings]);
 
   //========================================================================================
   /*                                                                                      *
@@ -75,13 +73,13 @@ const FlowBottomBar = props => {
    *                                                                                      */
   //========================================================================================
 
-  React.useEffect(() => {
+  useEffect(() => {
     const robotManager = new RobotManager();
     robotManager.getAll(robots => setRobots(robots));
     robotManager.subscribeToChanges(updateRobots);
   }, [updateRobots]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const status = runningFlow ? "active" : "default";
     setBarStatus(status);
     // Set selected robot name
@@ -90,6 +88,11 @@ const FlowBottomBar = props => {
       setSelectedRobotName(robotName);
     }
   }, [robotSelected, allRobots, runningFlow]);
+
+  // Call toggle warnings on change of warningVisibility
+  useEffect(() => {
+    onToggleWarnings(warningVisibility);
+  }, [warningVisibility, onToggleWarnings]);
 
   //========================================================================================
   /*                                                                                      *
