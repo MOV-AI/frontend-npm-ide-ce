@@ -177,6 +177,8 @@ class VirtualizedTree extends Component {
                 return (
                   <div
                     style={style}
+                    onMouseEnter={() => this.props.onMouseEnter(node)}
+                    onMouseLeave={() => this.props.onMouseLeave(node)}
                     onClick={() => this.props.onClickNode(node)}
                     onDoubleClick={() => this.props.onDoubleClickNode(node)}
                     p={2}
@@ -302,6 +304,8 @@ VirtualizedTree.propTypes = {
   data: PropTypes.array,
   showIcons: PropTypes.bool,
   onClickNode: PropTypes.func,
+  onMouseEnter: PropTypes.func,
+  onMouseLeave: PropTypes.func,
   onDoubleClickNode: PropTypes.func,
   handleChange: PropTypes.func,
   handleCopyClick: PropTypes.func,
@@ -314,6 +318,8 @@ VirtualizedTree.defaultProps = {
   data: [],
   showIcons: false,
   onClickNode: () => DEFAULT_FUNCTION("onClickNode"),
+  onMouseEnter: () => {},
+  onMouseLeave: () => {},
   onDoubleClickNode: () => DEFAULT_FUNCTION("onDoubleClickNode"),
   handleChange: () => DEFAULT_FUNCTION("handleChange"),
   handleCopyClick: () => DEFAULT_FUNCTION("handleCopyClick"),

@@ -360,6 +360,15 @@ class BaseNode extends BaseNodeStruct {
   }
 
   /**
+   * template - returns node template data
+   *
+   * @returns {object} node template data
+   */
+  get template() {
+    return this._template;
+  }
+
+  /**
    * status - set the status of the node
    *
    * @param {boolean} value true if running, false otherwise
@@ -609,7 +618,9 @@ class BaseNode extends BaseNodeStruct {
     if ("onDrag" in this.events) this.events.onDrag(this, d3.event);
     lodash
       .get(this.canvas.mode.current, "onDrag", {
-        next: () => {}
+        next: () => {
+          /* empty method */
+        }
       })
       .next(this);
   };
@@ -803,7 +814,7 @@ class BaseNode extends BaseNodeStruct {
    */
   update = data => {
     const fn = {
-      Visualization: data => this.updatePosition(data), // Position changes when dragging or when adding a new node
+      Visualization: docData => this.updatePosition(docData), // Position changes when dragging or when adding a new node
       default: () => {
         lodash.merge(this.data, data);
         this.data.name = this.name;

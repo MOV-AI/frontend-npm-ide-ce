@@ -2,6 +2,9 @@ import ClassicNode from "./ClassicNode";
 import ContainerNode from "./ContainerNode";
 import TemporaryContainerNode from "./TemporaryContainerNode";
 import TemporaryNode from "./TemporaryNode";
+import TreeClassicNode from "./TreeView/TreeClassicNode";
+import PreviewClassicNode from "./Preview/PreviewClassicNode";
+import PreviewContainerNode from "./Preview/PreviewContainerNode";
 import { DOCS_MNG } from "./constants";
 
 /**
@@ -49,7 +52,11 @@ class Factory {
       factory: { factory: Factory, docManager }
     });
 
-    if (output.cls === Factory.OUTPUT.CONTAINER.cls) {
+    if (
+      [Factory.OUTPUT.CONTAINER.cls, Factory.OUTPUT.TMP_CONTAINER.cls].includes(
+        output.cls
+      )
+    ) {
       await obj.aInit();
     }
 
@@ -57,10 +64,14 @@ class Factory {
   }
 
   static OUTPUT = {
+    PREV_NODE: { cls: PreviewClassicNode, scope: "Node" },
+    PREV_FLOW: { cls: PreviewContainerNode, scope: "Flow" },
     NODE: { cls: ClassicNode, scope: "Node" },
     TMP_NODE: { cls: TemporaryNode, scope: "Node" },
+    TREE_NODE: { cls: TreeClassicNode, scope: "Node" },
     CONTAINER: { cls: ContainerNode, scope: "Flow" },
-    TMP_CONTAINER: { cls: TemporaryContainerNode, scope: "Flow" }
+    TMP_CONTAINER: { cls: TemporaryContainerNode, scope: "Flow" },
+    TREE_CONTAINER: { cls: TreeClassicNode, scope: "Flow" }
   };
 }
 

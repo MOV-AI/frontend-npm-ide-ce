@@ -4,7 +4,7 @@ import { filter } from "rxjs/operators";
 import Canvas from "./canvas";
 import Graph from "../../Core/Graph/GraphBase";
 import InterfaceModes from "./InterfaceModes";
-import { maxMovingPixels } from "../../Constants/constants";
+import { maxMovingPixels, NODE_TYPES } from "../../Constants/constants";
 import Events from "./Events";
 import { EVT_NAMES } from "../../events";
 
@@ -169,18 +169,50 @@ export default class MainInterface {
     this.graph.deleteLinks([linkId]);
   };
 
-  deleteNode = (nodeId, deletedLinks) => {
+  addNode = name => {
+    const node = {
+      ...this.mode.current.props.node.data,
+      NodeLabel: name,
+      name: name,
+      id: name
+    };
+    this.modelView.current.addNode(node);
+    this.graph.addNode(node, NODE_TYPES.NODE).then(() => {
+      this.graph.update();
+      this.setMode(EVT_NAMES.DEFAULT);
+    });
+
+    return this;
+  };
+
+  addFlow = name => {
+    const node = {
+      ...this.mode.current.props.node.data,
+      ContainerLabel: name,
+      name: name,
+      id: name
+    };
+    this.modelView.current.addSubFlow(node);
+    this.graph.addNode(node, NODE_TYPES.CONTAINER).then(() => {
+      this.graph.update();
+      this.setMode(EVT_NAMES.DEFAULT);
+    });
+
+    return this;
+  };
+
+  deleteNode = nodeId => {
     this.graph.deleteNode(nodeId);
   };
 
   deleteNodeInst = nodeId => {
-    const deletedLinks = this.modelView.current.deleteNode(nodeId);
-    this.deleteNode(nodeId, deletedLinks);
+    this.modelView.current.deleteNode(nodeId);
+    this.deleteNode(nodeId);
   };
 
   deleteSubFlow = subFlowId => {
-    const deletedLinks = this.modelView.current.deleteSubFlow(subFlowId);
-    this.deleteNode(subFlowId, deletedLinks);
+    this.modelView.current.deleteSubFlow(subFlowId);
+    this.deleteNode(subFlowId);
   };
 
   //========================================================================================

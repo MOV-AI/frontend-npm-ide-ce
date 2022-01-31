@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import Backdrop from "@material-ui/core/Backdrop";
+import { usePluginMethods } from "../../../../../engine/ReactPlugin/ViewReactPlugin";
+import Loader from "../../_shared/Loader/Loader";
+import { generateContainerId } from "../Constants/constants";
 import useMainInterface from "./hooks/useMainInterface";
 import styles from "./styles";
-import Loader from "../../_shared/Loader/Loader";
-import { usePluginMethods } from "../../../../../engine/ReactPlugin/ViewReactPlugin";
 
 const useStyles = makeStyles(styles);
 
@@ -19,6 +20,8 @@ const BaseFlow = React.forwardRef((props, ref) => {
     type,
     model,
     dataFromDB,
+    off,
+    on,
     onNodeSelected,
     onReady
   } = props;
@@ -27,7 +30,7 @@ const BaseFlow = React.forwardRef((props, ref) => {
   // State Hooks
   const [loading, setLoading] = useState(true);
 
-  const containerId = useMemo(() => `base-${id.replace(/\//g, "-")}`, [id]);
+  const containerId = useMemo(() => generateContainerId(id), [id]);
 
   const { mainInterface } = useMainInterface({
     classes,
@@ -43,8 +46,30 @@ const BaseFlow = React.forwardRef((props, ref) => {
     call
   });
 
+  const getMainInterface = useCallback(() => {
+    return mainInterface.current;
+  }, [mainInterface]);
+
+  // Enter in add node/sub-flow mode
   useEffect(() => {
-    const mInt = mainInterface.current;
+    on("FlowExplorer", "addNode", node => {
+      const scopes = {
+        Node: "addNode",
+        Flow: "addFlow"
+      };
+      const templateId = node.name;
+      // If user tries to add the flow as a sub-flow to itself,
+      //  it's considered a forbidden operation
+      if (dataFromDB.Label === templateId) return;
+      // Add interface mode to add node/sub-flow
+      getMainInterface()?.setMode(scopes[node.scope], { templateId }, true);
+    });
+
+    return () => off("FlowExplorer", "addNode");
+  }, [getMainInterface, off, on, dataFromDB]);
+
+  useEffect(() => {
+    const mInt = getMainInterface();
     if (!mInt) return;
 
     // Subscribe to on loading exit (finish) event
@@ -54,7 +79,7 @@ const BaseFlow = React.forwardRef((props, ref) => {
 
     // Dispatch on ready event
     onReady(mInt);
-  }, [mainInterface, dataFromDB, onNodeSelected, onReady]);
+  }, [getMainInterface, dataFromDB, onNodeSelected, onReady]);
 
   usePluginMethods(ref, { mainInterface });
 
@@ -65,15 +90,7 @@ const BaseFlow = React.forwardRef((props, ref) => {
           <Loader />
         </Backdrop>
       )}
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          flexGrow: 1
-        }}
-        id={containerId}
-        tagindex="0"
-      ></div>
+      <div className={classes.flowCanvas} id={containerId} tagindex="0"></div>
     </div>
   );
 });

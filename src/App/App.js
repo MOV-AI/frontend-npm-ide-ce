@@ -1,7 +1,11 @@
 import React from "react";
-import "./App.css";
+import { withAuthentication, Style } from "@mov-ai/mov-fe-lib-react";
+import { Typography } from "@material-ui/core";
+import Grid from "@material-ui/core/Grid";
+import { makeStyles } from "@material-ui/core/styles";
 import PluginManagerIDE from "../engine/PluginManagerIDE/PluginManagerIDE";
 import DocManager from "../plugins/DocManager/DocManager";
+import FlowExplorer from "../plugins/views/editors/Flow/Components/Explorer/Explorer";
 import Dialog from "../plugins/Dialog/Dialog";
 import Alerts from "../plugins/Alerts/Alerts";
 import BottomBar from "../plugins/hosts/BottomBar/BottomBar";
@@ -14,12 +18,11 @@ import Explorer from "../plugins/views/Explorer/Explorer";
 import MainMenu from "../plugins/views/MainMenu/MainMenu";
 import Tabs from "../plugins/views/Tabs/Tabs";
 import Placeholder from "../plugins/views/Placeholder/Placeholder";
-import Grid from "@material-ui/core/Grid";
-import { makeStyles } from "@material-ui/core/styles";
-import { withAuthentication, Style } from "@mov-ai/mov-fe-lib-react";
 import { withTheme } from "../decorators/withTheme";
 import { MainContext } from "../main-context";
-import { Typography } from "@material-ui/core";
+import { FLOW_EXPLORER_PROFILE } from "../utils/Constants";
+
+import "./App.css";
 
 const DEBUG_MODE = false;
 
@@ -78,7 +81,11 @@ function installAppPlugins() {
     {
       profile: { name: "alert" },
       factory: profile => new Alerts(profile)
-    }
+    },
+    {
+      profile: FLOW_EXPLORER_PROFILE,
+      factory: profile => new FlowExplorer(profile)
+    },
   ];
   plugins.forEach(pluginDescription => {
     const plugin = pluginDescription.factory(pluginDescription.profile);
