@@ -24,12 +24,23 @@ const EMPTY_MESSAGE = {
   CmdLine: "No Command Lines"
 };
 
+const NODE_TYPES = {
+  NODE: "NODE",
+  CONTAINER: "CONTAINER"
+};
+
+const generateContainerId = flowId => {
+  return `base-${flowId?.replace(/\//g, "-")}`;
+};
+
 export {
   maxMovingPixels,
   canvasLimits,
+  generateContainerId,
   FLOW_VIEW_MODE,
   TRANSITION_LINK,
   TABLE_KEYS_NAMES,
   EMPTY_MESSAGE,
-  ROBOT_BLACKLIST
+  ROBOT_BLACKLIST,
+  NODE_TYPES
 };

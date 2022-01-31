@@ -169,6 +169,18 @@ class Flow extends Model {
     return this;
   }
 
+  addNode(node) {
+    const { name } = node;
+    const content = NodeInstance.serializeOfDB({ [name]: { ...node } });
+    this.getNodeInstances().setItem({ name, content });
+  }
+
+  addSubFlow(node) {
+    const { name } = node;
+    const content = SubFlow.serializeOfDB({ [name]: { ...node } });
+    this.getSubFlows().setItem({ name, content });
+  }
+
   /**
    * Deletes a node instance and connected links
    * @param {string} nodeId : The node instance id

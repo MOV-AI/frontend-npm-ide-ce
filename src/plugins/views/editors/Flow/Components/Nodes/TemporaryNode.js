@@ -1,7 +1,7 @@
 import BaseNode from "./BaseNode/BaseNode";
 
 class TemporaryNode extends BaseNode {
-  constructor(canvas, node, template) {
+  constructor({ canvas, node, template, opacity }) {
     const customNode = {
       id: "",
       NodeLabel: node.Template,
@@ -12,13 +12,13 @@ class TemporaryNode extends BaseNode {
       },
       ...node
     };
-    super(canvas, customNode, {}, "node", template);
+    super({ canvas, node: customNode, events: {}, template });
 
-    this.init().postInit();
+    this.init().postInit(opacity);
   }
 
-  postInit = () => {
-    this.object.attr("opacity", "0.5");
+  postInit = (opacity = "0.5") => {
+    this.object.attr("opacity", opacity);
   };
 
   /**

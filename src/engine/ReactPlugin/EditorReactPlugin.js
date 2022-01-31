@@ -158,6 +158,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
           profile={this.profile}
           emit={this.emit}
           on={this.on}
+          off={this.off}
           onTopic={this.onTopic}
         />
       );

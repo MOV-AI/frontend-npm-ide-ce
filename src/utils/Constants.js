@@ -14,11 +14,29 @@ export const SCOPES = {
   Node: "Node"
 };
 
+export const TOPICS = {
+  RIGHT_DRAWER: {
+    CHANGE_BOOKMARK: "changeBookmark",
+    ADD_BOOKMARK: "addBookmark",
+    SET_BOOKMARK: "setBookmark",
+    REMOVE_BOOKMARK: "removeBookmark",
+  }, 
+}
+
 //========================================================================================
 /*                                                                                      *
  *                                   Layout Constants                                   *
  *                                                                                      */
 //========================================================================================
+
+export const DOCK_POSITIONS = {
+  DOCK: "dockbox",
+  WINDOW: "windowbox",
+  MAX: "maxbox",
+  FLOAT: "floatbox",
+}
+
+export const FLOW_EXPLORER_PROFILE = { name: "FlowExplorer", title: "Flow Explorer" };
 
 export const HOMETAB_PROFILE = { name: "HomeTab", title: "Welcome" };
 

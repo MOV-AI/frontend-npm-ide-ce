@@ -3,6 +3,7 @@ import { Subject } from "rxjs";
 import Factory from "../../Components/Nodes/Factory";
 import TemporaryLink from "../Links/TemporaryLink";
 import { FLOW_VIEW_MODE, canvasLimits } from "../../Constants/constants";
+import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
 
 class Canvas {
   constructor({
@@ -60,7 +61,6 @@ class Canvas {
 
   initialize = () => {
     this.maxMeasures = Math.max(this.width, this.height);
-    //this.minScale = this.maxMeasures / this.maxMovingPixels;
     this.minScale = 0.2;
     this.nodeSize =
       0.005 * this.maxMovingPixels < 40 ? 40 : 0.005 * this.maxMovingPixels;
@@ -170,8 +170,12 @@ class Canvas {
     nodes.forEach(node => {
       const { xCenter, yCenter } = node.obj.center;
       const center = [xCenter, yCenter];
-      const greaterThanMinCorner = center.every((x, i) => x > minCorner[i]);
-      const lessThanMaxCorner = center.every((x, i) => x < maxCorner[i]);
+      const greaterThanMinCorner = center.every(
+        (xValue, i) => xValue > minCorner[i]
+      );
+      const lessThanMaxCorner = center.every(
+        (xValue, i) => xValue < maxCorner[i]
+      );
       if (greaterThanMinCorner && lessThanMaxCorner) {
         node.obj.selected = true;
         nodesInsideQuad.push(node.obj);
@@ -202,7 +206,6 @@ class Canvas {
 
   reload = () => {
     const { classes } = this;
-    //this.svg.style("background-color", classes.flowEditor.interfaceColor);
     this.svg.attr("class", `${classes.flowEditor.interfaceColor}`);
   };
 
@@ -258,7 +261,7 @@ class Canvas {
       .attr("height", this.maxMovingPixels)
       .attr("stroke", "black")
       .style("pointer-events", "all")
-      .on("click", d => {});
+      .on("click", d => DEFAULT_FUNCTION());
     return this;
   };
 
@@ -273,7 +276,7 @@ class Canvas {
       .attr("height", this.maxMovingPixels)
       .attr("stroke", "black")
       .style("pointer-events", "all")
-      .on("click", d => {});
+      .on("click", d => DEFAULT_FUNCTION());
 
     return this;
   };
@@ -346,9 +349,6 @@ class Canvas {
     this.mode.linking.onEnter.subscribe(data => this.onLinkingEnter(data));
     this.mode.linking.onExit.subscribe(() => this.onLinkingExit());
     this.mode.default.onEnter.subscribe(() => this.delBrushCanvas());
-    /*this.mode.addNode.onMouseMove.subscribe({
-      next: () => this.onAddNodeMouseMove(),
-    });*/
 
     return this;
   };
@@ -519,31 +519,17 @@ class Canvas {
     }
   };
 
-  onAddNodeEnter = templateId => {
-    if (!templateId) return;
+  onAddNodeEnter = props => {
+    const { templateId } = props;
+    const modeEvent = this.mode.addNode;
+    const node = { Template: templateId };
+    const factoryOutput = Factory.OUTPUT.TMP_NODE;
 
-    this.svg.node().focus();
-
-    // Not allowed to add nodes in tree view
-    const mode = this.mInterface.graph.viewMode;
-    const editionCursor = this.getEditionCursor(mode);
-    this.svg.style("cursor", editionCursor);
-
-    // Add temp node
-    Factory.create(this.docManager, Factory.OUTPUT.TMP_NODE, {
-      canvas: this,
-      node: { Template: templateId },
-      events: {}
-    }).then(obj => {
-      this.mode.addNode.props = obj;
-      this.append(() => {
-        return this.mode.addNode.props.el;
-      });
-    });
+    this.addNodeEnter({ modeEvent, node, factoryOutput });
   };
 
   onAddNodeExit = () => {
-    const node = this.mode.addNode.props;
+    const { node } = this.mode.addNode.props;
     this.svg.style("cursor", "default");
     if (node) {
       // remove temporary node from canvas
@@ -551,33 +537,43 @@ class Canvas {
     }
   };
 
-  onAddFlowEnter = templateId => {
+  onAddFlowEnter = props => {
+    const { templateId } = props;
+    const modeEvent = this.mode.addFlow;
+    const node = {
+      id: templateId,
+      ContainerFlow: templateId,
+      ContainerLabel: templateId
+    };
+    const factoryOutput = Factory.OUTPUT.TMP_CONTAINER;
+
+    this.addNodeEnter({ modeEvent, node, factoryOutput });
+  };
+
+  addNodeEnter = props => {
+    const { modeEvent, node, factoryOutput } = props;
     this.svg.node().focus();
 
-    // Not allowed to add nodes in tree view
     const mode = this.mInterface.graph.viewMode;
     const editionCursor = this.getEditionCursor(mode);
     this.svg.style("cursor", editionCursor);
 
     // Add temp node
-    Factory.create(this.docManager, Factory.OUTPUT.TMP_CONTAINER, {
+    Factory.create(this.docManager, factoryOutput, {
       canvas: this,
-      node: {
-        id: templateId,
-        ContainerFlow: templateId,
-        ContainerLabel: templateId
-      },
+      node,
       events: {}
     }).then(obj => {
-      this.mode.addFlow.props = obj;
+      modeEvent.props.node = obj;
+
       this.append(() => {
-        return this.mode.addFlow.props.el;
+        return obj.el;
       });
     });
   };
 
   onAddFlowExit = () => {
-    const node = this.mode.addFlow.props;
+    const { node } = this.mode.addFlow.props;
     this.svg.style("cursor", "default");
     if (node) {
       // remove temporary node from canvas
@@ -600,7 +596,7 @@ class Canvas {
       newPosition = transform.invert(newPosition);
     }
     // set new position on the temporary node
-    this.mode.current.props.setPosition(
+    this.mode.current.props?.node?.setPosition(
       newPosition[0] + offset.x,
       newPosition[1] + offset.y
     );
