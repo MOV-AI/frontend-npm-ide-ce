@@ -259,6 +259,11 @@ class Flow extends Model {
     return this.getLinks().getItem(linkId).getDependency();
   }
 
+  toggleExposedPort(templateName, nodeName, portName) {
+    this.getExposedPorts().toggleExposedPort(templateName, nodeName, portName);
+    return this.getExposedPorts().serializeToDB();
+  }
+
   //========================================================================================
   /*                                                                                      *
    *                                    Event Handlers                                    *
