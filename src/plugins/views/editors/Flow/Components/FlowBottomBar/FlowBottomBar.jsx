@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import WarningIcon from "@material-ui/icons/Warning";
 import { makeStyles } from "@material-ui/styles";
@@ -11,10 +11,10 @@ const useStyles = makeStyles(styles);
 
 const FlowBottomBar = props => {
   // State(s)
-  const [barStatus, setBarStatus] = React.useState("default");
-  const [allRobots, setRobots] = React.useState({});
-  const [selectedRobotName, setSelectedRobotName] = React.useState("");
-  const [warningVisibility, setWarningVisibility] = React.useState(true);
+  const [barStatus, setBarStatus] = useState("default");
+  const [allRobots, setRobots] = useState({});
+  const [selectedRobotName, setSelectedRobotName] = useState("");
+  const [warningVisibility, setWarningVisibility] = useState(true);
 
   // Prop(s)
   const { onToggleWarnings, robotSelected, runningFlow, warnings } = props;
@@ -28,7 +28,7 @@ const FlowBottomBar = props => {
    *                                                                                      */
   //========================================================================================
 
-  const updateRobots = React.useCallback(changedRobots => {
+  const updateRobots = useCallback(changedRobots => {
     setRobots(prevState => {
       const newState = {};
       Object.keys(changedRobots).forEach(id => {
@@ -62,9 +62,7 @@ const FlowBottomBar = props => {
   const toggleVisibility = useCallback(() => {
     if (!warnings.length) return;
     // Toggle warnings if there's any
-    setWarningVisibility(prevState => {
-      return !prevState;
-    });
+    setWarningVisibility(prevState => !prevState);
   }, [warnings]);
 
   //========================================================================================
@@ -76,7 +74,11 @@ const FlowBottomBar = props => {
   useEffect(() => {
     const robotManager = new RobotManager();
     robotManager.getAll(robots => setRobots(robots));
-    robotManager.subscribeToChanges(updateRobots);
+    const subscriberId = robotManager.subscribeToChanges(updateRobots);
+    // Unsubscribe to changes on component unmount
+    return () => {
+      robotManager.unsubscribeToChanges(subscriberId);
+    };
   }, [updateRobots]);
 
   useEffect(() => {
