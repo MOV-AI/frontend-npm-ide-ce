@@ -730,7 +730,8 @@ class BaseNode extends BaseNodeStruct {
     this.canvas.events.next({
       name: "onMouseOver",
       type: "Port",
-      data: { port, mouseover: true }
+      event: d3.event,
+      port
     });
   };
 
@@ -743,7 +744,8 @@ class BaseNode extends BaseNodeStruct {
     this.canvas.events.next({
       name: "onMouseOut",
       type: "Port",
-      data: { port, mouseover: false }
+      event: d3.event,
+      port
     });
   };
 

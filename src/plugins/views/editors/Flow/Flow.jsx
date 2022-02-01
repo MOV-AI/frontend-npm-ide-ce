@@ -17,6 +17,7 @@ import FlowContextMenu from "./Components/Menus/ContextMenu/FlowContextMenu";
 import ContainerMenu from "./Components/Menus/ContainerMenu";
 import Explorer from "./Components/Explorer/Explorer";
 import LinkMenu from "./Components/Menus/LinkMenu";
+import PortTooltip from "./Components/Tooltips/PortTooltip";
 import { EVT_NAMES, EVT_TYPES } from "./events";
 import { FLOW_VIEW_MODE } from "./Constants/constants";
 
@@ -53,6 +54,8 @@ const Flow = (props, ref) => {
     open: false,
     position: { x: 0, y: 0 }
   });
+
+  const [tooltipConfig, setTooltipConfig] = useState(null);
 
   // Other Hooks
   const classes = useStyles();
@@ -505,6 +508,7 @@ const Flow = (props, ref) => {
         )
         .subscribe(event => onLinkSelected(event.data));
 
+      // onPortMouseOver
       mainInterface.canvas.events
         .pipe(
           filter(
@@ -513,8 +517,19 @@ const Flow = (props, ref) => {
               event.type === EVT_TYPES.PORT
           )
         )
-        .subscribe(evtData => console.log("onPortMouseOver", evtData));
+        .subscribe(evtData => {
+          const { port, event } = evtData;
+          const anchorPosition = {
+            left: event.layerX + 8,
+            top: event.layerY
+          };
+          setTooltipConfig({
+            port,
+            anchorPosition
+          });
+        });
 
+      // onPortMouseOut
       mainInterface.canvas.events
         .pipe(
           filter(
@@ -523,7 +538,9 @@ const Flow = (props, ref) => {
               event.type === EVT_TYPES.PORT
           )
         )
-        .subscribe(evtData => console.log("onPortMouseOver", evtData));
+        .subscribe(() => {
+          setTooltipConfig(null);
+        });
 
       mainInterface.canvas.events
         .pipe(
@@ -629,6 +646,7 @@ const Flow = (props, ref) => {
         onLinkDelete={handleLinkDelete}
         onSubFlowDelete={handleSubFlowDelete}
       />
+      {tooltipConfig && <PortTooltip {...tooltipConfig} />}
     </div>
   );
 };
