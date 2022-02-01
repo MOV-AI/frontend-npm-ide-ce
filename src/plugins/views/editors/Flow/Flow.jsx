@@ -14,6 +14,7 @@ import NodeMenu from "./Components/Menus/NodeMenu";
 import FlowTopBar from "./Components/FlowTopBar/FlowTopBar";
 import FlowBottomBar from "./Components/FlowBottomBar/FlowBottomBar";
 import FlowContextMenu from "./Components/Menus/ContextMenu/FlowContextMenu";
+import { MODE as FLOW_CONTEXT_MODE } from "./Components/Menus/ContextMenu";
 import ContainerMenu from "./Components/Menus/ContainerMenu";
 import Explorer from "./Components/Explorer/Explorer";
 import LinkMenu from "./Components/Menus/LinkMenu";
@@ -392,7 +393,7 @@ const Flow = (props, ref) => {
   );
 
   const handleContextClose = useCallback(() => {
-    setContextMenuOptions({ anchorPosition: null });
+    setContextMenuOptions(null);
     getMainInterface().setMode("default");
   }, []);
 
@@ -457,7 +458,7 @@ const Flow = (props, ref) => {
         };
         setContextMenuOptions({
           args: evtData,
-          mode: "Link",
+          mode: FLOW_CONTEXT_MODE.LINK,
           anchorPosition,
           onClose: handleContextClose
         });
@@ -474,9 +475,20 @@ const Flow = (props, ref) => {
       mainInterface.mode.canvasCtxMenu.onEnter.subscribe(evtData =>
         console.log("onCanvasCtxMenu", evtData)
       );
-      mainInterface.mode.portCtxMenu.onEnter.subscribe(evtData =>
-        console.log("onPortCtxMenu", evtData)
-      );
+
+      // subscribe to port context menu event
+      mainInterface.mode.portCtxMenu.onEnter.subscribe(evtData => {
+        const anchorPosition = {
+          left: evtData.event.clientX,
+          top: evtData.event.clientY
+        };
+        setContextMenuOptions({
+          args: evtData.port,
+          mode: FLOW_CONTEXT_MODE.PORT,
+          anchorPosition,
+          onClose: handleContextClose
+        });
+      });
 
       mainInterface.canvas.events
         .pipe(
@@ -508,7 +520,7 @@ const Flow = (props, ref) => {
         )
         .subscribe(event => onLinkSelected(event.data));
 
-      // onPortMouseOver
+      // subscribe to port mouseOver event
       mainInterface.canvas.events
         .pipe(
           filter(
@@ -529,7 +541,7 @@ const Flow = (props, ref) => {
           });
         });
 
-      // onPortMouseOut
+      // subscribe to port mouseOut event
       mainInterface.canvas.events
         .pipe(
           filter(
@@ -580,7 +592,7 @@ const Flow = (props, ref) => {
     [t, call]
   );
 
-  const handleNodeDelete = useCallback(() => {
+  const handleDeleteNode = useCallback(() => {
     const { args: node } = contextMenuOptions;
     const callback = () => getMainInterface().deleteNodeInst(node.data.id);
 
@@ -588,16 +600,24 @@ const Flow = (props, ref) => {
     setContextMenuOptions(prevValue => ({ ...prevValue, anchorEl: null }));
   }, [handleDelete, contextMenuOptions]);
 
-  const handleSubFlowDelete = useCallback(() => {
+  const handleDeleteSubFlow = useCallback(() => {
     const { args: node } = contextMenuOptions;
     const callback = () => getMainInterface().deleteSubFlow(node.data.id);
 
     handleDelete({ nodeId: node.data.id, callback });
   }, [contextMenuOptions, handleDelete]);
 
-  const handleLinkDelete = useCallback(() => {
+  const handleDeleteLink = useCallback(() => {
     const { args: link } = contextMenuOptions;
     getMainInterface().deleteLink(link.id);
+  }, [contextMenuOptions]);
+
+  /**
+   * Toggle exposed port
+   */
+  const handleToggleExposedPort = useCallback(() => {
+    const { args: port } = contextMenuOptions;
+    getMainInterface().toggleExposedPort(port);
   }, [contextMenuOptions]);
 
   //========================================================================================
@@ -640,12 +660,15 @@ const Flow = (props, ref) => {
         runningFlow={runningFlow}
         warnings={warnings}
       />
-      <FlowContextMenu
-        {...contextMenuOptions}
-        onNodeDelete={handleNodeDelete}
-        onLinkDelete={handleLinkDelete}
-        onSubFlowDelete={handleSubFlowDelete}
-      />
+      {contextMenuOptions && (
+        <FlowContextMenu
+          {...contextMenuOptions}
+          onNodeDelete={handleDeleteNode}
+          onLinkDelete={handleDeleteLink}
+          onSubFlowDelete={handleDeleteSubFlow}
+          onPortToggle={handleToggleExposedPort}
+        />
+      )}
       {tooltipConfig && <PortTooltip {...tooltipConfig} />}
     </div>
   );
