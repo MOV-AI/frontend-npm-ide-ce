@@ -7,7 +7,7 @@ import Add from "@material-ui/icons/Add";
 import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
-import { FLOW_EXPLORER_PROFILE, TOPICS } from "../../../../utils/Constants";
+import { FLOW_EXPLORER_PROFILE, PLUGINS } from "../../../../utils/Constants";
 import BaseFlow from "./Views/BaseFlow";
 import Menu from "./Components/Menus/Menu";
 import NodeMenu from "./Components/Menus/NodeMenu";
@@ -84,8 +84,19 @@ const Flow = (props, ref) => {
    * Component did mount
    */
   useEffect(() => {
-    on("rightDrawer", TOPICS.RIGHT_DRAWER.CHANGE_BOOKMARK, bookmark => {
-      activeBookmark.current = bookmark.name;
+    on(
+      PLUGINS.RIGHT_DRAWER.NAME,
+      PLUGINS.RIGHT_DRAWER.ON.CHANGE_BOOKMARK,
+      bookmark => {
+        activeBookmark.current = bookmark.name;
+      }
+    );
+
+    // Subscribe to docManager broadcast for flowEditor (global events)
+    on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR, evt => {
+      // evt ex.: {action: "setMode", value: "default"}
+      const { action, value } = evt;
+      getMainInterface()?.[action](value);
     });
   }, [on]);
 
@@ -134,11 +145,11 @@ const Flow = (props, ref) => {
    */
   const openDoc = useCallback(
     docData => {
-      call("docManager", "read", {
+      call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.READ, {
         scope: docData.scope,
         name: docData.name
       }).then(doc => {
-        call("tabs", "openEditor", {
+        call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, {
           id: doc.getUrl(),
           name: doc.getName(),
           scope: doc.getScope()
@@ -175,8 +186,8 @@ const Flow = (props, ref) => {
       const MenuComponent = getMenuComponent(node?.data?.model);
       if (!node || !MenuComponent) return;
       call(
-        "rightDrawer",
-        TOPICS.RIGHT_DRAWER.ADD_BOOKMARK,
+        PLUGINS.RIGHT_DRAWER.NAME,
+        PLUGINS.RIGHT_DRAWER.CALL.ADD_BOOKMARK,
         {
           icon: <i className="icon-Nodes" />,
           name: NODE_MENU_NAME,
@@ -206,8 +217,8 @@ const Flow = (props, ref) => {
     (link, linkSelection) => {
       if (!link) return;
       call(
-        "rightDrawer",
-        TOPICS.RIGHT_DRAWER.ADD_BOOKMARK,
+        PLUGINS.RIGHT_DRAWER.NAME,
+        PLUGINS.RIGHT_DRAWER.CALL.ADD_BOOKMARK,
         {
           icon: <CompareArrowsIcon />,
           name: LINK_MENU_NAME,
@@ -234,8 +245,8 @@ const Flow = (props, ref) => {
     const menuName = `detail-menu`;
     // add bookmark
     call(
-      "rightDrawer",
-      TOPICS.RIGHT_DRAWER.SET_BOOKMARK,
+      PLUGINS.RIGHT_DRAWER.NAME,
+      PLUGINS.RIGHT_DRAWER.CALL.SET_BOOKMARK,
       {
         [menuName]: {
           icon: <InfoIcon></InfoIcon>,
@@ -305,7 +316,7 @@ const Flow = (props, ref) => {
         if (prevState === newViewMode) return prevState;
         isEditableComponentRef.current = newViewMode === FLOW_VIEW_MODE.default;
         // Set mode loading after changing view mode
-        setMode("loading");
+        setMode(EVT_NAMES.LOADING);
         return newViewMode;
       });
     },
@@ -357,8 +368,8 @@ const Flow = (props, ref) => {
       debounceSelection.current = setTimeout(() => {
         if (!node) {
           call(
-            "rightDrawer",
-            TOPICS.RIGHT_DRAWER.REMOVE_BOOKMARK,
+            PLUGINS.RIGHT_DRAWER.NAME,
+            PLUGINS.RIGHT_DRAWER.CALL.REMOVE_BOOKMARK,
             NODE_MENU_NAME,
             activeBookmark.current
           );
@@ -383,8 +394,8 @@ const Flow = (props, ref) => {
       getMainInterface().selectedLink = link;
       if (!link) {
         call(
-          "rightDrawer",
-          TOPICS.RIGHT_DRAWER.REMOVE_BOOKMARK,
+          PLUGINS.RIGHT_DRAWER.NAME,
+          PLUGINS.RIGHT_DRAWER.CALL.REMOVE_BOOKMARK,
           LINK_MENU_NAME,
           activeBookmark.current
         );
@@ -398,7 +409,7 @@ const Flow = (props, ref) => {
 
   const handleContextClose = useCallback(() => {
     setContextMenuOptions(null);
-    getMainInterface().setMode("default");
+    getMainInterface().setMode(EVT_NAMES.DEFAULT);
   }, []);
 
   /**
@@ -406,8 +417,17 @@ const Flow = (props, ref) => {
    */
   const onReady = useCallback(
     mainInterface => {
-      // Subscribe to on node select event
+      // subscribe to on enter default mode
+      mainInterface.mode.default.onEnter.subscribe(() => {
+        call(
+          PLUGINS.DOC_MANAGER.NAME,
+          PLUGINS.DOC_MANAGER.CALL.BROADCAST,
+          PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR,
+          { action: "setMode", value: EVT_NAMES.DEFAULT }
+        );
+      });
 
+      // Subscribe to on node select event
       mainInterface.mode.selectNode.onEnter.subscribe(() => {
         const selectedNodes = mainInterface.selectedNodes;
         const node = selectedNodes.length !== 1 ? null : selectedNodes[0];
@@ -441,14 +461,14 @@ const Flow = (props, ref) => {
       });
 
       mainInterface.mode.addNode.onClick.subscribe(() => {
-        call("dialog", "newDocument", {
+        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
           scope: "node",
           onSubmit: newName => getMainInterface().addNode(newName)
         });
       });
 
       mainInterface.mode.addFlow.onClick.subscribe(() => {
-        call("dialog", "newDocument", {
+        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
           scope: "sub-flow",
           onSubmit: newName => getMainInterface().addFlow(newName)
         });
@@ -476,9 +496,10 @@ const Flow = (props, ref) => {
         })
       );
 
-      mainInterface.mode.canvasCtxMenu.onEnter.subscribe(evtData =>
-        console.log("onCanvasCtxMenu", evtData)
-      );
+      mainInterface.mode.canvasCtxMenu.onEnter.subscribe(evtData => {
+        console.log("onCanvasCtxMenu", evtData);
+        mainInterface.setMode(EVT_NAMES.DEFAULT);
+      });
 
       // subscribe to port context menu event
       mainInterface.mode.portCtxMenu.onEnter.subscribe(evtData => {
@@ -586,7 +607,7 @@ const Flow = (props, ref) => {
 
   const handleDelete = useCallback(
     ({ nodeId, callback }) => {
-      call("dialog", "confirmation", {
+      call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
         submitText: t("Delete"),
         title: t("Confirm to delete"),
         onSubmit: callback,
