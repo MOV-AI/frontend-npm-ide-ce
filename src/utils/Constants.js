@@ -44,6 +44,11 @@ export const PLUGINS = {
   DIALOG: {
     NAME: "dialog",
     CALL: { NEW_DOC: "newDocument", CONFIRMATION: "confirmation" }
+  },
+  FLOW_EXPLORER: {
+    NAME: "FlowExplorer",
+    CALL: {},
+    ON: { ADD_NODE: "addNode" }
   }
 };
 

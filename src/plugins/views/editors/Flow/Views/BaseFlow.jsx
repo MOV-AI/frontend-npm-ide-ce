@@ -10,9 +10,11 @@ import Backdrop from "@material-ui/core/Backdrop";
 import { makeStyles } from "@material-ui/core/styles";
 import { usePluginMethods } from "../../../../../engine/ReactPlugin/ViewReactPlugin";
 import { generateContainerId } from "../Constants/constants";
+import { EVT_NAMES } from "../events";
 import Loader from "../../_shared/Loader/Loader";
 import Warnings from "../Components/Warnings/Warnings";
 import useMainInterface from "./hooks/useMainInterface";
+import { PLUGINS } from "../../../../../utils/Constants";
 import styles from "./styles";
 
 const useStyles = makeStyles(styles);
@@ -66,7 +68,12 @@ const BaseFlow = React.forwardRef((props, ref) => {
 
   // Enter in add node/sub-flow mode
   useEffect(() => {
-    on("FlowExplorer", "addNode", node => {
+    on(PLUGINS.FLOW_EXPLORER.NAME, PLUGINS.FLOW_EXPLORER.ON.ADD_NODE, node => {
+      // event emitter is latching thus we need to skip
+      // it while flow is loading
+      const currMode = getMainInterface()?.mode.current.id ?? EVT_NAMES.LOADING;
+      if (currMode === EVT_NAMES.LOADING) return;
+
       const scopes = {
         Node: "addNode",
         Flow: "addFlow"
@@ -79,7 +86,8 @@ const BaseFlow = React.forwardRef((props, ref) => {
       getMainInterface()?.setMode(scopes[node.scope], { templateId }, true);
     });
 
-    return () => off("FlowExplorer", "addNode");
+    return () =>
+      off(PLUGINS.FLOW_EXPLORER.NAME, PLUGINS.FLOW_EXPLORER.ON.ADD_NODE);
   }, [getMainInterface, off, on, dataFromDB]);
 
   useEffect(() => {
