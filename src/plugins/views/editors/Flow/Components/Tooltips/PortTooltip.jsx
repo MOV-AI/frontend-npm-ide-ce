@@ -1,24 +1,39 @@
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
+import { makeStyles } from "@material-ui/core/styles";
 import { useTranslation } from "react-i18next";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
-import Typography from "@material-ui/core/Typography";
-import Grid from "@material-ui/core/Grid";
 import { Divider } from "@material-ui/core";
 import PortTooltipContent from "./PortTooltipContent";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import Paper from "@material-ui/core/Paper";
 
-const SIZES = {
-  DEFAULT: "20rem",
-  CUSTOM: "30rem"
-};
+const ITEMS_INDEX = "tooltip-fragment-row";
+
+const useStyles = makeStyles(() => ({
+  root: {
+    padding: "5px",
+    position: "absolute"
+  },
+  item: {
+    lineHeight: "22px",
+    fontSize: "1rem"
+  }
+}));
 
 const PortTooltip = props => {
+  const classes = useStyles();
   const { t } = useTranslation();
   const { anchorPosition, port } = props;
   const title = t("Port");
 
-  const getRows = useCallback(() => {
+  const itemTextProps = {
+    color: "primary",
+    className: classes.item
+  };
+
+  const getItems = useCallback(() => {
     const { name, message, template, callback } = port.data;
 
     return (
@@ -31,34 +46,29 @@ const PortTooltip = props => {
     );
   }, [port]);
 
-  const getSize = useCallback(() => {
-    const textLengths = ["name", "message", "template", "callback"].map(
-      value => {
-        return port?.data[value]?.length ?? 0;
-      }
-    );
-
-    const size = Math.max(...textLengths) > 30 ? SIZES.CUSTOM : SIZES.DEFAULT;
-
-    return size;
-  }, [port]);
-
   return (
-    <Card style={{ position: "absolute", width: getSize(), ...anchorPosition }}>
-      <CardContent>
-        <Grid container spacing={0}>
-          <Grid item xs={12}>
-            <Typography variant="caption" color="textSecondary" component="p">
-              {title}
-            </Typography>
-          </Grid>
-          <Grid item xs={12}>
+    <Paper
+      style={{ ...anchorPosition }}
+      className={classes.root}
+      elevation={14}
+    >
+      <List
+        dense={true}
+        subheader={
+          <>
+            <ListItem key={`${ITEMS_INDEX}-subheader`}>
+              <ListItemText
+                primary={title}
+                primaryTypographyProps={itemTextProps}
+              />
+            </ListItem>
             <Divider />
-          </Grid>
-          {getRows()}
-        </Grid>
-      </CardContent>
-    </Card>
+          </>
+        }
+      >
+        {getItems()}
+      </List>
+    </Paper>
   );
 };
 
