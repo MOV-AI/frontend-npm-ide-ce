@@ -1,3 +1,4 @@
+import { randomId } from "../../utils/Utils";
 import Manager from "../Manager";
 import Model from "../Model";
 import { Parameter } from "../subModels"; // from shared subModels
@@ -9,8 +10,7 @@ import {
   NodeInstance,
   SubFlow
 } from "./subModels"; // from internal subModels
-import GroupManager from "./subModels/Group/GroupManager";
-import { randomId } from "../../utils/Utils";
+import IdBasedManager from "../subModels/IdBasedModel/IdBasedManager";
 import schema from "./schema";
 
 class Flow extends Model {
@@ -42,7 +42,7 @@ class Flow extends Model {
     ExposedPorts,
     this.propEvents
   );
-  groups = new GroupManager("groups", Group, this.propEvents);
+  groups = new IdBasedManager("groups", Group, this.propEvents);
   links = new Manager("links", Link, this.propEvents);
   nodeInstances = new Manager("nodeInstances", NodeInstance, this.propEvents);
   parameters = new Manager("parameters", Parameter, this.propEvents);
@@ -84,11 +84,29 @@ class Flow extends Model {
   }
 
   /**
+   * Returns the node instance item requested
+   * @param {String} nodeId : the id of the item we're getting
+   * @returns {Manager}
+   */
+  getNodeInstanceItem(nodeId) {
+    return this.nodeInstances.getItem(nodeId);
+  }
+
+  /**
    * Returns the sub-flows manager
    * @returns {Manager}
    */
   getSubFlows() {
     return this.subFlows;
+  }
+
+  /**
+   * Returns the sub flow item requested
+   * @param {String} flowId : the id of the item we're getting
+   * @returns {Manager}
+   */
+  getSubFlowItem(flowId) {
+    return this.subFlows.getItem(flowId);
   }
 
   /**
@@ -109,10 +127,72 @@ class Flow extends Model {
 
   /**
    * Returns the groups manager
-   * @returns {Manager}
+   * @returns {GroupManager}
    */
   getGroups() {
     return this.groups;
+  }
+
+  /**
+   * Returns a group
+   * @param {String} groupId : the id of the group to retrieve
+   * @returns {Group}
+   */
+  getGroup(groupId) {
+    return this.groups.getItem(groupId);
+  }
+
+  /**
+   * Adds a new Group
+   * @param {String} groupName : The name of the group to be added
+   * @returns {Flow}
+   */
+  addGroup(groupName) {
+    const groupId = randomId();
+    this.groups.setItem({
+      name: groupId,
+      content: { id: groupId, name: groupName, enabled: true }
+    });
+    return this;
+  }
+
+  /**
+   * Deletes a group
+   * @param {String} groupId : The id of the group to be deleted
+   * @returns {Flow}
+   */
+  deleteGroup(groupId) {
+    this.groups.deleteItem(groupId);
+    return this;
+  }
+
+  /**
+   * Toggles a group visibility
+   * @param {String} groupId : The id of the group to toggle the visibility
+   * @returns {Flow}
+   */
+  toggleGroupVisibility(groupId) {
+    const thisGroup = this.getGroup(groupId);
+    this.groups.updateItem({
+      name: groupId,
+      content: { ...thisGroup, enabled: !thisGroup.enabled }
+    });
+    return this;
+  }
+
+  /**
+   * Rename group
+   * @param {String} groupId : The id of the group to edit
+   * @param {Object} content : The content to replace on the group
+   * @returns {Flow}
+   */
+  editGroup(groupId, content = {}) {
+    const thisGroup = this.getGroup(groupId);
+    this.groups.updateItem({
+      name: groupId,
+      content: { ...thisGroup, ...content }
+    });
+    return this;
   }
 
   /**
@@ -121,6 +201,75 @@ class Flow extends Model {
    */
   getParameters() {
     return this.parameters;
+  }
+
+  /**
+   * Returns the parameter
+   * @param {String} paramId : The id of the parameter to retrieve
+   * @returns {Parameter}
+   */
+  getParameter(paramId) {
+    return this.parameters.getItem(paramId);
+  }
+
+  /**
+   * Adds a new Parameter
+   * @returns {Manager}
+   */
+  addParameter(name, content) {
+    this.parameters.setItem({ name, content });
+    return this;
+  }
+
+  /**
+   * Deletes a parameter
+   * @param {string} paramId : The id of the parameter to be deleted
+   * @returns {Flow}
+   */
+  deleteParameter(paramId) {
+    this.parameters.deleteItem(paramId);
+    return this;
+  }
+
+  /**
+   * Updates an instance of a managed property
+   * Can only be used with managed properties
+   * @param {string} propName : The name of the property
+   * @param {object} content : The data to update the item
+   * @param {string} prevName : Previous item name
+   * @returns {Node} : The instance
+   */
+  updateKeyValueItem(propName, content, prevName) {
+    const name = content.name;
+    if (prevName !== name) {
+      this[propName].renameItem({ prevName, name }, true);
+    }
+
+    this[propName].updateItem({ name, content });
+    return this;
+  }
+
+  /**
+   * Deletes an instance of a managed property
+   * Can only be used with managed properties
+   * @param {string} varName : The name of the property
+   * @param {any} key : The name of the item
+   * @returns {Node} : The instance
+   */
+  deleteKeyValue(varName, key) {
+    this[varName].deleteItem(key);
+    return this;
+  }
+
+  /**
+   * Returns an instance of a managed property
+   * Can only be used with managed properties
+   * @param {string} varName : The name of the property
+   * @param {any} key : The name of the item
+   * @returns {any}
+   */
+  getKeyValue(varName, key) {
+    return this[varName].getItem(key);
   }
 
   /**
@@ -305,11 +454,14 @@ class Flow extends Model {
       Label: name,
       Description: description,
       LastUpdate: details,
+      // TODO hasItems is just a temporary fix. Depends on Backend Analysis of this issue
       NodeInst: this.getNodeInstances().serializeToDB(),
       Container: this.getSubFlows().serializeToDB(),
       ExposedPorts: this.getExposedPorts().serializeToDB(),
       Links: this.getLinks().serializeToDB(),
-      Layers: this.getGroups().serializeToDB(),
+      Layers: this.getGroups().hasItems()
+        ? this.getGroups().serializeToDB()
+        : null,
       Parameter: this.getParameters().serializeToDB()
     };
   }

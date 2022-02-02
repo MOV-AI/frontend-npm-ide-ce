@@ -1,12 +1,20 @@
 import React, { useCallback, forwardRef } from "react";
+import PropTypes from "prop-types";
 import { MenuItem, Select, FormControl, InputLabel } from "@material-ui/core";
-import { withTheme } from "../../../../../../decorators/withTheme";
-import withAlerts from "../../../../../../decorators/withAlerts";
+import { withTheme } from "../../../../../decorators/withTheme";
+import withAlerts from "../../../../../decorators/withAlerts";
 import KeyValueEditorDialog from "../KeyValueTable/KeyValueEditorDialog";
-import useDataTypes from "./DataTypes/hooks/useDataTypes";
+import useDataTypes from "../hooks/useDataTypes";
 
 const ParameterEditorDialog = forwardRef((props, ref) => {
-  const { alert, alertSeverities } = props;
+  const {
+    isNew,
+    disableType,
+    customValidation,
+    preventRenderType,
+    alert,
+    alertSeverities
+  } = props;
   // Hooks
   const [data, setData] = React.useState({});
   const { getDataTypes, getLabel, getEditComponent, getValidValue, validate } =
@@ -24,8 +32,9 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
    * @returns {*} Formatted value
    */
   const valueToRender = formData => {
-    const type = formData.type;
-    return type === "string" ? JSON.stringify(formData.value) : formData.value;
+    return formData?.type === "string"
+      ? JSON.stringify(formData.value)
+      : formData.value;
   };
 
   /**
@@ -48,29 +57,35 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
    * @param {*} formData
    * @returns
    */
-  const onValidate = formData => {
-    const dataToValidate = {
-      ...formData,
-      value: data.value,
-      type: data.type
-    };
-    return validate(dataToValidate)
-      .then(res => {
-        if (!res.success)
-          throw new Error(res.error || "Data validation failed");
-        // Prepare data to submit
-        if (res.parsed) data.value = res.parsed.toString();
-        const dataToSubmit = {
-          ...dataToValidate,
-          value: valueToSave(data)
-        };
-        return { ...res, data: dataToSubmit };
-      })
-      .catch(err => {
-        alert({ message: err.message, severity: alertSeverities.ERROR });
-        return err;
-      });
-  };
+  const onValidate = useCallback(
+    formData => {
+      const dataToValidate = {
+        ...formData,
+        value: data.value,
+        type: data.type
+      };
+      console.log("dataToValidate", dataToValidate);
+      if (customValidation) return customValidation(dataToValidate);
+
+      return validate(dataToValidate)
+        .then(res => {
+          if (!res.success)
+            throw new Error(res.error || "Data validation failed");
+          // Prepare data to submit
+          if (res.parsed) data.value = res.parsed.toString();
+          const dataToSubmit = {
+            ...dataToValidate,
+            value: valueToSave(data)
+          };
+          return { ...res, data: dataToSubmit };
+        })
+        .catch(err => {
+          alert({ message: err.message, severity: alertSeverities.ERROR });
+          return err;
+        });
+    },
+    [data, alertSeverities.ERROR, alert, validate, customValidation]
+  );
 
   //========================================================================================
   /*                                                                                      *
@@ -120,6 +135,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
    * @returns {ReactComponent} Form control with data type selector
    */
   const renderTypeSelector = useCallback(() => {
+    if (preventRenderType) return null;
     return (
       <FormControl style={{ marginTop: 15 }}>
         <InputLabel>Type *</InputLabel>
@@ -127,6 +143,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
           fullWidth
           value={data.type || "any"}
           onChange={handleTypeChange}
+          disabled={disableType}
         >
           {getDataTypes().map(key => (
             <MenuItem key={key} value={key}>
@@ -136,27 +153,38 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
         </Select>
       </FormControl>
     );
-  }, [data, getDataTypes, getLabel, handleTypeChange]);
+  }, [
+    data,
+    preventRenderType,
+    disableType,
+    getDataTypes,
+    getLabel,
+    handleTypeChange
+  ]);
 
   /**
    * Render Value Editor Component
    */
-  const renderValueEditor = useCallback(() => {
-    const editComponent = getEditComponent(data.type);
-    if (!editComponent) return <></>;
-    return getEditComponent(data.type)(
-      {
-        rowData: { value: data.value },
-        onChange: _value => {
-          setData(prevState => {
-            return { ...prevState, value: _value };
-          });
+  const renderValueEditor = useCallback(
+    (defaultValue, options) => {
+      const editComponent = getEditComponent(data.type);
+      if (!editComponent) return <></>;
+      return getEditComponent(data.type)(
+        {
+          ...options,
+          rowData: { value: defaultValue ?? data.value },
+          onChange: _value => {
+            setData(prevState => {
+              return { ...prevState, value: _value };
+            });
+          },
+          isNew: options.isNew ?? isNew
         },
-        isNew: props.isNew
-      },
-      "dialog"
-    );
-  }, [getEditComponent, data, props.isNew]);
+        "dialog"
+      );
+    },
+    [data, isNew, getEditComponent]
+  );
 
   return (
     <KeyValueEditorDialog
@@ -167,5 +195,15 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
     />
   );
 });
+
+ParameterEditorDialog.propTypes = {
+  data: PropTypes.object.isRequired,
+  isNew: PropTypes.bool,
+  disableType: PropTypes.bool,
+  customValidation: PropTypes.func,
+  preventRenderType: PropTypes.bool,
+  alert: PropTypes.func,
+  alertSeverities: PropTypes.object
+};
 
 export default withAlerts(withTheme(ParameterEditorDialog));

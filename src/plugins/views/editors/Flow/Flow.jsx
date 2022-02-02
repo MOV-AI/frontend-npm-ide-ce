@@ -163,6 +163,31 @@ const Flow = (props, ref) => {
   }, []);
 
   /**
+   * Get node menu if any
+   */
+  const getNodeMenuToAdd = useCallback(
+    node => {
+      const MenuComponent = getMenuComponent(node?.data?.model);
+      if (!node || !MenuComponent) return;
+      return {
+        icon: <i className="icon-Nodes" />,
+        name: NODE_MENU_NAME,
+        view: (
+          <MenuComponent
+            id={id}
+            call={call}
+            nodeInst={node}
+            flowModel={instance}
+            openDoc={openDoc}
+            editable={isEditableComponentRef.current}
+          />
+        )
+      };
+    },
+    [NODE_MENU_NAME, call, id, instance, openDoc, getMenuComponent]
+  );
+
+  /**
    * Add node menu if any
    */
   const addNodeMenu = useCallback(
@@ -172,25 +197,36 @@ const Flow = (props, ref) => {
       call(
         "rightDrawer",
         TOPICS.RIGHT_DRAWER.ADD_BOOKMARK,
-        {
-          icon: <i className="icon-Nodes" />,
-          name: NODE_MENU_NAME,
-          view: (
-            <MenuComponent
-              id={id}
-              call={call}
-              nodeInst={node}
-              flowModel={instance}
-              openDoc={openDoc}
-              editable={isEditableComponentRef.current}
-            />
-          )
-        },
+        getNodeMenuToAdd(node),
         nodeSelection,
         activeBookmark.current
       );
     },
-    [NODE_MENU_NAME, call, id, instance, openDoc, getMenuComponent]
+    [call, getMenuComponent, getNodeMenuToAdd]
+  );
+
+  /**
+   * Get link right menu if any
+   * @param {Link} link : Link to be rendered in menu
+   */
+  const getLinkMenuToAdd = useCallback(
+    link => {
+      if (!link) return;
+      return {
+        icon: <CompareArrowsIcon />,
+        name: LINK_MENU_NAME,
+        view: (
+          <LinkMenu
+            id={id}
+            call={call}
+            link={link.data}
+            flowModel={instance}
+            sourceMessage={link?.src?.data?.message}
+          />
+        )
+      };
+    },
+    [LINK_MENU_NAME, call, id, instance]
   );
 
   /**
@@ -203,62 +239,68 @@ const Flow = (props, ref) => {
       call(
         "rightDrawer",
         TOPICS.RIGHT_DRAWER.ADD_BOOKMARK,
-        {
-          icon: <CompareArrowsIcon />,
-          name: LINK_MENU_NAME,
-          view: (
-            <LinkMenu
-              id={id}
-              call={call}
-              link={link.data}
-              flowModel={instance}
-              sourceMessage={link?.src?.data?.message}
-            />
-          )
-        },
+        getLinkMenuToAdd(link),
         linkSelection,
         activeBookmark.current
       );
     },
-    [LINK_MENU_NAME, call, id, instance]
+    [call, getLinkMenuToAdd]
   );
 
   const renderRightMenu = useCallback(() => {
     const explorerView = new Explorer(FLOW_EXPLORER_PROFILE);
     const details = props.data?.details || {};
     const menuName = `detail-menu`;
+    const bookmarks = {
+      [menuName]: {
+        icon: <InfoIcon></InfoIcon>,
+        name: menuName,
+        view: (
+          <Menu
+            id={id}
+            call={call}
+            name={name}
+            details={details}
+            model={instance}
+            editable={isEditableComponentRef.current}
+          ></Menu>
+        )
+      },
+      FlowExplorer: {
+        icon: getIconByScope(FLOW_EXPLORER_PROFILE.name),
+        name: FLOW_EXPLORER_PROFILE.name,
+        view: explorerView.render({ flowId: id })
+      }
+    };
+
+    // Add node menu if any is selected
+    if (selectedNodeRef.current) {
+      bookmarks[NODE_MENU_NAME] = getNodeMenuToAdd(selectedNodeRef.current);
+    }
+
+    // Add link menu if any is selected
+    if (selectedLinkRef.current) {
+      bookmarks[LINK_MENU_NAME] = getLinkMenuToAdd(selectedLinkRef.current);
+    }
+
     // add bookmark
     call(
       "rightDrawer",
       TOPICS.RIGHT_DRAWER.SET_BOOKMARK,
-      {
-        [menuName]: {
-          icon: <InfoIcon></InfoIcon>,
-          name: menuName,
-          view: (
-            <Menu
-              id={id}
-              call={call}
-              name={name}
-              details={details}
-              model={instance}
-              editable={isEditableComponentRef.current}
-            ></Menu>
-          )
-        },
-        FlowExplorer: {
-          icon: getIconByScope(FLOW_EXPLORER_PROFILE.name),
-          name: FLOW_EXPLORER_PROFILE.name,
-          view: explorerView.render({ flowId: id })
-        }
-      },
+      bookmarks,
       activeBookmark.current
     );
-    // Add node menu if any is selected
-    addNodeMenu(selectedNodeRef.current);
-    // Add link menu if any is selected
-    addLinkMenu(selectedLinkRef.current);
-  }, [call, id, name, instance, props.data, addNodeMenu, addLinkMenu]);
+  }, [
+    LINK_MENU_NAME,
+    NODE_MENU_NAME,
+    call,
+    id,
+    name,
+    instance,
+    props.data,
+    getNodeMenuToAdd,
+    getLinkMenuToAdd
+  ]);
 
   usePluginMethods(ref, {
     renderRightMenu
@@ -435,6 +477,7 @@ const Flow = (props, ref) => {
       mainInterface.mode.addNode.onClick.subscribe(() => {
         call("dialog", "newDocument", {
           scope: "node",
+          // TODO add validation here ROS regex and exists?
           onSubmit: newName => getMainInterface().addNode(newName)
         });
       });
@@ -442,6 +485,7 @@ const Flow = (props, ref) => {
       mainInterface.mode.addFlow.onClick.subscribe(() => {
         call("dialog", "newDocument", {
           scope: "sub-flow",
+          // TODO add validation here ROS regex and exists?
           onSubmit: newName => getMainInterface().addFlow(newName)
         });
       });

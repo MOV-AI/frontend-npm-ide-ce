@@ -13,15 +13,15 @@ const ROBOT_BLACKLIST = window.SERVER_DATA?.RobotBlackList ?? [];
 const TRANSITION_LINK = "movai_msgs/Transition";
 
 const TABLE_KEYS_NAMES = {
-  parameters: "Parameter",
-  envVars: "EnvVar",
-  cmdLine: "CmdLine"
+  PARAMETERS: "parameters",
+  ENVVARS: "envVars",
+  CMDLINE: "commands"
 };
 
 const EMPTY_MESSAGE = {
-  Parameter: "No Parameters",
-  EnvVar: "No Environment Variables",
-  CmdLine: "No Command Lines"
+  PARAMETERS: "No Parameters",
+  ENVVARS: "No Environment Variables",
+  COMMANDS: "No Command Lines"
 };
 
 const NODE_TYPES = {
@@ -29,9 +29,9 @@ const NODE_TYPES = {
   CONTAINER: "CONTAINER"
 };
 
-const generateContentId = (flowId) => {
+const generateContentId = flowId => {
   return `base-${flowId?.replace(/\//g, "-")}`;
-}
+};
 
 export {
   maxMovingPixels,

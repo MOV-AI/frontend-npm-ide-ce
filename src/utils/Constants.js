@@ -23,6 +23,19 @@ export const TOPICS = {
   }, 
 }
 
+export const DEFAULT_KEY_VALUE_DATA = {
+  name: "",
+  description: "",
+  type: "any",
+  value: ""
+};
+
+export const DOC_VALID_NAMES = new RegExp(/^[\w][0-9A-Za-z-]*(_[0-9A-Za-z-]+)*[_]?$/);
+
+export const ROS_VALID_NAMES = new RegExp(
+  /(?!.*__.*)^[a-zA-Z~/]{1}?[a-zA-Z0-9_/]*$/
+);
+
 //========================================================================================
 /*                                                                                      *
  *                                   Layout Constants                                   *

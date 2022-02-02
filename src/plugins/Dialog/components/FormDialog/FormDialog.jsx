@@ -52,6 +52,37 @@ const FormDialog = props => {
   // Translation hook
   const { t } = useTranslation();
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Validate value
+   * @param {String} _value : New value
+   * @returns {ValidationResult}
+   */
+  const validateValue = _value => {
+    const res = onValidation(_value);
+    // Set state
+    setValidation({ error: !res.result, message: res.error });
+    setValue(_value);
+    if (onPostValidation && res.result) {
+      onPostValidation(_value).then(result => {
+        setValidation(result);
+      });
+    }
+    // Return validation result
+    return res;
+  };
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                       Handlers                                       *
+   *                                                                                      */
+  //========================================================================================
+
   /**
    * Handle dialog close
    * @param {Event} _ : Close Event
@@ -68,7 +99,7 @@ const FormDialog = props => {
    * Handle form submit
    */
   const handleSubmit = () => {
-    const _validation = onChange(value);
+    const _validation = validateValue(value);
     if (_validation.error) return;
     const result = onSubmit(value);
     if (result instanceof Promise) {
@@ -81,22 +112,41 @@ const FormDialog = props => {
   };
 
   /**
-   * On change TextField value
-   * @param {String} _value : New value
+   * Handle the onKeyPress event of Textfield
+   * @param {event} evt
+   */
+  const handleKeyPress = evt => {
+    let isEnter = evt.key === "Enter";
+    if (isEnter) {
+      evt.preventDefault();
+      handleSubmit();
+    }
+  };
+
+  /**
+   * Handle the onChange event of Textfield
+   * @param {event} evt
+   */
+  const handleOnChange = evt => {
+    validateValue(evt.target.value);
+  };
+
+  /**
+   * Handle paste on Textfield
+   * @param {event} event : event to be captured
    * @returns {ValidationResult}
    */
-  const onChange = _value => {
-    const res = onValidation(_value);
-    // Set state
-    setValidation({ error: !res.result, message: res.error });
-    setValue(_value);
-    if (onPostValidation && res.result) {
-      onPostValidation(_value).then(result => {
-        setValidation(result);
-      });
-    }
-    // Return validation result
-    return res;
+  const handlePaste = event => {
+    event.preventDefault();
+    // Trim pasted text
+    const pastedText = event.clipboardData
+      .getData("text/plain")
+      .trim()
+      .replace(/(\r\n|\n|\r)/gm, "");
+    // Validate pasted text
+    validateValue(pastedText);
+    // Set text in input field
+    event.target.value = pastedText;
   };
 
   return (
@@ -125,26 +175,9 @@ const FormDialog = props => {
             InputLabelProps={{ shrink: true }}
             defaultValue={value}
             multiline={multiline}
-            onPaste={event => {
-              event.preventDefault();
-              // Trim pasted text
-              const pastedText = event.clipboardData
-                .getData("text/plain")
-                .trim()
-                .replace(/(\r\n|\n|\r)/gm, "");
-              // Validate pasted text
-              onChange(pastedText);
-              // Set text in input field
-              event.target.value = pastedText;
-            }}
-            onKeyPress={event => {
-              let isEnter = event.key === "Enter";
-              if (isEnter) {
-                event.preventDefault();
-                handleSubmit();
-              }
-            }}
-            onChange={event => onChange(event.target.value)}
+            onPaste={handlePaste}
+            onKeyPress={handleKeyPress}
+            onChange={handleOnChange}
             inputProps={{ maxLength: multiline ? "" : maxLength }} // limit of characters here
             margin="normal"
           />

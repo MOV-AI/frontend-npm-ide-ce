@@ -1,20 +1,18 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import { IconButton, Tooltip, Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/styles";
 import LayersIcon from "@material-ui/icons/Layers";
 import LayersClearIcon from "@material-ui/icons/LayersClear";
-import styles from "../../styles";
-import { DEFAULT_FUNCTION, useTranslation } from "../../../../../_shared/mocks";
 
-const useStyles = makeStyles(styles);
+import { nodeGroupStyles } from "../../styles";
 
 const NodeGroupSection = props => {
   const { nodeGroups, flowGroups, handleBelongGroup } = props;
   // State hooks
   const [groups, setGroups] = React.useState([]);
   // Other hooks
-  const classes = useStyles();
+  const classes = nodeGroupStyles();
   const { t } = useTranslation();
 
   //========================================================================================
@@ -67,15 +65,14 @@ const NodeGroupSection = props => {
 };
 
 NodeGroupSection.propTypes = {
+  handleBelongGroup: PropTypes.func.isRequired,
   nodeGroups: PropTypes.array,
-  flowGroups: PropTypes.object,
-  handleBelongGroup: PropTypes.func
+  flowGroups: PropTypes.object
 };
 
 NodeGroupSection.defaultProps = {
   nodeGroups: [],
-  flowGroups: {},
-  handleBelongGroup: () => DEFAULT_FUNCTION("handleBelongGroup")
+  flowGroups: {}
 };
 
 export default NodeGroupSection;

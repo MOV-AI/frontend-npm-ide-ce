@@ -1,7 +1,7 @@
-import IdBasedModel from "../../../subModels/IdBasedModel/IdBasedModel";
+import Model from "../../Model";
 import schema from "./schema";
 
-class Group extends IdBasedModel {
+class IdBased extends Model {
   constructor() {
     // inject imported schema and forward constructor arguments
     super({ schema, ...arguments[0] });
@@ -14,10 +14,9 @@ class Group extends IdBasedModel {
   //========================================================================================
 
   id = "";
-  enabled = true;
 
   // Define observable properties
-  observables = Object.values(Group.OBSERVABLE_KEYS);
+  observables = Object.values(IdBased.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -26,20 +25,20 @@ class Group extends IdBasedModel {
   //========================================================================================
 
   /**
-   * Returns the enabled property
-   * @returns {boolean}
+   * Returns the id property
+   * @returns {string}
    */
-  getEnabled() {
-    return this.enabled;
+  getId() {
+    return this.id;
   }
 
   /**
-   * Sets the enabled property
-   * @param {boolean} value : The new value
-   * @returns {Group}
+   * Sets the id property
+   * @param {string} value : The new value
+   * @returns {IdBased}
    */
-  setEnabled(value) {
-    this.enabled = value;
+  setId(value) {
+    this.id = value;
     return this;
   }
 
@@ -57,7 +56,6 @@ class Group extends IdBasedModel {
     return {
       id: this.getId(),
       name: this.getName(),
-      enabled: this.getEnabled()
     };
   }
 
@@ -67,11 +65,10 @@ class Group extends IdBasedModel {
    * @returns {object}
    */
   serializeToDB() {
-    const { name, enabled } = this.serialize();
+    const { name } = this.serialize();
 
     return {
       name,
-      on: enabled
     };
   }
 
@@ -89,15 +86,14 @@ class Group extends IdBasedModel {
   static serializeOfDB(json) {
     const id = Object.keys(json)[0];
     const content = Object.values(json)[0];
-    const { name, on: enabled } = content;
+    const { name } = content;
 
-    return { id, name, enabled };
+    return { id, name };
   }
 
   static OBSERVABLE_KEYS = {
     NAME: "name",
-    ENABLED: "enabled"
   };
 }
 
-export default Group;
+export default IdBased;

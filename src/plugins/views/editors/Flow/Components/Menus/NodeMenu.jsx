@@ -1,8 +1,6 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState, useRef, memo } from "react";
 import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
-import { DEFAULT_FUNCTION, useTranslation } from "../../../_shared/mocks";
-import { TABLE_KEYS_NAMES } from "../../Constants/constants";
+import { useTranslation } from "react-i18next";
 import {
   Collapse,
   Divider,
@@ -13,13 +11,15 @@ import {
 } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import styles from "./styles";
+import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
+import { TABLE_KEYS_NAMES } from "../../Constants/constants";
 import MenuDetails from "./sub-components/MenuDetails";
 import PortsDetails from "./sub-components/PortsDetails";
 import PropertiesSection from "./sub-components/collapsibleSections/PropertiesSection";
-import ParametersSection from "./sub-components/collapsibleSections/ParametersSection";
 import KeyValuesSection from "./sub-components/collapsibleSections/KeyValuesSection";
 import NodeGroupSection from "./sub-components/collapsibleSections/NodeGroupSection";
+
+import { nodeMenuStyles } from "./styles";
 
 //========================================================================================
 /*                                                                                      *
@@ -28,45 +28,44 @@ import NodeGroupSection from "./sub-components/collapsibleSections/NodeGroupSect
 //========================================================================================
 
 const ACTIVE_ITEM = {
-  properties: 1,
-  parameters: 2,
-  envVars: 3,
-  cmdLine: 4,
-  group: 5
+  PROPERTIES: 1,
+  PARAMETERS: 2,
+  ENVVARS: 3,
+  CMDLINE: 4,
+  GROUP: 5
 };
-
-const useStyles = makeStyles(styles);
 
 /**
  * Node Menu Component
  * @param {*} props : Component props
  * @returns {ReaactElement} Node Menu
  */
-const NodeMenu = props => {
-  // Props
-  const { nodeInst, call, openDoc, editable, flowModel } = props;
+const NodeMenu = memo(({ nodeInst, call, openDoc, editable, flowModel }) => {
+  const data = nodeInst.data;
   // State hooks
-  const [templateData, setTemplateData] = React.useState({});
-  const [activeItem, setActiveItem] = React.useState(0);
+  const nodeInstanceRef = useRef();
+  const [templateData, setTemplateData] = useState({});
+  const [nodeInstance, setNodeInstance] = useState({});
+  const [activeItem, setActiveItem] = useState(0);
   // Other hooks
-  const classes = useStyles();
+  const classes = nodeMenuStyles();
   const { t } = useTranslation();
 
   //========================================================================================
   /*                                                                                      *
-   *                                        Helper                                        *
+   *                                       Handlers                                       *
    *                                                                                      */
   //========================================================================================
-
-  const data = nodeInst.data;
 
   /**
    * @private Handle expand/collapse action
    *  If item is collapsed : Expand item and collapse other
    *  If item is expanded  : Collapse item and let all others collapsed as well
-   * @param {*} _activeItem
+   * @param {Event} evt
    */
-  const handleExpandClick = useCallback(newActiveItem => {
+  const handleExpandClick = useCallback(evt => {
+    const newActiveItem = parseInt(evt.currentTarget.dataset.menuId);
+
     setActiveItem(prevState => {
       return prevState === newActiveItem ? 0 : newActiveItem;
     });
@@ -74,16 +73,54 @@ const NodeMenu = props => {
 
   //========================================================================================
   /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Get the node instance item
+   * @param {string} id : Node instance Item Id
+   * @returns {NodeInstance}
+   */
+  const getNodeInstance = useCallback(
+    id => ({ ...flowModel.current.getNodeInstanceItem(id) }),
+    [flowModel]
+  );
+
+  /**
+   * @param {Object} formData : Data to Save
+   */
+  const handleSubmitParameter = useCallback(
+    formData => {
+      const varName = formData.varName;
+      if (nodeInstanceRef.current.getKeyValue(varName, formData.name)) {
+        nodeInstanceRef.current.updateKeyValueItem(varName, formData);
+      } else {
+        nodeInstanceRef.current.addKeyValue(varName, formData);
+      }
+      setNodeInstance(getNodeInstance(data.id));
+    },
+    [data.id, getNodeInstance]
+  );
+
+  //========================================================================================
+  /*                                                                                      *
    *                                    React Lifecycle                                   *
    *                                                                                      */
   //========================================================================================
 
-  React.useEffect(() => {
+  // Component Did Mount
+  useEffect(() => {
+    nodeInstanceRef.current = flowModel.current.getNodeInstanceItem(data.id);
+    setNodeInstance(getNodeInstance(data.id));
+  }, [flowModel, data.id, getNodeInstance]);
+
+  useEffect(() => {
     const name = data?.Template;
     if (!data?.Template) return;
     // Read node template
     call("docManager", "read", { name, scope: data.model }).then(doc => {
-      setTemplateData(doc.serializeToDB());
+      setTemplateData(doc.serialize());
     });
   }, [data, call]);
 
@@ -93,21 +130,69 @@ const NodeMenu = props => {
    *                                                                                      */
   //========================================================================================
 
-  const onChangeProperties = useCallback((varName, value) => {
-    console.log("debug onChangeProperties", varName, value);
-  }, []);
+  /**
+   * Handle Change Properties
+   * @param {string} prop : property name to update
+   * @param {boolean} value : property value to update
+   */
+  const onChangeProperties = useCallback(
+    (prop, value) => {
+      nodeInstanceRef.current.updateKeyValueProp(prop, value);
 
-  const handleParamEdit = useCallback(() => {
-    console.log("debug handleParamEdit");
-  }, []);
+      setNodeInstance(getNodeInstance(data.id));
+    },
+    [data.id, getNodeInstance]
+  );
 
-  const handleTableKeyEdit = useCallback((varName, value) => {
-    console.log("debug handleParamEdit", varName, value);
-  }, []);
+  /**
+   * Open dialog to edit/add new Parameter
+   * @param {string} dataId : Unique identifier of item (undefined when not created yet)
+   * @param {ReactComponent} DialogComponent : Dialog component to render
+   */
+  const handleKeyValueDialog = useCallback(
+    (data, param) => {
+      const obj = {
+        varName: param,
+        type: "any",
+        name: data.key,
+        ...data
+      };
+      call(
+        "dialog",
+        "customDialog",
+        {
+          onSubmit: handleSubmitParameter,
+          customValidation: newData =>
+            Promise.resolve({ result: true, data: newData }),
+          title: t("Edit {{paramName}}", { paramName: obj.name }),
+          data: obj,
+          showDefault: true,
+          disableName: true,
+          disableType: true,
+          disableDescription: true,
+          preventRenderType: param !== TABLE_KEYS_NAMES.PARAMETERS,
+          call
+        },
+        ParameterEditorDialog
+      );
+    },
+    [call, handleSubmitParameter, t]
+  );
 
-  const handleBelongGroup = useCallback((groupId, checked) => {
-    console.log("debug handleBelongGroup", groupId, checked);
-  }, []);
+  /**
+   * Handle toggle belong to a group
+   * @param {string} groupId : The id of the group to add / remove
+   * @param {boolean} checked : The flag controling if we should add or remove
+   */
+  const handleBelongGroup = useCallback(
+    (groupId, checked) => {
+      if (checked) nodeInstanceRef.current.addGroup(groupId);
+      else nodeInstanceRef.current.removeGroup(groupId);
+
+      setNodeInstance(getNodeInstance(data.id));
+    },
+    [data.id, getNodeInstance]
+  );
 
   //========================================================================================
   /*                                                                                      *
@@ -121,30 +206,29 @@ const NodeMenu = props => {
         id={data.id}
         model={data.model}
         template={data.Template}
-        type={templateData.Type}
+        type={templateData.type}
         openDoc={openDoc}
       />
-      <PortsDetails openDoc={openDoc} templateData={templateData.PortsInst} />
+      <PortsDetails openDoc={openDoc} templateData={templateData.ports} />
       {/* =========================== PROPERTIES =========================== */}
       <ListItem
         button
-        onClick={() => handleExpandClick(ACTIVE_ITEM.properties)}
+        data-menu-id={ACTIVE_ITEM.PROPERTIES}
+        onClick={handleExpandClick}
       >
         <ListItemText primary={t("Properties")} />
-        {activeItem === ACTIVE_ITEM.properties ? (
+        {activeItem === ACTIVE_ITEM.PROPERTIES ? (
           <ExpandLess />
         ) : (
           <ExpandMore />
         )}
       </ListItem>
-      <Collapse in={activeItem === ACTIVE_ITEM.properties} unmountOnExit>
-        <Grid container style={{ padding: "10px 20px 20px" }}>
+      <Collapse in={activeItem === ACTIVE_ITEM.PROPERTIES} unmountOnExit>
+        <Grid container className={classes.gridContainer}>
           <PropertiesSection
             editable={editable}
-            launch={data.Launch}
-            persistent={data.Persistent}
-            remappable={data.Remappable}
             templateData={templateData}
+            nodeInstance={nodeInstance}
             onChangeProperties={onChangeProperties}
           />
         </Grid>
@@ -153,82 +237,100 @@ const NodeMenu = props => {
       {/* =========================== PARAMETERS =========================== */}
       <ListItem
         button
-        onClick={() => handleExpandClick(ACTIVE_ITEM.parameters)}
+        data-menu-id={ACTIVE_ITEM.PARAMETERS}
+        onClick={handleExpandClick}
       >
         <ListItemText primary={t("Parameters")} />
-        {activeItem === ACTIVE_ITEM.parameters ? (
+        {activeItem === ACTIVE_ITEM.PARAMETERS ? (
           <ExpandLess />
         ) : (
           <ExpandMore />
         )}
       </ListItem>
-      <Collapse in={activeItem === ACTIVE_ITEM.parameters} unmountOnExit>
-        <ParametersSection
+      <Collapse in={activeItem === ACTIVE_ITEM.PARAMETERS} unmountOnExit>
+        <KeyValuesSection
           editable={editable}
-          instanceValues={data.Parameter}
-          templateValues={templateData.Parameter}
-          handleParamEdit={handleParamEdit}
+          varName={TABLE_KEYS_NAMES.PARAMETERS}
+          instanceValues={Object.fromEntries(
+            nodeInstance[TABLE_KEYS_NAMES.PARAMETERS]?.data || []
+          )}
+          templateValues={templateData.parameters}
+          handleTableKeyEdit={handleKeyValueDialog}
         />
         <Divider />
       </Collapse>
       {/* =========================== ENV. VARIABLES =========================== */}
-      <ListItem button onClick={() => handleExpandClick(ACTIVE_ITEM.envVars)}>
+      <ListItem
+        button
+        data-menu-id={ACTIVE_ITEM.ENVVARS}
+        onClick={handleExpandClick}
+      >
         <ListItemText primary={t("Env. Variables")} />
-        {activeItem === ACTIVE_ITEM.envVars ? <ExpandLess /> : <ExpandMore />}
+        {activeItem === ACTIVE_ITEM.ENVVARS ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
-      <Collapse in={activeItem === ACTIVE_ITEM.envVars} unmountOnExit>
+      <Collapse in={activeItem === ACTIVE_ITEM.ENVVARS} unmountOnExit>
         <KeyValuesSection
           editable={editable}
-          varName={TABLE_KEYS_NAMES.envVars}
-          instanceValues={data.EnvVar}
-          templateValues={templateData.EnvVar}
-          handleTableKeyEdit={handleTableKeyEdit}
+          varName={TABLE_KEYS_NAMES.ENVVARS}
+          instanceValues={Object.fromEntries(
+            nodeInstance[TABLE_KEYS_NAMES.ENVVARS]?.data || []
+          )}
+          templateValues={templateData.envVars}
+          handleTableKeyEdit={handleKeyValueDialog}
         />
         <Divider />
       </Collapse>
       {/* =========================== COMMAND LINES =========================== */}
-      <ListItem button onClick={() => handleExpandClick(ACTIVE_ITEM.cmdLine)}>
+      <ListItem
+        button
+        data-menu-id={ACTIVE_ITEM.CMDLINE}
+        onClick={handleExpandClick}
+      >
         <ListItemText primary={t("Command Line")} />
-        {activeItem === ACTIVE_ITEM.cmdLine ? <ExpandLess /> : <ExpandMore />}
+        {activeItem === ACTIVE_ITEM.CMDLINE ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
-      <Collapse in={activeItem === ACTIVE_ITEM.cmdLine} unmountOnExit>
+      <Collapse in={activeItem === ACTIVE_ITEM.CMDLINE} unmountOnExit>
         <KeyValuesSection
           editable={editable}
-          varName={TABLE_KEYS_NAMES.cmdLine}
-          instanceValues={data.CmdLine}
-          templateValues={templateData.CmdLine}
-          handleTableKeyEdit={handleTableKeyEdit}
+          varName={TABLE_KEYS_NAMES.CMDLINE}
+          instanceValues={Object.fromEntries(
+            nodeInstance[TABLE_KEYS_NAMES.CMDLINE]?.data || []
+          )}
+          templateValues={templateData.commands}
+          handleTableKeyEdit={handleKeyValueDialog}
         />
         <Divider />
       </Collapse>
       {/* =========================== GROUP =========================== */}
-      <ListItem button onClick={() => handleExpandClick(ACTIVE_ITEM.group)}>
+      <ListItem
+        button
+        data-menu-id={ACTIVE_ITEM.GROUP}
+        onClick={handleExpandClick}
+      >
         <ListItemText primary={t("Group")} />
-        {activeItem === ACTIVE_ITEM.group ? <ExpandLess /> : <ExpandMore />}
+        {activeItem === ACTIVE_ITEM.GROUP ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
-      <Collapse in={activeItem === ACTIVE_ITEM.group} unmountOnExit>
+      <Collapse in={activeItem === ACTIVE_ITEM.GROUP} unmountOnExit>
         <NodeGroupSection
           flowGroups={flowModel.current.getGroups().serialize()}
-          nodeGroups={data.NodeLayers}
+          nodeGroups={nodeInstance.groups}
           handleBelongGroup={handleBelongGroup}
         />
         <Divider />
       </Collapse>
     </Typography>
   );
-};
+});
 
 NodeMenu.propTypes = {
-  flowName: PropTypes.string.isRequired,
   nodeInst: PropTypes.object.isRequired,
-  layers: PropTypes.object,
-  openDoc: PropTypes.func,
+  flowModel: PropTypes.object.isRequired,
+  call: PropTypes.func.isRequired,
+  openDoc: PropTypes.func.isRequired,
   editable: PropTypes.bool
 };
 
 NodeMenu.defaultProps = {
-  openDoc: () => DEFAULT_FUNCTION(),
-  layers: {},
   editable: true
 };
 

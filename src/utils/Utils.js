@@ -6,6 +6,8 @@ import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import ListAltIcon from "@material-ui/icons/ListAlt";
 import movaiIcon from "../plugins/views/editors/_shared/Loader/movai_red.svg";
 
+import { DOC_VALID_NAMES } from "./Constants";
+
 /**
  * Generate random ID
  * @returns {String} Random ID in format : "1c76107c-146e-40bc-93fb-8148750cf50a"
@@ -83,6 +85,14 @@ export const stopPropagation = e => {
  * @returns {String}
  */
 export function getNameFromURL(url) {
-  console.log("url", url);
   return url?.substring(url.lastIndexOf("/") +1);
+}
+
+export function validateDocumentName(name){
+  const validation = DOC_VALID_NAMES;
+  if (!validation.test(name)) {
+    throw new Error("Invalid name");
+  }else{
+    return true;
+  }
 }

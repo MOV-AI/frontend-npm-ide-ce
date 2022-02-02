@@ -1,3 +1,5 @@
+import { validateDocumentName } from "../../../../../utils/Utils";
+
 /**
  * useNewDocument hook
  * @returns Functions used to create new document
@@ -10,11 +12,8 @@ const useNewDocument = ({ call, scope }) => {
    */
   const onValidation = value => {
     try {
-      const validation = new RegExp(/^[\w][0-9A-Za-z-]*(_[0-9A-Za-z-]+)*[_]?$/);
-      if (!validation.test(value)) {
-        throw new Error("Invalid name");
-      }
-      return { result: true, error: "" };
+      const validation = validateDocumentName(value);
+      return { result: validation, error: "" };
     } catch (err) {
       return {
         result: false,
