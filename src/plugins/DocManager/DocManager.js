@@ -1,7 +1,7 @@
 import { Document } from "@mov-ai/mov-fe-lib-core";
+import { PLUGINS } from "../../utils/Constants";
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
 import docsFactory from "./docs";
-import TOPICS from "./topics";
 
 /**
  * Document Manager plugin to handle requests, subscribers and more
@@ -141,7 +141,7 @@ class DocManager extends IDEPlugin {
    */
   save(modelKey, newName) {
     const { name, scope } = modelKey;
-    this.emit(TOPICS.saveDoc, {
+    this.emit(PLUGINS.DOC_MANAGER.ON.SAVE_DOC, {
       docManager: this,
       doc: Document.parsePath(name, scope),
       newName
@@ -213,7 +213,7 @@ class DocManager extends IDEPlugin {
    * @param {string} store : The name of the store firing the event
    */
   onStoreLoad(store) {
-    this.emit(TOPICS.loadDocs, this);
+    this.emit(PLUGINS.DOC_MANAGER.ON.LOAD_DOCS, this);
   }
 
   /**
@@ -222,7 +222,7 @@ class DocManager extends IDEPlugin {
    * @param {object<{documentName, documentType}>} doc
    */
   onStoreUpdate(store, doc, action = "set") {
-    this.emit(TOPICS.updateDocs, this, {
+    this.emit(PLUGINS.DOC_MANAGER.ON.UPDATE_DOCS, this, {
       action,
       ...doc
     });
@@ -235,7 +235,7 @@ class DocManager extends IDEPlugin {
    * @param {boolean} value : Document Dirty state
    */
   onDocumentDirty(store, instance, value) {
-    this.emit(TOPICS.updateDocDirty, {
+    this.emit(PLUGINS.DOC_MANAGER.ON.UPDATE_DOC_DIRTY, {
       instance,
       value
     });
@@ -246,7 +246,7 @@ class DocManager extends IDEPlugin {
    * @param {{url: string, name: string}} data : Document data
    */
   onDocumentDeleted(store, data) {
-    this.emit(TOPICS.deleteDoc, { ...data, scope: store });
+    this.emit(PLUGINS.DOC_MANAGER.ON.DELETE_DOC, { ...data, scope: store });
   }
 
   /**
@@ -275,7 +275,8 @@ class DocManager extends IDEPlugin {
         // Discard dirty document changes
         this.discardDocChanges({ scope, name });
         // Emit event to close untitled tabs
-        if (doc.getIsNew()) this.emit(TOPICS.deleteDoc, { url, name, scope });
+        if (doc.getIsNew())
+          this.emit(PLUGINS.DOC_MANAGER.ON.DELETE_DOC, { url, name, scope });
       });
       // Destroy store to kill subscribers
       store.destroy();

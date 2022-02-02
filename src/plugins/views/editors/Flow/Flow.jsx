@@ -43,6 +43,7 @@ const Flow = (props, ref) => {
     data,
     alert,
     confirmationAlert,
+    saveDocument,
     on
   } = props;
   // State Hooks
@@ -157,6 +158,20 @@ const Flow = (props, ref) => {
       });
     },
     [call]
+  );
+
+  /**
+   * @private Used to remove invalid links
+   * @param {*} callback
+   */
+  const deleteInvalidLinks = useCallback(
+    (links, callback) => {
+      links.forEach(link => instance.current.deleteLink(link.id));
+      // Save document and call graph callback
+      saveDocument();
+      callback && callback();
+    },
+    [instance, saveDocument]
   );
 
   //========================================================================================
@@ -407,10 +422,34 @@ const Flow = (props, ref) => {
     [call, LINK_MENU_NAME, addLinkMenu]
   );
 
+  /**
+   * Close context menu
+   */
   const handleContextClose = useCallback(() => {
     setContextMenuOptions(null);
     getMainInterface().setMode(EVT_NAMES.DEFAULT);
   }, []);
+
+  /**
+   * On Links validation
+   * @param {{invalidLinks: Array, callback: Function}} eventData
+   */
+  const onLinksValidated = useCallback(
+    eventData => {
+      const { invalidLinks, callback } = eventData;
+      if (invalidLinks.length) {
+        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
+          submitText: t("Fix"),
+          title: t("Invalid Links Found"),
+          onSubmit: () => deleteInvalidLinks(invalidLinks, callback),
+          message: t(
+            "Do you want to fix this? This will remove all invalid links and save the flow"
+          )
+        });
+      }
+    },
+    [call, t, deleteInvalidLinks]
+  );
 
   /**
    * Subscribe to mainInterface and canvas events
@@ -439,6 +478,9 @@ const Flow = (props, ref) => {
         const persistentWarns = evtData.warnings.filter(el => el.isPersistent);
         onFlowValidated({ warnings: persistentWarns });
       });
+
+      // Subscribe to invalid links validation
+      mainInterface.graph.onLinksValidated.subscribe(onLinksValidated);
 
       // When enter default mode remove other node/sub-flow bookmarks
       mainInterface.mode.default.onEnter.subscribe(() => {
@@ -602,6 +644,7 @@ const Flow = (props, ref) => {
       onNodeSelected,
       onFlowValidated,
       onLinkSelected,
+      onLinksValidated,
       handleContextClose,
       openDoc,
       call,

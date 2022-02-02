@@ -37,6 +37,7 @@ export default class Graph {
   warningsVisibility = true;
   validator = new GraphValidator(this);
   onFlowValidated = new Subject();
+  onLinksValidated = new Subject();
   invalidLinks = [];
 
   //========================================================================================
@@ -117,24 +118,19 @@ export default class Graph {
     Object.entries(links).forEach(([id, value]) => {
       this.addLink({ id, ...value });
     });
-    this.removeLinksModal();
-
+    // Emits result of links validation
+    this.onLinksValidated.next({
+      invalidLinks: this.invalidLinks,
+      callback: this.clearInvalidLinks
+    });
     return this;
   }
 
   /**
-   * @private
+   * @private Clear invalid links property
    */
-  removeLinksModal = () => {
-    // TODO: implement
-    return this;
-  };
-
-  /**
-   * @private
-   */
-  getRemoveInvalidLinks = () => () => {
-    // TODO: implement
+  clearInvalidLinks = () => () => {
+    this.invalidLinks = [];
   };
 
   /**
@@ -457,6 +453,9 @@ export default class Graph {
     });
   };
 
+  /**
+   * Set all temporary warnings as permanents
+   */
   setPermanentWarnings = () => {
     this.warnings = this.warnings.map(wn => ({ ...wn, isPersistent: true }));
     this.onFlowValidated.next({ warnings: this.warnings });
