@@ -53,7 +53,11 @@ export const PLUGINS = {
   },
   DIALOG: {
     NAME: "dialog",
-    CALL: { NEW_DOC: "newDocument", CONFIRMATION: "confirmation" }
+    CALL: {
+      NEW_DOC: "newDocument",
+      CONFIRMATION: "confirmation",
+      ALERT: "alert"
+    }
   },
   FLOW_EXPLORER: {
     NAME: "FlowExplorer",

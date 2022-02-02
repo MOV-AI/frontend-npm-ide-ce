@@ -263,7 +263,12 @@ export default class Graph {
     this.links.forEach(value => (value.transparent = false));
   };
 
-  loadData(flow) {
+  /**
+   * Load Flow Data
+   * @param {*} flow : Data from DB
+   * @returns {Promise} Promise to be resolved after all nodes, containers and links are loaded
+   */
+  async loadData(flow) {
     this.destroy();
 
     return Promise.allSettled([
@@ -281,10 +286,8 @@ export default class Graph {
    */
   validateFlow = () => {
     const { warnings, invalidContainersParam } = this.validator.validateFlow();
-    this.onFlowValidated.next({ warnings: warnings });
+    this.onFlowValidated.next({ warnings: warnings, invalidContainersParam });
     this.warnings = warnings;
-    // Validate sub-flows parameters
-    this.invalidContainerParamModal(invalidContainersParam);
   };
 
   /**

@@ -174,6 +174,40 @@ const Flow = (props, ref) => {
     [instance, saveDocument]
   );
 
+  /**
+   * @private Show alert dialog for containers with invalid parameters
+   * @param {*} invalidContainersParam
+   */
+  const invalidContainersParamAlert = useCallback(
+    invalidContainerParams => {
+      // Don't show dialog if no invalid params found
+      if (!invalidContainerParams || !invalidContainerParams.length) return;
+      // Set title and message for alert
+      const title = t("Sub-flows with invalid parameters");
+      let message =
+        t(
+          "The parameters of the sub-flow should come from the flow template."
+        ) +
+        t(
+          "The following sub-flows contains custom parameters that are not present on its template:\n"
+        );
+      // Add containers name to message
+      invalidContainerParams.forEach(containerId => {
+        message += "\n  " + containerId;
+      });
+      // Add how to fix information
+      message +=
+        "\n\n" +
+        t(
+          "To fix it, you can either remove the custom parameter on the sub-flow or add the parameter on the template."
+        );
+
+      // Show alert dialog
+      alert({ message, title, location: "modal" });
+    },
+    [t, alert]
+  );
+
   //========================================================================================
   /*                                                                                      *
    *                               Right menu initialization                              *
@@ -477,6 +511,7 @@ const Flow = (props, ref) => {
       mainInterface.graph.onFlowValidated.subscribe(evtData => {
         const persistentWarns = evtData.warnings.filter(el => el.isPersistent);
         onFlowValidated({ warnings: persistentWarns });
+        invalidContainersParamAlert(evtData.invalidContainersParam);
       });
 
       // Subscribe to invalid links validation
@@ -646,6 +681,7 @@ const Flow = (props, ref) => {
       onLinkSelected,
       onLinksValidated,
       handleContextClose,
+      invalidContainersParamAlert,
       openDoc,
       call,
       alert

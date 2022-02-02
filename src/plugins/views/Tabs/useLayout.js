@@ -36,7 +36,6 @@ const useLayout = (props, dockRef) => {
    */
   const _applyLayout = useCallback(
     _layout => {
-      console.log("debug apply Layout");
       setLayout(_layout);
       workspaceManager.setLayout(_layout);
     },
