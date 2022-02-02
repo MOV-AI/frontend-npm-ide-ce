@@ -6,6 +6,7 @@ import { Typography } from "@material-ui/core";
 import { withViewPlugin } from "../../../../../../engine/ReactPlugin/ViewReactPlugin";
 import VirtualizedTree from "./../../../../Explorer/components/VirtualizedTree/VirtualizedTree";
 import Preview from "./Preview";
+import { PLUGINS } from "../../../../../../utils/Constants";
 
 import { explorerStyles } from "./styles";
 
@@ -55,7 +56,7 @@ const Explorer = props => {
           });
         },
         1: () => {
-          emit("addNode", node);
+          emit(PLUGINS.FLOW_EXPLORER.ON.ADD_NODE, node);
         }
       };
       _get(deepnessToAction, node.deepness, () => {

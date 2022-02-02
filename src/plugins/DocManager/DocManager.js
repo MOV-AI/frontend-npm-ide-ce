@@ -12,6 +12,7 @@ class DocManager extends IDEPlugin {
     const methods = Array.from(
       new Set([
         ...(profile.methods ?? []),
+        "broadcast",
         "getStore",
         "getDocTypes",
         "getDocFactory",
@@ -140,7 +141,11 @@ class DocManager extends IDEPlugin {
    */
   save(modelKey, newName) {
     const { name, scope } = modelKey;
-    this.emit(TOPICS.saveDoc, { docManager: this, doc: Document.parsePath(name, scope), newName });
+    this.emit(TOPICS.saveDoc, {
+      docManager: this,
+      doc: Document.parsePath(name, scope),
+      newName
+    });
     return this.getStore(scope).saveDoc(name, newName);
   }
 
@@ -198,6 +203,10 @@ class DocManager extends IDEPlugin {
    *                                        Events                                        *
    *                                                                                      */
   //========================================================================================
+
+  broadcast(event, data) {
+    this.emit(event, data);
+  }
 
   /**
    * Emits an event when a store fires an onLoad event
