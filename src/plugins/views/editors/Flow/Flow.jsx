@@ -426,6 +426,15 @@ const Flow = (props, ref) => {
         onLinkSelected(null);
       });
 
+      // Subscribe to double click event in a node
+      mainInterface.mode.onDblClick.onEnter.subscribe(evtData => {
+        const node = evtData.node;
+        openDoc({
+          name: node.templateName,
+          scope: node.data.model
+        });
+      });
+
       // Subscribe to node instance/sub flow context menu events
       mainInterface.mode.nodeCtxMenu.onEnter.subscribe(evtData => {
         const anchorPosition = {
@@ -573,6 +582,7 @@ const Flow = (props, ref) => {
       onFlowValidated,
       onLinkSelected,
       handleContextClose,
+      openDoc,
       call,
       alert
     ]
