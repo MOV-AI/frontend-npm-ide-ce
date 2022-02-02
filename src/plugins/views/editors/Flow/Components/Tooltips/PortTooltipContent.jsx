@@ -1,18 +1,26 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { makeStyles } from "@material-ui/core/styles";
 import { useTranslation } from "react-i18next";
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
 
-const TOOLTIP_INDEX = "tooltip-fragment-row";
-const SIZES = {
-  LEFT: 4,
-  RIGHT: 8
-};
+const ITEMS_INDEX = "tooltip-fragment-row";
+
+const useStyles = makeStyles(() => ({
+  root: {
+    marginTop: 4,
+    marginBottom: 4
+  },
+  item: {
+    lineHeight: 1.2
+  }
+}));
 
 const PortTooltipContent = props => {
   const { t } = useTranslation();
   const { name, message, template, callback } = props;
+  const classes = useStyles();
   const text = {
     name: t("Name"),
     message: t("Message"),
@@ -20,29 +28,34 @@ const PortTooltipContent = props => {
     callback: t("Callback")
   };
 
+  const itemTextProps = {
+    variant: "caption",
+    className: classes.item
+  };
+
   const data = [
-    { text: text.name, size: SIZES.LEFT },
-    { text: name, size: SIZES.RIGHT },
-    { text: text.message, size: SIZES.LEFT },
-    { text: message, size: SIZES.RIGHT },
-    { text: text.protocol, size: SIZES.LEFT },
-    { text: template, size: SIZES.RIGHT }
+    { primary: text.name, secondary: name },
+    { primary: text.message, secondary: message },
+    { primary: text.protocol, secondary: template }
   ];
 
   if (callback) {
-    data.push(
-      { text: text.callback, size: SIZES.LEFT },
-      { text: callback, size: SIZES.RIGHT }
-    );
+    data.push({ primary: text.callback, secondary: callback });
   }
 
-  return data.map((row, index) => {
+  return data.map(item => {
     return (
-      <Grid item xs={row.size} key={`${TOOLTIP_INDEX}-${index}`}>
-        <Typography variant="caption" color="textSecondary" component="p">
-          {row.text}
-        </Typography>
-      </Grid>
+      <ListItem
+        style={{ paddingTop: 0, paddingBottom: 0 }}
+        key={`${ITEMS_INDEX}-${item.primary}`}
+      >
+        <ListItemText
+          {...item}
+          primaryTypographyProps={itemTextProps}
+          secondaryTypographyProps={itemTextProps}
+          className={classes.root}
+        ></ListItemText>
+      </ListItem>
     );
   });
 };
