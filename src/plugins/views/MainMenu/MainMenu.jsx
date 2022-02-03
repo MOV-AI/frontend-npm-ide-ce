@@ -7,14 +7,15 @@ import {
   ContextMenu
 } from "@mov-ai/mov-fe-lib-react";
 import { Authentication } from "@mov-ai/mov-fe-lib-core";
+import IconButton from "@material-ui/core/IconButton";
 import TextSnippetIcon from "@material-ui/icons/Description";
-import AppsIcon from "@material-ui/icons/Apps";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 import { Tooltip } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MainContext } from "../../../main-context";
 import { VERSION } from "../../../utils/Constants";
 import { getIconByScope } from "../../../utils/Utils";
+import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
 
 const useStyles = makeStyles(theme => ({
   icon: {
@@ -22,6 +23,13 @@ const useStyles = makeStyles(theme => ({
     cursor: "pointer",
     "& svg": {
       color: theme.palette.primary.main
+    }
+  },
+  movaiIcon: {
+    padding: 0,
+    "& img": {
+      width: 35,
+      height: 35
     }
   }
 }));
@@ -94,10 +102,13 @@ const MainMenu = props => {
           backgroundColor={theme.palette.background.default}
           upperElement={
             <Tooltip title="Apps" placement="right" arrow>
-              <AppsIcon
-                className={classes.icon}
+              <IconButton
+                className={classes.movaiIcon}
                 onClick={handleHomeIconClick}
-              ></AppsIcon>
+              >
+                <img src={movaiIcon} alt="MOV.AI Logo" />
+                <p></p>
+              </IconButton>
             </Tooltip>
           }
           creatorElement={
