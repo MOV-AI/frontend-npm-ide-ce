@@ -221,7 +221,7 @@ const FlowTopBar = props => {
     initStoreHelper().then(() => {
       robotManager.getAll(onLoadRobotList);
     });
-  }, [robotManager, call, onLoadRobotList, initStoreHelper]);
+  }, [robotManager, onLoadRobotList, initStoreHelper]);
 
   /**
    * On component unmount

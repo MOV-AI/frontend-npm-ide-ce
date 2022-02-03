@@ -1,54 +1,20 @@
-import React from "react";
-import { makeStyles } from "@material-ui/styles";
-import WarningIcon from "@material-ui/icons/Warning";
+import React, { useEffect, useCallback, useState } from "react";
 import PropTypes from "prop-types";
-import { RobotManager, Document } from "@mov-ai/mov-fe-lib-core";
+import WarningIcon from "@material-ui/icons/Warning";
+import { makeStyles } from "@material-ui/styles";
 import { Typography, Tooltip } from "@material-ui/core";
+import { RobotManager, Document } from "@mov-ai/mov-fe-lib-core";
 import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
+import styles from "./styles";
 
-const useStyles = makeStyles(theme => ({
-  bar: {
-    height: 25,
-    width: "100%"
-  },
-  grow: {
-    flexGrow: 1
-  },
-  active: {
-    background: theme.palette.primary.light,
-    color: "black"
-  },
-  default: {
-    color: "white",
-    background: theme.palette.background.primary,
-    borderTop: "solid 1px black"
-  },
-  tooltip: {
-    fontSize: "1em"
-  },
-  action: {
-    cursor: "pointer",
-    width: "fit-content",
-    display: "inline-block",
-    padding: "0 15px",
-    borderRight: `solid 1px ${theme.palette.background.secondary}`,
-    "& i": { marginRight: 10, fontSize: "14px" },
-    "&:hover": {
-      filter: `drop-shadow(2px 4px 6px white)`
-    }
-  },
-  alignRight: {
-    float: "right",
-    borderLeft: `solid 1px ${theme.palette.background.secondary}`
-  }
-}));
+const useStyles = makeStyles(styles);
 
 const FlowBottomBar = props => {
   // State(s)
-  const [barStatus, setBarStatus] = React.useState("default");
-  const [allRobots, setRobots] = React.useState({});
-  const [selectedRobotName, setSelectedRobotName] = React.useState("");
-  const [warningVisibility, setWarningVisibility] = React.useState(true);
+  const [barStatus, setBarStatus] = useState("default");
+  const [allRobots, setRobots] = useState({});
+  const [selectedRobotName, setSelectedRobotName] = useState("");
+  const [warningVisibility, setWarningVisibility] = useState(true);
 
   // Prop(s)
   const { onToggleWarnings, robotSelected, runningFlow, warnings } = props;
@@ -56,7 +22,13 @@ const FlowBottomBar = props => {
   // Hook(s)
   const classes = useStyles();
 
-  const updateRobots = React.useCallback(changedRobots => {
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  const updateRobots = useCallback(changedRobots => {
     setRobots(prevState => {
       const newState = {};
       Object.keys(changedRobots).forEach(id => {
@@ -84,19 +56,32 @@ const FlowBottomBar = props => {
     });
   };
 
+  /**
+   * Toggle warnings visibility in canvas
+   */
+  const toggleVisibility = useCallback(() => {
+    if (!warnings.length) return;
+    // Toggle warnings if there's any
+    setWarningVisibility(prevState => !prevState);
+  }, [warnings]);
+
   //========================================================================================
   /*                                                                                      *
    *                                    React lifecycle                                   *
    *                                                                                      */
   //========================================================================================
 
-  React.useEffect(() => {
+  useEffect(() => {
     const robotManager = new RobotManager();
     robotManager.getAll(robots => setRobots(robots));
-    robotManager.subscribeToChanges(updateRobots);
+    const subscriberId = robotManager.subscribeToChanges(updateRobots);
+    // Unsubscribe to changes on component unmount
+    return () => {
+      robotManager.unsubscribeToChanges(subscriberId);
+    };
   }, [updateRobots]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const status = runningFlow ? "active" : "default";
     setBarStatus(status);
     // Set selected robot name
@@ -105,6 +90,11 @@ const FlowBottomBar = props => {
       setSelectedRobotName(robotName);
     }
   }, [robotSelected, allRobots, runningFlow]);
+
+  // Call toggle warnings on change of warningVisibility
+  useEffect(() => {
+    onToggleWarnings(warningVisibility);
+  }, [warningVisibility, onToggleWarnings]);
 
   //========================================================================================
   /*                                                                                      *
@@ -138,12 +128,10 @@ const FlowBottomBar = props => {
         <Tooltip title="Show warnings" classes={{ tooltip: classes.tooltip }}>
           <Typography
             component="div"
-            className={`${classes.action} ${classes.alignRight}`}
-            onClick={evt => {
-              const isVisible = !warningVisibility;
-              onToggleWarnings(isVisible);
-              setWarningVisibility(isVisible);
-            }}
+            className={`${classes.action} ${classes.alignRight} ${
+              warningVisibility ? classes.actionActive : ""
+            }`}
+            onClick={toggleVisibility}
           >
             <WarningIcon fontSize="small" /> {warnings.length}
           </Typography>

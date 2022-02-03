@@ -3,8 +3,8 @@ import ContainerNode from "./ContainerNode";
 import TemporaryContainerNode from "./TemporaryContainerNode";
 import TemporaryNode from "./TemporaryNode";
 import TreeClassicNode from "./TreeView/TreeClassicNode";
-import TreeContainerNode from "./TreeView/TreeClassicNode";
 import PreviewClassicNode from "./Preview/PreviewClassicNode";
+import PreviewContainerNode from "./Preview/PreviewContainerNode";
 import { DOCS_MNG } from "./constants";
 
 /**
@@ -65,12 +65,13 @@ class Factory {
 
   static OUTPUT = {
     PREV_NODE: { cls: PreviewClassicNode, scope: "Node" },
+    PREV_FLOW: { cls: PreviewContainerNode, scope: "Flow" },
     NODE: { cls: ClassicNode, scope: "Node" },
     TMP_NODE: { cls: TemporaryNode, scope: "Node" },
     TREE_NODE: { cls: TreeClassicNode, scope: "Node" },
     CONTAINER: { cls: ContainerNode, scope: "Flow" },
     TMP_CONTAINER: { cls: TemporaryContainerNode, scope: "Flow" },
-    TREE_CONTAINER: { cls: TreeContainerNode, scope: "Flow" },
+    TREE_CONTAINER: { cls: TreeClassicNode, scope: "Flow" }
   };
 }
 

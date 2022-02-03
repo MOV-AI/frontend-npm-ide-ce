@@ -169,6 +169,8 @@ class ExposedPortsManager extends Manager {
     obj.togglePort(port);
 
     this.removeEmpties();
+
+    this.emit(EVENTS.UPDATE);
   }
 
   //========================================================================================

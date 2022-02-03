@@ -215,6 +215,16 @@ export default class MainInterface {
     this.deleteNode(subFlowId);
   };
 
+  toggleExposedPort = port => {
+    const templateName = port.node.getExposedName();
+    const nodeName = port.node.name;
+    const portName = port.name;
+
+    this.graph.updateExposedPorts(
+      this.modelView.current.toggleExposedPort(templateName, nodeName, portName)
+    );
+  };
+
   //========================================================================================
   /*                                                                                      *
    *                                      Subscribers                                     *

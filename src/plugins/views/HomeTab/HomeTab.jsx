@@ -1,24 +1,34 @@
-import React, { forwardRef, useCallback } from "react";
+import React, { forwardRef, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
-import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import withAlerts from "../../../decorators/withAlerts";
+import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import { getNameFromURL } from "../../../utils/Utils";
+import { HOMETAB_PROFILE } from "../../../utils/Constants";
 import ERROR_MESSAGES from "../../../utils/ErrorMessages";
 import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
 import QuickAccessComponent from "./components/QuickAccess";
 import RecentDocumentsComponent from "./components/RecentDocuments";
 import SamplesComponent from "./components/Samples";
-
 import { homeTabStyles } from "./styles";
 
 const HomeTab = forwardRef((props, ref) => {
-  const { workspaceManager, call, on, alert, alertSeverities } = props;
-  const classes = homeTabStyles();
+  const { workspaceManager, call, on, off, alert, alertSeverities } = props;
   const { t } = useTranslation();
+  const classes = homeTabStyles();
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Methods                                       *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Open Document
+   * @param {{name: string, scope: string, id: string, isDeleted: bool}} doc : Document data
+   */
   const openExistingDocument = useCallback(
     doc => {
       if (!doc.name) doc.name = getNameFromURL(doc.id);
@@ -36,6 +46,23 @@ const HomeTab = forwardRef((props, ref) => {
     },
     [alertSeverities, alert, call, t]
   );
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    React Lifecycle                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  useEffect(() => {
+    const HOMETAB_ID_TOPIC = `${HOMETAB_PROFILE.name}-active`;
+    call("rightDrawer", "resetBookmarks");
+    on("tabs", HOMETAB_ID_TOPIC, () => {
+      call("rightDrawer", "resetBookmarks");
+    });
+    return () => {
+      off("tabs", HOMETAB_ID_TOPIC);
+    };
+  }, [call, on, off]);
 
   //========================================================================================
   /*                                                                                      *

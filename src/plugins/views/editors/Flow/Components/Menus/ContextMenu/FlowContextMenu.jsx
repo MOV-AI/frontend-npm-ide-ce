@@ -1,25 +1,20 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import { ContextMenu, DEFAULT_FUNCTION } from ".";
-
-const t = v => v;
-
-const MODE = {
-  NODE: "NodeInst",
-  LINK: "Link",
-  SUBFLOW: "Container",
-  PORTS: "Ports"
-};
+import ToggleOnIcon from "@material-ui/icons/ToggleOn";
+import { ContextMenu, DEFAULT_FUNCTION, MODE } from ".";
 
 const FlowContextMenu = props => {
+  const { t } = useTranslation();
   const {
     mode,
     anchorPosition,
     onClose,
     onNodeDelete,
     onLinkDelete,
-    onSubFlowDelete
+    onSubFlowDelete,
+    onPortToggle
   } = props;
 
   const handleOptionsClick = fn => {
@@ -49,11 +44,20 @@ const FlowContextMenu = props => {
     }
   ];
 
+  const getPortOptions = [
+    {
+      label: t("Toggle"),
+      icon: <ToggleOnIcon />,
+      onClick: () => handleOptionsClick(onPortToggle)
+    }
+  ];
+
   const getItems = () => {
     const renderMap = {
       [MODE.NODE]: getNodeOptions,
       [MODE.LINK]: getLinkOptions,
-      [MODE.SUBFLOW]: getSubFlowOptions
+      [MODE.SUBFLOW]: getSubFlowOptions,
+      [MODE.PORT]: getPortOptions
     };
 
     return renderMap[mode];
@@ -74,7 +78,8 @@ FlowContextMenu.defaultProps = {
   onClose: () => DEFAULT_FUNCTION("onClose"),
   onNodeDelete: () => DEFAULT_FUNCTION("onNodeDelete"),
   onLinkDelete: () => DEFAULT_FUNCTION("onLinkDelete"),
-  onSubFlowDelete: () => DEFAULT_FUNCTION("onSubFlowDelete")
+  onSubFlowDelete: () => DEFAULT_FUNCTION("onSubFlowDelete"),
+  onPortToggle: () => DEFAULT_FUNCTION("onPortToggle")
 };
 
 FlowContextMenu.propTypes = {
@@ -83,7 +88,8 @@ FlowContextMenu.propTypes = {
   onClose: PropTypes.func,
   onNodeDelete: PropTypes.func,
   onLinkDelete: PropTypes.func,
-  onSubFlowDelete: PropTypes.func
+  onSubFlowDelete: PropTypes.func,
+  onPortToggle: PropTypes.func
 };
 
 export default FlowContextMenu;

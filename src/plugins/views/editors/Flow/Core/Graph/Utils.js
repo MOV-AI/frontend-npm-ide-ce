@@ -1,53 +1,59 @@
 import { flattenObject } from "../../Utils/utils";
 
+const SEPARATOR = ",";
+
 /**
- * // TODO: review
- * shouldUpdateExposedPorts - compare exposed ports states and update only what changed
- * @param {object} _prevState exposed ports previous state
- * @param {object} _newState exposed ports new state
- * @param {boolean} updatedAll update all ports
+ * Transform path and exposed value in object
+ * @param {string} obj : "<template name>,<node name>,<port name>"
+ * @param {bool} value : Port is exposed
+ *
+ * @returns {object} {node: <node name>, port: <port name>, value: <exposed>}
  */
-const shouldUpdateExposedPorts = (_prevState, _newState, updatedAll) => {
-  const separator = ",";
-  const prevState = flattenObject(_prevState, "", separator);
-  const newState = flattenObject(_newState, "", separator);
-  const output = []; // array with nodes and respective ports that should be updated
+const format = (obj, value) => {
+  const [, node, port] = obj.split(SEPARATOR);
+  return { node, port, value };
+};
 
-  /**
-   * transform path and exposed value in object
-   * @param {string} obj "<template name>.<node name>.<array index>.<port name>"
-   * @param {bool} value port is exposed
-   *
-   * @returns {object} {node: <node name>, port: <port name>, value: <exposed>}
-   */
-  const format = (obj, value) => {
-    const [, node, , port] = obj.split(separator);
-    return { node, port, value: value };
-  };
-
-  /**
-   * Push node and port to array of nodes to update
-   * @param {string} key Object path without port name
-   * @param {string} value port name
-   * @param {bool} exposed  port is exposed
-   */
-  const update = (key, value, exposed) => {
-    output.push(format([key, value].join(separator), exposed));
-  };
-
-  const inObject = (key, arr) => key in arr;
-
-  Object.entries({ ...prevState, ...newState }).forEach(([key, value]) => {
-    if (!(key in prevState) || !(key in newState) || updatedAll) {
-      format(
-        key,
-        update(key, value, inObject(key, newState) || updatedAll),
-        output
-      );
+/**
+ * Returns an array with the state flattened
+ * @param {object} state :
+ * @returns {array}
+ */
+const normalize = state => {
+  return Object.entries(flattenObject(state, "", SEPARATOR)).map(
+    ([key, value]) => {
+      // remove index added by flatten method
+      return [...key.split(SEPARATOR).slice(0, -1), value].join(SEPARATOR);
     }
-  });
+  );
+};
 
-  return output;
+/**
+ * Returns an array with the symmetric difference
+ * @param {array} arr1 : Array to diff
+ * @param {array} arr2 : Array to diff
+ * @returns {array}
+ */
+const arrDiff = (arr1, arr2) => {
+  return arr1
+    .filter(v => !arr2.includes(v))
+    .concat(arr2.filter(v => !arr1.includes(v)));
+};
+
+/**
+ * shouldUpdateExposedPorts - compare exposed ports states and update only what changed
+ * @param {object} prevState exposed ports previous state
+ * @param {object} newState exposed ports new state
+ * @param {boolean} updateAll update all ports
+ */
+const shouldUpdateExposedPorts = (prevState, newState, updateAll) => {
+  const _prevState = normalize(prevState);
+  const _newState = normalize(newState);
+  const state = updateAll
+    ? [...new Set([..._prevState, ..._newState])]
+    : arrDiff(_prevState, _newState);
+
+  return state.map(key => format(key, _newState.includes(key)));
 };
 
 export { shouldUpdateExposedPorts };

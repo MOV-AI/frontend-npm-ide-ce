@@ -36,7 +36,7 @@ export function portConvertTypeCss(message) {
 export function getBaseTemplate(type) {
   const baseTemplate = {
     start: { id: type },
-    flow: { template: { Type: "MovAI/Flow" } }
+    container: { Type: "MovAI/Flow" }
   };
   return baseTemplate[type];
 }

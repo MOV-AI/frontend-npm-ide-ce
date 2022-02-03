@@ -1,17 +1,25 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback
+} from "react";
 import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
 import Backdrop from "@material-ui/core/Backdrop";
+import { makeStyles } from "@material-ui/core/styles";
 import { usePluginMethods } from "../../../../../engine/ReactPlugin/ViewReactPlugin";
+import { generateContainerId } from "../Constants/constants";
+import { EVT_NAMES } from "../events";
 import Loader from "../../_shared/Loader/Loader";
-import { generateContentId } from "../Constants/constants";
+import Warnings from "../Components/Warnings/Warnings";
 import useMainInterface from "./hooks/useMainInterface";
+import { PLUGINS } from "../../../../../utils/Constants";
 import styles from "./styles";
 
 const useStyles = makeStyles(styles);
 
 const BaseFlow = React.forwardRef((props, ref) => {
-  const classes = useStyles(props);
   const {
     call,
     instance,
@@ -23,6 +31,8 @@ const BaseFlow = React.forwardRef((props, ref) => {
     off,
     on,
     onNodeSelected,
+    warnings,
+    warningsVisibility,
     onReady
   } = props;
   const readOnly = false;
@@ -30,7 +40,13 @@ const BaseFlow = React.forwardRef((props, ref) => {
   // State Hooks
   const [loading, setLoading] = useState(true);
 
-  const containerId = useMemo(() => generateContentId(id), [id]);
+  const containerId = useMemo(() => generateContainerId(id), [id]);
+
+  // Refs
+  const warningsRef = useRef();
+  const containerRef = useRef();
+  // Other hooks
+  const classes = useStyles(props);
 
   const { mainInterface } = useMainInterface({
     classes,
@@ -50,18 +66,29 @@ const BaseFlow = React.forwardRef((props, ref) => {
     return mainInterface.current;
   }, [mainInterface]);
 
+  // Enter in add node/sub-flow mode
   useEffect(() => {
-    on("FlowExplorer", "addNode", node => {
+    on(PLUGINS.FLOW_EXPLORER.NAME, PLUGINS.FLOW_EXPLORER.ON.ADD_NODE, node => {
+      // event emitter is latching thus we need to skip
+      // it while flow is loading
+      const currMode = getMainInterface()?.mode.current.id ?? EVT_NAMES.LOADING;
+      if (currMode === EVT_NAMES.LOADING) return;
+
       const scopes = {
         Node: "addNode",
         Flow: "addFlow"
       };
       const templateId = node.name;
+      // If user tries to add the flow as a sub-flow to itself,
+      //  it's considered a forbidden operation
+      if (dataFromDB.Label === templateId) return;
+      // Add interface mode to add node/sub-flow
       getMainInterface()?.setMode(scopes[node.scope], { templateId }, true);
     });
 
-    return () => off("FlowExplorer", "addNode");
-  }, [getMainInterface, off, on]);
+    return () =>
+      off(PLUGINS.FLOW_EXPLORER.NAME, PLUGINS.FLOW_EXPLORER.ON.ADD_NODE);
+  }, [getMainInterface, off, on, dataFromDB]);
 
   useEffect(() => {
     const mInt = getMainInterface();
@@ -86,14 +113,20 @@ const BaseFlow = React.forwardRef((props, ref) => {
         </Backdrop>
       )}
       <div
-        style={{
-          width: "100%",
-          height: "100%",
-          flexGrow: 1
-        }}
+        className={classes.flowCanvas}
+        ref={containerRef}
         id={containerId}
         tagindex="0"
-      ></div>
+      >
+        <React.Fragment>
+          <Warnings
+            ref={warningsRef}
+            warnings={warnings}
+            isVisible={warningsVisibility}
+            domNode={containerRef}
+          />
+        </React.Fragment>
+      </div>
     </div>
   );
 });

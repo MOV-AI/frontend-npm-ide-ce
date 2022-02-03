@@ -618,7 +618,9 @@ class BaseNode extends BaseNodeStruct {
     if ("onDrag" in this.events) this.events.onDrag(this, d3.event);
     lodash
       .get(this.canvas.mode.current, "onDrag", {
-        next: () => {}
+        next: () => {
+          /* empty method */
+        }
       })
       .next(this);
   };
@@ -728,7 +730,8 @@ class BaseNode extends BaseNodeStruct {
     this.canvas.events.next({
       name: "onMouseOver",
       type: "Port",
-      data: { port, mouseover: true }
+      event: d3.event,
+      port
     });
   };
 
@@ -741,7 +744,8 @@ class BaseNode extends BaseNodeStruct {
     this.canvas.events.next({
       name: "onMouseOut",
       type: "Port",
-      data: { port, mouseover: false }
+      event: d3.event,
+      port
     });
   };
 
@@ -812,7 +816,7 @@ class BaseNode extends BaseNodeStruct {
    */
   update = data => {
     const fn = {
-      Visualization: data => this.updatePosition(data), // Position changes when dragging or when adding a new node
+      Visualization: docData => this.updatePosition(docData), // Position changes when dragging or when adding a new node
       default: () => {
         lodash.merge(this.data, data);
         this.data.name = this.name;
