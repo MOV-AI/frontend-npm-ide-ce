@@ -783,19 +783,20 @@ class BaseNode extends BaseNodeStruct {
   };
 
   /**
-   * onLayersChange - on layers event handler
+   * onGroupsChange - on groups event handler
    *
-   * @param {object} layers flow layers
+   * @param {object} groups flow groups
    */
-  onLayersChange = layers => {
-    const nodeLayers = lodash.get(this.data, "NodeLayers", []);
+  onGroupsChange = groups => {
+    const nodeGroups = this.data.NodeLayers ?? [];
     const hide =
-      nodeLayers.every(layer => {
-        if (layer in layers) {
-          return layers[layer].on ? false : true;
+      nodeGroups.every(group => {
+        const groupItem = groups.get(group);
+        if (groupItem) {
+          return !groupItem.enabled;
         }
         return false;
-      }) && nodeLayers.length > 0;
+      }) && nodeGroups.length > 0;
     this.visibility = !hide;
   };
 

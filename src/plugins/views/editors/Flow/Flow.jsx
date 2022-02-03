@@ -76,6 +76,26 @@ const Flow = (props, ref) => {
 
   //========================================================================================
   /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Used to handle group visibility
+   */
+  const handleGroupVisibility = useCallback((groupId, visibility) => {
+    getMainInterface().onGroupChange(groupId, visibility);
+  }, []);
+
+  /**
+   * Handle group visibilities
+   */
+  const groupsVisibilities = useCallback(() => {
+    getMainInterface().onGroupsChange(instance.current.getGroups()?.data);
+  }, [instance]);
+
+  //========================================================================================
+  /*                                                                                      *
    *                                    React Lifecycle                                   *
    *                                                                                      */
   //========================================================================================
@@ -196,11 +216,20 @@ const Flow = (props, ref) => {
             flowModel={instance}
             openDoc={openDoc}
             editable={isEditableComponentRef.current}
+            groupsVisibilities={groupsVisibilities}
           />
         )
       };
     },
-    [NODE_MENU_NAME, call, id, instance, openDoc, getMenuComponent]
+    [
+      NODE_MENU_NAME,
+      call,
+      id,
+      instance,
+      openDoc,
+      getMenuComponent,
+      groupsVisibilities
+    ]
   );
 
   /**
@@ -278,6 +307,7 @@ const Flow = (props, ref) => {
             name={name}
             details={details}
             model={instance}
+            handleGroupVisibility={handleGroupVisibility}
             editable={isEditableComponentRef.current}
           ></Menu>
         )
@@ -315,7 +345,8 @@ const Flow = (props, ref) => {
     instance,
     props.data,
     getNodeMenuToAdd,
-    getLinkMenuToAdd
+    getLinkMenuToAdd,
+    handleGroupVisibility
   ]);
 
   usePluginMethods(ref, {
@@ -479,6 +510,7 @@ const Flow = (props, ref) => {
       // Subscribe to flow validations
       mainInterface.graph.onFlowValidated.subscribe(evtData => {
         const persistentWarns = evtData.warnings.filter(el => el.isPersistent);
+        groupsVisibilities();
         onFlowValidated({ warnings: persistentWarns });
       });
 
@@ -643,13 +675,14 @@ const Flow = (props, ref) => {
         .subscribe(evtData => console.log("onLinkErrorMouseOver", evtData));
     },
     [
+      call,
+      alert,
+      groupsVisibilities,
       onNodeSelected,
       onFlowValidated,
       onLinkSelected,
       handleContextClose,
-      openDoc,
-      call,
-      alert
+      openDoc
     ]
   );
 

@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import {
   Collapse,
@@ -31,7 +32,14 @@ const ACTIVE_ITEM = {
   groups: 3
 };
 
-const Menu = ({ name, model, details: detailsProp, editable, call }) => {
+const Menu = ({
+  name,
+  model,
+  details: detailsProp,
+  editable,
+  call,
+  handleGroupVisibility
+}) => {
   // State hook
   const [activeItem, setActiveItem] = React.useState(0);
   const { data } = useDataSubscriber({
@@ -328,6 +336,7 @@ const Menu = ({ name, model, details: detailsProp, editable, call }) => {
           model={model}
           editGroupName={editGroupName}
           editable={editable}
+          handleGroupVisibility={handleGroupVisibility}
         />
       ))
     ) : (
@@ -335,7 +344,14 @@ const Menu = ({ name, model, details: detailsProp, editable, call }) => {
         No Groups
       </Typography>
     );
-  }, [classes, data.groups, model, editable, editGroupName]);
+  }, [
+    classes,
+    data.groups,
+    model,
+    editable,
+    editGroupName,
+    handleGroupVisibility
+  ]);
 
   return (
     <Typography component="div">
@@ -418,6 +434,15 @@ const Menu = ({ name, model, details: detailsProp, editable, call }) => {
       </List>
     </Typography>
   );
+};
+
+Menu.propTypes = {
+  name: PropTypes.string.isRequired,
+  model: PropTypes.object.isRequired,
+  details: PropTypes.object.isRequired,
+  call: PropTypes.func.isRequired,
+  handleGroupVisibility: PropTypes.func.isRequired,
+  editable: PropTypes.bool
 };
 
 export default Menu;

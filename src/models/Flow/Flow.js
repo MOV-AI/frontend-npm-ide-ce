@@ -171,11 +171,11 @@ class Flow extends Model {
    * @param {String} groupId : The id of the group to toggle the visibility
    * @returns {Flow}
    */
-  toggleGroupVisibility(groupId) {
+  toggleGroupVisibility(groupId, enabled) {
     const thisGroup = this.getGroup(groupId);
     this.groups.updateItem({
       name: groupId,
-      content: { ...thisGroup, enabled: !thisGroup.enabled }
+      content: { ...thisGroup, enabled }
     });
     return this;
   }

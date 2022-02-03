@@ -12,7 +12,8 @@ const GroupItem = ({
   item: { id, name, enabled },
   editable,
   model,
-  editGroupName
+  editGroupName,
+  handleGroupVisibility
 }) => {
   const classes = groupItemStyles();
   const { t } = useTranslation();
@@ -27,8 +28,9 @@ const GroupItem = ({
    * Handler to Toggle Group visibility
    */
   const handleGroupActive = useCallback(() => {
-    model.current.toggleGroupVisibility(id);
-  }, [model, id]);
+    handleGroupVisibility(id, enabled);
+    model.current.toggleGroupVisibility(id, !enabled);
+  }, [model, enabled, id, handleGroupVisibility]);
 
   /**
    * Handler to Edit this Group (right now we're only able to edit the name)
