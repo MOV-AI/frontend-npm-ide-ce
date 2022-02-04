@@ -546,7 +546,7 @@ const Flow = (props, ref) => {
       mainInterface.mode.addNode.onClick.subscribe(() => {
         call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
           scope: "node",
-          // TODO add validation here ROS regex and exists?
+          // TODO add validation here ROS regex and exists? https://movai.atlassian.net/browse/FP-1487
           onSubmit: newName => getMainInterface().addNode(newName)
         });
       });
@@ -554,7 +554,7 @@ const Flow = (props, ref) => {
       mainInterface.mode.addFlow.onClick.subscribe(() => {
         call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
           scope: "sub-flow",
-          // TODO add validation here ROS regex and exists?
+          // TODO add validation here ROS regex and exists? https://movai.atlassian.net/browse/FP-1487
           onSubmit: newName => getMainInterface().addFlow(newName)
         });
       });
