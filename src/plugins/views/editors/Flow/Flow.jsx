@@ -184,23 +184,19 @@ const Flow = (props, ref) => {
       if (!invalidContainerParams || !invalidContainerParams.length) return;
       // Set title and message for alert
       const title = t("Sub-flows with invalid parameters");
-      let message =
-        t(
-          "The parameters of the sub-flow should come from the flow template."
-        ) +
-        t(
-          "The following sub-flows contains custom parameters that are not present on its template:\n"
-        );
+      let message = `${t(
+        "The parameters of the sub-flow should come from the flow template."
+      )} ${t(
+        "The following sub-flows contains custom parameters that are not present on its template:"
+      )}\n`;
       // Add containers name to message
       invalidContainerParams.forEach(containerId => {
-        message += "\n  " + containerId;
+        message += `\n ${containerId}`;
       });
       // Add how to fix information
-      message +=
-        "\n\n" +
-        t(
-          "To fix it, you can either remove the custom parameter on the sub-flow or add the parameter on the template."
-        );
+      message += `\n\n${t(
+        "To fix it, you can either remove the custom parameter on the sub-flow or add the parameter on the template."
+      )}`;
 
       // Show alert dialog
       alert({ message, title, location: "modal" });
