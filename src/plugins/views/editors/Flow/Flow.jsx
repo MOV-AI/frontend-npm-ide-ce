@@ -43,6 +43,7 @@ const Flow = (props, ref) => {
     data,
     alert,
     confirmationAlert,
+    saveDocument,
     on
   } = props;
   // State Hooks
@@ -177,6 +178,50 @@ const Flow = (props, ref) => {
       });
     },
     [call]
+  );
+
+  /**
+   * @private Used to remove invalid links
+   * @param {*} callback
+   */
+  const deleteInvalidLinks = useCallback(
+    (links, callback) => {
+      links.forEach(link => instance.current.deleteLink(link.id));
+      // Save document and call graph callback
+      saveDocument();
+      callback && callback();
+    },
+    [instance, saveDocument]
+  );
+
+  /**
+   * @private Show alert dialog for containers with invalid parameters
+   * @param {*} invalidContainersParam
+   */
+  const invalidContainersParamAlert = useCallback(
+    invalidContainerParams => {
+      // Don't show dialog if no invalid params found
+      if (!invalidContainerParams || !invalidContainerParams.length) return;
+      // Set title and message for alert
+      const title = t("Sub-flows with invalid parameters");
+      let message = `${t(
+        "The parameters of the sub-flow should come from the flow template."
+      )} ${t(
+        "The following sub-flows contains custom parameters that are not present on its template:"
+      )}\n`;
+      // Add containers name to message
+      invalidContainerParams.forEach(containerId => {
+        message += `\n ${containerId}`;
+      });
+      // Add how to fix information
+      message += `\n\n${t(
+        "To fix it, you can either remove the custom parameter on the sub-flow or add the parameter on the template."
+      )}`;
+
+      // Show alert dialog
+      alert({ message, title, location: "modal" });
+    },
+    [t, alert]
   );
 
   //========================================================================================
@@ -480,10 +525,34 @@ const Flow = (props, ref) => {
     [call, LINK_MENU_NAME, addLinkMenu]
   );
 
+  /**
+   * Close context menu
+   */
   const handleContextClose = useCallback(() => {
     setContextMenuOptions(null);
     getMainInterface().setMode(EVT_NAMES.DEFAULT);
   }, []);
+
+  /**
+   * On Links validation
+   * @param {{invalidLinks: Array, callback: Function}} eventData
+   */
+  const onLinksValidated = useCallback(
+    eventData => {
+      const { invalidLinks, callback } = eventData;
+      if (invalidLinks.length) {
+        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
+          submitText: t("Fix"),
+          title: t("Invalid Links Found"),
+          onSubmit: () => deleteInvalidLinks(invalidLinks, callback),
+          message: t(
+            "Do you want to fix this? This will remove all invalid links and save the flow"
+          )
+        });
+      }
+    },
+    [call, t, deleteInvalidLinks]
+  );
 
   /**
    * Subscribe to mainInterface and canvas events
@@ -512,7 +581,11 @@ const Flow = (props, ref) => {
         const persistentWarns = evtData.warnings.filter(el => el.isPersistent);
         groupsVisibilities();
         onFlowValidated({ warnings: persistentWarns });
+        invalidContainersParamAlert(evtData.invalidContainersParam);
       });
+
+      // Subscribe to invalid links validation
+      mainInterface.graph.onLinksValidated.subscribe(onLinksValidated);
 
       // When enter default mode remove other node/sub-flow bookmarks
       mainInterface.mode.default.onEnter.subscribe(() => {
@@ -681,7 +754,9 @@ const Flow = (props, ref) => {
       onNodeSelected,
       onFlowValidated,
       onLinkSelected,
+      onLinksValidated,
       handleContextClose,
+      invalidContainersParamAlert,
       openDoc
     ]
   );

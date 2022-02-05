@@ -37,6 +37,7 @@ export default class Graph {
   warningsVisibility = true;
   validator = new GraphValidator(this);
   onFlowValidated = new Subject();
+  onLinksValidated = new Subject();
   invalidLinks = [];
 
   //========================================================================================
@@ -117,24 +118,19 @@ export default class Graph {
     Object.entries(links).forEach(([id, value]) => {
       this.addLink({ id, ...value });
     });
-    this.removeLinksModal();
-
+    // Emits result of links validation
+    this.onLinksValidated.next({
+      invalidLinks: this.invalidLinks,
+      callback: this.clearInvalidLinks
+    });
     return this;
   }
 
   /**
-   * @private
+   * @private Clear invalid links property
    */
-  removeLinksModal = () => {
-    // TODO: implement
-    return this;
-  };
-
-  /**
-   * @private
-   */
-  getRemoveInvalidLinks = () => () => {
-    // TODO: implement
+  clearInvalidLinks = () => () => {
+    this.invalidLinks = [];
   };
 
   /**
@@ -267,7 +263,12 @@ export default class Graph {
     this.links.forEach(value => (value.transparent = false));
   };
 
-  loadData(flow) {
+  /**
+   * Load Flow Data
+   * @param {*} flow : Data from DB
+   * @returns {Promise} Promise to be resolved after all nodes, containers and links are loaded
+   */
+  async loadData(flow) {
     this.destroy();
 
     return Promise.allSettled([
@@ -285,10 +286,8 @@ export default class Graph {
    */
   validateFlow = () => {
     const { warnings, invalidContainersParam } = this.validator.validateFlow();
-    this.onFlowValidated.next({ warnings: warnings });
+    this.onFlowValidated.next({ warnings: warnings, invalidContainersParam });
     this.warnings = warnings;
-    // Validate sub-flows parameters
-    this.invalidContainerParamModal(invalidContainersParam);
   };
 
   /**
@@ -457,6 +456,9 @@ export default class Graph {
     });
   };
 
+  /**
+   * Set all temporary warnings as permanents
+   */
   setPermanentWarnings = () => {
     this.warnings = this.warnings.map(wn => ({ ...wn, isPersistent: true }));
     this.onFlowValidated.next({ warnings: this.warnings });

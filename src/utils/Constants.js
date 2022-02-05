@@ -26,8 +26,18 @@ export const TOPICS = {
 export const PLUGINS = {
   DOC_MANAGER: {
     NAME: "docManager",
-    CALL: { READ: "read", BROADCAST: "broadcast" },
-    ON: { FLOW_EDITOR: "flowEditor" }
+    CALL: {
+      READ: "read",
+      BROADCAST: "broadcast"
+    },
+    ON: {
+      FLOW_EDITOR: "flowEditor",
+      UPDATE_DOC_DIRTY: "updateDocDirty",
+      DELETE_DOC: "deleteDoc",
+      UPDATE_DOCS: "updateDocs",
+      LOAD_DOCS: "loadDocs",
+      SAVE_DOC: "saveDoc"
+    }
   },
   TABS: { NAME: "tabs", CALL: { OPEN_EDITOR: "openEditor" } },
   RIGHT_DRAWER: {
@@ -43,7 +53,11 @@ export const PLUGINS = {
   },
   DIALOG: {
     NAME: "dialog",
-    CALL: { NEW_DOC: "newDocument", CONFIRMATION: "confirmation" }
+    CALL: {
+      NEW_DOC: "newDocument",
+      CONFIRMATION: "confirmation",
+      ALERT: "alert"
+    }
   },
   FLOW_EXPLORER: {
     NAME: "FlowExplorer",
