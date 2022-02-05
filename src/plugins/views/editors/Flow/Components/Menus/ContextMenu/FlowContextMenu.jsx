@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import ToggleOnIcon from "@material-ui/icons/ToggleOn";
+import FileCopyIcon from "@material-ui/icons/FileCopy";
 import { ContextMenu, DEFAULT_FUNCTION, MODE } from ".";
 
 const FlowContextMenu = props => {
@@ -11,6 +12,8 @@ const FlowContextMenu = props => {
     mode,
     anchorPosition,
     onClose,
+    onNodeCopy,
+    onCanvasPaste,
     onNodeDelete,
     onLinkDelete,
     onSubFlowDelete,
@@ -24,12 +27,22 @@ const FlowContextMenu = props => {
 
   const getNodeOptions = [
     {
+      label: t("Copy"),
+      icon: <FileCopyIcon />,
+      onClick: () => handleOptionsClick(onNodeCopy)
+    },
+    {
       label: t("Delete"),
       icon: <DeleteOutlineIcon />,
       onClick: () => handleOptionsClick(onNodeDelete)
     }
   ];
   const getSubFlowOptions = [
+    {
+      label: t("Copy"),
+      icon: <FileCopyIcon />,
+      onClick: () => handleOptionsClick(onNodeCopy)
+    },
     {
       label: t("Delete"),
       icon: <DeleteOutlineIcon />,
@@ -52,12 +65,20 @@ const FlowContextMenu = props => {
     }
   ];
 
+  const getCanvasOptions = [
+    {
+      label: t("Paste"),
+      onClick: () => handleOptionsClick(onCanvasPaste)
+    }
+  ];
+
   const getItems = () => {
     const renderMap = {
       [MODE.NODE]: getNodeOptions,
       [MODE.LINK]: getLinkOptions,
       [MODE.SUBFLOW]: getSubFlowOptions,
-      [MODE.PORT]: getPortOptions
+      [MODE.PORT]: getPortOptions,
+      [MODE.CANVAS]: getCanvasOptions
     };
 
     return renderMap[mode];
@@ -76,6 +97,8 @@ FlowContextMenu.defaultProps = {
   mode: MODE.NODE,
   anchorPosition: null,
   onClose: () => DEFAULT_FUNCTION("onClose"),
+  onNodeCopy: () => DEFAULT_FUNCTION("onNodeCopy"),
+  onCanvasPaste: () => DEFAULT_FUNCTION("onCanvasPaste"),
   onNodeDelete: () => DEFAULT_FUNCTION("onNodeDelete"),
   onLinkDelete: () => DEFAULT_FUNCTION("onLinkDelete"),
   onSubFlowDelete: () => DEFAULT_FUNCTION("onSubFlowDelete"),
@@ -86,6 +109,8 @@ FlowContextMenu.propTypes = {
   mode: PropTypes.string,
   anchorPosition: PropTypes.object,
   onClose: PropTypes.func,
+  onNodeCopy: PropTypes.func,
+  onCanvasPaste: PropTypes.func,
   onNodeDelete: PropTypes.func,
   onLinkDelete: PropTypes.func,
   onSubFlowDelete: PropTypes.func,

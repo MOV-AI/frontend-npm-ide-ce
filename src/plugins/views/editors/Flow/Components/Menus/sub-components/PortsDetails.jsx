@@ -59,15 +59,20 @@ const PortsDetails = props => {
    */
   const getInternalData = useCallback(
     portsData => {
-      return portsData.map(port => {
+      return portsData.map((port, portIndex) => {
         return (
-          <Typography component="div" className={classes.portRow}>
+          <Typography
+            key={`port-${portIndex}`}
+            component="div"
+            className={classes.portRow}
+          >
             <Typography component="div" className={classes.portName}>
               {port.name}
             </Typography>
-            {port.value?.map(callback => {
+            {port.value?.map((callback, portValueIndex) => {
               return (
                 <Link
+                  key={`portValue-${portValueIndex}`}
                   className={classes.portCallbackLink}
                   component="button"
                   onClick={event => {

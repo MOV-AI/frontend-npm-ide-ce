@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { filter } from "rxjs/operators";
 import { makeStyles } from "@material-ui/core/styles";
@@ -8,6 +8,8 @@ import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { FLOW_EXPLORER_PROFILE, PLUGINS } from "../../../../utils/Constants";
+import Clipboard, { KEYS } from "./Utils/Clipboard";
+import Vec2 from "./Utils/Vec2";
 import BaseFlow from "./Views/BaseFlow";
 import Menu from "./Components/Menus/Menu";
 import NodeMenu from "./Components/Menus/NodeMenu";
@@ -53,16 +55,16 @@ const Flow = (props, ref) => {
   const [warnings, setWarnings] = useState([]);
   const [warningsVisibility, setWarningsVisibility] = useState(true);
   const [viewMode, setViewMode] = useState(FLOW_VIEW_MODE.default);
+  const [tooltipConfig, setTooltipConfig] = useState(null);
   const [contextMenuOptions, setContextMenuOptions] = useState({
     open: false,
     position: { x: 0, y: 0 }
   });
 
-  const [tooltipConfig, setTooltipConfig] = useState(null);
-
   // Other Hooks
   const classes = useStyles();
   const { t } = useTranslation();
+  const clipboard = useMemo(() => new Clipboard(), []);
   // Refs
   const baseFlowRef = React.useRef();
   const mainInterfaceRef = React.useRef();
@@ -202,6 +204,28 @@ const Flow = (props, ref) => {
       alert({ message, title, location: "modal" });
     },
     [t, alert]
+  );
+
+  /**
+   * Open Dialog to Enter Paste Node name
+   * @param {*} position : x and y position in canvas
+   * @param {*} nodeToCopy : Node data
+   * @returns {Promise} Resolved only after submit or cancel dialog
+   */
+  const pasteNodeDialog = useCallback(
+    (position, nodeToCopy) => {
+      const node = nodeToCopy.node;
+      return new Promise(resolve => {
+        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, {
+          title: `${t("Paste")} ${node.model}`,
+          value: `${node.id}_copy`,
+          onSubmit: newName =>
+            getMainInterface().pasteNode(newName, node, position),
+          onClose: () => resolve()
+        });
+      });
+    },
+    [call, t]
   );
 
   //========================================================================================
@@ -578,9 +602,18 @@ const Flow = (props, ref) => {
         })
       );
 
+      // Subscribe to canvas context menu
       mainInterface.mode.canvasCtxMenu.onEnter.subscribe(evtData => {
-        console.log("onCanvasCtxMenu", evtData);
-        mainInterface.setMode(EVT_NAMES.DEFAULT);
+        const anchorPosition = {
+          left: evtData.event.clientX,
+          top: evtData.event.clientY
+        };
+        setContextMenuOptions({
+          args: evtData.position,
+          mode: FLOW_CONTEXT_MODE.CANVAS,
+          anchorPosition,
+          onClose: handleContextClose
+        });
       });
 
       // subscribe to port context menu event
@@ -690,6 +723,10 @@ const Flow = (props, ref) => {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Handle Delete : Show confirmation dialog before performing delete action
+   * @param {{nodeId: string, callback: function}} data
+   */
   const handleDelete = useCallback(
     ({ nodeId, callback }) => {
       call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
@@ -702,6 +739,53 @@ const Flow = (props, ref) => {
     [t, call]
   );
 
+  /**
+   * Handle copy node
+   */
+  const handleCopyNode = useCallback(() => {
+    const { args: node } = contextMenuOptions;
+    const selectedNodesSet = new Set(
+      [node].concat(getMainInterface().selectedNodes)
+    );
+    const selectedNodes = Array.from(selectedNodesSet);
+    const nodesPos = selectedNodes.map(n =>
+      Vec2.of(n.center.xCenter, n.center.yCenter)
+    );
+    let center = nodesPos.reduce((e, x) => e.add(x), Vec2.ZERO);
+    center = center.scale(1 / selectedNodes.length);
+    // Nodes to copy
+    const nodesToCopy = {
+      nodes: selectedNodes.map(n => n.data),
+      flow: data.id,
+      nodesPosFromCenter: nodesPos.map(pos => pos.sub(center))
+    };
+    // Write nodes to copy to clipboard
+    clipboard.write(KEYS.NODES_TO_COPY, nodesToCopy);
+  }, [clipboard, contextMenuOptions, data.id]);
+
+  /**
+   * Handle paste nodes in canvas
+   */
+  const handlePasteNodes = useCallback(async () => {
+    const { args: position } = contextMenuOptions;
+    const nodesToCopy = clipboard.read(KEYS.NODES_TO_COPY);
+    if (!nodesToCopy) return;
+
+    for (let i = 0; i < nodesToCopy.nodes.length; i++) {
+      const node = nodesToCopy.nodes[i];
+      const nodesPosFromCenter = nodesToCopy.nodesPosFromCenter || [Vec2.ZERO];
+      const newPos = Vec2.of(position.x, position.y).add(nodesPosFromCenter[i]);
+      // Open dialog for each node to copy
+      await pasteNodeDialog(newPos.toObject(), {
+        node: node,
+        flow: nodesToCopy.flow
+      });
+    }
+  }, [clipboard, contextMenuOptions, pasteNodeDialog]);
+
+  /**
+   * Handle delete node
+   */
   const handleDeleteNode = useCallback(() => {
     const { args: node } = contextMenuOptions;
     const callback = () => getMainInterface().deleteNodeInst(node.data.id);
@@ -710,6 +794,9 @@ const Flow = (props, ref) => {
     setContextMenuOptions(prevValue => ({ ...prevValue, anchorEl: null }));
   }, [handleDelete, contextMenuOptions]);
 
+  /**
+   * Handle delete sub-flow
+   */
   const handleDeleteSubFlow = useCallback(() => {
     const { args: node } = contextMenuOptions;
     const callback = () => getMainInterface().deleteSubFlow(node.data.id);
@@ -717,6 +804,9 @@ const Flow = (props, ref) => {
     handleDelete({ nodeId: node.data.id, callback });
   }, [contextMenuOptions, handleDelete]);
 
+  /**
+   * Handle delete link
+   */
   const handleDeleteLink = useCallback(() => {
     const { args: link } = contextMenuOptions;
     getMainInterface().deleteLink(link.id);
@@ -775,6 +865,8 @@ const Flow = (props, ref) => {
       {contextMenuOptions && (
         <FlowContextMenu
           {...contextMenuOptions}
+          onNodeCopy={handleCopyNode}
+          onCanvasPaste={handlePasteNodes}
           onNodeDelete={handleDeleteNode}
           onLinkDelete={handleDeleteLink}
           onSubFlowDelete={handleDeleteSubFlow}
