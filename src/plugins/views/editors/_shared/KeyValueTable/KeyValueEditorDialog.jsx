@@ -200,7 +200,7 @@ const KeyValueEditorDialog = props => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t("Cancel")}</Button>
-        <Button color="primary" onClick={onSave}>
+        <Button color="primary" onClick={onSave} disabled={validation.error}>
           {t("Save")}
         </Button>
       </DialogActions>

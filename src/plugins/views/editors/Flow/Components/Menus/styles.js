@@ -37,6 +37,7 @@ const parameters = {
 
 const menuStyles = makeStyles(theme => ({
   ...common,
+  ...parameters,
   description: {
     whiteSpace: "normal !important",
     textAlign: "justify"

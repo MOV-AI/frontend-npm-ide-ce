@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
@@ -40,10 +40,10 @@ const FormDialog = props => {
     maxLength
   } = props;
   // State hook
-  const [open, setOpen] = React.useState(true);
-  const [isLoading, setLoading] = React.useState(false);
-  const [value, setValue] = React.useState(defaultValue);
-  const [validation, setValidation] = React.useState({
+  const [open, setOpen] = useState(true);
+  const [isLoading, setLoading] = useState(false);
+  const [value, setValue] = useState(defaultValue);
+  const [validation, setValidation] = useState({
     error: false,
     message: ""
   });
@@ -51,6 +51,21 @@ const FormDialog = props => {
   const classes = useStyles();
   // Translation hook
   const { t } = useTranslation();
+  // Ref
+  const inputRef = useRef();
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    React Lifecycle                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  // Trigger input focus in first render
+  useEffect(() => {
+    setTimeout(() => {
+      inputRef.current?.querySelector("input")?.focus();
+    });
+  }, []);
 
   //========================================================================================
   /*                                                                                      *
@@ -167,6 +182,7 @@ const FormDialog = props => {
           </div>
         ) : (
           <TextField
+            ref={inputRef}
             autoFocus={true}
             error={validation.error}
             helperText={validation.message}

@@ -14,11 +14,9 @@ import EditIcon from "@material-ui/icons/Edit";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import Add from "@material-ui/icons/Add";
+import { Utils } from "@mov-ai/mov-fe-lib-core";
 import useDataSubscriber from "../../../../../DocManager/useDataSubscriber";
-import {
-  DEFAULT_KEY_VALUE_DATA,
-  DOC_VALID_NAMES
-} from "../../../../../../utils/Constants";
+import { DEFAULT_KEY_VALUE_DATA } from "../../../../../../utils/Constants";
 import { validateDocumentName } from "../../../../../../utils/Utils";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
 import DetailsMenu from "../../../_shared/DetailsMenu/DetailsMenu";
@@ -130,7 +128,8 @@ const Menu = ({
 
       try {
         if (!name) throw new Error(`Name is mandatory`);
-        else if (!DOC_VALID_NAMES.test(name)) throw new Error(`Invalid Name`);
+        else if (!Utils.validateEntityName(name, []))
+          throw new Error(`Invalid Name`);
 
         // Validate against repeated names
         if (oldName !== name && model.current.getParameter(name)) {

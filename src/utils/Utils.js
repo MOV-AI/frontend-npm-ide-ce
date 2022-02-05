@@ -3,9 +3,8 @@ import BuildIcon from "@material-ui/icons/Build";
 import CodeIcon from "@material-ui/icons/Code";
 import DescriptionIcon from "@material-ui/icons/Description";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
+import { Utils } from "@mov-ai/mov-fe-lib-core";
 import movaiIcon from "../plugins/views/editors/_shared/Loader/movai_red.svg";
-
-import { DOC_VALID_NAMES } from "./Constants";
 
 /**
  * Generate random ID
@@ -90,9 +89,13 @@ export function getNameFromURL(url) {
   return url?.substring(url.lastIndexOf("/") + 1);
 }
 
+/**
+ * Validate document name and throw error if validation doesn't pass
+ * @param {string} name : Document name
+ * @returns {boolean}
+ */
 export function validateDocumentName(name) {
-  const validation = DOC_VALID_NAMES;
-  if (!validation.test(name)) {
+  if (!Utils.validateEntityName(name)) {
     throw new Error("Invalid name");
   } else {
     return true;

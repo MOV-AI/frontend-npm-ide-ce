@@ -127,7 +127,7 @@ class Flow extends Model {
 
   /**
    * Returns the groups manager
-   * @returns {GroupManager}
+   * @returns {IdBasedManager}
    */
   getGroups() {
     return this.groups;
@@ -455,18 +455,20 @@ class Flow extends Model {
   serializeToDB() {
     const { name, description, details } = this.serialize();
 
+    // TODO method is just a temporary fix. Depends on Backend Analysis of this issue
+    const getValueToSave = manager => {
+      return manager.hasItems() ? manager.serializeToDB() : undefined;
+    };
+
     return {
       Label: name,
       Description: description,
       LastUpdate: details,
-      // TODO hasItems is just a temporary fix. Depends on Backend Analysis of this issue
       NodeInst: this.getNodeInstances().serializeToDB(),
       Container: this.getSubFlows().serializeToDB(),
-      ExposedPorts: this.getExposedPorts().serializeToDB(),
-      Links: this.getLinks().serializeToDB(),
-      Layers: this.getGroups().hasItems()
-        ? this.getGroups().serializeToDB()
-        : null,
+      ExposedPorts: getValueToSave(this.getExposedPorts()),
+      Links: getValueToSave(this.getLinks()),
+      Layers: getValueToSave(this.getGroups()),
       Parameter: this.getParameters().serializeToDB()
     };
   }

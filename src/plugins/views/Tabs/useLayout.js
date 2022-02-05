@@ -260,7 +260,7 @@ const useLayout = (props, dockRef) => {
       const { instance: model, value: isDirty } = data;
       const tabId = model.getUrl();
       const currentTabData = tabsById.current.get(tabId);
-      const currentDirtyState = Boolean(currentTabData.isDirty);
+      const currentDirtyState = Boolean(currentTabData?.isDirty);
       // Doesn't trigger update if dirty state didn't change
       if (!currentTabData || currentDirtyState === isDirty) return;
       // Set new dirty state

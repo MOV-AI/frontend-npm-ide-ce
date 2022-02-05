@@ -56,6 +56,7 @@ export const PLUGINS = {
     CALL: {
       NEW_DOC: "newDocument",
       CONFIRMATION: "confirmation",
+      FORM_DIALOG: "formDialog",
       ALERT: "alert"
     }
   },
@@ -72,8 +73,6 @@ export const DEFAULT_KEY_VALUE_DATA = {
   type: "any",
   value: ""
 };
-
-export const DOC_VALID_NAMES = new RegExp(/^[\w][0-9A-Za-z-]*(_[0-9A-Za-z-]+)*[_]?$/);
 
 export const ROS_VALID_NAMES = new RegExp(
   /(?!.*__.*)^[a-zA-Z~/]{1}?[a-zA-Z0-9_/]*$/

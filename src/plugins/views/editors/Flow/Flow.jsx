@@ -617,16 +617,24 @@ const Flow = (props, ref) => {
       });
 
       mainInterface.mode.addNode.onClick.subscribe(() => {
-        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
-          scope: "node",
+        const nodeName = getMainInterface().mode.current.props.node.data.name;
+        // Open dialog
+        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, {
+          title: t("Add node"),
+          submitText: t("Add"),
+          value: nodeName,
           // TODO add validation here ROS regex and exists? https://movai.atlassian.net/browse/FP-1487
           onSubmit: newName => getMainInterface().addNode(newName)
         });
       });
 
       mainInterface.mode.addFlow.onClick.subscribe(() => {
-        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
-          scope: "sub-flow",
+        const flowName = getMainInterface().mode.current.props.node.data.name;
+        // Open dialog
+        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, {
+          title: t("Add sub-flow"),
+          submitText: t("Add"),
+          value: flowName,
           // TODO add validation here ROS regex and exists? https://movai.atlassian.net/browse/FP-1487
           onSubmit: newName => getMainInterface().addFlow(newName)
         });
@@ -750,6 +758,7 @@ const Flow = (props, ref) => {
     [
       call,
       alert,
+      t,
       groupsVisibilities,
       onNodeSelected,
       onFlowValidated,
