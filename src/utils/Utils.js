@@ -42,7 +42,7 @@ export const getTabIconColor = scope => {
  * @param {string} scope : Document type (Callback, Configuration, ...)
  * @returns {component} Icon by document type
  */
-export const getIconByScope = (scope = "Default", style) => {
+export const getIconByScope = (scope = "Default", style = {}) => {
   const color = getTabIconColor(scope);
   const icon = {
     Callback: <CodeIcon style={{ color, ...style }} />,

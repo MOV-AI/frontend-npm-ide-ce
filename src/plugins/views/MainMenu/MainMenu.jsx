@@ -29,20 +29,21 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const MainMenu = props => {
-  const { call, emit } = props;
+  const { call } = props;
   // State hooks
   const [docTypes, setDocTypes] = useState([]);
   // Other hooks
   const classes = useStyles();
   const theme = useTheme();
   const { t } = useTranslation();
+  // Refs
   const MENUS = useRef([
     {
       name: HOMETAB_PROFILE.name,
-      icon: props => <HomeIcon {...props}></HomeIcon>,
-      title: t("Reopen Welcome Tab"),
+      icon: _props => <HomeIcon {..._props}></HomeIcon>,
+      title: t("Get Started"),
       isActive: true,
-      getOnClick: (call, emit) => {
+      getOnClick: () => {
         getHomeTab().then(homeTab => {
           call("tabs", "open", homeTab);
         });
@@ -50,48 +51,34 @@ const MainMenu = props => {
     },
     {
       name: "explorer",
-      icon: props => <TextSnippetIcon {...props}></TextSnippetIcon>,
+      icon: _props => <TextSnippetIcon {..._props}></TextSnippetIcon>,
       title: "Explorer",
       isActive: true,
-      getOnClick: (call, emit) => {
+      getOnClick: () => {
         // Toggle left drawer
         call("leftDrawer", "toggle");
       }
     }
-    // {
-    //   name: "fleet",
-    //   icon: props => <AndroidIcon {...props}></AndroidIcon>,
-    //   title: "Fleet",
-    //   getOnClick: (call, emit) => () => {
-    //     // TODO: Open Fleet tab
-    //     console.log("debug open Fleet");
-    //   }
-    // },
-    // {
-    //   name: "debug",
-    //   icon: props => <BugReportIcon {...props}></BugReportIcon>,
-    //   title: "Debug",
-    //   getOnClick: (call, emit) => () => {
-    //     // TODO: Open Debug options
-    //     console.log("debug open Debug");
-    //   }
-    // },
-    // {
-    //   name: "diff",
-    //   icon: props => <CompareIcon {...props}></CompareIcon>,
-    //   title: "Diff tool",
-    //   getOnClick: (call, emit) => () => {
-    //     // TODO: Open DiffTool
-    //     console.log("debug open Diff Tool");
-    //   }
-    // }
   ]);
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                    React Lifecycle                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  // To run when component is initiated
   useEffect(() => {
     call("docManager", "getDocTypes").then(_docTypes => {
       setDocTypes(_docTypes);
     });
   }, [call]);
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                     Handle Events                                    *
+   *                                                                                      */
+  //========================================================================================
 
   /**
    * Handle click in home icon
@@ -99,6 +86,12 @@ const MainMenu = props => {
   const handleHomeIconClick = () => {
     window.location.href = "/";
   };
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Render                                        *
+   *                                                                                      */
+  //========================================================================================
 
   return (
     <MainContext.Consumer>
@@ -144,7 +137,7 @@ const MainMenu = props => {
             <Tooltip title={menu.title} placement="right" arrow>
               {menu.icon({
                 className: classes.icon,
-                onClick: () => menu.getOnClick(call, emit)
+                onClick: () => menu.getOnClick()
               })}
             </Tooltip>
           ))}
