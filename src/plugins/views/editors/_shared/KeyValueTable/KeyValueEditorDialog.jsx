@@ -20,6 +20,11 @@ import {
 import { withTheme } from "../../../../../decorators/withTheme";
 import { DialogTitle } from "../../../../Dialog/components/AppDialog/AppDialog";
 
+const COMPONENTS = {
+  NAME: "name",
+  VALUE: "value"
+};
+
 const useStyles = makeStyles(theme => ({
   input: { fontSize: "13px" },
   marginTop: { marginTop: "10px" },
@@ -40,8 +45,8 @@ const KeyValueEditorDialog = props => {
   const {
     onClose,
     onSubmit,
-    validateNameOnChange,
-    validateValueOnChange,
+    nameValidation,
+    valueValidation,
     validate,
     title,
     isNew,
@@ -85,10 +90,10 @@ const KeyValueEditorDialog = props => {
    */
   const onChangeName = evt => {
     const name = evt?.target?.value;
-    if (validateNameOnChange && validate) {
-      validate({ name }).then(res => {
+    if (nameValidation && validate) {
+      nameValidation({ name }).then(res => {
         setValidation({
-          component: "name",
+          component: COMPONENTS.NAME,
           error: !res.result,
           message: res.error
         });
@@ -116,10 +121,10 @@ const KeyValueEditorDialog = props => {
    * @param {string} value : Code editor value
    */
   const onChangeValue = value => {
-    if (validateValueOnChange && validate) {
+    if (valueValidation && validate) {
       validate({ value }).then(res => {
         setValidation({
-          component: "value",
+          component: COMPONENTS.VALUE,
           error: !res.result,
           message: res.error
         });
@@ -161,8 +166,10 @@ const KeyValueEditorDialog = props => {
         <Typography component="div" className={classes.container}>
           <TextField
             label="Name *"
-            error={validation.component === "name" && validation.error}
-            helperText={validation.component === "name" && validation.message}
+            error={validation.component === COMPONENTS.NAME && validation.error}
+            helperText={
+              validation.component === COMPONENTS.NAME && validation.message
+            }
             value={data.name}
             autoFocus={isNew}
             disabled={disableName}
@@ -187,6 +194,10 @@ const KeyValueEditorDialog = props => {
             {renderValueEditor(data.value, {
               isNew,
               onChange: onChangeValue,
+              error:
+                validation.component === COMPONENTS.VALUE && validation.error,
+              helperText:
+                validation.component === COMPONENTS.VALUE && validation.message,
               disabled: disabled
             })}
           </FormControl>
@@ -200,6 +211,7 @@ const KeyValueEditorDialog = props => {
               <AccordionDetails>
                 {renderValueEditor(data.defaultValue, {
                   isNew,
+                  isDefault: true,
                   onChange: onChangeValue,
                   disabled: true
                 })}

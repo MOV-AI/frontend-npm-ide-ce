@@ -171,7 +171,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
       return getEditComponent(data.type)(
         {
           ...options,
-          rowData: { value: defaultValue || data.value },
+          rowData: { value: options.isDefault ? defaultValue : data.value },
           onChange: _value => {
             setData(prevState => {
               return { ...prevState, value: _value };

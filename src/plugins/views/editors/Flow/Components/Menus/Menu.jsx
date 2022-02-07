@@ -154,16 +154,12 @@ const Menu = ({
    * @param {Object} data : Data to Save
    */
   const handleSubmitParameter = useCallback(
-    data => {
-      const { name } = data.newData;
-      if (data.oldName === "") {
-        model.current.addParameter(name, data.newData);
+    (oldName, data) => {
+      const { name } = data;
+      if (oldName === "") {
+        model.current.addParameter(name, data);
       } else {
-        model.current.updateKeyValueItem(
-          "parameters",
-          data.newData,
-          data.oldName
-        );
+        model.current.updateKeyValueItem("parameters", data, oldName);
       }
     },
     [model]
@@ -181,9 +177,8 @@ const Menu = ({
         "dialog",
         "customDialog",
         {
-          customValidation: newData => validateParamName(obj.name, newData),
-          onSubmit: handleSubmitParameter,
-          validateNameOnChange: true,
+          onSubmit: data => handleSubmitParameter(obj.name, data),
+          nameValidation: newData => validateParamName(obj.name, newData),
           renderType: true,
           title: t("Parameter"),
           data: obj,
