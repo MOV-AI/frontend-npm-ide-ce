@@ -1,10 +1,15 @@
-import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef
+} from "react";
 import { Tooltip } from "@material-ui/core";
 import { HOMETAB_PROFILE, DEFAULT_LAYOUT } from "../../../utils/Constants";
-import { getIconByScope } from "../../../utils/Utils";
+import { getIconByScope, getHomeTab } from "../../../utils/Utils";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Workspace from "../../../utils/Workspace";
-import HomeTab from "../HomeTab/HomeTab";
 import TOPICS from "./topics";
 
 const useLayout = (props, dockRef) => {
@@ -91,7 +96,6 @@ const useLayout = (props, dockRef) => {
    * @returns {Element} Tab element to render
    */
   const _getCustomTab = useCallback((docData, onCloseTab, isDirty) => {
-
     return (
       <Tooltip title={docData.tabTitle || docData.id}>
         <div onAuxClick={() => onCloseTab(docData.id)}>
@@ -302,31 +306,6 @@ const useLayout = (props, dockRef) => {
     [props, _getCustomTab, _closeTab]
   );
 
-  /**
-   * Installs the HomeTab Plugin
-   * @private
-   * @returns the HomeTab
-   */
-  const installHomeTabPlugin = useCallback(() => {
-    const viewPlugin = new HomeTab(
-      HOMETAB_PROFILE,
-      { workspaceManager }
-    );
-
-    return PluginManagerIDE.install(HOMETAB_PROFILE.name, viewPlugin).then(() => {
-      // Create and return tab data
-      // Return TabData
-      return {
-        id: HOMETAB_PROFILE.name,
-        name: HOMETAB_PROFILE.title,
-        tabTitle: HOMETAB_PROFILE.title,
-        scope: HOMETAB_PROFILE.name,
-        extension: "",
-        content: viewPlugin.render()
-      };
-    });
-  }, [workspaceManager]);
-
   //========================================================================================
   /*                                                                                      *
    *                                    Exposed Methods                                   *
@@ -380,11 +359,15 @@ const useLayout = (props, dockRef) => {
   /**
    * Close Tab
    */
-  const close = useCallback(() => {
-    // Close tab dynamically
-    console.log("removeTab");
-    call("rightDrawer", "resetBookmarks");
-  }, [call]);
+  const close = useCallback(
+    data => {
+      const { tabId, keepBookmarks } = data;
+      // Close tab dynamically
+      _closeTab(tabId);
+      !keepBookmarks && call("rightDrawer", "resetBookmarks");
+    },
+    [call, _closeTab]
+  );
 
   /**
    * Load tab data
@@ -486,29 +469,31 @@ const useLayout = (props, dockRef) => {
    * Load workspace
    */
   useEffect(() => {
-    const [ lastLayout, lastTabs ] = workspaceManager.getLayoutAndTabs();
+    const [lastLayout, lastTabs] = workspaceManager.getLayoutAndTabs();
     const tabs = [];
 
     tabsById.current = lastTabs;
     // Install current tabs plugins
     lastTabs.forEach(tab => {
       const { id, name, scope } = tab;
-      
-      if(id === HOMETAB_PROFILE.name)
-        tabs.push(installHomeTabPlugin());
-      else
-        tabs.push(_getTabData({ id, name, scope }));
+
+      if (id === HOMETAB_PROFILE.name) tabs.push(getHomeTab());
+      else tabs.push(_getTabData({ id, name, scope }));
     });
     // after all plugins are installed
     Promise.allSettled(tabs).then(_tabs => {
-      _tabs.forEach(tab => tab.status === "fulfilled" && tabsById.current.set(tab.value.id, tab.value));
+      _tabs.forEach(
+        tab =>
+          tab.status === "fulfilled" &&
+          tabsById.current.set(tab.value.id, tab.value)
+      );
       setLayout(lastLayout);
     });
     // Destroy local workspace manager instance on unmount
     return () => {
       workspaceManager.destroy();
     };
-  }, [workspaceManager, on, call, installHomeTabPlugin, _closeTab, _getTabData, open]);
+  }, [workspaceManager, on, call, _closeTab, _getTabData, open]);
 
   //========================================================================================
   /*                                                                                      *

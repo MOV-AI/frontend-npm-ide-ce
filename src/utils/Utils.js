@@ -4,6 +4,8 @@ import CodeIcon from "@material-ui/icons/Code";
 import DescriptionIcon from "@material-ui/icons/Description";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import movaiIcon from "../plugins/views/editors/_shared/Loader/movai_red.svg";
+import { HOMETAB_PROFILE } from "./Constants";
+import HomeTab from "../plugins/views/HomeTab/HomeTab";
 
 /**
  * Generate random ID
@@ -40,7 +42,7 @@ export const getTabIconColor = scope => {
  * @param {string} scope : Document type (Callback, Configuration, ...)
  * @returns {component} Icon by document type
  */
-export const getIconByScope = (scope = "Default", style) => {
+export const getIconByScope = (scope = "Default", style = {}) => {
   const color = getTabIconColor(scope);
   const icon = {
     Callback: <CodeIcon style={{ color, ...style }} />,
@@ -50,10 +52,16 @@ export const getIconByScope = (scope = "Default", style) => {
     GraphicScene: <DeviceHubIcon style={{ color, ...style }} />,
     Node: <i className={`icon-Nodes`} style={{ color, ...style }}></i>,
     Configuration: <BuildIcon style={{ color, ...style }} />,
-    HomeTab: <img src={movaiIcon} alt="MOV.AI Logo" style={{ maxWidth: 12, ...style}} />,
+    HomeTab: (
+      <img
+        src={movaiIcon}
+        alt="MOV.AI Logo"
+        style={{ maxWidth: 12, ...style }}
+      />
+    ),
     Default: <></>
   };
-  
+
   return icon[scope];
 };
 
@@ -73,7 +81,7 @@ export const SCOPES = {
  */
 export const stopPropagation = e => {
   e?.stopPropagation();
-}
+};
 
 /**
  * Returns the document name from an URL
@@ -82,5 +90,24 @@ export const stopPropagation = e => {
  */
 export function getNameFromURL(url) {
   console.log("url", url);
-  return url?.substring(url.lastIndexOf("/") +1);
+  return url?.substring(url.lastIndexOf("/") + 1);
 }
+
+/**
+ * Gets the HomeTab Plugin
+ * @private
+ * @returns {Promise} the HomeTab
+ */
+export const getHomeTab = () => {
+  const viewPlugin = new HomeTab(HOMETAB_PROFILE);
+
+  return Promise.resolve({
+    ...HOMETAB_PROFILE,
+    id: HOMETAB_PROFILE.name,
+    name: HOMETAB_PROFILE.title,
+    tabTitle: HOMETAB_PROFILE.title,
+    scope: HOMETAB_PROFILE.name,
+    extension: "",
+    content: viewPlugin.render()
+  });
+};
