@@ -24,6 +24,12 @@ const EMPTY_MESSAGE = {
   COMMANDS: "No Command Lines"
 };
 
+const DIALOG_TITLE = {
+  PARAMETERS: "Edit Parameter",
+  ENVVARS: "Edit Environment Variable",
+  COMMANDS: "Edit Command Line"
+};
+
 const NODE_TYPES = {
   NODE: "NODE",
   CONTAINER: "CONTAINER"
@@ -41,6 +47,7 @@ export {
   TRANSITION_LINK,
   TABLE_KEYS_NAMES,
   EMPTY_MESSAGE,
+  DIALOG_TITLE,
   ROBOT_BLACKLIST,
   NODE_TYPES
 };

@@ -55,6 +55,7 @@ const KeyValueEditorDialog = props => {
   // State hook
   const [data, setData] = React.useState({});
   const [validation, setValidation] = React.useState({
+    component: null,
     error: false,
     message: ""
   });
@@ -86,7 +87,11 @@ const KeyValueEditorDialog = props => {
     const name = evt?.target?.value;
     if (validateNameOnChange && validate) {
       validate({ name }).then(res => {
-        setValidation({ error: !res.result, message: res.error });
+        setValidation({
+          component: "name",
+          error: !res.result,
+          message: res.error
+        });
       });
     }
 
@@ -113,7 +118,11 @@ const KeyValueEditorDialog = props => {
   const onChangeValue = value => {
     if (validateValueOnChange && validate) {
       validate({ value }).then(res => {
-        setValidation({ error: !res.result, message: res.error });
+        setValidation({
+          component: "value",
+          error: !res.result,
+          message: res.error
+        });
       });
     }
 
@@ -127,11 +136,12 @@ const KeyValueEditorDialog = props => {
    */
   const onSave = () => {
     validate(data).then(res => {
-      if (res.result) {
+      const result = res.result ?? res.success;
+      if (result) {
         onSubmit(res.data);
         onClose();
       } else {
-        setValidation({ error: !res.result, message: res.error });
+        setValidation({ error: !result, message: res.error });
       }
     });
   };
@@ -151,8 +161,8 @@ const KeyValueEditorDialog = props => {
         <Typography component="div" className={classes.container}>
           <TextField
             label="Name *"
-            error={validation.error}
-            helperText={validation.message}
+            error={validation.component === "name" && validation.error}
+            helperText={validation.component === "name" && validation.message}
             value={data.name}
             autoFocus={isNew}
             disabled={disableName}
@@ -200,7 +210,7 @@ const KeyValueEditorDialog = props => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t("Cancel")}</Button>
-        <Button color="primary" onClick={onSave} disabled={validation.error}>
+        <Button color="primary" onClick={onSave}>
           {t("Save")}
         </Button>
       </DialogActions>

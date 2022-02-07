@@ -12,7 +12,7 @@ import {
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
-import { TABLE_KEYS_NAMES } from "../../Constants/constants";
+import { TABLE_KEYS_NAMES, DIALOG_TITLE } from "../../Constants/constants";
 import MenuDetails from "./sub-components/MenuDetails";
 import PortsDetails from "./sub-components/PortsDetails";
 import PropertiesSection from "./sub-components/collapsibleSections/PropertiesSection";
@@ -153,19 +153,17 @@ const NodeMenu = memo(
     const handleKeyValueDialog = useCallback(
       (data, param) => {
         const obj = {
+          ...data,
           varName: param,
-          type: "any",
-          name: data.key,
-          ...data
+          type: data.type ?? "any",
+          name: data.key
         };
         call(
           "dialog",
           "customDialog",
           {
             onSubmit: handleSubmitParameter,
-            customValidation: newData =>
-              Promise.resolve({ result: true, data: newData }),
-            title: t("Edit {{paramName}}", { paramName: obj.name }),
+            title: t(DIALOG_TITLE[param.toUpperCase()]),
             data: obj,
             showDefault: true,
             disableName: true,

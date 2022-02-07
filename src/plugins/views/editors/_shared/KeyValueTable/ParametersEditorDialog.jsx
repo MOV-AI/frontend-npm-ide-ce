@@ -64,7 +64,6 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
         value: data.value,
         type: data.type
       };
-      console.log("dataToValidate", dataToValidate);
       if (customValidation) return customValidation(dataToValidate);
 
       return validate(dataToValidate)
@@ -172,7 +171,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
       return getEditComponent(data.type)(
         {
           ...options,
-          rowData: { value: defaultValue ?? data.value },
+          rowData: { value: defaultValue || data.value },
           onChange: _value => {
             setData(prevState => {
               return { ...prevState, value: _value };

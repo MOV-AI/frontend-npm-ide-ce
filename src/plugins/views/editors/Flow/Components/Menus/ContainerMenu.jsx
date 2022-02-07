@@ -5,7 +5,7 @@ import { Collapse, Divider, ListItem, ListItemText } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
-import { TABLE_KEYS_NAMES } from "../../Constants/constants";
+import { TABLE_KEYS_NAMES, DIALOG_TITLE } from "../../Constants/constants";
 import KeyValuesSection from "./sub-components/collapsibleSections/KeyValuesSection";
 import MenuDetails from "./sub-components/MenuDetails";
 
@@ -69,19 +69,17 @@ const ContainerMenu = props => {
   const handleKeyValueDialog = useCallback(
     (data, param) => {
       const obj = {
+        ...data,
         varName: param,
-        type: "any",
-        name: data.key,
-        ...data
+        type: data.type ?? "any",
+        name: data.key
       };
       call(
         "dialog",
         "customDialog",
         {
           onSubmit: handleSubmitParameter,
-          customValidation: newData =>
-            Promise.resolve({ result: true, data: newData }),
-          title: t("Edit {{paramName}}", { paramName: obj.name }),
+          title: t(DIALOG_TITLE[param.toUpperCase()]),
           data: obj,
           showDefault: true,
           disableName: true,
