@@ -16,12 +16,14 @@ const TYPES = {
 const NODE_PROPS = {
   Node: {
     LABEL: "NodeLabel",
-    MODEL_METHOD: "addNode",
+    MODEL_ADD_METHOD: "addNode",
+    MODEL_DEL_METHOD: "deleteNode",
     TYPE: NODE_TYPES.NODE
   },
   Flow: {
     LABEL: "ContainerLabel",
-    MODEL_METHOD: "addSubFlow",
+    MODEL_ADD_METHOD: "addSubFlow",
+    MODEL_DEL_METHOD: "deleteSubFlow",
     TYPE: NODE_TYPES.CONTAINER
   }
 };
@@ -229,7 +231,7 @@ export default class MainInterface {
       id: name
     };
     // Add node to model data
-    this.modelView.current[NODE_PROP_DATA.MODEL_METHOD](node);
+    this.modelView.current[NODE_PROP_DATA.MODEL_ADD_METHOD](node);
     // Add node to canvas
     this.graph.addNode(node, NODE_PROP_DATA.TYPE).then(() => {
       this.graph.update();
@@ -237,18 +239,21 @@ export default class MainInterface {
     });
   };
 
-  deleteNode = nodeId => {
-    this.graph.deleteNode(nodeId);
-  };
-
-  deleteNodeInst = nodeId => {
-    this.modelView.current.deleteNode(nodeId);
-    this.deleteNode(nodeId);
-  };
-
-  deleteSubFlow = subFlowId => {
-    this.modelView.current.deleteSubFlow(subFlowId);
-    this.deleteNode(subFlowId);
+  /**
+   * Delete Nodes/Sub-Flows
+   * @param {*} node : Node data
+   */
+  deleteNode = node => {
+    // Gather information from model
+    const NODE_PROP_DATA = NODE_PROPS[node.model];
+    // Delete from model data
+    this.modelView.current[NODE_PROP_DATA.MODEL_DEL_METHOD](node.id);
+    // Delete from canvas
+    this.graph.deleteNode(node.id);
+    // Remove from selected nodes
+    this.selectedNodes = this.selectedNodes.filter(
+      el => el.data.id !== node.id
+    );
   };
 
   toggleExposedPort = port => {

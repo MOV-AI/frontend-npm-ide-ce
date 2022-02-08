@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import ToggleOnIcon from "@material-ui/icons/ToggleOn";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
-import { ContextMenu, DEFAULT_FUNCTION, MODE } from ".";
+import { ContextMenu, MODE } from ".";
 
 const FlowContextMenu = props => {
   const { t } = useTranslation();
@@ -95,26 +95,19 @@ const FlowContextMenu = props => {
 
 FlowContextMenu.defaultProps = {
   mode: MODE.NODE,
-  anchorPosition: null,
-  onClose: () => DEFAULT_FUNCTION("onClose"),
-  onNodeCopy: () => DEFAULT_FUNCTION("onNodeCopy"),
-  onCanvasPaste: () => DEFAULT_FUNCTION("onCanvasPaste"),
-  onNodeDelete: () => DEFAULT_FUNCTION("onNodeDelete"),
-  onLinkDelete: () => DEFAULT_FUNCTION("onLinkDelete"),
-  onSubFlowDelete: () => DEFAULT_FUNCTION("onSubFlowDelete"),
-  onPortToggle: () => DEFAULT_FUNCTION("onPortToggle")
+  anchorPosition: null
 };
 
 FlowContextMenu.propTypes = {
   mode: PropTypes.string,
   anchorPosition: PropTypes.object,
-  onClose: PropTypes.func,
-  onNodeCopy: PropTypes.func,
-  onCanvasPaste: PropTypes.func,
-  onNodeDelete: PropTypes.func,
-  onLinkDelete: PropTypes.func,
-  onSubFlowDelete: PropTypes.func,
-  onPortToggle: PropTypes.func
+  onClose: PropTypes.func.isRequired,
+  onNodeCopy: PropTypes.func.isRequired,
+  onCanvasPaste: PropTypes.func.isRequired,
+  onNodeDelete: PropTypes.func.isRequired,
+  onLinkDelete: PropTypes.func.isRequired,
+  onSubFlowDelete: PropTypes.func.isRequired,
+  onPortToggle: PropTypes.func.isRequired
 };
 
 export default FlowContextMenu;
