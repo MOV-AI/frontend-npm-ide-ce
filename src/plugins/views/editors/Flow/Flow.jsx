@@ -360,7 +360,10 @@ const Flow = (props, ref) => {
       FlowExplorer: {
         icon: <Add />,
         name: FLOW_EXPLORER_PROFILE.name,
-        view: explorerView.render({ flowId: id })
+        view: explorerView.render({
+          flowId: id,
+          mainInterface: getMainInterface()
+        })
       }
     };
 
@@ -560,6 +563,7 @@ const Flow = (props, ref) => {
   const onReady = useCallback(
     mainInterface => {
       // subscribe to on enter default mode
+      // When enter default mode remove other node/sub-flow bookmarks
       mainInterface.mode.default.onEnter.subscribe(() => {
         call(
           PLUGINS.DOC_MANAGER.NAME,
@@ -567,6 +571,8 @@ const Flow = (props, ref) => {
           PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR,
           { action: "setMode", value: EVT_NAMES.DEFAULT }
         );
+        onNodeSelected(null);
+        onLinkSelected(null);
       });
 
       // Subscribe to on node select event
@@ -586,12 +592,6 @@ const Flow = (props, ref) => {
 
       // Subscribe to invalid links validation
       mainInterface.graph.onLinksValidated.subscribe(onLinksValidated);
-
-      // When enter default mode remove other node/sub-flow bookmarks
-      mainInterface.mode.default.onEnter.subscribe(() => {
-        onNodeSelected(null);
-        onLinkSelected(null);
-      });
 
       // Subscribe to double click event in a node
       mainInterface.mode.onDblClick.onEnter.subscribe(evtData => {
