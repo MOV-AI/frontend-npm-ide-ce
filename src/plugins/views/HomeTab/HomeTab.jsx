@@ -1,13 +1,15 @@
 import React, { forwardRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
+import { useTheme } from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import withAlerts from "../../../decorators/withAlerts";
 import { getNameFromURL } from "../../../utils/Utils";
 import ERROR_MESSAGES from "../../../utils/ErrorMessages";
-import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
+import movaiFullLogoWhite from "../editors/_shared/Branding/movai-full-logo-white.png";
+import movaiFullLogo from "../editors/_shared/Branding/movai-full-logo.png";
 import QuickAccessComponent from "./components/QuickAccess";
 import RecentDocumentsComponent from "./components/RecentDocuments";
 import SamplesComponent from "./components/Samples";
@@ -18,6 +20,7 @@ const HomeTab = forwardRef((props, ref) => {
   const { workspaceManager, call, on, alert, alertSeverities } = props;
   const classes = homeTabStyles();
   const { t } = useTranslation();
+  const theme = useTheme();
 
   const openExistingDocument = useCallback(
     doc => {
@@ -67,7 +70,7 @@ const HomeTab = forwardRef((props, ref) => {
             className={classes.socialIconBadge}
           >
             <img
-              src={movaiIcon}
+              src={theme.label === "dark" ? movaiFullLogoWhite : movaiFullLogo}
               alt="MOV.AI Logo"
               className={classes.movaiIcon}
             />

@@ -16,6 +16,7 @@ import { MainContext } from "../../../main-context";
 import { VERSION } from "../../../utils/Constants";
 import { getIconByScope } from "../../../utils/Utils";
 import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
+import movaiIconWhite from "../editors/_shared/Branding/movai-logo-white.png";
 
 const useStyles = makeStyles(theme => ({
   icon: {
@@ -106,7 +107,10 @@ const MainMenu = props => {
                 className={classes.movaiIcon}
                 onClick={handleHomeIconClick}
               >
-                <img src={movaiIcon} alt="MOV.AI Logo" />
+                <img
+                  src={theme.label === "dark" ? movaiIconWhite : movaiIcon}
+                  alt="MOV.AI Logo"
+                />
                 <p></p>
               </IconButton>
             </Tooltip>
