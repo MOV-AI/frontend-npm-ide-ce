@@ -63,7 +63,14 @@ export default class Graph {
     this.mode.addNode.onEnter.subscribe({
       next: () => this.reset()
     });
-
+    // Subscribe to template update
+    console.log("debug subscribe in graphBase");
+    this.docManager(
+      "docManager",
+      "subscribeToChanges",
+      this.id,
+      this.onTemplateUpdate
+    );
     return this;
   };
 
@@ -178,18 +185,20 @@ export default class Graph {
   /**
    * @private
    */
-  updateContainersWithTemplate = templateName => {
+  updateContainersWithTemplate = data => {
     const containers = [...this.nodes]
       .filter(([id, node]) => node.obj.data.type === "Container")
       .map(([id, node]) => node.obj);
+    console.log("debug updateContainersWithTemplate", containers, data);
     // update container with templateName
     containers.forEach(subFlow => {
       const container = this.flows.getFlow(subFlow.templateName);
       const containerNodes = container?.NodeInst || {};
       const hasTemplate = Object.values(containerNodes).filter(
-        el => el.Template === templateName
+        el => el.Template === data.Label
       ).length;
-      if (hasTemplate) subFlow.onTemplateUpdate(subFlow.templateName);
+      console.log("debug hasTemplate", hasTemplate, subFlow);
+      if (hasTemplate) subFlow.onTemplateUpdate(data);
     });
   };
 
@@ -235,14 +244,11 @@ export default class Graph {
     requestAnimationFrame(update);
   };
 
-  onTemplateUpdate = _debounce(templateName => {
-    this.nodes.forEach(node => node.obj.onTemplateUpdate(templateName));
-    setTimeout(() => {
-      this.loadExposedPorts(this.exposedPorts, true);
-      this.updateContainersWithTemplate(templateName);
-      this.debounceToValidateFlow();
-    }, 100);
-  });
+  onTemplateUpdate = data => {
+    this.nodes.forEach(node => node.obj.onTemplateUpdate(data));
+    this.loadExposedPorts(this.exposedPorts, true);
+    this.debounceToValidateFlow();
+  };
 
   /**
    * Event triggered on mouse over link

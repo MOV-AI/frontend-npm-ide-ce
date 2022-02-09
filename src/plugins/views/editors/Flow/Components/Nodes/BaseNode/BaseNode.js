@@ -667,8 +667,7 @@ class BaseNode extends BaseNodeStruct {
    * Update graphical representation
    */
   update = () => {
-    this.addPorts().renderPorts().updateSize().renderStatus();
-
+    this.addPorts().renderHeader().renderStatus().renderPorts();
     return this;
   };
 
@@ -774,12 +773,12 @@ class BaseNode extends BaseNodeStruct {
    * onTemplateUpdate - on template update event handler
    * templates only change when edited while in redis
    *
-   * @param {string} name node's template name
+   * @param {string} data node's template name
    */
-  onTemplateUpdate = name => {
-    if (name !== this.templateName) return; //not my template
-    this._template = undefined;
-    this.update();
+  onTemplateUpdate = data => {
+    if (data.Label !== this.templateName) return; // not my template
+    this._template = Object.assign(this._template, data);
+    this.updateTemplate();
   };
 
   /**
@@ -809,26 +808,6 @@ class BaseNode extends BaseNodeStruct {
       return this.el;
     });
   }
-
-  /**
-   * update - update node
-   *
-   * @param {object} data updated node data
-   */
-  update = data => {
-    const fn = {
-      Visualization: docData => this.updatePosition(docData), // Position changes when dragging or when adding a new node
-      default: () => {
-        lodash.merge(this.data, data);
-        this.data.name = this.name;
-      }
-    };
-    Object.keys(data).forEach(key => {
-      (fn[key] || fn["default"])(data);
-      this.init().addToCanvas();
-    });
-    return true;
-  };
 
   /**
    * deleteKey - set node data key to null

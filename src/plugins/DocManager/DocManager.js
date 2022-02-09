@@ -16,6 +16,7 @@ class DocManager extends IDEPlugin {
         "getStore",
         "getDocTypes",
         "getDocFactory",
+        "subscribeToChanges",
         "getDocFromNameType",
         "checkDocumentExists",
         "discardDocChanges",
@@ -33,6 +34,12 @@ class DocManager extends IDEPlugin {
     // Add unload events
     window.onbeforeunload = this.onBeforeUnload;
     window.onunload = this.onUnload;
+    // Subscriber
+    this.docSubscriptions = new Map();
+  }
+
+  getName() {
+    return "DocManager";
   }
 
   activate() {
@@ -44,7 +51,34 @@ class DocManager extends IDEPlugin {
       onDocumentDeleted: (store, name) => this.onDocumentDeleted(store, name)
     };
 
-    this.docsMap = docsFactory("global", observer);
+    this.docsMap = docsFactory("global", observer, this);
+  }
+
+  onDocumentUpdate(doc) {
+    this.docSubscriptions.forEach(callback => {
+      callback(doc.serializeToDB());
+    });
+  }
+
+  /**
+   * Subscribe Instance to changes
+   * @param {object} obj
+   * @returns {Promise<Model>}
+   */
+  subscribeToChanges(id, callback) {
+    this.docSubscriptions.set(id, callback);
+  }
+
+  /**
+   * Unsubscribe Instance to changes
+   * @param {object} obj
+   * @returns {Promise<Model>}
+   */
+  unSubscribeToChanges(id) {
+    if (this.docSubscriptions.has(id)) {
+      return this.docSubscriptions.delete(id);
+    }
+    console.log("debug this.unSubscribeToChanges", this.docSubscriptions);
   }
 
   /**
