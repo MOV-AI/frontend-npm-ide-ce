@@ -306,6 +306,10 @@ export default class BaseLink extends BaseLinkStruct {
     return this.canvas.readOnly;
   }
 
+  /**
+   * Set link visibility
+   * @param {boolean} visible
+   */
   set visibility(visible) {
     this.visible = Boolean(visible);
     this.object.attr("visibility", this.visible ? "visible" : "hidden");

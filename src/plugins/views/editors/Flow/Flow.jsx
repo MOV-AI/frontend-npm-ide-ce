@@ -98,6 +98,7 @@ const Flow = (props, ref) => {
    * Handle group visibilities
    */
   const groupsVisibilities = useCallback(() => {
+    if (!instance.current) return;
     getMainInterface().onGroupsChange(instance.current.getGroups()?.data);
   }, [instance]);
 

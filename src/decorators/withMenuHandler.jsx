@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 
 /**
  * Handle actions to update right menu of each editor
@@ -13,7 +13,7 @@ const withMenuHandler = Component => {
     /**
      * Reset right menu : clear menu and close right drawer
      */
-    const resetRightMenu = React.useCallback(() => {
+    const resetRightMenu = useCallback(() => {
       call("rightDrawer", "resetBookmarks");
     }, [call]);
 
@@ -21,7 +21,7 @@ const withMenuHandler = Component => {
      * Render components menu if any and bind events of active tab to trigger the component's renderRightMenu method
      * @returns
      */
-    const initRightMenu = () => {
+    const initRightMenu = useCallback(() => {
       // render component menus (if any)
       const editorRef = ref?.current;
       if (!editorRef) return;
@@ -31,15 +31,15 @@ const withMenuHandler = Component => {
       // Render (or close) right menu details
       _updateRightMenu();
       updateRightMenuRef.current = _updateRightMenu;
-    };
+    }, [ref, resetRightMenu]);
 
     /**
-     *
+     * Update Right menu
      */
-    const updateRightMenu = () => {
+    const updateRightMenu = useCallback(() => {
       if (!updateRightMenuRef.current) initRightMenu();
       updateRightMenuRef.current();
-    };
+    }, [initRightMenu]);
 
     return (
       <Component
