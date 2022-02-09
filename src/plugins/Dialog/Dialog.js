@@ -115,8 +115,17 @@ class Dialog extends IDEPlugin {
    */
   formDialog(data) {
     const targetElement = this._handleDialogOpen();
-    const { title, submitText, onSubmit, size, multiline, inputLabel, value, onValidation } =
-      data;
+    const {
+      title,
+      submitText,
+      onSubmit,
+      onClose,
+      size,
+      multiline,
+      inputLabel,
+      value,
+      onValidation
+    } = data;
     ReactDOM.render(
       <FormDialog
         call={this.call}
@@ -128,7 +137,10 @@ class Dialog extends IDEPlugin {
         submitText={submitText}
         onSubmit={onSubmit}
         onValidation={onValidation}
-        onClose={this._handleDialogClose}
+        onClose={() => {
+          this._handleDialogClose();
+          onClose && onClose();
+        }}
       />,
       targetElement
     );

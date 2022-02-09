@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { filter } from "rxjs/operators";
 import { makeStyles } from "@material-ui/core/styles";
@@ -8,6 +8,8 @@ import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { FLOW_EXPLORER_PROFILE, PLUGINS } from "../../../../utils/Constants";
+import Clipboard, { KEYS } from "./Utils/Clipboard";
+import Vec2 from "./Utils/Vec2";
 import BaseFlow from "./Views/BaseFlow";
 import Menu from "./Components/Menus/Menu";
 import NodeMenu from "./Components/Menus/NodeMenu";
@@ -42,6 +44,10 @@ const Flow = (props, ref) => {
     instance,
     data,
     alert,
+    addKeyBind,
+    removeKeyBind,
+    activateKeyBind,
+    deactivateKeyBind,
     confirmationAlert,
     saveDocument,
     on
@@ -53,16 +59,16 @@ const Flow = (props, ref) => {
   const [warnings, setWarnings] = useState([]);
   const [warningsVisibility, setWarningsVisibility] = useState(true);
   const [viewMode, setViewMode] = useState(FLOW_VIEW_MODE.default);
+  const [tooltipConfig, setTooltipConfig] = useState(null);
   const [contextMenuOptions, setContextMenuOptions] = useState({
     open: false,
     position: { x: 0, y: 0 }
   });
 
-  const [tooltipConfig, setTooltipConfig] = useState(null);
-
   // Other Hooks
   const classes = useStyles();
   const { t } = useTranslation();
+  const clipboard = useMemo(() => new Clipboard(), []);
   // Refs
   const baseFlowRef = React.useRef();
   const mainInterfaceRef = React.useRef();
@@ -161,6 +167,30 @@ const Flow = (props, ref) => {
   }, []);
 
   /**
+   * Get the current node (from context menu) and all other selected nodes
+   * @returns {array} Selected nodes
+   */
+  const getSelectedNodes = useCallback(() => {
+    const { args: node } = contextMenuOptions || {};
+    const selectedNodesSet = new Set(
+      [node].concat(getMainInterface().selectedNodes)
+    );
+    return Array.from(selectedNodesSet).filter(el => el);
+  }, [contextMenuOptions]);
+
+  /**
+   * Call broadcast method to emit event to all open flows
+   */
+  const setFlowsToDefault = useCallback(() => {
+    call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.BROADCAST,
+      PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR,
+      { action: "setMode", value: EVT_NAMES.DEFAULT }
+    );
+  }, [call]);
+
+  /**
    * Open document in new tab
    * @param {*} docData
    */
@@ -222,6 +252,51 @@ const Flow = (props, ref) => {
       alert({ message, title, location: "modal" });
     },
     [t, alert]
+  );
+
+  /**
+   * Handle dialog opening
+   * @param {*} method
+   * @param {*} args
+   * @param {*} resolve
+   */
+  const openDialog = useCallback(
+    ({ method, args, resolve }) => {
+      // Deactivate key bind before opening dialog
+      deactivateKeyBind();
+      // On close dialog reactivate keybind and resolve promise
+      args.onClose = () => {
+        activateKeyBind();
+        resolve && resolve();
+      };
+      // Call dialog plugin with given method and args
+      call(PLUGINS.DIALOG.NAME, method, args);
+    },
+    [activateKeyBind, call, deactivateKeyBind]
+  );
+
+  /**
+   * Open Dialog to Enter Paste Node name
+   * @param {*} position : x and y position in canvas
+   * @param {*} nodeToCopy : Node data
+   * @returns {Promise} Resolved only after submit or cancel dialog
+   */
+  const pasteNodeDialog = useCallback(
+    (position, nodeToCopy) => {
+      const node = nodeToCopy.node;
+      return new Promise(resolve => {
+        const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
+        const args = {
+          title: `${t("Paste")} ${node.model}`,
+          value: `${node.id}_copy`,
+          onSubmit: newName =>
+            getMainInterface().pasteNode(newName, node, position)
+        };
+        // Open Dialog
+        openDialog({ method, args, resolve });
+      });
+    },
+    [t, openDialog]
   );
 
   //========================================================================================
@@ -565,14 +640,9 @@ const Flow = (props, ref) => {
       // subscribe to on enter default mode
       // When enter default mode remove other node/sub-flow bookmarks
       mainInterface.mode.default.onEnter.subscribe(() => {
-        call(
-          PLUGINS.DOC_MANAGER.NAME,
-          PLUGINS.DOC_MANAGER.CALL.BROADCAST,
-          PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR,
-          { action: "setMode", value: EVT_NAMES.DEFAULT }
-        );
         onNodeSelected(null);
         onLinkSelected(null);
+        setFlowsToDefault();
       });
 
       // Subscribe to on node select event
@@ -618,26 +688,30 @@ const Flow = (props, ref) => {
 
       mainInterface.mode.addNode.onClick.subscribe(() => {
         const nodeName = getMainInterface().mode.current.props.node.data.name;
-        // Open dialog
-        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, {
+        const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
+        const args = {
           title: t("Add node"),
           submitText: t("Add"),
           value: nodeName,
           // TODO add validation here ROS regex and exists? https://movai.atlassian.net/browse/FP-1487
           onSubmit: newName => getMainInterface().addNode(newName)
-        });
+        };
+        // Open form dialog
+        openDialog({ method, args });
       });
 
       mainInterface.mode.addFlow.onClick.subscribe(() => {
         const flowName = getMainInterface().mode.current.props.node.data.name;
-        // Open dialog
-        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, {
+        const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
+        const args = {
           title: t("Add sub-flow"),
           submitText: t("Add"),
           value: flowName,
           // TODO add validation here ROS regex and exists? https://movai.atlassian.net/browse/FP-1487
           onSubmit: newName => getMainInterface().addFlow(newName)
-        });
+        };
+        // Open form dialog
+        openDialog({ method, args });
       });
 
       // Subscribe to link context menu events
@@ -662,9 +736,18 @@ const Flow = (props, ref) => {
         })
       );
 
+      // Subscribe to canvas context menu
       mainInterface.mode.canvasCtxMenu.onEnter.subscribe(evtData => {
-        console.log("onCanvasCtxMenu", evtData);
-        mainInterface.setMode(EVT_NAMES.DEFAULT);
+        const anchorPosition = {
+          left: evtData.event.clientX,
+          top: evtData.event.clientY
+        };
+        setContextMenuOptions({
+          args: evtData.position,
+          mode: FLOW_CONTEXT_MODE.CANVAS,
+          anchorPosition,
+          onClose: handleContextClose
+        });
       });
 
       // subscribe to port context menu event
@@ -756,17 +839,18 @@ const Flow = (props, ref) => {
         .subscribe(evtData => console.log("onLinkErrorMouseOver", evtData));
     },
     [
-      call,
-      alert,
-      t,
-      groupsVisibilities,
-      onNodeSelected,
-      onFlowValidated,
-      onLinkSelected,
       onLinksValidated,
-      handleContextClose,
+      onNodeSelected,
+      onLinkSelected,
+      setFlowsToDefault,
+      groupsVisibilities,
+      onFlowValidated,
       invalidContainersParamAlert,
-      openDoc
+      openDoc,
+      handleContextClose,
+      t,
+      openDialog,
+      alert
     ]
   );
 
@@ -776,33 +860,96 @@ const Flow = (props, ref) => {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Handle Delete : Show confirmation dialog before performing delete action
+   * @param {{nodeId: string, callback: function}} data
+   */
   const handleDelete = useCallback(
-    ({ nodeId, callback }) => {
+    ({ message, callback }) => {
       call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
         submitText: t("Delete"),
         title: t("Confirm to delete"),
         onSubmit: callback,
-        message: `Are you sure you want to delete "${nodeId}"?`
+        message
       });
     },
     [t, call]
   );
 
+  /**
+   * Handle copy node
+   */
+  const handleCopyNode = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    const nodesPos = selectedNodes.map(n =>
+      Vec2.of(n.center.xCenter, n.center.yCenter)
+    );
+    let center = nodesPos.reduce((e, x) => e.add(x), Vec2.ZERO);
+    center = center.scale(1 / selectedNodes.length);
+    // Nodes to copy
+    const nodesToCopy = {
+      nodes: selectedNodes.map(n => n.data),
+      flow: data.id,
+      nodesPosFromCenter: nodesPos.map(pos => pos.sub(center))
+    };
+    // Write nodes to copy to clipboard
+    clipboard.write(KEYS.NODES_TO_COPY, nodesToCopy);
+  }, [clipboard, getSelectedNodes, data.id]);
+
+  /**
+   * Handle paste nodes in canvas
+   */
+  const handlePasteNodes = useCallback(
+    async evt => {
+      if (evt) evt.preventDefault();
+      const { args: position = getMainInterface().canvas.mousePosition } =
+        contextMenuOptions || {};
+      const nodesToCopy = clipboard.read(KEYS.NODES_TO_COPY);
+      if (!nodesToCopy) return;
+
+      for (const [i, node] of nodesToCopy.nodes.entries()) {
+        const nodesPosFromCenter = nodesToCopy.nodesPosFromCenter || [
+          Vec2.ZERO
+        ];
+        const newPos = Vec2.of(position.x, position.y).add(
+          nodesPosFromCenter[i]
+        );
+        // Open dialog for each node to copy
+        await pasteNodeDialog(newPos.toObject(), {
+          node: node,
+          flow: nodesToCopy.flow
+        });
+      }
+    },
+    [clipboard, contextMenuOptions, pasteNodeDialog]
+  );
+
+  /**
+   * Handle delete node
+   */
   const handleDeleteNode = useCallback(() => {
-    const { args: node } = contextMenuOptions;
-    const callback = () => getMainInterface().deleteNodeInst(node.data.id);
+    const selectedNodes = getSelectedNodes();
+    if (!selectedNodes.length) return;
+    // Callback to delete all nodes
+    const callback = () =>
+      selectedNodes.forEach(node => {
+        getMainInterface().deleteNode(node.data);
+      });
+    // Compose confirmation message
+    let message = t("Are you sure you want to delete");
+    message +=
+      selectedNodes.length === 1
+        ? ` "${selectedNodes[0].data.id}"?`
+        : ` ${t("the selected nodes")}?`;
+    // Show confirmation before delete
+    handleDelete({ message, callback });
 
-    handleDelete({ nodeId: node.data.id, callback });
     setContextMenuOptions(prevValue => ({ ...prevValue, anchorEl: null }));
-  }, [handleDelete, contextMenuOptions]);
+  }, [handleDelete, getSelectedNodes, t]);
 
-  const handleDeleteSubFlow = useCallback(() => {
-    const { args: node } = contextMenuOptions;
-    const callback = () => getMainInterface().deleteSubFlow(node.data.id);
-
-    handleDelete({ nodeId: node.data.id, callback });
-  }, [contextMenuOptions, handleDelete]);
-
+  /**
+   * Handle delete link
+   */
   const handleDeleteLink = useCallback(() => {
     const { args: link } = contextMenuOptions;
     getMainInterface().deleteLink(link.id);
@@ -815,6 +962,33 @@ const Flow = (props, ref) => {
     const { args: port } = contextMenuOptions;
     getMainInterface().toggleExposedPort(port);
   }, [contextMenuOptions]);
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                       Shortcuts                                      *
+   *                                                                                      */
+  //========================================================================================
+
+  useEffect(() => {
+    addKeyBind("ctrl+c", handleCopyNode);
+    addKeyBind("ctrl+v", handlePasteNodes);
+    addKeyBind("esc", setFlowsToDefault);
+    addKeyBind(["del", "backspace"], handleDeleteNode);
+    // remove keyBind on unmount
+    return () => {
+      removeKeyBind("ctrl+c");
+      removeKeyBind("ctrl+v");
+      removeKeyBind("esc");
+      removeKeyBind(["del", "backspace"]);
+    };
+  }, [
+    addKeyBind,
+    removeKeyBind,
+    setFlowsToDefault,
+    handleCopyNode,
+    handlePasteNodes,
+    handleDeleteNode
+  ]);
 
   //========================================================================================
   /*                                                                                      *
@@ -861,9 +1035,11 @@ const Flow = (props, ref) => {
       {contextMenuOptions && (
         <FlowContextMenu
           {...contextMenuOptions}
-          onNodeDelete={handleDeleteNode}
+          onNodeCopy={handleCopyNode}
+          onCanvasPaste={handlePasteNodes}
           onLinkDelete={handleDeleteLink}
-          onSubFlowDelete={handleDeleteSubFlow}
+          onNodeDelete={handleDeleteNode}
+          onSubFlowDelete={handleDeleteNode}
           onPortToggle={handleToggleExposedPort}
         />
       )}
