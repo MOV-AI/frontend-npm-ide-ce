@@ -379,6 +379,13 @@ class Canvas {
   }
 
   /**
+   * Return mouse position in object with x and y
+   */
+  get mousePosition() {
+    return { x: this._mouse[0], y: this._mouse[1] };
+  }
+
+  /**
    * set mouse position
    * @param {array} value [x,y] position in canvas
    */

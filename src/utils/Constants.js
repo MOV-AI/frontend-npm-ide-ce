@@ -56,6 +56,7 @@ export const PLUGINS = {
     CALL: {
       NEW_DOC: "newDocument",
       CONFIRMATION: "confirmation",
+      FORM_DIALOG: "formDialog",
       ALERT: "alert"
     }
   },
