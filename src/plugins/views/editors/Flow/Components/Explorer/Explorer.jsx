@@ -24,6 +24,7 @@ const Explorer = props => {
   //========================================================================================
 
   useEffect(() => {
+    if (!mainInterface) return;
     mainInterface.mode.default.onEnter.subscribe(() => {
       shouldUpdatePreview.current = true;
       setSelectedNode({});
