@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { Collapse, Divider, ListItem, ListItemText } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
+import { DATA_TYPES } from "../../../../../../utils/Constants";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
 import { TABLE_KEYS_NAMES, DIALOG_TITLE } from "../../Constants/constants";
 import KeyValuesSection from "./sub-components/collapsibleSections/KeyValuesSection";
@@ -67,12 +68,12 @@ const ContainerMenu = props => {
    * @param {ReactComponent} DialogComponent : Dialog component to render
    */
   const handleKeyValueDialog = useCallback(
-    (data, param) => {
+    (keyValueData, param) => {
       const obj = {
-        ...data,
+        ...keyValueData,
         varName: param,
-        type: data.type ?? "any",
-        name: data.key
+        type: keyValueData.type ?? DATA_TYPES.ANY,
+        name: keyValueData.key
       };
       call(
         "dialog",

@@ -27,6 +27,13 @@ const COMPONENTS = {
 
 const useStyles = makeStyles(theme => ({
   input: { fontSize: "13px" },
+  label: {
+    marginTop: "20px",
+    fontSize: "16px",
+    transform: "translate(0, 1.5px) scale(0.75)",
+    transformOrigin: "top left",
+    color: "rgba(255, 255, 255, .7)"
+  },
   marginTop: { marginTop: "10px" },
   paper: { minWidth: "50%" },
   container: {
@@ -37,6 +44,24 @@ const useStyles = makeStyles(theme => ({
   codeContainer: {
     height: "200px",
     width: "100%"
+  },
+  accordion: {
+    margin: "0px !important"
+  },
+  accordionSummary: {
+    paddingLeft: "0px",
+    paddingRight: "0px",
+    minHeight: "auto !important",
+    alignItems: "flex-end",
+
+    "& > div": {
+      margin: "0px !important",
+      padding: "0px"
+    }
+  },
+  noHorizontalPadding: {
+    paddingLeft: 0,
+    paddingRight: 0
   }
 }));
 
@@ -141,12 +166,11 @@ const KeyValueEditorDialog = props => {
    */
   const onSave = () => {
     validate(data).then(res => {
-      const result = res.result ?? res.success;
-      if (result) {
+      if (res.result ?? res.success) {
         onSubmit(res.data);
         onClose();
       } else {
-        setValidation({ error: !result, message: res.error });
+        setValidation({ error: true, message: res.error });
       }
     });
   };
@@ -189,7 +213,7 @@ const KeyValueEditorDialog = props => {
             />
           </FormControl>
           {renderCustomContent && renderCustomContent()}
-          <InputLabel className={classes.marginTop}>Value</InputLabel>
+          <InputLabel className={classes.label}>{t("Value")}</InputLabel>
           <FormControl className={classes.marginTop}>
             {renderValueEditor(data.value, {
               isNew,
@@ -198,21 +222,25 @@ const KeyValueEditorDialog = props => {
                 validation.component === COMPONENTS.VALUE && validation.error,
               helperText:
                 validation.component === COMPONENTS.VALUE && validation.message,
-              disabled: disabled
+              disabled: disabled,
+              defaultValue: data.defaultValue
             })}
           </FormControl>
           {showDefault && (
-            <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography className={classes.heading}>
-                  Default Value
+            <Accordion className={classes.accordion} defaultExpanded>
+              <AccordionSummary
+                className={classes.accordionSummary}
+                expandIcon={<ExpandMoreIcon />}
+              >
+                <Typography className={classes.label}>
+                  {t("Default Value")}
                 </Typography>
               </AccordionSummary>
-              <AccordionDetails>
+              <AccordionDetails className={classes.noHorizontalPadding}>
                 {renderValueEditor(data.defaultValue, {
                   isNew,
-                  isDefault: true,
                   onChange: onChangeValue,
+                  isDefault: true,
                   disabled: true
                 })}
               </AccordionDetails>

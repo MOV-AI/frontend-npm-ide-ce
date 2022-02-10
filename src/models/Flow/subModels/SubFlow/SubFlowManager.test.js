@@ -1,3 +1,4 @@
+import { DATA_TYPES } from "../../../../utils/Constants";
 import Manager from "../../../Manager";
 import SubFlow from "./SubFlow";
 
@@ -14,8 +15,8 @@ test("Serialize OF db", () => {
       ContainerLabel: "align",
       Visualization: [0.01, 0.02],
       Parameter: {
-        camera: { Value: "back1", Type: "any" },
-        move_distance_to_car: { Value: "0.30", Type: "number" }
+        camera: { Value: "back1", Type: DATA_TYPES.ANY },
+        move_distance_to_car: { Value: "0.30", Type: DATA_TYPES.NUMBER }
       }
     }
   };
@@ -26,11 +27,11 @@ test("Serialize OF db", () => {
       name: content.align.ContainerLabel,
       position: { x: 0.01, y: 0.02 },
       parameters: {
-        camera: { name: "camera", value: "back1", type: "any" },
+        camera: { name: "camera", value: "back1", type: DATA_TYPES.ANY },
         move_distance_to_car: {
           name: "move_distance_to_car",
           value: "0.30",
-          type: "number"
+          type: DATA_TYPES.NUMBER
         }
       }
     }
@@ -51,7 +52,7 @@ test("Serialize TO db", () => {
         y: { Value: 0.02 }
       },
       Parameter: {
-        camera: { Value: "back1", Type: "any" }
+        camera: { Value: "back1", Type: DATA_TYPES.ANY }
       }
     }
   };
