@@ -25,9 +25,9 @@ const EMPTY_MESSAGE = {
 };
 
 const DIALOG_TITLE = {
-  PARAMETERS: "Edit Parameter",
-  ENVVARS: "Edit Environment Variable",
-  COMMANDS: "Edit Command Line"
+  PARAMETERS: "Parameter",
+  ENVVARS: "Environment Variable",
+  COMMANDS: "Command Line"
 };
 
 const NODE_TYPES = {

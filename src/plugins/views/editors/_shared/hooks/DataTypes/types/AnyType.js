@@ -1,8 +1,9 @@
+import { DATA_TYPES } from "../../../../../../../utils/Constants";
 import DataType from "../AbstractDataType";
 
 class AnyType extends DataType {
   // Any type properties definition
-  key = "any";
+  key = DATA_TYPES.ANY;
   label = "Any";
   editComponent = this.defaultStringEditor;
 
@@ -12,7 +13,7 @@ class AnyType extends DataType {
    * @returns
    */
   validate(value) {
-    return Promise.resolve({ success: true });
+    return Promise.resolve({ success: true, value });
   }
 }
 

@@ -1,8 +1,10 @@
+import { DATA_TYPES } from "../../../../../../../utils/Constants";
 import DataType from "../AbstractDataType";
+import { checkIfDefaultOrDisabled } from "./utils";
 
 class ArrayType extends DataType {
   // Array type properties definition
-  key = "array";
+  key = DATA_TYPES.ARRAY;
   label = "Array";
   default = "[]";
 
@@ -23,6 +25,9 @@ class ArrayType extends DataType {
     value = value.replace(/'/g, '"');
     return new Promise(resolve => {
       try {
+        if (checkIfDefaultOrDisabled(value)) {
+          return resolve({ success: true, value });
+        }
         const parsed = this.getParsedValue(value);
         resolve({ success: Array.isArray(parsed), value });
       } catch (e) {

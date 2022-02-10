@@ -1,8 +1,10 @@
+import { DATA_TYPES } from "../../../../../../../utils/Constants";
 import DataType from "../AbstractDataType";
+import { checkIfDefaultOrDisabled } from "./utils";
 
 class StringType extends DataType {
   // String type properties definition
-  key = "string";
+  key = DATA_TYPES.STRING;
   label = "String";
   default = '""';
 
@@ -24,8 +26,12 @@ class StringType extends DataType {
   validate(value) {
     return new Promise(resolve => {
       try {
+        if (checkIfDefaultOrDisabled(value)) {
+          return resolve({ success: true, value });
+        }
         const parsed = this.getParsedValue(value);
-        const isValid = typeof parsed === "string" || parsed instanceof String;
+        const isValid =
+          typeof parsed === DATA_TYPES.STRING || parsed instanceof String;
         resolve({ success: isValid });
       } catch (e) {
         console.log("debug e", e);

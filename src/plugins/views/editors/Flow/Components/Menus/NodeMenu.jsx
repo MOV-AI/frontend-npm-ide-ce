@@ -11,6 +11,7 @@ import {
 } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
+import { DATA_TYPES } from "../../../../../../utils/Constants";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
 import { TABLE_KEYS_NAMES, DIALOG_TITLE } from "../../Constants/constants";
 import MenuDetails from "./sub-components/MenuDetails";
@@ -41,7 +42,15 @@ const ACTIVE_ITEM = {
  * @returns {ReaactElement} Node Menu
  */
 const NodeMenu = memo(
-  ({ nodeInst, call, openDoc, editable, flowModel, groupsVisibilities }) => {
+  ({
+    nodeInst,
+    openDialog,
+    call,
+    openDoc,
+    editable,
+    flowModel,
+    groupsVisibilities
+  }) => {
     const data = nodeInst.data;
     // State hooks
     const nodeInstanceRef = useRef();
@@ -95,7 +104,11 @@ const NodeMenu = memo(
       formData => {
         const varName = formData.varName;
         if (nodeInstanceRef.current.getKeyValue(varName, formData.name)) {
-          nodeInstanceRef.current.updateKeyValueItem(varName, formData);
+          if (formData.value === "") {
+            nodeInstanceRef.current.deleteKeyValue(varName, formData.name);
+          } else {
+            nodeInstanceRef.current.updateKeyValueItem(varName, formData);
+          }
         } else {
           nodeInstanceRef.current.addKeyValue(varName, formData);
         }
@@ -147,35 +160,37 @@ const NodeMenu = memo(
 
     /**
      * Open dialog to edit/add new Parameter
-     * @param {string} dataId : Unique identifier of item (undefined when not created yet)
+     * @param {object} objData : data to construct the object
      * @param {ReactComponent} DialogComponent : Dialog component to render
      */
     const handleKeyValueDialog = useCallback(
-      (data, param) => {
+      (objData, param) => {
+        const paramType = t(DIALOG_TITLE[param.toUpperCase()]);
         const obj = {
-          ...data,
+          ...objData,
           varName: param,
-          type: data.type ?? "any",
-          name: data.key
+          type: objData.type ?? DATA_TYPES.ANY,
+          name: objData.key,
+          paramType
         };
-        call(
-          "dialog",
-          "customDialog",
-          {
-            onSubmit: handleSubmitParameter,
-            title: t(DIALOG_TITLE[param.toUpperCase()]),
-            data: obj,
-            showDefault: true,
-            disableName: true,
-            disableType: true,
-            disableDescription: true,
-            preventRenderType: param !== TABLE_KEYS_NAMES.PARAMETERS,
-            call
-          },
-          ParameterEditorDialog
-        );
+
+        const method = "customDialog";
+        const args = {
+          onSubmit: handleSubmitParameter,
+          title: t("Edit {{paramType}}", { paramType }),
+          data: obj,
+          showDefault: true,
+          showValueOptions: true,
+          disableName: true,
+          disableType: true,
+          disableDescription: true,
+          preventRenderType: param !== TABLE_KEYS_NAMES.PARAMETERS,
+          call
+        };
+
+        openDialog({ method, args }, ParameterEditorDialog);
       },
-      [call, handleSubmitParameter, t]
+      [openDialog, call, handleSubmitParameter, t]
     );
 
     /**
@@ -200,6 +215,17 @@ const NodeMenu = memo(
      *                                                                                      */
     //========================================================================================
 
+    /**
+     * Simple extract method to lower complex cognitivity
+     * @param {string} thisItem : to check if this is the active item
+     */
+    const renderExpandIcon = useCallback(
+      thisItem => {
+        return activeItem === thisItem ? <ExpandLess /> : <ExpandMore />;
+      },
+      [activeItem]
+    );
+
     return (
       <Typography component="div" className={classes.root}>
         <MenuDetails
@@ -217,11 +243,7 @@ const NodeMenu = memo(
           onClick={handleExpandClick}
         >
           <ListItemText primary={t("Properties")} />
-          {activeItem === ACTIVE_ITEM.PROPERTIES ? (
-            <ExpandLess />
-          ) : (
-            <ExpandMore />
-          )}
+          {renderExpandIcon(ACTIVE_ITEM.PROPERTIES)}
         </ListItem>
         <Collapse in={activeItem === ACTIVE_ITEM.PROPERTIES} unmountOnExit>
           <Grid container className={classes.gridContainer}>
@@ -241,11 +263,7 @@ const NodeMenu = memo(
           onClick={handleExpandClick}
         >
           <ListItemText primary={t("Parameters")} />
-          {activeItem === ACTIVE_ITEM.PARAMETERS ? (
-            <ExpandLess />
-          ) : (
-            <ExpandMore />
-          )}
+          {renderExpandIcon(ACTIVE_ITEM.PARAMETERS)}
         </ListItem>
         <Collapse in={activeItem === ACTIVE_ITEM.PARAMETERS} unmountOnExit>
           <KeyValuesSection
@@ -266,7 +284,7 @@ const NodeMenu = memo(
           onClick={handleExpandClick}
         >
           <ListItemText primary={t("Env. Variables")} />
-          {activeItem === ACTIVE_ITEM.ENVVARS ? <ExpandLess /> : <ExpandMore />}
+          {renderExpandIcon(ACTIVE_ITEM.ENVVARS)}
         </ListItem>
         <Collapse in={activeItem === ACTIVE_ITEM.ENVVARS} unmountOnExit>
           <KeyValuesSection
@@ -287,7 +305,7 @@ const NodeMenu = memo(
           onClick={handleExpandClick}
         >
           <ListItemText primary={t("Command Line")} />
-          {activeItem === ACTIVE_ITEM.CMDLINE ? <ExpandLess /> : <ExpandMore />}
+          {renderExpandIcon(ACTIVE_ITEM.CMDLINE)}
         </ListItem>
         <Collapse in={activeItem === ACTIVE_ITEM.CMDLINE} unmountOnExit>
           <KeyValuesSection
@@ -308,7 +326,7 @@ const NodeMenu = memo(
           onClick={handleExpandClick}
         >
           <ListItemText primary={t("Group")} />
-          {activeItem === ACTIVE_ITEM.GROUP ? <ExpandLess /> : <ExpandMore />}
+          {renderExpandIcon(ACTIVE_ITEM.GROUP)}
         </ListItem>
         <Collapse in={activeItem === ACTIVE_ITEM.GROUP} unmountOnExit>
           <NodeGroupSection

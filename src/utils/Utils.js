@@ -101,3 +101,40 @@ export function validateDocumentName(name) {
     return true;
   }
 }
+
+const boolToPythonOptions = {
+  true: "True",
+  false: "False"
+};
+
+const PythonToBoolOptions = {
+  True: true,
+  False: false
+};
+
+/**
+ * Convert boolean to Python string
+ * @param {boolean} value
+ * @returns {string} : A string representing a Python boolean
+ */
+export function isValidPythonBool(value) {
+  return value in boolToPythonOptions;
+}
+
+/**
+ * Convert boolean to Python string
+ * @param {boolean} value
+ * @returns {string} : A string representing a Python boolean
+ */
+export function boolToPython(value) {
+  return boolToPythonOptions[value] ?? boolToPythonOptions[false];
+}
+
+/**
+ * Convert from Python string to boolean
+ * @param {string} value : A string representing a Python boolean
+ * @returns {boolean}
+ */
+export function pythonToBool(value) {
+  return PythonToBoolOptions[value];
+}

@@ -2,6 +2,7 @@ import React from "react";
 import { TextField, Typography } from "@material-ui/core";
 import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
 import _toString from "lodash/toString";
+import { DATA_TYPES } from "../../../../../../utils/Constants";
 
 /**
  * Abstract Data Type Class
@@ -82,7 +83,7 @@ class AbstractDataType {
    * @returns parsed value
    */
   getParsedValue(value) {
-    return typeof value === "string" ? JSON.parse(value) : value;
+    return typeof value === DATA_TYPES.STRING ? JSON.parse(value) : value;
   }
 
   /**
@@ -125,11 +126,12 @@ class AbstractDataType {
    */
   codeEditComponent = props => {
     return (
-      <Typography component="div" style={{ height: "200px", width: "100%" }}>
+      <Typography component="div" style={{ height: "100px", width: "100%" }}>
         <MonacoCodeEditor
           value={_toString(props.rowData.value)}
           onLoad={editor => {
             if (!props.isNew) editor.focus();
+            props.onLoadEditor && props.onLoadEditor(editor);
           }}
           language="python"
           disableMinimap={true}
