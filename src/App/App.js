@@ -3,7 +3,6 @@ import { withAuthentication, Style } from "@mov-ai/mov-fe-lib-react";
 import { Typography } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
-import PluginManagerIDE from "../engine/PluginManagerIDE/PluginManagerIDE";
 import DocManager from "../plugins/DocManager/DocManager";
 import FlowExplorer from "../plugins/views/editors/Flow/Components/Explorer/Explorer";
 import Dialog from "../plugins/Dialog/Dialog";
@@ -16,11 +15,17 @@ import TopBar from "../plugins/hosts/TopBar/TopBar";
 import AlertPanel from "../plugins/hosts/AlertPanel/AlertPanel";
 import Explorer from "../plugins/views/Explorer/Explorer";
 import MainMenu from "../plugins/views/MainMenu/MainMenu";
+import HomeTab from "../plugins/views/HomeTab/HomeTab";
 import Tabs from "../plugins/views/Tabs/Tabs";
+import PluginManagerIDE from "../engine/PluginManagerIDE/PluginManagerIDE";
 import Placeholder from "../plugins/views/Placeholder/Placeholder";
 import { withTheme } from "../decorators/withTheme";
+import {
+  HOMETAB_PROFILE,
+  FLOW_EXPLORER_PROFILE,
+  PLUGINS
+} from "../utils/Constants";
 import { MainContext } from "../main-context";
-import { FLOW_EXPLORER_PROFILE, PLUGINS } from "../utils/Constants";
 
 import "./App.css";
 
@@ -98,6 +103,10 @@ function installViewPlugins() {
     {
       profile: { name: "mainMenu", location: "leftPanel" },
       factory: profile => new MainMenu(profile)
+    },
+    {
+      profile: HOMETAB_PROFILE,
+      factory: profile => new HomeTab(profile)
     },
     {
       profile: { name: "explorer", location: "leftDrawer" },

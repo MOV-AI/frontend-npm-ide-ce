@@ -1,10 +1,11 @@
-import React, { forwardRef, useCallback, useEffect } from "react";
+import React, { forwardRef, useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import withAlerts from "../../../decorators/withAlerts";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
+import Workspace from "../../../utils/Workspace";
 import { getNameFromURL } from "../../../utils/Utils";
 import { HOMETAB_PROFILE, PLUGINS } from "../../../utils/Constants";
 import ERROR_MESSAGES from "../../../utils/ErrorMessages";
@@ -15,9 +16,10 @@ import SamplesComponent from "./components/Samples";
 import { homeTabStyles } from "./styles";
 
 const HomeTab = forwardRef((props, ref) => {
-  const { workspaceManager, call, on, off, alert, alertSeverities } = props;
-  const { t } = useTranslation();
+  const { call, on, off, alert, alertSeverities } = props;
+  const workspaceManager = useMemo(() => new Workspace(), []);
   const classes = homeTabStyles();
+  const { t } = useTranslation();
 
   //========================================================================================
   /*                                                                                      *
@@ -111,7 +113,6 @@ const HomeTab = forwardRef((props, ref) => {
 export default withViewPlugin(withAlerts(HomeTab));
 
 HomeTab.propTypes = {
-  call: PropTypes.func,
-  on: PropTypes.func,
-  workspaceManager: PropTypes.object
+  call: PropTypes.func.isRequired,
+  on: PropTypes.func.isRequired
 };

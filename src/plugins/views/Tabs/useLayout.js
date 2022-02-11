@@ -12,10 +12,9 @@ import {
   DOCK_POSITIONS,
   PLUGINS
 } from "../../../utils/Constants";
-import { getIconByScope } from "../../../utils/Utils";
+import { getIconByScope, getHomeTab } from "../../../utils/Utils";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Workspace from "../../../utils/Workspace";
-import HomeTab from "../HomeTab/HomeTab";
 import TOPICS from "./topics";
 
 const useLayout = (props, dockRef) => {
@@ -316,30 +315,6 @@ const useLayout = (props, dockRef) => {
     [props, _getCustomTab, _closeTab]
   );
 
-  /**
-   * Installs the HomeTab Plugin
-   * @private
-   * @returns the HomeTab
-   */
-  const installHomeTabPlugin = useCallback(() => {
-    const viewPlugin = new HomeTab(HOMETAB_PROFILE, { workspaceManager });
-
-    return PluginManagerIDE.install(HOMETAB_PROFILE.name, viewPlugin).then(
-      () => {
-        // Create and return tab data
-        // Return TabData
-        return {
-          id: HOMETAB_PROFILE.name,
-          name: HOMETAB_PROFILE.title,
-          tabTitle: HOMETAB_PROFILE.title,
-          scope: HOMETAB_PROFILE.name,
-          extension: "",
-          content: viewPlugin.render()
-        };
-      }
-    );
-  }, [workspaceManager]);
-
   //========================================================================================
   /*                                                                                      *
    *                                    Exposed Methods                                   *
@@ -546,7 +521,7 @@ const useLayout = (props, dockRef) => {
     lastTabs.forEach(tab => {
       const { id, name, scope } = tab;
 
-      if (id === HOMETAB_PROFILE.name) tabs.push(installHomeTabPlugin());
+      if (id === HOMETAB_PROFILE.name) tabs.push(getHomeTab());
       else tabs.push(_getTabData({ id, name, scope }));
     });
     // after all plugins are installed
@@ -562,15 +537,7 @@ const useLayout = (props, dockRef) => {
     return () => {
       workspaceManager.destroy();
     };
-  }, [
-    workspaceManager,
-    on,
-    call,
-    installHomeTabPlugin,
-    _closeTab,
-    _getTabData,
-    open
-  ]);
+  }, [workspaceManager, on, call, _closeTab, _getTabData, open]);
 
   //========================================================================================
   /*                                                                                      *

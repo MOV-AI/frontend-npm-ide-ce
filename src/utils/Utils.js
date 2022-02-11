@@ -5,6 +5,8 @@ import DescriptionIcon from "@material-ui/icons/Description";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import { Utils } from "@mov-ai/mov-fe-lib-core";
 import movaiIcon from "../plugins/views/editors/_shared/Loader/movai_red.svg";
+import { HOMETAB_PROFILE } from "./Constants";
+import HomeTab from "../plugins/views/HomeTab/HomeTab";
 
 /**
  * Generate random ID
@@ -138,3 +140,22 @@ export function boolToPython(value) {
 export function pythonToBool(value) {
   return PythonToBoolOptions[value];
 }
+
+/**
+ * Gets the HomeTab Plugin
+ * @private
+ * @returns {Promise} the HomeTab
+ */
+export const getHomeTab = () => {
+  const viewPlugin = new HomeTab(HOMETAB_PROFILE);
+
+  return Promise.resolve({
+    ...HOMETAB_PROFILE,
+    id: HOMETAB_PROFILE.name,
+    name: HOMETAB_PROFILE.title,
+    tabTitle: HOMETAB_PROFILE.title,
+    scope: HOMETAB_PROFILE.name,
+    extension: "",
+    content: viewPlugin.render()
+  });
+};
