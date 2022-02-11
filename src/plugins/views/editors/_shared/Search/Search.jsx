@@ -1,6 +1,7 @@
 import React from "react";
 import SearchIcon from "@material-ui/icons/Search";
 import { TextField, InputAdornment } from "@material-ui/core";
+import { DATA_TYPES } from "../../../../../utils/Constants";
 
 /**
  * Normalize string
@@ -34,16 +35,16 @@ const filter = (searchQuery, subject) => {
   };
 
   switch (typeof subject) {
-    case "string":
+    case DATA_TYPES.STRING:
       subject = normalizeString(subject);
       return subject.includes(searchQuery);
 
-    case "object":
+    case DATA_TYPES.OBJECT:
       // Is array
       if (Array.isArray(subject)) {
         subject = subject.filter(e => {
           var value = filter(searchQuery, e);
-          if (typeof value !== "boolean") {
+          if (typeof value !== DATA_TYPES.BOOLEAN) {
             if (value !== undefined) {
               value = value.length === 0 ? false : true;
             }
@@ -59,9 +60,9 @@ const filter = (searchQuery, subject) => {
         return list.length > 0 ? subject : false;
       }
 
-    case "number":
+    case DATA_TYPES.NUMBER:
       return searchNonStrings();
-    case "boolean":
+    case DATA_TYPES.BOOLEAN:
       return searchNonStrings();
 
     default:

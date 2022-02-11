@@ -1,7 +1,7 @@
-import Model from "../../../Model";
+import IdBasedModel from "../../../subModels/IdBasedModel/IdBasedModel";
 import schema from "./schema";
 
-class Group extends Model {
+class Group extends IdBasedModel {
   constructor() {
     // inject imported schema and forward constructor arguments
     super({ schema, ...arguments[0] });
@@ -24,24 +24,6 @@ class Group extends Model {
    *                                     Data Handlers                                    *
    *                                                                                      */
   //========================================================================================
-
-  /**
-   * Returns the id property
-   * @returns {string}
-   */
-  getId() {
-    return this.id;
-  }
-
-  /**
-   * Sets the id property
-   * @param {string} value : The new value
-   * @returns {Group}
-   */
-  setId(value) {
-    this.id = value;
-    return this;
-  }
 
   /**
    * Returns the enabled property

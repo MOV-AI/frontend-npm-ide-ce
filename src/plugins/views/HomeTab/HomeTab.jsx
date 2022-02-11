@@ -6,7 +6,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import withAlerts from "../../../decorators/withAlerts";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import { getNameFromURL } from "../../../utils/Utils";
-import { HOMETAB_PROFILE } from "../../../utils/Constants";
+import { HOMETAB_PROFILE, PLUGINS } from "../../../utils/Constants";
 import ERROR_MESSAGES from "../../../utils/ErrorMessages";
 import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
 import QuickAccessComponent from "./components/QuickAccess";
@@ -55,9 +55,12 @@ const HomeTab = forwardRef((props, ref) => {
 
   useEffect(() => {
     const HOMETAB_ID_TOPIC = `${HOMETAB_PROFILE.name}-active`;
-    call("rightDrawer", "resetBookmarks");
+    call(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS);
     on("tabs", HOMETAB_ID_TOPIC, () => {
-      call("rightDrawer", "resetBookmarks");
+      call(
+        PLUGINS.RIGHT_DRAWER.NAME,
+        PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS
+      );
     });
     return () => {
       off("tabs", HOMETAB_ID_TOPIC);

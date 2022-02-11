@@ -3,6 +3,7 @@ import BuildIcon from "@material-ui/icons/Build";
 import CodeIcon from "@material-ui/icons/Code";
 import DescriptionIcon from "@material-ui/icons/Description";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
+import { Utils } from "@mov-ai/mov-fe-lib-core";
 import movaiIcon from "../plugins/views/editors/_shared/Loader/movai_red.svg";
 
 /**
@@ -85,6 +86,55 @@ export const stopPropagation = e => {
  * @returns {String}
  */
 export function getNameFromURL(url) {
-  console.log("url", url);
   return url?.substring(url.lastIndexOf("/") + 1);
+}
+
+/**
+ * Validate document name and throw error if validation doesn't pass
+ * @param {string} name : Document name
+ * @returns {boolean}
+ */
+export function validateDocumentName(name) {
+  if (!Utils.validateEntityName(name)) {
+    throw new Error("Invalid name");
+  } else {
+    return true;
+  }
+}
+
+const boolToPythonOptions = {
+  true: "True",
+  false: "False"
+};
+
+const PythonToBoolOptions = {
+  True: true,
+  False: false
+};
+
+/**
+ * Convert boolean to Python string
+ * @param {boolean} value
+ * @returns {string} : A string representing a Python boolean
+ */
+export function isValidPythonBool(value) {
+  return value in boolToPythonOptions;
+}
+
+/**
+ * Convert boolean to Python string
+ * @param {boolean} value
+ * @returns {string} : A string representing a Python boolean
+ */
+export function boolToPython(value) {
+  return boolToPythonOptions[value] ?? boolToPythonOptions[false];
+}
+
+/**
+ * Convert from Python string to boolean
+ * @param {string} value : A string representing a Python boolean
+ * @returns {boolean}
+ */
+export function pythonToBool(value) {
+  return PythonToBoolOptions[value];
 }

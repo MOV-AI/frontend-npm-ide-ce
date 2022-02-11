@@ -1,5 +1,5 @@
 import { useTheme } from "@material-ui/core/styles";
-import DataTypeManager from "../DataTypeManager";
+import DataTypeManager from "./DataTypes/DataTypeManager";
 
 const useDataTypes = () => {
   // Hooks

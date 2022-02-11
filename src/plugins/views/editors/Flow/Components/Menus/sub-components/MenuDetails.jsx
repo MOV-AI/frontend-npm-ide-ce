@@ -4,10 +4,13 @@ import { ListItem, ListItemText, Typography } from "@material-ui/core";
 import NodeLink from "./NodeLink";
 import { DEFAULT_FUNCTION, useTranslation } from "../../../../_shared/mocks";
 
+import { menuDetailsStyles } from "../styles";
+
 const MenuDetails = props => {
   // Props
   const { id, template, model, type, openDoc } = props;
   // Other hooks
+  const classes = menuDetailsStyles();
   const { t } = useTranslation();
 
   //========================================================================================
@@ -18,7 +21,7 @@ const MenuDetails = props => {
 
   return (
     <>
-      <h2 style={{ textAlign: "center" }}>{id}</h2>
+      <h2 className={classes.header}>{id}</h2>
       <ListItem divider>
         <ListItemText primary={t("Name:")} />
         <NodeLink name={template} scope={model} openDoc={openDoc}>

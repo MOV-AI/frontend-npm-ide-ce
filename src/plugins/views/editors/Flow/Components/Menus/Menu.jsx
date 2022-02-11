@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import {
   Collapse,
   Divider,
@@ -7,23 +8,25 @@ import {
   List,
   ListItem,
   ListItemText,
-  Typography,
-  Tooltip
+  Typography
 } from "@material-ui/core";
-import { useTranslation } from "react-i18next";
 import EditIcon from "@material-ui/icons/Edit";
-import DeleteIcon from "@material-ui/icons/DeleteOutline";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import Add from "@material-ui/icons/Add";
-import VisibilityIcon from "@material-ui/icons/Visibility";
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+import { Utils } from "@mov-ai/mov-fe-lib-core";
 import useDataSubscriber from "../../../../../DocManager/useDataSubscriber";
+import {
+  DEFAULT_KEY_VALUE_DATA,
+  DATA_TYPES,
+  PLUGINS
+} from "../../../../../../utils/Constants";
+import { validateDocumentName } from "../../../../../../utils/Utils";
+import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
 import DetailsMenu from "../../../_shared/DetailsMenu/DetailsMenu";
 import TableKeyValue from "./sub-components/TableKeyValue";
-import styles from "./styles";
-
-const useStyles = makeStyles(styles);
+import GroupItem from "./sub-components/GroupItem";
+import menuStyles from "./styles";
 
 const ACTIVE_ITEM = {
   description: 1,
@@ -31,7 +34,15 @@ const ACTIVE_ITEM = {
   groups: 3
 };
 
-const Menu = ({ name, model, details: detailsProp, editable, call }) => {
+const Menu = ({
+  name,
+  model,
+  details: detailsProp,
+  editable,
+  call,
+  handleGroupVisibility,
+  openDialog
+}) => {
   // State hook
   const [activeItem, setActiveItem] = React.useState(0);
   const { data } = useDataSubscriber({
@@ -39,7 +50,7 @@ const Menu = ({ name, model, details: detailsProp, editable, call }) => {
     propsData: detailsProp
   });
   // Other hooks
-  const classes = useStyles();
+  const classes = menuStyles();
   const { t } = useTranslation();
 
   //========================================================================================
@@ -71,7 +82,7 @@ const Menu = ({ name, model, details: detailsProp, editable, call }) => {
     const parameters = data?.parameters || {};
     Object.keys(parameters).forEach(param => {
       const value = data.parameters?.[param]?.value || "";
-      const type = data.parameters?.[param]?.type || "any";
+      const type = data.parameters?.[param]?.type || DATA_TYPES.ANY;
       output.push({
         key: param,
         value: renderValue(value, type, true)
@@ -80,6 +91,66 @@ const Menu = ({ name, model, details: detailsProp, editable, call }) => {
     return output;
   }, [data?.parameters, renderValue]);
 
+  /**
+   * @private Use this to change a group name
+   * @param {String} prevName : previous name (used to discern if is new or edit)
+   * @param {Function} submitCallback : Callback to be called on Submit
+   */
+  const editGroupName = useCallback(
+    (submitCallback, prevName = "") => {
+      const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
+      const args = {
+        size: "sm",
+        title: prevName ? t("Edit Group") : t("Add Group"),
+        inputLabel: t("Group Name"),
+        value: prevName,
+        onValidation: value => {
+          try {
+            const validation = validateDocumentName(value);
+            return { result: validation, error: "" };
+          } catch (err) {
+            return {
+              result: false,
+              error: err.message
+            };
+          }
+        },
+        onSubmit: submitCallback
+      };
+      openDialog({ method, args });
+    },
+    [openDialog, t]
+  );
+
+  /**
+   * @summary: Validate document name against invalid characters. It accept ROS valid names
+   * and can't accept two consecutive underscores.
+   * @param {String} oldName : Old Name
+   * @param {Object} newData : New data
+   * @returns {Promise} {result: <boolean>, [error: <string> OR data: <object>]}
+   **/
+  const validateParamName = useCallback(
+    (oldName, newData) => {
+      const { name: newName } = newData;
+
+      try {
+        if (!newName) throw new Error(`Name is mandatory`);
+        else if (!Utils.validateEntityName(newName, []))
+          throw new Error(`Invalid Name`);
+
+        // Validate against repeated names
+        if (oldName !== newName && model.current.getParameter(newName)) {
+          throw new Error(`Cannot have 2 entries with the same name`);
+        }
+      } catch (error) {
+        return Promise.resolve({ result: false, error: error.message });
+      }
+
+      return Promise.resolve({ result: true, data: { oldName, newData } });
+    },
+    [model]
+  );
+
   //========================================================================================
   /*                                                                                      *
    *                                     Handle Events                                    *
@@ -87,15 +158,60 @@ const Menu = ({ name, model, details: detailsProp, editable, call }) => {
   //========================================================================================
 
   /**
-   * Handle expand/collapse action
+   * @param {Object} data : Data to Save
+   */
+  const handleSubmitParameter = useCallback(
+    (oldName, newData) => {
+      if (oldName === "") {
+        model.current.addParameter(newData.name, newData);
+      } else {
+        model.current.updateKeyValueItem("parameters", newData, oldName);
+      }
+    },
+    [model]
+  );
+
+  /**
+   * Open dialog to edit/add new Parameter
+   * @param {string} dataId : Unique identifier of item (undefined when not created yet)
+   * @param {ReactComponent} DialogComponent : Dialog component to render
+   */
+  const handleParameterDialog = useCallback(
+    dataId => {
+      const obj = model.current.getParameter(dataId) || DEFAULT_KEY_VALUE_DATA;
+      const method = PLUGINS.DIALOG.CALL.CUSTOM_DIALOG;
+
+      const args = {
+        onSubmit: formData => handleSubmitParameter(obj.name, formData),
+        nameValidation: newData => validateParamName(obj.name, newData),
+        renderType: true,
+        title: t("Parameter"),
+        data: obj,
+        call
+      };
+
+      openDialog({ method, args }, ParameterEditorDialog);
+    },
+    [model, openDialog, call, validateParamName, handleSubmitParameter, t]
+  );
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                       Handlers                                       *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * @private Handle expand/collapse action
    *  If item is collapsed : Expand item and collapse other
    *  If item is expanded  : Collapse item and let all others collapsed as well
-   * @param {*} _activeItem
+   * @param {Event} evt
    */
-  const handleExpandClick = useCallback(newActiveItem => {
+  const handleExpandClick = useCallback(evt => {
+    const newActiveItem = parseInt(evt.currentTarget.dataset.menuId);
+
     setActiveItem(prevState => {
-      if (prevState === newActiveItem) return 0;
-      else return newActiveItem;
+      return prevState === newActiveItem ? 0 : newActiveItem;
     });
   }, []);
 
@@ -103,39 +219,64 @@ const Menu = ({ name, model, details: detailsProp, editable, call }) => {
    * Open dialog to edit flow description
    */
   const handleEditDescriptionClick = useCallback(() => {
-    call("dialog", "formDialog", {
+    const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
+    const args = {
       size: "md",
       multiline: true,
       title: t("Edit Description"),
       inputLabel: t("Description"),
       value: model.current.getDescription(),
       onSubmit: description => model.current.setDescription(description)
-    });
-  }, [call, t, model]);
+    };
+    openDialog({ method, args });
+  }, [openDialog, t, model]);
 
+  /**
+   * Handle Add new Parameter
+   */
   const handleAddParameterClick = useCallback(() => {
-    console.log("debug handleAddParameterClick");
-  }, []);
+    handleParameterDialog();
+  }, [handleParameterDialog]);
 
-  const handleParamEdit = useCallback(() => {
-    console.log("debug handleParamEdit");
-  }, []);
+  /**
+   * Handle Edit Parameter
+   * @param {string} key : parameter id to edit
+   */
+  const handleParamEdit = useCallback(
+    ({ key }) => {
+      handleParameterDialog(key);
+    },
+    [handleParameterDialog]
+  );
 
-  const handleParamDelete = useCallback(() => {
-    console.log("debug handleParamDelete");
-  }, []);
+  /**
+   * Handle Delete Parameter
+   * @param {string} key : parameter id to delete
+   * @param {string} value : parameter value, to construct the confirm phrase
+   */
+  const handleParamDelete = useCallback(
+    ({ key, value }) => {
+      const method = PLUGINS.DIALOG.CALL.CONFIRMATION;
+      const args = {
+        submitText: t("Delete"),
+        title: t('Confirm to delete "{{paramName}}"', { paramName: key }),
+        onSubmit: () => model.current.deleteParameter(key),
+        message: t(
+          'Are you sure you want to delete the param "{{paramName}}" with the value "{{value}}"?',
+          { paramName: key, value }
+        )
+      };
+      openDialog({ method, args });
+    },
+    [model, openDialog, t]
+  );
 
-  const handleGroupActive = useCallback((group, status) => {
-    console.log("debug handleGroupActive", group, status);
-  }, []);
-
-  const handleGroupEdit = useCallback(groupId => {
-    console.log("debug open modal to edit group", groupId);
-  }, []);
-
-  const handleGroupDelete = useCallback(groupId => {
-    console.log("debug handleGroupDelete", groupId);
-  }, []);
+  /**
+   * Handle Add group click
+   */
+  const handleAddGroupClick = useCallback(() => {
+    editGroupName(groupName => model.current.addGroup(groupName));
+  }, [editGroupName, model]);
 
   //========================================================================================
   /*                                                                                      *
@@ -189,52 +330,18 @@ const Menu = ({ name, model, details: detailsProp, editable, call }) => {
    * @returns {ReactElement} Groups to render in collapsible content
    */
   const renderGroups = useCallback(() => {
-    const groups = Object.keys(data.groups || {});
+    const groups = Object.values(data.groups || {});
     return groups.length ? (
-      groups.map(key => {
-        const checked = data.groups[key].enabled;
-        const groupName = data.groups[key].name;
-        return (
-          <Typography component="div" className={classes.groupRow} key={key}>
-            <Tooltip title={groupName}>
-              <Typography
-                component="div"
-                className={`${classes.itemValue} ${classes.groupItem}`}
-              >
-                {groupName}
-              </Typography>
-            </Tooltip>
-            <IconButton onClick={() => handleGroupActive(key, !checked)}>
-              {checked && (
-                <VisibilityIcon
-                  fontSize="small"
-                  color="primary"
-                ></VisibilityIcon>
-              )}
-              {!checked && (
-                <VisibilityOffIcon
-                  fontSize="small"
-                  color="disabled"
-                ></VisibilityOffIcon>
-              )}
-            </IconButton>
-            {editable && (
-              <Tooltip title={t("Edit Group")}>
-                <IconButton onClick={() => handleGroupEdit(key)}>
-                  <EditIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-            {editable && (
-              <Tooltip title={t("Delete Group")}>
-                <IconButton onClick={() => handleGroupDelete(key)}>
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-          </Typography>
-        );
-      })
+      groups.map(group => (
+        <GroupItem
+          key={group.id}
+          item={group}
+          model={model}
+          editGroupName={editGroupName}
+          editable={editable}
+          handleGroupVisibility={handleGroupVisibility}
+        />
+      ))
     ) : (
       <Typography className={`${classes.itemValue} ${classes.disabled}`}>
         No Groups
@@ -243,11 +350,10 @@ const Menu = ({ name, model, details: detailsProp, editable, call }) => {
   }, [
     classes,
     data.groups,
+    model,
     editable,
-    handleGroupActive,
-    handleGroupEdit,
-    handleGroupDelete,
-    t
+    editGroupName,
+    handleGroupVisibility
   ]);
 
   return (
@@ -257,7 +363,8 @@ const Menu = ({ name, model, details: detailsProp, editable, call }) => {
         {/* ============ DESCRIPTION ============ */}
         <ListItem
           button
-          onClick={() => handleExpandClick(ACTIVE_ITEM.description)}
+          data-menu-id={ACTIVE_ITEM.description}
+          onClick={handleExpandClick}
         >
           <ListItemText primary={t("Description")} />
           <IconButton
@@ -282,7 +389,8 @@ const Menu = ({ name, model, details: detailsProp, editable, call }) => {
         {/* ============ PARAMETERS ============ */}
         <ListItem
           button
-          onClick={() => handleExpandClick(ACTIVE_ITEM.parameters)}
+          data-menu-id={ACTIVE_ITEM.parameters}
+          onClick={handleExpandClick}
         >
           <ListItemText primary={t("Parameters")} />
           <IconButton
@@ -305,13 +413,17 @@ const Menu = ({ name, model, details: detailsProp, editable, call }) => {
           <Divider />
         </Collapse>
         {/* ============ GROUPS ============ */}
-        <ListItem button onClick={() => handleExpandClick(ACTIVE_ITEM.groups)}>
+        <ListItem
+          button
+          data-menu-id={ACTIVE_ITEM.groups}
+          onClick={handleExpandClick}
+        >
           <ListItemText primary={t("Groups")} />
           <IconButton
             disabled={!editable}
             onClick={e => {
               e.stopPropagation();
-              handleAddParameterClick();
+              handleAddGroupClick();
             }}
           >
             <Add />
@@ -325,6 +437,15 @@ const Menu = ({ name, model, details: detailsProp, editable, call }) => {
       </List>
     </Typography>
   );
+};
+
+Menu.propTypes = {
+  name: PropTypes.string.isRequired,
+  model: PropTypes.object.isRequired,
+  details: PropTypes.object.isRequired,
+  call: PropTypes.func.isRequired,
+  handleGroupVisibility: PropTypes.func.isRequired,
+  editable: PropTypes.bool
 };
 
 export default Menu;

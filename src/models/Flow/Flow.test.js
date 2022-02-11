@@ -1,3 +1,4 @@
+import { DATA_TYPES } from "../../utils/Constants";
 import Flow from "./Flow";
 import flows from "./__mock__/data/flows";
 
@@ -33,8 +34,8 @@ test("Serialize OF db", () => {
           x: 0.023333333333333334
         },
         parameters: {
-          camera: { value: "back1", type: "any" },
-          move_distance_to_car: { value: "0.30", type: "any" }
+          camera: { value: "back1", type: DATA_TYPES.ANY },
+          move_distance_to_car: { value: "0.30", type: DATA_TYPES.ANY }
         }
       }
     },
@@ -47,7 +48,7 @@ test("Serialize OF db", () => {
           y: 0.015466666666666667
         },
         parameters: {
-          varA: { value: "5", type: "any" }
+          varA: { value: "5", type: DATA_TYPES.ANY }
         }
       }
     },
@@ -63,7 +64,7 @@ test("Serialize OF db", () => {
     },
     groups: { 0: { id: "0", name: "layer1", enabled: true } },
     parameters: {
-      var1: { value: "movai", description: "", type: "any" }
+      var1: { value: "movai", description: "", type: DATA_TYPES.ANY }
     }
   };
 

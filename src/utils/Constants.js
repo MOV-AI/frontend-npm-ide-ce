@@ -7,20 +7,22 @@ export const MANAGER = "manager";
 
 export const VERSION = get(window, "SERVER_DATA.Application.Version", "0.0.1");
 
+export const DISABLED_VALUE = "None";
+
+export const DATA_TYPES = {
+  BOOLEAN: "boolean",
+  STRING: "string",
+  NUMBER: "number",
+  OBJECT: "object",
+  ARRAY: "array",
+  ANY: "any"
+};
+
 export const SCOPES = {
   Callback: "Callback",
   Configuration: "Configuration",
   Flow: "Flow",
   Node: "Node"
-};
-
-export const TOPICS = {
-  RIGHT_DRAWER: {
-    CHANGE_BOOKMARK: "changeBookmark",
-    ADD_BOOKMARK: "addBookmark",
-    SET_BOOKMARK: "setBookmark",
-    REMOVE_BOOKMARK: "removeBookmark"
-  }
 };
 
 export const PLUGINS = {
@@ -45,7 +47,8 @@ export const PLUGINS = {
     CALL: {
       ADD_BOOKMARK: "addBookmark",
       SET_BOOKMARK: "setBookmark",
-      REMOVE_BOOKMARK: "removeBookmark"
+      REMOVE_BOOKMARK: "removeBookmark",
+      RESET_BOOKMARKS: "resetBookmarks"
     },
     ON: {
       CHANGE_BOOKMARK: "changeBookmark"
@@ -57,6 +60,7 @@ export const PLUGINS = {
       NEW_DOC: "newDocument",
       CONFIRMATION: "confirmation",
       FORM_DIALOG: "formDialog",
+      CUSTOM_DIALOG: "customDialog",
       ALERT: "alert"
     }
   },
@@ -66,6 +70,17 @@ export const PLUGINS = {
     ON: { ADD_NODE: "addNode" }
   }
 };
+
+export const DEFAULT_KEY_VALUE_DATA = {
+  name: "",
+  description: "",
+  type: DATA_TYPES.ANY,
+  value: ""
+};
+
+export const ROS_VALID_NAMES = new RegExp(
+  /(?!.*__.*)^[a-zA-Z~/]{1}?[a-zA-Z0-9_/]*$/
+);
 
 //========================================================================================
 /*                                                                                      *

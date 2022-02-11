@@ -1,12 +1,9 @@
 import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { Divider, Link, Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import styles from "../styles";
 import CallbackModel from "../../../../../../../models/Callback/Callback";
 import { DEFAULT_FUNCTION, useTranslation } from "../../../../_shared/mocks";
-
-const useStyles = makeStyles(styles);
+import { portStyles } from "../styles";
 
 const PortsDetails = props => {
   // Props
@@ -15,7 +12,7 @@ const PortsDetails = props => {
   const [inputPorts, setInputPorts] = useState([]);
   const [outputPorts, setOutputPorts] = useState([]);
   // Other Hooks
-  const classes = useStyles();
+  const classes = portStyles();
   const { t } = useTranslation();
 
   //========================================================================================
@@ -34,9 +31,9 @@ const PortsDetails = props => {
     const _outputPorts = [];
     Object.keys(ports).forEach(portName => {
       const port = ports[portName];
-      const inputs = Object.values(port.In);
-      const outputs = Object.values(port.Out);
-      const callbacks = inputs.map(el => el.Callback).filter(cb => cb);
+      const inputs = Object.values(port.portIn);
+      const outputs = Object.values(port.portOut);
+      const callbacks = inputs.map(el => el.callback).filter(cb => cb);
       // Add input ports
       inputs.some(() =>
         _inputPorts.push({
@@ -62,17 +59,17 @@ const PortsDetails = props => {
       return portsData.map((port, portIndex) => {
         return (
           <Typography
-            key={`port-${portIndex}`}
+            key={`${port.name}_${portIndex}`}
             component="div"
             className={classes.portRow}
           >
             <Typography component="div" className={classes.portName}>
               {port.name}
             </Typography>
-            {port.value?.map((callback, portValueIndex) => {
+            {port.value?.map((callback, valueIndex) => {
               return (
                 <Link
-                  key={`portValue-${portValueIndex}`}
+                  key={`${port.name}_${portIndex}_${valueIndex}`}
                   className={classes.portCallbackLink}
                   component="button"
                   onClick={event => {

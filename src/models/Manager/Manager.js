@@ -55,6 +55,13 @@ class Manager {
   }
 
   /**
+   * @returns {Boolean} : if has any items
+   */
+  hasItems() {
+    return Boolean(this.data.size);
+  }
+
+  /**
    * Creates a new item
    * Emits the CREATE event
    * @param {object} param0 : An object with the name of the item and the content
@@ -91,16 +98,16 @@ class Manager {
   }
 
   /**
-   * Renames an item 
+   * Renames an item
    * @param {object} param0: An object with the old name of the item and the new name for the item
    * @param {boolean} preventEmit: A boolean to prevent the second EVENTS.UPDATE emission
    * @returns : The instance
    */
-  renameItem({ oldName, name }, preventEmit) {
-    const oldItem = this.getItem(oldName);
-    if(oldItem){
+  renameItem({ prevName, name }, preventEmit) {
+    const oldItem = this.getItem(prevName);
+    if (oldItem) {
       oldItem.setName(name);
-      this.data.delete(oldName);
+      this.data.delete(prevName);
       this.data.set(name, oldItem);
       !preventEmit && this.emit(EVENTS.UPDATE);
     }
@@ -216,6 +223,15 @@ class Manager {
     if (typeof anyFn === "function") {
       anyFn.call(this, event, name, value);
     }
+  }
+
+  /**
+   * Clear all items
+   * @returns {Manager} Returns its instance
+   */
+  clear() {
+    this.data.clear();
+    return this;
   }
 
   /**

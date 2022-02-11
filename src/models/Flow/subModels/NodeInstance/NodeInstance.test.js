@@ -1,5 +1,6 @@
-import Position from "../Position/Position";
+import { DATA_TYPES } from "../../../../utils/Constants";
 import Manager from "../../../Manager";
+import Position from "../Position/Position";
 import NodeInstance from "./NodeInstance";
 
 test("Smoke test", () => {
@@ -29,8 +30,8 @@ test("Serialize OF db", () => {
         y: { Value: 0.02 }
       },
       Parameter: {
-        camera: { Value: "back1", Type: "string" },
-        move_distance_to_car: { Value: "0.30", Type: "number" }
+        camera: { Value: "back1", Type: DATA_TYPES.STRING },
+        move_distance_to_car: { Value: "0.30", Type: DATA_TYPES.NUMBER }
       }
     }
   };
@@ -44,11 +45,11 @@ test("Serialize OF db", () => {
     groups: ["0"],
     position: { x: 0.01, y: 0.02 },
     parameters: {
-      camera: { name: "camera", value: "back1", type: "string" },
+      camera: { name: "camera", value: "back1", type: DATA_TYPES.STRING },
       move_distance_to_car: {
         name: "move_distance_to_car",
         value: "0.30",
-        type: "number"
+        type: DATA_TYPES.NUMBER
       }
     },
     envVars: { path: { name: "path", value: "/opt/movai" } },
@@ -70,11 +71,11 @@ test("Serialize TO db", () => {
     envVars: { path: { name: "path", value: "/opt/movai" } },
     position: { x: 0.01, y: 0.03 },
     parameters: {
-      camera: { name: "camera", value: "back1", type: "any" },
+      camera: { name: "camera", value: "back1", type: DATA_TYPES.ANY },
       move_distance_to_car: {
         name: "move_distance_to_car",
         value: "0.30",
-        type: "number"
+        type: DATA_TYPES.NUMBER
       }
     }
   };
@@ -93,8 +94,8 @@ test("Serialize TO db", () => {
       y: { Value: 0.03 }
     },
     Parameter: {
-      camera: { Value: "back1", Type: "any" },
-      move_distance_to_car: { Value: "0.30", Type: "number" }
+      camera: { Value: "back1", Type: DATA_TYPES.ANY },
+      move_distance_to_car: { Value: "0.30", Type: DATA_TYPES.NUMBER }
     }
   };
 
@@ -116,11 +117,11 @@ test("Create node", () => {
     envVars: { path: { name: "path", value: "/opt/movai" } },
     position: { x: 0.01, y: 0.03 },
     parameters: {
-      camera: { name: "camera", value: "back1", type: "any" },
+      camera: { name: "camera", value: "back1", type: DATA_TYPES.ANY },
       move_distance_to_car: {
         name: "move_distance_to_car",
         value: "0.30",
-        type: "number"
+        type: DATA_TYPES.NUMBER
       }
     }
   };

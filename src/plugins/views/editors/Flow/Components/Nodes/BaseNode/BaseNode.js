@@ -429,6 +429,16 @@ class BaseNode extends BaseNodeStruct {
   }
 
   /**
+   * Return visualization to DB format
+   */
+  get visualizationToDB() {
+    return {
+      x: { Value: this.data.Visualization[0] },
+      y: { Value: this.data.Visualization[1] }
+    };
+  }
+
+  /**
    * setPosition - update the node's position
    *
    * @param {number} x position in x
@@ -667,9 +677,28 @@ class BaseNode extends BaseNodeStruct {
    * Update graphical representation
    */
   update = () => {
-    this.addPorts().renderPorts().updateSize().renderStatus();
-
+    this.addPorts().renderHeader().renderStatus().renderPorts();
     return this;
+  };
+
+  /**
+   *
+   * @param {*} data
+   * @returns
+   */
+  updateNode = data => {
+    const fn = {
+      Visualization: _data => this.updatePosition(_data), // Position changes when dragging or when adding a new node
+      default: () => {
+        lodash.merge(this.data, data);
+        this.data.name = this.name;
+      }
+    };
+    Object.keys(data).forEach(key => {
+      (fn[key] || fn["default"])(data);
+      if (!this.noReloadRequired.includes(key)) this.init().addToCanvas();
+    });
+    return true;
   };
 
   /**
@@ -774,28 +803,29 @@ class BaseNode extends BaseNodeStruct {
    * onTemplateUpdate - on template update event handler
    * templates only change when edited while in redis
    *
-   * @param {string} name node's template name
+   * @param {string} data node's template name
    */
-  onTemplateUpdate = name => {
-    if (name !== this.templateName) return; //not my template
-    this._template = undefined;
-    this.update();
+  onTemplateUpdate = data => {
+    if (data.Label !== this.templateName) return; // not my template
+    this._template = Object.assign(this._template, data);
+    this.updateTemplate();
   };
 
   /**
-   * onLayersChange - on layers event handler
+   * onGroupsChange - on groups event handler
    *
-   * @param {object} layers flow layers
+   * @param {object} groups flow groups
    */
-  onLayersChange = layers => {
-    const nodeLayers = lodash.get(this.data, "NodeLayers", []);
+  onGroupsChange = groups => {
+    const nodeGroups = this.data.NodeLayers ?? [];
     const hide =
-      nodeLayers.every(layer => {
-        if (layer in layers) {
-          return layers[layer].on ? false : true;
+      nodeGroups.every(group => {
+        const groupItem = groups.get(group);
+        if (groupItem) {
+          return !groupItem.enabled;
         }
         return false;
-      }) && nodeLayers.length > 0;
+      }) && nodeGroups.length > 0;
     this.visibility = !hide;
   };
 
@@ -808,26 +838,6 @@ class BaseNode extends BaseNodeStruct {
       return this.el;
     });
   }
-
-  /**
-   * update - update node
-   *
-   * @param {object} data updated node data
-   */
-  update = data => {
-    const fn = {
-      Visualization: docData => this.updatePosition(docData), // Position changes when dragging or when adding a new node
-      default: () => {
-        lodash.merge(this.data, data);
-        this.data.name = this.name;
-      }
-    };
-    Object.keys(data).forEach(key => {
-      (fn[key] || fn["default"])(data);
-      this.init().addToCanvas();
-    });
-    return true;
-  };
 
   /**
    * deleteKey - set node data key to null

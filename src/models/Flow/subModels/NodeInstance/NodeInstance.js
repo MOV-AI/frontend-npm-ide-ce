@@ -136,6 +136,27 @@ class NodeInstance extends Model {
   }
 
   /**
+   * Adds a new id to the groups
+   * @param {string} groupId : The groupId
+   * @returns {NodeInstance} : The instance
+   */
+  addGroup(groupId) {
+    this.groups.push(groupId);
+    return this;
+  }
+
+  /**
+   * Remove Group by groupId
+   * @param {string} groupId : The groupId
+   * @returns {NodeInstance} : The instance
+   */
+  removeGroup(groupId) {
+    const indexOfGroupId = this.groups.indexOf(groupId);
+    if (indexOfGroupId >= 0) this.groups.splice(indexOfGroupId, 1);
+    return this;
+  }
+
+  /**
    * Returns the node's position object
    * @returns {Position}
    */
@@ -157,6 +178,69 @@ class NodeInstance extends Model {
       this.getPosition().serialize()
     );
 
+    return this;
+  }
+
+  /**
+   * Updates an instance of a managed property
+   * Can only be used with managed properties
+   * @param {string} propName : The name of the property
+   * @param {*} content : The data to update the item
+   * @returns {Node} : The instance
+   */
+  updateKeyValueItem(propName, content) {
+    const name = content.name;
+    this[propName]?.updateItem({ name, content });
+
+    return this;
+  }
+
+  /**
+   * Updates an instance of a managed property
+   * Can only be used with managed properties
+   * @param {string} propName : The name of the property
+   * @param {boolean} value : The value to update the prop
+   * @returns {Node} : The instance
+   */
+  updateKeyValueProp(propName, value) {
+    this[propName] = value;
+
+    return this;
+  }
+
+  /**
+   * Deletes an instance of a managed property
+   * Can only be used with managed properties
+   * @param {string} varName : The name of the property
+   * @param {any} key : The name of the item
+   * @returns {Node} : The instance
+   */
+  deleteKeyValue(varName, key) {
+    this[varName]?.deleteItem(key);
+    return this;
+  }
+
+  /**
+   * Returns an instance of a managed property
+   * Can only be used with managed properties
+   * @param {string} varName : The name of the property
+   * @param {any} key : The name of the item
+   * @returns {any}
+   */
+  getKeyValue(varName, key) {
+    return this[varName]?.getItem(key);
+  }
+
+  /**
+   * Sets an instance of a managed property
+   * Can only be used with managed properties
+   * @param {string} varName : The name of the property
+   * @param {any} content : The content of the item
+   * @returns {Node} : The instance
+   */
+  addKeyValue(varName, content) {
+    const name = content.name;
+    this[varName]?.setItem({ name, content });
     return this;
   }
 

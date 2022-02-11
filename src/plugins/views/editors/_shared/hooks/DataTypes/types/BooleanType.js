@@ -1,22 +1,20 @@
 import React from "react";
 import { Checkbox } from "@material-ui/core";
+import { DATA_TYPES } from "../../../../../../../utils/Constants";
+import { pythonToBool, boolToPython } from "../../../../../../../utils/Utils";
 import DataType from "../AbstractDataType";
 
 class BooleanType extends DataType {
   // Boolean type properties definition
-  key = "boolean";
+  key = DATA_TYPES.BOOLEAN;
   label = "Boolean";
-  default = "False";
+  default = boolToPython(false);
 
   editComponent = (props, mode = "row") => {
     let pyValue = this.toString(props.rowData.value).toLowerCase();
     const editor = {
       row: () => this.booleanEditComponent(props, pyValue),
-      dialog: () => {
-        if (props.rowData.value === "None")
-          return this.codeEditComponent(props);
-        else return this.booleanEditComponent(props, pyValue, true);
-      }
+      dialog: () => this.booleanEditComponent(props, pyValue, true)
     };
     return editor[mode]();
   };
@@ -29,8 +27,8 @@ class BooleanType extends DataType {
   validate(value) {
     return new Promise(resolve => {
       try {
-        const parsed = this.pythonToBool(value);
-        const isValid = typeof parsed === "boolean";
+        const parsed = pythonToBool(value);
+        const isValid = typeof parsed === DATA_TYPES.BOOLEAN;
 
         resolve({ success: isValid });
       } catch (e) {
@@ -46,34 +44,6 @@ class BooleanType extends DataType {
   //========================================================================================
 
   /**
-   * Convert boolean to Python string
-   * @param {boolean} value
-   * @returns {string} : A string representing a Python boolean
-   */
-  boolToPython(value) {
-    const options = {
-      true: "True",
-      false: "False"
-    };
-
-    return options[value] ?? options[false];
-  }
-
-  /**
-   * Convert from Python string to boolean
-   * @param {string} value : A string representing a Python boolean
-   * @returns {boolean}
-   */
-  pythonToBool(value) {
-    const options = {
-      True: true,
-      False: false
-    };
-
-    return options[value];
-  }
-
-  /**
    * Render Boolean Type edit component
    * @param {*} props
    * @param {*} pyValue
@@ -84,7 +54,7 @@ class BooleanType extends DataType {
     let parsedValue = false;
     try {
       parsedValue = JSON.parse(pyValue);
-      if (typeof parsedValue === "string")
+      if (typeof parsedValue === DATA_TYPES.STRING)
         parsedValue = JSON.parse(parsedValue);
     } catch (e) {
       parsedValue = false;
@@ -93,7 +63,7 @@ class BooleanType extends DataType {
     // On change checkbox value
     const onChangeCheckbox = event => {
       const boolValue = event.target.checked;
-      const value = usePythonValue ? this.boolToPython(boolValue) : boolValue;
+      const value = usePythonValue ? boolToPython(boolValue) : boolValue;
       props.onChange(value);
     };
 

@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import _get from "lodash/get";
 import _set from "lodash/set";
@@ -11,16 +11,25 @@ import { PLUGINS } from "../../../../../../utils/Constants";
 import { explorerStyles } from "./styles";
 
 const Explorer = props => {
-  const { flowId, call, on, emit, height } = props;
+  const { flowId, call, on, emit, height, mainInterface } = props;
   const classes = explorerStyles();
-  const [data, setData] = React.useState([]);
-  const [selectedNode, setSelectedNode] = React.useState({});
+  const [data, setData] = useState([]);
+  const [selectedNode, setSelectedNode] = useState({});
+  const shouldUpdatePreview = useRef(true);
 
   //========================================================================================
   /*                                                                                      *
    *                                     Handle Events                                    *
    *                                                                                      */
   //========================================================================================
+
+  useEffect(() => {
+    if (!mainInterface) return;
+    mainInterface.mode.default.onEnter.subscribe(() => {
+      shouldUpdatePreview.current = true;
+      setSelectedNode({});
+    });
+  }, [mainInterface]);
 
   /**
    * Expand tree or open document depending on the node deepness
@@ -56,6 +65,8 @@ const Explorer = props => {
           });
         },
         1: () => {
+          shouldUpdatePreview.current = false;
+          setSelectedNode(node);
           emit(PLUGINS.FLOW_EXPLORER.ON.ADD_NODE, node);
         }
       };
@@ -77,7 +88,9 @@ const Explorer = props => {
    * @param {NodeObject} node
    */
   const handleMouseEnterNode = useCallback(node => {
-    setSelectedNode(node);
+    if (shouldUpdatePreview.current) {
+      setSelectedNode(node);
+    }
   }, []);
 
   /**
@@ -85,7 +98,9 @@ const Explorer = props => {
    * @param {NodeObject} node
    */
   const handleMouseLeaveNode = useCallback(node => {
-    setSelectedNode({});
+    if (shouldUpdatePreview.current) {
+      setSelectedNode({});
+    }
   }, []);
 
   //========================================================================================
@@ -128,7 +143,7 @@ const Explorer = props => {
    *                                                                                      */
   //========================================================================================
 
-  React.useEffect(() => {
+  useEffect(() => {
     on("docManager", "loadDocs", loadDocs);
   }, [on, loadDocs]);
 

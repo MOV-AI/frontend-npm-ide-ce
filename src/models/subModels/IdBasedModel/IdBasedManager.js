@@ -1,6 +1,6 @@
-import Manager from "../../../Manager";
+import Manager from "../../Manager";
 
-class GroupManager extends Manager {
+class IdBasedManager extends Manager {
   serialize() {
     const output = {};
 
@@ -26,4 +26,4 @@ class GroupManager extends Manager {
   }
 }
 
-export default GroupManager;
+export default IdBasedManager;

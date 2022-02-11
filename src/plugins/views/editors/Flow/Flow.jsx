@@ -83,6 +83,27 @@ const Flow = (props, ref) => {
 
   //========================================================================================
   /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Used to handle group visibility
+   */
+  const handleGroupVisibility = useCallback((groupId, visibility) => {
+    getMainInterface().onGroupChange(groupId, visibility);
+  }, []);
+
+  /**
+   * Handle group visibilities
+   */
+  const groupsVisibilities = useCallback(() => {
+    if (!instance.current) return;
+    getMainInterface().onGroupsChange(instance.current.getGroups()?.data);
+  }, [instance]);
+
+  //========================================================================================
+  /*                                                                                      *
    *                                    React Lifecycle                                   *
    *                                                                                      */
   //========================================================================================
@@ -241,7 +262,7 @@ const Flow = (props, ref) => {
    * @param {*} resolve
    */
   const openDialog = useCallback(
-    ({ method, args, resolve }) => {
+    ({ method, args, resolve }, dialogComponent) => {
       // Deactivate key bind before opening dialog
       deactivateKeyBind();
       // On close dialog reactivate keybind and resolve promise
@@ -250,7 +271,7 @@ const Flow = (props, ref) => {
         resolve && resolve();
       };
       // Call dialog plugin with given method and args
-      call(PLUGINS.DIALOG.NAME, method, args);
+      call(PLUGINS.DIALOG.NAME, method, args, dialogComponent);
     },
     [activateKeyBind, call, deactivateKeyBind]
   );
@@ -269,6 +290,11 @@ const Flow = (props, ref) => {
         const args = {
           title: `${t("Paste")} ${node.model}`,
           value: `${node.id}_copy`,
+          onValidation: newName =>
+            getMainInterface().graph.validator.validateNodeName(
+              newName,
+              t(node.model)
+            ),
           onSubmit: newName =>
             getMainInterface().pasteNode(newName, node, position)
         };
@@ -299,6 +325,42 @@ const Flow = (props, ref) => {
   }, []);
 
   /**
+   * Get node menu if any
+   */
+  const getNodeMenuToAdd = useCallback(
+    node => {
+      const MenuComponent = getMenuComponent(node?.data?.model);
+      if (!node || !MenuComponent) return;
+      return {
+        icon: <i className="icon-Nodes" />,
+        name: NODE_MENU_NAME,
+        view: (
+          <MenuComponent
+            id={id}
+            call={call}
+            nodeInst={node}
+            flowModel={instance}
+            openDoc={openDoc}
+            editable={isEditableComponentRef.current}
+            groupsVisibilities={groupsVisibilities}
+            openDialog={openDialog}
+          />
+        )
+      };
+    },
+    [
+      NODE_MENU_NAME,
+      call,
+      id,
+      instance,
+      openDoc,
+      openDialog,
+      getMenuComponent,
+      groupsVisibilities
+    ]
+  );
+
+  /**
    * Add node menu if any
    */
   const addNodeMenu = useCallback(
@@ -308,25 +370,38 @@ const Flow = (props, ref) => {
       call(
         PLUGINS.RIGHT_DRAWER.NAME,
         PLUGINS.RIGHT_DRAWER.CALL.ADD_BOOKMARK,
-        {
-          icon: <i className="icon-Nodes" />,
-          name: NODE_MENU_NAME,
-          view: (
-            <MenuComponent
-              id={id}
-              call={call}
-              nodeInst={node}
-              flowModel={instance}
-              openDoc={openDoc}
-              editable={isEditableComponentRef.current}
-            />
-          )
-        },
+        getNodeMenuToAdd(node),
+        activeBookmark.current,
         nodeSelection,
-        activeBookmark.current
+        true
       );
     },
-    [NODE_MENU_NAME, call, id, instance, openDoc, getMenuComponent]
+    [call, getMenuComponent, getNodeMenuToAdd]
+  );
+
+  /**
+   * Get link right menu if any
+   * @param {Link} link : Link to be rendered in menu
+   */
+  const getLinkMenuToAdd = useCallback(
+    link => {
+      if (!link) return;
+      return {
+        icon: <CompareArrowsIcon />,
+        name: LINK_MENU_NAME,
+        view: (
+          <LinkMenu
+            id={id}
+            call={call}
+            link={link.data}
+            flowModel={instance}
+            sourceMessage={link?.src?.data?.message}
+            openDialog={openDialog}
+          />
+        )
+      };
+    },
+    [LINK_MENU_NAME, openDialog, call, id, instance]
   );
 
   /**
@@ -339,62 +414,76 @@ const Flow = (props, ref) => {
       call(
         PLUGINS.RIGHT_DRAWER.NAME,
         PLUGINS.RIGHT_DRAWER.CALL.ADD_BOOKMARK,
-        {
-          icon: <CompareArrowsIcon />,
-          name: LINK_MENU_NAME,
-          view: (
-            <LinkMenu
-              id={id}
-              call={call}
-              link={link.data}
-              flowModel={instance}
-              sourceMessage={link?.src?.data?.message}
-            />
-          )
-        },
+        getLinkMenuToAdd(link),
+        activeBookmark.current,
         linkSelection,
-        activeBookmark.current
+        true
       );
     },
-    [LINK_MENU_NAME, call, id, instance]
+    [call, getLinkMenuToAdd]
   );
 
   const renderRightMenu = useCallback(() => {
     const explorerView = new Explorer(FLOW_EXPLORER_PROFILE);
     const details = props.data?.details || {};
     const menuName = `detail-menu`;
+    const bookmarks = {
+      [menuName]: {
+        icon: <InfoIcon></InfoIcon>,
+        name: menuName,
+        view: (
+          <Menu
+            id={id}
+            call={call}
+            name={name}
+            details={details}
+            model={instance}
+            handleGroupVisibility={handleGroupVisibility}
+            editable={isEditableComponentRef.current}
+            openDialog={openDialog}
+          ></Menu>
+        )
+      },
+      FlowExplorer: {
+        icon: <Add />,
+        name: FLOW_EXPLORER_PROFILE.name,
+        view: explorerView.render({
+          flowId: id,
+          mainInterface: getMainInterface()
+        })
+      }
+    };
+
+    // Add node menu if any is selected
+    if (selectedNodeRef.current) {
+      bookmarks[NODE_MENU_NAME] = getNodeMenuToAdd(selectedNodeRef.current);
+    }
+
+    // Add link menu if any is selected
+    if (selectedLinkRef.current) {
+      bookmarks[LINK_MENU_NAME] = getLinkMenuToAdd(selectedLinkRef.current);
+    }
+
     // add bookmark
     call(
       PLUGINS.RIGHT_DRAWER.NAME,
       PLUGINS.RIGHT_DRAWER.CALL.SET_BOOKMARK,
-      {
-        [menuName]: {
-          icon: <InfoIcon></InfoIcon>,
-          name: menuName,
-          view: (
-            <Menu
-              id={id}
-              call={call}
-              name={name}
-              details={details}
-              model={instance}
-              editable={isEditableComponentRef.current}
-            ></Menu>
-          )
-        },
-        FlowExplorer: {
-          icon: <Add />,
-          name: FLOW_EXPLORER_PROFILE.name,
-          view: explorerView.render({ flowId: id })
-        }
-      },
+      bookmarks,
       activeBookmark.current
     );
-    // Add node menu if any is selected
-    addNodeMenu(selectedNodeRef.current);
-    // Add link menu if any is selected
-    addLinkMenu(selectedLinkRef.current);
-  }, [call, id, name, instance, props.data, addNodeMenu, addLinkMenu]);
+  }, [
+    LINK_MENU_NAME,
+    NODE_MENU_NAME,
+    id,
+    name,
+    instance,
+    props.data,
+    call,
+    openDialog,
+    getNodeMenuToAdd,
+    getLinkMenuToAdd,
+    handleGroupVisibility
+  ]);
 
   usePluginMethods(ref, {
     renderRightMenu
@@ -479,6 +568,19 @@ const Flow = (props, ref) => {
   }, []);
 
   /**
+   * Remove Node Bookmark and set selectedNode to null
+   */
+  const unselectNode = useCallback(() => {
+    call(
+      PLUGINS.RIGHT_DRAWER.NAME,
+      PLUGINS.RIGHT_DRAWER.CALL.REMOVE_BOOKMARK,
+      NODE_MENU_NAME,
+      activeBookmark.current
+    );
+    selectedNodeRef.current = null;
+  }, [NODE_MENU_NAME, call, selectedNodeRef]);
+
+  /**
    * On Node Selected
    * @param {*} node
    */
@@ -487,13 +589,7 @@ const Flow = (props, ref) => {
       clearTimeout(debounceSelection.current);
       debounceSelection.current = setTimeout(() => {
         if (!node) {
-          call(
-            PLUGINS.RIGHT_DRAWER.NAME,
-            PLUGINS.RIGHT_DRAWER.CALL.REMOVE_BOOKMARK,
-            NODE_MENU_NAME,
-            activeBookmark.current
-          );
-          selectedNodeRef.current = null;
+          unselectNode();
         } else {
           selectedNodeRef.current = node;
           activeBookmark.current = NODE_MENU_NAME;
@@ -501,7 +597,7 @@ const Flow = (props, ref) => {
         }
       }, 300);
     },
-    [addNodeMenu, call, NODE_MENU_NAME]
+    [NODE_MENU_NAME, addNodeMenu, unselectNode]
   );
 
   /**
@@ -562,7 +658,10 @@ const Flow = (props, ref) => {
   const onReady = useCallback(
     mainInterface => {
       // subscribe to on enter default mode
+      // When enter default mode remove other node/sub-flow bookmarks
       mainInterface.mode.default.onEnter.subscribe(() => {
+        onNodeSelected(null);
+        onLinkSelected(null);
         setFlowsToDefault();
       });
 
@@ -576,18 +675,13 @@ const Flow = (props, ref) => {
       // Subscribe to flow validations
       mainInterface.graph.onFlowValidated.subscribe(evtData => {
         const persistentWarns = evtData.warnings.filter(el => el.isPersistent);
+        groupsVisibilities();
         onFlowValidated({ warnings: persistentWarns });
         invalidContainersParamAlert(evtData.invalidContainersParam);
       });
 
       // Subscribe to invalid links validation
       mainInterface.graph.onLinksValidated.subscribe(onLinksValidated);
-
-      // When enter default mode remove other node/sub-flow bookmarks
-      mainInterface.mode.default.onEnter.subscribe(() => {
-        onNodeSelected(null);
-        onLinkSelected(null);
-      });
 
       // Subscribe to double click event in a node
       mainInterface.mode.onDblClick.onEnter.subscribe(evtData => {
@@ -613,9 +707,17 @@ const Flow = (props, ref) => {
       });
 
       mainInterface.mode.addNode.onClick.subscribe(() => {
-        const method = PLUGINS.DIALOG.CALL.NEW_DOC;
+        const nodeName = getMainInterface().mode.current.props.node.data.name;
+        const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
         const args = {
-          scope: "node",
+          title: t("Add Node"),
+          submitText: t("Add"),
+          value: nodeName,
+          onValidation: newName =>
+            getMainInterface().graph.validator.validateNodeName(
+              newName,
+              t("Node")
+            ),
           onSubmit: newName => getMainInterface().addNode(newName)
         };
         // Open form dialog
@@ -623,9 +725,17 @@ const Flow = (props, ref) => {
       });
 
       mainInterface.mode.addFlow.onClick.subscribe(() => {
-        const method = PLUGINS.DIALOG.CALL.NEW_DOC;
+        const flowName = getMainInterface().mode.current.props.node.data.name;
+        const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
         const args = {
-          scope: "sub-flow",
+          title: t("Add Sub-flow"),
+          submitText: t("Add"),
+          value: flowName,
+          onValidation: newName =>
+            getMainInterface().graph.validator.validateNodeName(
+              newName,
+              t("Sub-flow")
+            ),
           onSubmit: newName => getMainInterface().addFlow(newName)
         };
         // Open form dialog
@@ -758,13 +868,15 @@ const Flow = (props, ref) => {
     },
     [
       onLinksValidated,
-      setFlowsToDefault,
       onNodeSelected,
+      onLinkSelected,
+      setFlowsToDefault,
+      groupsVisibilities,
       onFlowValidated,
       invalidContainersParamAlert,
-      onLinkSelected,
       openDoc,
       handleContextClose,
+      t,
       openDialog,
       alert
     ]
@@ -847,10 +959,12 @@ const Flow = (props, ref) => {
     const selectedNodes = getSelectedNodes();
     if (!selectedNodes.length) return;
     // Callback to delete all nodes
-    const callback = () =>
+    const callback = () => {
       selectedNodes.forEach(node => {
         getMainInterface().deleteNode(node.data);
       });
+      unselectNode();
+    };
     // Compose confirmation message
     let message = t("Are you sure you want to delete");
     message +=
@@ -861,7 +975,7 @@ const Flow = (props, ref) => {
     handleDelete({ message, callback });
 
     setContextMenuOptions(prevValue => ({ ...prevValue, anchorEl: null }));
-  }, [handleDelete, getSelectedNodes, t]);
+  }, [handleDelete, unselectNode, getSelectedNodes, t]);
 
   /**
    * Handle delete link

@@ -188,6 +188,17 @@ class ContainerNode extends BaseContainerNode {
       console.error(error);
     }
   };
+
+  /**
+   * @override update method from BaseNode
+   * @returns {ContainerNode} instance
+   */
+  update = async () => {
+    await this.addPorts();
+    this.renderHeader().renderStatus().renderPorts();
+    return this;
+  };
+
   /**
    * Returns true if the name represents a NodeInst and false
    * if it represents a Container (aka sub flow)

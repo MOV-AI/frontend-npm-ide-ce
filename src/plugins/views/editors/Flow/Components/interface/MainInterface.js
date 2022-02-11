@@ -305,6 +305,26 @@ export default class MainInterface {
 
   //========================================================================================
   /*                                                                                      *
+   *                                    Helper Methods                                    *
+   *                                                                                      */
+  //========================================================================================
+
+  hideLinks = (node, visitedLinks) => {
+    node.links.forEach(linkId => {
+      const link = this.graph.links.get(linkId);
+      if (
+        // link was not yet visited or is visible
+        !visitedLinks.has(linkId) ||
+        link.visible
+      ) {
+        link.visibility = node.obj.visible;
+      }
+      visitedLinks.add(linkId);
+    });
+  };
+
+  //========================================================================================
+  /*                                                                                      *
    *                                    Event Handlers                                    *
    *                                                                                      */
   //========================================================================================
@@ -314,10 +334,8 @@ export default class MainInterface {
   };
 
   onDragEnd = draggedNode => {
-    const nodes = this.selectedNodes.filter(
-      node => node.data.id === draggedNode.data.id
-    );
-    nodes.push(draggedNode);
+    const selectedNodesSet = new Set([draggedNode].concat(this.selectedNodes));
+    const nodes = Array.from(selectedNodesSet).filter(obj => obj);
 
     nodes.forEach(node => {
       const { id } = node.data;
@@ -369,23 +387,21 @@ export default class MainInterface {
     return this.stateSub.subscribe(fn);
   };
 
-  onLayersChange = layers => {
+  onGroupsChange = groups => {
     const visitedLinks = new Set();
-
     this.graph.nodes.forEach(node => {
-      node.obj.onLayersChange(layers);
+      node.obj.onGroupsChange(groups);
+      this.hideLinks(node, visitedLinks);
+    });
+  };
 
-      node.links.forEach(linkId => {
-        const link = this.graph.links.get(linkId);
-        if (
-          // link was not yet visited or is visible
-          !visitedLinks.has(linkId) ||
-          link.visible
-        ) {
-          link.visibility = node.obj.visible;
-        }
-        visitedLinks.add(linkId);
-      });
+  onGroupChange = (groupId, visibility) => {
+    const visitedLinks = new Set();
+    this.graph.nodes.forEach(node => {
+      if (node.obj.data.NodeLayers?.includes(groupId)) {
+        node.obj.visibility = !visibility;
+        this.hideLinks(node, visitedLinks);
+      }
     });
   };
 
