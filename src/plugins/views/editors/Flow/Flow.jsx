@@ -561,6 +561,19 @@ const Flow = (props, ref) => {
   }, []);
 
   /**
+   * Remove Node Bookmark and set selectedNode to null
+   */
+  const unselectNode = useCallback(() => {
+    call(
+      PLUGINS.RIGHT_DRAWER.NAME,
+      PLUGINS.RIGHT_DRAWER.CALL.REMOVE_BOOKMARK,
+      NODE_MENU_NAME,
+      activeBookmark.current
+    );
+    selectedNodeRef.current = null;
+  }, [NODE_MENU_NAME, call, selectedNodeRef]);
+
+  /**
    * On Node Selected
    * @param {*} node
    */
@@ -569,13 +582,7 @@ const Flow = (props, ref) => {
       clearTimeout(debounceSelection.current);
       debounceSelection.current = setTimeout(() => {
         if (!node) {
-          call(
-            PLUGINS.RIGHT_DRAWER.NAME,
-            PLUGINS.RIGHT_DRAWER.CALL.REMOVE_BOOKMARK,
-            NODE_MENU_NAME,
-            activeBookmark.current
-          );
-          selectedNodeRef.current = null;
+          unselectNode();
         } else {
           selectedNodeRef.current = node;
           activeBookmark.current = NODE_MENU_NAME;
@@ -583,7 +590,7 @@ const Flow = (props, ref) => {
         }
       }, 300);
     },
-    [addNodeMenu, call, NODE_MENU_NAME]
+    [NODE_MENU_NAME, addNodeMenu, unselectNode]
   );
 
   /**
@@ -937,10 +944,12 @@ const Flow = (props, ref) => {
     const selectedNodes = getSelectedNodes();
     if (!selectedNodes.length) return;
     // Callback to delete all nodes
-    const callback = () =>
+    const callback = () => {
       selectedNodes.forEach(node => {
         getMainInterface().deleteNode(node.data);
       });
+      unselectNode();
+    };
     // Compose confirmation message
     let message = t("Are you sure you want to delete");
     message +=
@@ -951,7 +960,7 @@ const Flow = (props, ref) => {
     handleDelete({ message, callback });
 
     setContextMenuOptions(prevValue => ({ ...prevValue, anchorEl: null }));
-  }, [handleDelete, getSelectedNodes, t]);
+  }, [handleDelete, unselectNode, getSelectedNodes, t]);
 
   /**
    * Handle delete link
