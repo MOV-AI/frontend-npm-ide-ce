@@ -290,6 +290,11 @@ const Flow = (props, ref) => {
         const args = {
           title: `${t("Paste")} ${node.model}`,
           value: `${node.id}_copy`,
+          onValidation: newName =>
+            getMainInterface().graph.validator.validateNodeName(
+              newName,
+              t(node.model)
+            ),
           onSubmit: newName =>
             getMainInterface().pasteNode(newName, node, position)
         };
@@ -696,10 +701,14 @@ const Flow = (props, ref) => {
         const nodeName = getMainInterface().mode.current.props.node.data.name;
         const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
         const args = {
-          title: t("Add node"),
+          title: t("Add Node"),
           submitText: t("Add"),
           value: nodeName,
-          // TODO add validation here ROS regex and exists? https://movai.atlassian.net/browse/FP-1487
+          onValidation: newName =>
+            getMainInterface().graph.validator.validateNodeName(
+              newName,
+              t("Node")
+            ),
           onSubmit: newName => getMainInterface().addNode(newName)
         };
         // Open form dialog
@@ -710,10 +719,14 @@ const Flow = (props, ref) => {
         const flowName = getMainInterface().mode.current.props.node.data.name;
         const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
         const args = {
-          title: t("Add sub-flow"),
+          title: t("Add Sub-flow"),
           submitText: t("Add"),
           value: flowName,
-          // TODO add validation here ROS regex and exists? https://movai.atlassian.net/browse/FP-1487
+          onValidation: newName =>
+            getMainInterface().graph.validator.validateNodeName(
+              newName,
+              t("Sub-flow")
+            ),
           onSubmit: newName => getMainInterface().addFlow(newName)
         };
         // Open form dialog
