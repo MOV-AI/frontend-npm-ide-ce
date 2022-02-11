@@ -7,11 +7,7 @@ import Add from "@material-ui/icons/Add";
 import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
-import {
-  FLOW_EXPLORER_PROFILE,
-  PLUGINS,
-  ROS_VALID_NAMES
-} from "../../../../utils/Constants";
+import { FLOW_EXPLORER_PROFILE, PLUGINS } from "../../../../utils/Constants";
 import Clipboard, { KEYS } from "./Utils/Clipboard";
 import Vec2 from "./Utils/Vec2";
 import BaseFlow from "./Views/BaseFlow";
@@ -90,37 +86,6 @@ const Flow = (props, ref) => {
    *                                    Private Methods                                   *
    *                                                                                      */
   //========================================================================================
-
-  /**
-   * Validates the given name to add a new instance
-   * @param {name} string : New name for this instance
-   * @param {instType} string : Type of instance (Node/Sub-flow)
-   */
-  const validateAddInstance = useCallback(
-    (newName, instType) => {
-      try {
-        const re = ROS_VALID_NAMES;
-        if (!newName)
-          throw new Error(
-            t("{{instance}} name is mandatory", { instance: instType })
-          );
-        if (!re.test(newName))
-          throw new Error(
-            t("Invalid {{instance}} name", { instance: instType })
-          );
-        if (instance.current.getNodeInstanceItem(newName))
-          throw new Error(t("Cannot have multiple instances with same name"));
-
-        return { result: true, error: "" };
-      } catch (err) {
-        return {
-          result: false,
-          error: err.message
-        };
-      }
-    },
-    [instance, t]
-  );
 
   /**
    * Used to handle group visibility
@@ -731,7 +696,11 @@ const Flow = (props, ref) => {
           title: t("Add Node"),
           submitText: t("Add"),
           value: nodeName,
-          onValidation: newName => validateAddInstance(newName, t("Node")),
+          onValidation: newName =>
+            getMainInterface().graph.validator.validateNodeName(
+              newName,
+              t("Node")
+            ),
           onSubmit: newName => getMainInterface().addNode(newName)
         };
         // Open form dialog
@@ -745,7 +714,11 @@ const Flow = (props, ref) => {
           title: t("Add Sub-flow"),
           submitText: t("Add"),
           value: flowName,
-          onValidation: newName => validateAddInstance(newName, t("Sub-flow")),
+          onValidation: newName =>
+            getMainInterface().graph.validator.validateNodeName(
+              newName,
+              t("Sub-flow")
+            ),
           onSubmit: newName => getMainInterface().addFlow(newName)
         };
         // Open form dialog

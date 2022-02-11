@@ -6,21 +6,21 @@
  *
  */
 
+import i18n from "../../../../../../i18n/i18n";
+import { ROS_VALID_NAMES } from "../../../../../../utils/Constants";
 import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
 import { MisMatchMessageLink } from "../../Components/Links/Errors";
 import { isLinkeable } from "../../Components/Nodes/BaseNode/PortValidator";
 
-const t = v => v;
-
 const messages = {
   startLink: {
-    message: t("Start link(s) not found"),
+    message: i18n.t("Start link(s) not found"),
     type: "warning",
     isRuntime: true,
     isPersistent: false
   },
   linkMismatchMessage: {
-    message: t("There're links with message mismatch"),
+    message: i18n.t("There're links with message mismatch"),
     type: "warning",
     isRuntime: false,
     isPersistent: true
@@ -115,37 +115,36 @@ export default class GraphValidator {
   };
 
   /**
-   * check conditions for a valid name
+   * Validates the given name to add a new instance
    * 1 - should be unique
    * 2 - should pass regex test
-   * @param {string} name value to validate
-   * @param {Map} nodes list of nodes already added to the flow
-   *
+   * @param {name} string : New name for this instance
+   * @param {instType} string : Type of instance (Node/Sub-flow)
    * @returns {object} {result <bool>, error <string>}
    */
-  static validateNodeName = (name, nodes) => {
-    const rosValidation = new RegExp(/^[a-zA-Z]\w*$/);
-
-    const re = new RegExp(/(_{2,})/);
-
+  validateNodeName = (newName, instType) => {
     try {
-      let nodeExists = false;
-      nodes.forEach(node => {
-        if (name === node.obj.name) {
-          nodeExists = true;
-        }
-      });
+      const re = ROS_VALID_NAMES;
+      if (!newName)
+        throw new Error(
+          i18n.t("{{instance}} name is mandatory", { instance: instType })
+        );
+      if (!re.test(newName))
+        throw new Error(
+          i18n.t("Invalid {{instance}} name", { instance: instType })
+        );
+      if (this.graph.nodes.has(newName))
+        throw new Error(
+          i18n.t("Cannot have multiple instances with same name")
+        );
 
-      if (nodeExists) {
-        throw new Error("Node already exists");
-      }
-      if (!rosValidation.test(name) || re.test(name)) {
-        throw new Error("Invalid name");
-      }
-    } catch (error) {
-      return { result: false, error: error.message };
+      return { result: true, error: "" };
+    } catch (err) {
+      return {
+        result: false,
+        error: err.message
+      };
     }
-    return { result: true, error: "" };
   };
 
   /**
