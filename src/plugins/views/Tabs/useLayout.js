@@ -414,7 +414,7 @@ const useLayout = (props, dockRef) => {
         direction !== "remove" ? tabId : firstContainer.activeId;
       // Attempt to close tab
       if (direction === "remove") {
-        _onLayoutRemoveTab(newLayout, tabId);
+        _closeTab(tabId);
       } else {
         // Update layout
         _applyLayout(newLayout);
@@ -424,7 +424,7 @@ const useLayout = (props, dockRef) => {
       if (newActiveTab) emit(`${newActiveTab}-active`);
       else call("rightDrawer", "resetBookmarks");
     },
-    [emit, call, _getFirstContainer, _onLayoutRemoveTab, _applyLayout]
+    [emit, call, _getFirstContainer, _closeTab, _applyLayout]
   );
 
   /**
