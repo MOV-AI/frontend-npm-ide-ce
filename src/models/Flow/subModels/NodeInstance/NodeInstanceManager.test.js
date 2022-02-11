@@ -1,6 +1,5 @@
 import NodeInstance from "./NodeInstance";
 import Manager from "../../../Manager";
-import { DATA_TYPES } from "../../../../utils/Constants";
 
 test("Smoke test", () => {
   const obj = new Manager("nodes", NodeInstance);
@@ -24,8 +23,8 @@ test("Serialize OF db", () => {
         y: { Value: 0.02 }
       },
       Parameter: {
-        camera: { Value: "back1", Type: DATA_TYPES.ANY },
-        move_distance_to_car: { Value: "0.30", Type: DATA_TYPES.NUMBER }
+        camera: { Value: "back1", Type: "any" },
+        move_distance_to_car: { Value: "0.30", Type: "number" }
       }
     }
   };
@@ -42,11 +41,11 @@ test("Serialize OF db", () => {
       envVars: { path: { name: "path", value: "/opt/movai" } },
       position: { x: 0.01, y: 0.02 },
       parameters: {
-        camera: { name: "camera", value: "back1", type: DATA_TYPES.ANY },
+        camera: { name: "camera", value: "back1", type: "any" },
         move_distance_to_car: {
           name: "move_distance_to_car",
           value: "0.30",
-          type: DATA_TYPES.NUMBER
+          type: "number"
         }
       }
     }
@@ -73,8 +72,8 @@ test("Serialize TO db", () => {
         x: { Value: 0.023333333333333334 }
       },
       Parameter: {
-        camera: { Value: "back1", Type: DATA_TYPES.ANY },
-        move_distance_to_car: { Value: "0.30", Type: DATA_TYPES.NUMBER }
+        camera: { Value: "back1", Type: "any" },
+        move_distance_to_car: { Value: "0.30", Type: "number" }
       }
     }
   };

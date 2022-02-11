@@ -30,7 +30,7 @@ const useStyles = makeStyles(theme => ({
     overflow: "hidden"
   },
   codeContainer: {
-    height: "100px",
+    height: "200px",
     width: "100%"
   }
 }));
@@ -150,7 +150,7 @@ const KeyValueEditorDialog = props => {
             />
           </FormControl>
           {renderCustomContent && renderCustomContent()}
-          <InputLabel className={classes.marginTop}>{t("Value")}</InputLabel>
+          <InputLabel className={classes.marginTop}>Value</InputLabel>
           <FormControl className={classes.marginTop}>
             {renderValueEditor(data.value, {
               isNew,
@@ -162,7 +162,7 @@ const KeyValueEditorDialog = props => {
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography className={classes.heading}>
-                  {t("Default Value")}
+                  Default Value
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>

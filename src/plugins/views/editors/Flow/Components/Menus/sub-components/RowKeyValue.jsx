@@ -1,16 +1,13 @@
-import React, { useCallback } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import Edit from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/DeleteOutline";
 import IconButton from "@material-ui/core/IconButton";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import { Typography } from "@material-ui/core";
-import {
-  DATA_TYPES,
-  DISABLED_VALUE
-} from "../../../../../../../utils/Constants";
 
 import { rowKeyValueStyles } from "../styles";
+import { useCallback } from "react";
 
 const RowKeyValue = ({
   item,
@@ -36,7 +33,7 @@ const RowKeyValue = ({
    * @returns {String} rendered value
    */
   const getValue = (value, valueType) => {
-    return valueType === DATA_TYPES.STRING ? JSON.stringify(value) : value;
+    return valueType === "string" ? JSON.stringify(value) : value;
   };
 
   //========================================================================================
@@ -71,29 +68,29 @@ const RowKeyValue = ({
    * @returns {JSXElement}
    */
   const renderParamRow = useCallback(
-    row => {
-      if (row.value === "" || row.value === null) {
+    item => {
+      if (item.value === "" || item.value === null) {
         return (
           <Typography
             component="div"
             className={`${classes.valueDefault} ${classes.valueContainer}`}
           >
-            {getValue(row.defaultValue, row.type)}
+            {getValue(item.defaultValue, item.type)}
           </Typography>
         );
-      } else if (row.value === DISABLED_VALUE) {
+      } else if (item.value === "None") {
         return (
           <Typography
             component="div"
             className={`${classes.valueNone} ${classes.valueContainer}`}
           >
-            {getValue(row.defaultValue, row.type)}
+            {getValue(item.defaultValue, item.type)}
           </Typography>
         );
       } else {
         return (
           <Typography component="div" className={classes.valueContainer}>
-            {getValue(row.value, row.type)}
+            {getValue(item.value, item.type)}
           </Typography>
         );
       }
@@ -106,7 +103,7 @@ const RowKeyValue = ({
       <Typography
         component="div"
         className={`${classes.keyContainer} ${
-          item.value === DISABLED_VALUE ? classes.valueNone : ""
+          item.value === "None" ? classes.valueNone : ""
         }`}
       >
         {item.key}

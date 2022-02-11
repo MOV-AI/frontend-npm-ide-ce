@@ -2,9 +2,9 @@ import React, { memo } from "react";
 import PropTypes from "prop-types";
 import _isEqual from "lodash/isEqual";
 import { useTranslation, DEFAULT_FUNCTION } from "../../../_shared/mocks";
-import useDataTypes from "../../../_shared/hooks/useDataTypes";
 import KeyValueTable from "../KeyValueTable/KeyValueTable";
 import ParameterEditorDialog from "./ParametersEditorDialog";
+import useDataTypes from "./DataTypes/hooks/useDataTypes";
 
 const ParametersTable = props => {
   // Props

@@ -1,4 +1,3 @@
-import { DATA_TYPES } from "../../../utils/Constants";
 import Model from "../../Model/Model";
 import schema from "./schema";
 
@@ -144,7 +143,7 @@ class Parameter extends Model {
 
 // Default model values
 Parameter.defaults = {
-  type: DATA_TYPES.ANY
+  type: "any"
 };
 
 export default Parameter;

@@ -1,7 +1,6 @@
-import { DATA_TYPES } from "../../../../utils/Constants";
-import Manager from "../../../Manager";
-import Position from "../Position/Position";
 import SubFlow from "./SubFlow";
+import Position from "../Position/Position";
+import Manager from "../../../Manager";
 
 test("Smoke test", () => {
   const obj = new SubFlow();
@@ -17,7 +16,7 @@ test("Serialize OF db", () => {
       ContainerLabel: "subflow",
       ContainerFlow: "tugbot_actuators",
       Visualization: [0.01, 0.02],
-      Parameter: { varA: { Value: "5", Type: DATA_TYPES.ANY } }
+      Parameter: { varA: { Value: "5", Type: "any" } }
     }
   };
 
@@ -26,7 +25,7 @@ test("Serialize OF db", () => {
     template: data.subflow.ContainerFlow,
     position: { x: 0.01, y: 0.02 },
     parameters: {
-      varA: { name: "varA", value: "5", type: DATA_TYPES.ANY }
+      varA: { name: "varA", value: "5", type: "any" }
     }
   };
 
@@ -39,11 +38,11 @@ test("Serialize TO db", () => {
     name: "align",
     position: { x: 0.01, y: 0.03 },
     parameters: {
-      camera: { name: "camera", value: "back1", type: DATA_TYPES.ANY },
+      camera: { name: "camera", value: "back1", type: "any" },
       move_distance_to_car: {
         name: "move_distance_to_car",
         value: "0.30",
-        type: DATA_TYPES.NUMBER
+        type: "number"
       }
     }
   };
@@ -56,8 +55,8 @@ test("Serialize TO db", () => {
       y: { Value: 0.03 }
     },
     Parameter: {
-      camera: { Value: "back1", Type: DATA_TYPES.ANY },
-      move_distance_to_car: { Value: "0.30", Type: DATA_TYPES.NUMBER }
+      camera: { Value: "back1", Type: "any" },
+      move_distance_to_car: { Value: "0.30", Type: "number" }
     }
   };
 
@@ -74,11 +73,11 @@ test("Create subflow", () => {
     name: "align",
     position: [0.01, 0.03],
     parameters: {
-      camera: { name: "camera", value: "back1", type: DATA_TYPES.ANY },
+      camera: { name: "camera", value: "back1", type: "any" },
       move_distance_to_car: {
         name: "move_distance_to_car",
         value: "0.30",
-        type: DATA_TYPES.NUMBER
+        type: "number"
       }
     }
   };

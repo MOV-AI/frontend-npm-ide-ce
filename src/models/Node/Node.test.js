@@ -1,6 +1,5 @@
-import { DATA_TYPES } from "../../utils/Constants";
-import { Command, EnvVar, Parameter, Port } from "../subModels";
 import Node from "./Node";
+import { Command, EnvVar, Parameter, Port } from "../subModels";
 
 test("Smoke test", () => {
   const obj = new Node();
@@ -87,13 +86,13 @@ test("Serialize OF db", () => {
         name: "move_distance",
         value: "0.2",
         description: data.Parameter.move_distance.Description,
-        type: DATA_TYPES.ANY
+        type: "any"
       },
       detection_type: {
         name: "detection_type",
         value: "gentag",
         description: data.Parameter.detection_type.Description,
-        type: DATA_TYPES.ANY
+        type: "any"
       }
     },
     envVars: { varA: { name: "varA", value: "/opt/movai" } },
@@ -149,14 +148,14 @@ test("Serialize TO db", () => {
         value: "0.2",
         description:
           "[Float] Distance in meters to move forward with the cart before regrabbing",
-        type: DATA_TYPES.ANY
+        type: "any"
       },
       detection_type: {
         name: "detection_type",
         value: "gentag",
         description:
           "[Sring] Type of detection to be used. Can be either tag or cart_detector",
-        type: DATA_TYPES.ANY
+        type: "any"
       }
     },
     envVars: { varA: { name: "varA", value: "/opt/movai" } },
@@ -455,9 +454,9 @@ test("Call dispatcher on port callback change", done => {
   obj.getPorts().setData(data);
 
   // subscribe to changes to validate dispatcher
-  obj.subscribe((_obj, prop, value) => {
+  obj.subscribe((obj, prop, value) => {
     try {
-      expect(_obj).toBeInstanceOf(Node);
+      expect(obj).toBeInstanceOf(Node);
       expect(prop).toBe("ports");
       expect(value).toMatchObject(expected);
 
@@ -505,9 +504,9 @@ test("Call dispatcher on port parameter change", done => {
   obj.getPorts().setData(data);
 
   // subscribe to changes to validate dispatcher
-  obj.subscribe((thisObj, prop, value) => {
+  obj.subscribe((obj, prop, value) => {
     try {
-      expect(thisObj).toBeInstanceOf(Node);
+      expect(obj).toBeInstanceOf(Node);
       expect(prop).toBe("ports");
       expect(value).toMatchObject(expected);
 

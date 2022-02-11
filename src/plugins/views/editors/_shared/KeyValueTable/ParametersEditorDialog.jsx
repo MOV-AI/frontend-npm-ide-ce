@@ -1,28 +1,10 @@
-import React, { useCallback, useEffect, useState, forwardRef } from "react";
-import { useTranslation } from "react-i18next";
+import React, { useCallback, forwardRef } from "react";
 import PropTypes from "prop-types";
-import {
-  MenuItem,
-  Select,
-  FormControl,
-  FormControlLabel,
-  InputLabel,
-  Radio,
-  RadioGroup
-} from "@material-ui/core";
+import { MenuItem, Select, FormControl, InputLabel } from "@material-ui/core";
 import { withTheme } from "../../../../../decorators/withTheme";
-import { DATA_TYPES, DISABLED_VALUE } from "../../../../../utils/Constants";
 import withAlerts from "../../../../../decorators/withAlerts";
 import KeyValueEditorDialog from "../KeyValueTable/KeyValueEditorDialog";
 import useDataTypes from "../hooks/useDataTypes";
-
-import { parametersDialogStyles } from "./styles";
-
-const VALUE_OPTIONS = {
-  CUSTOM: "custom",
-  DEFAULT: "default",
-  DISABLED: "disabled"
-};
 
 const ParameterEditorDialog = forwardRef((props, ref) => {
   const {
@@ -30,16 +12,11 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
     disableType,
     customValidation,
     preventRenderType,
-    showValueOptions,
     alert,
     alertSeverities
   } = props;
-
   // Hooks
-  const [data, setData] = useState({});
-  const [valueOption, setValueOption] = useState(VALUE_OPTIONS.DEFAULT);
-  const { t } = useTranslation();
-  const classes = parametersDialogStyles();
+  const [data, setData] = React.useState({});
   const { getDataTypes, getLabel, getEditComponent, getValidValue, validate } =
     useDataTypes();
 
@@ -50,72 +27,25 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
   //========================================================================================
 
   /**
-   * Renders a value related to to it's type
-   * @param {*} value : value to be rendered
-   */
-  const renderValue = useCallback(
-    value => {
-      if (props.data.type === DATA_TYPES.STRING) {
-        return `"${value}"`;
-      }
-
-      return value;
-    },
-    [props.data.type]
-  );
-
-  /**
-   * Get Default Value Option
-   * @param {*} defaultValue : Default value to check
-   * @param {*} value : Value to check
-   */
-  const getValueOption = useCallback(value => {
-    let result = VALUE_OPTIONS.CUSTOM;
-
-    if (value === DISABLED_VALUE) {
-      result = VALUE_OPTIONS.DISABLED;
-    }
-    if (value === "") {
-      result = VALUE_OPTIONS.DEFAULT;
-    }
-
-    return result;
-  }, []);
-
-  /**
    * @private Stringify value if type string
    * @param {{type: string, value: *}} formData
    * @returns {*} Formatted value
    */
-  const valueToRender = useCallback(formData => {
-    const formValue = formData.value || formData.defaultValue;
-    return formData?.type === DATA_TYPES.STRING
-      ? JSON.stringify(formValue)
-      : formValue;
-  }, []);
+  const valueToRender = formData => {
+    return formData?.type === "string"
+      ? JSON.stringify(formData.value)
+      : formData.value;
+  };
 
   /**
    * @private Parse value if type string
    * @param {{type: string, value: *}} formData
    * @returns {*} Formatted value
    */
-  const valueToSave = useCallback(
-    formData => {
-      const type = formData.type;
-
-      if (valueOption === VALUE_OPTIONS.DEFAULT) {
-        return "";
-      }
-      if (valueOption === VALUE_OPTIONS.DISABLED) {
-        return DISABLED_VALUE;
-      }
-
-      return type === DATA_TYPES.STRING
-        ? JSON.parse(formData.value)
-        : formData.value;
-    },
-    [valueOption]
-  );
+  const valueToSave = formData => {
+    const type = formData.type;
+    return type === "string" ? JSON.parse(formData.value) : formData.value;
+  };
 
   //========================================================================================
   /*                                                                                      *
@@ -131,16 +61,15 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
     formData => {
       const dataToValidate = {
         ...formData,
-        value: valueOption === VALUE_OPTIONS.DEFAULT ? "" : data.value,
+        value: data.value,
         type: data.type
       };
-
       if (customValidation) return customValidation(dataToValidate);
 
       return validate(dataToValidate)
         .then(res => {
           if (!res.success)
-            throw new Error(res.error || t("Data validation failed"));
+            throw new Error(res.error || "Data validation failed");
           // Prepare data to submit
           if (res.parsed) data.value = res.parsed.toString();
           const dataToSubmit = {
@@ -154,16 +83,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
           return err;
         });
     },
-    [
-      valueOption,
-      data,
-      alertSeverities.ERROR,
-      alert,
-      validate,
-      valueToSave,
-      customValidation,
-      t
-    ]
+    [data, alertSeverities.ERROR, alert, validate, customValidation]
   );
 
   //========================================================================================
@@ -171,7 +91,6 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
    *                                   Component Handlers                                 *
    *                                                                                      */
   //========================================================================================
-
   /**
    * Handle Type Select onChange Event
    * @param {*} evt
@@ -194,39 +113,15 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
     [data, getValidValue]
   );
 
-  /**
-   * Handle Value Option onChange Event
-   * @param {*} evt
-   */
-  const handleChangeValueOption = useCallback(
-    evt => {
-      const opt = evt.target.value;
-      setData(prevState => {
-        if (opt === VALUE_OPTIONS.DISABLED) {
-          return { ...prevState, value: DISABLED_VALUE };
-        }
-        if (opt === VALUE_OPTIONS.DEFAULT || opt === VALUE_OPTIONS.CUSTOM) {
-          return { ...prevState, value: renderValue(props.data.defaultValue) };
-        }
-        return prevState;
-      });
-
-      setValueOption(opt);
-    },
-    [props.data.defaultValue, renderValue]
-  );
-
   //========================================================================================
   /*                                                                                      *
    *                                    React lifecycle                                   *
    *                                                                                      */
-  //========================================================f================================
+  //========================================================================================
 
-  useEffect(() => {
-    if (showValueOptions) setValueOption(getValueOption(props.data.value));
-
+  React.useEffect(() => {
     setData({ ...props.data, value: valueToRender(props.data) });
-  }, [props.data, showValueOptions, valueToRender, getValueOption]);
+  }, [props.data]);
 
   //========================================================================================
   /*                                                                                      *
@@ -245,7 +140,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
         <InputLabel>Type *</InputLabel>
         <Select
           fullWidth
-          value={data.type || DATA_TYPES.ANY}
+          value={data.type || "any"}
           onChange={handleTypeChange}
           disabled={disableType}
         >
@@ -266,36 +161,6 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
     handleTypeChange
   ]);
 
-  const renderValueOptions = useCallback(() => {
-    return (
-      <FormControl component="fieldset">
-        <RadioGroup
-          value={valueOption}
-          onChange={handleChangeValueOption}
-          className={classes.valueOptions}
-        >
-          <FormControlLabel
-            value={VALUE_OPTIONS.CUSTOM}
-            control={<Radio />}
-            label={t("Use Custom Value")}
-          />
-          <FormControlLabel
-            value={VALUE_OPTIONS.DEFAULT}
-            control={<Radio />}
-            label={t("Use Default Value")}
-          />
-          <FormControlLabel
-            value={VALUE_OPTIONS.DISABLED}
-            control={<Radio />}
-            label={t("Disable {{paramType}}", {
-              paramType: data.paramType || t("Value")
-            })}
-          />
-        </RadioGroup>
-      </FormControl>
-    );
-  }, [data.paramType, valueOption, classes, handleChangeValueOption, t]);
-
   /**
    * Render Value Editor Component
    */
@@ -303,51 +168,21 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
     (defaultValue, options) => {
       const editComponent = getEditComponent(data.type);
       if (!editComponent) return <></>;
-      return (
-        <>
-          {!options.isDefault && showValueOptions && renderValueOptions()}
-          {!options.isDefault && valueOption === VALUE_OPTIONS.DISABLED ? (
-            <p className={classes.disabledValue}>
-              {t("Disabled {{paramType}}", {
-                paramType: data.paramType || t("Value")
-              })}
-            </p>
-          ) : (
-            getEditComponent(data.type)(
-              {
-                rowData: {
-                  value: options.isDefault
-                    ? renderValue(defaultValue)
-                    : data.value
-                },
-                onChange: _value => {
-                  if (options.defaultValue !== _value) {
-                    setValueOption(VALUE_OPTIONS.CUSTOM);
-                  }
-                  setData(prevState => {
-                    return { ...prevState, value: _value };
-                  });
-                },
-                disabled: options.disabled,
-                isNew: options.isNew ?? isNew
-              },
-              "dialog"
-            )
-          )}
-        </>
+      return getEditComponent(data.type)(
+        {
+          ...options,
+          rowData: { value: options.isDefault ? defaultValue : data.value },
+          onChange: _value => {
+            setData(prevState => {
+              return { ...prevState, value: _value };
+            });
+          },
+          isNew: options.isNew ?? isNew
+        },
+        "dialog"
       );
     },
-    [
-      valueOption,
-      showValueOptions,
-      data,
-      isNew,
-      classes,
-      renderValueOptions,
-      renderValue,
-      getEditComponent,
-      t
-    ]
+    [data, isNew, getEditComponent]
   );
 
   return (

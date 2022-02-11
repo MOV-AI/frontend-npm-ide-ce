@@ -262,7 +262,7 @@ const Flow = (props, ref) => {
    * @param {*} resolve
    */
   const openDialog = useCallback(
-    ({ method, args, resolve }, dialogComponent) => {
+    ({ method, args, resolve }) => {
       // Deactivate key bind before opening dialog
       deactivateKeyBind();
       // On close dialog reactivate keybind and resolve promise
@@ -271,7 +271,7 @@ const Flow = (props, ref) => {
         resolve && resolve();
       };
       // Call dialog plugin with given method and args
-      call(PLUGINS.DIALOG.NAME, method, args, dialogComponent);
+      call(PLUGINS.DIALOG.NAME, method, args);
     },
     [activateKeyBind, call, deactivateKeyBind]
   );
@@ -338,7 +338,6 @@ const Flow = (props, ref) => {
             openDoc={openDoc}
             editable={isEditableComponentRef.current}
             groupsVisibilities={groupsVisibilities}
-            openDialog={openDialog}
           />
         )
       };
@@ -349,7 +348,6 @@ const Flow = (props, ref) => {
       id,
       instance,
       openDoc,
-      openDialog,
       getMenuComponent,
       groupsVisibilities
     ]

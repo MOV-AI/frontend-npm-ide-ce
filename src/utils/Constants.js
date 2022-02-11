@@ -7,17 +7,6 @@ export const MANAGER = "manager";
 
 export const VERSION = get(window, "SERVER_DATA.Application.Version", "0.0.1");
 
-export const DISABLED_VALUE = "None";
-
-export const DATA_TYPES = {
-  BOOLEAN: "boolean",
-  STRING: "string",
-  NUMBER: "number",
-  OBJECT: "object",
-  ARRAY: "array",
-  ANY: "any"
-};
-
 export const SCOPES = {
   Callback: "Callback",
   Configuration: "Configuration",
@@ -81,7 +70,7 @@ export const PLUGINS = {
 export const DEFAULT_KEY_VALUE_DATA = {
   name: "",
   description: "",
-  type: DATA_TYPES.ANY,
+  type: "any",
   value: ""
 };
 

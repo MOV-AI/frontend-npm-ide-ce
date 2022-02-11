@@ -2,9 +2,8 @@ import React, { useCallback, forwardRef } from "react";
 import { MenuItem, Select, FormControl, InputLabel } from "@material-ui/core";
 import { withTheme } from "../../../../../../decorators/withTheme";
 import withAlerts from "../../../../../../decorators/withAlerts";
-import { DATA_TYPES } from "../../../../../../utils/Constants";
-import useDataTypes from "../../../_shared/hooks/useDataTypes";
 import KeyValueEditorDialog from "../KeyValueTable/KeyValueEditorDialog";
+import useDataTypes from "./DataTypes/hooks/useDataTypes";
 
 const ParameterEditorDialog = forwardRef((props, ref) => {
   const { alert, alertSeverities } = props;
@@ -26,9 +25,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
    */
   const valueToRender = formData => {
     const type = formData.type;
-    return type === DATA_TYPES.STRING
-      ? JSON.stringify(formData.value)
-      : formData.value;
+    return type === "string" ? JSON.stringify(formData.value) : formData.value;
   };
 
   /**
@@ -38,9 +35,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
    */
   const valueToSave = formData => {
     const type = formData.type;
-    return type === DATA_TYPES.STRING
-      ? JSON.parse(formData.value)
-      : formData.value;
+    return type === "string" ? JSON.parse(formData.value) : formData.value;
   };
 
   //========================================================================================
@@ -130,7 +125,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
         <InputLabel>Type *</InputLabel>
         <Select
           fullWidth
-          value={data.type || DATA_TYPES.ANY}
+          value={data.type || "any"}
           onChange={handleTypeChange}
         >
           {getDataTypes().map(key => (

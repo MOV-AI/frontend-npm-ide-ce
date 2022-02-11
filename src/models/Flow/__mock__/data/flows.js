@@ -1,5 +1,3 @@
-import { DATA_TYPES } from "../../../../utils/Constants";
-
 const flows = {
   test1: {
     Label: "test11",
@@ -20,8 +18,8 @@ const flows = {
           x: { Value: 0.023333333333333334 }
         },
         Parameter: {
-          camera: { Value: "back1", Type: DATA_TYPES.ANY },
-          move_distance_to_car: { Value: "0.30", Type: DATA_TYPES.ANY }
+          camera: { Value: "back1", Type: "any" },
+          move_distance_to_car: { Value: "0.30", Type: "any" }
         }
       }
     },
@@ -33,7 +31,7 @@ const flows = {
           x: { Value: 0.04133333333333333 },
           y: { Value: 0.015466666666666667 }
         },
-        Parameter: { varA: { Value: "5", Type: DATA_TYPES.ANY } }
+        Parameter: { varA: { Value: "5", Type: "any" } }
       }
     },
     Links: {
@@ -47,9 +45,7 @@ const flows = {
       }
     },
     Layers: { 0: { name: "layer1", on: true } },
-    Parameter: {
-      var1: { Value: "movai", Description: "", Type: DATA_TYPES.ANY }
-    }
+    Parameter: { var1: { Value: "movai", Description: "", Type: "any" } }
   },
   test2: {
     Label: "test",

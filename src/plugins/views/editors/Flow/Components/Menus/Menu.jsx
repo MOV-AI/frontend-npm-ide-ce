@@ -16,10 +16,7 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 import Add from "@material-ui/icons/Add";
 import { Utils } from "@mov-ai/mov-fe-lib-core";
 import useDataSubscriber from "../../../../../DocManager/useDataSubscriber";
-import {
-  DEFAULT_KEY_VALUE_DATA,
-  DATA_TYPES
-} from "../../../../../../utils/Constants";
+import { DEFAULT_KEY_VALUE_DATA } from "../../../../../../utils/Constants";
 import { validateDocumentName } from "../../../../../../utils/Utils";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
 import DetailsMenu from "../../../_shared/DetailsMenu/DetailsMenu";
@@ -80,7 +77,7 @@ const Menu = ({
     const parameters = data?.parameters || {};
     Object.keys(parameters).forEach(param => {
       const value = data.parameters?.[param]?.value || "";
-      const type = data.parameters?.[param]?.type || DATA_TYPES.ANY;
+      const type = data.parameters?.[param]?.type || "any";
       output.push({
         key: param,
         value: renderValue(value, type, true)
@@ -127,15 +124,15 @@ const Menu = ({
    **/
   const validateParamName = useCallback(
     (oldName, newData) => {
-      const { name: newName } = newData;
+      const { name } = newData;
 
       try {
-        if (!newName) throw new Error(`Name is mandatory`);
-        else if (!Utils.validateEntityName(newName, []))
+        if (!name) throw new Error(`Name is mandatory`);
+        else if (!Utils.validateEntityName(name, []))
           throw new Error(`Invalid Name`);
 
         // Validate against repeated names
-        if (oldName !== newName && model.current.getParameter(newName)) {
+        if (oldName !== name && model.current.getParameter(name)) {
           throw new Error(`Cannot have 2 entries with the same name`);
         }
       } catch (error) {
@@ -157,11 +154,12 @@ const Menu = ({
    * @param {Object} data : Data to Save
    */
   const handleSubmitParameter = useCallback(
-    (oldName, newData) => {
+    (oldName, data) => {
+      const { name } = data;
       if (oldName === "") {
-        model.current.addParameter(newData.name, newData);
+        model.current.addParameter(name, data);
       } else {
-        model.current.updateKeyValueItem("parameters", newData, oldName);
+        model.current.updateKeyValueItem("parameters", data, oldName);
       }
     },
     [model]
@@ -179,7 +177,7 @@ const Menu = ({
         "dialog",
         "customDialog",
         {
-          onSubmit: formData => handleSubmitParameter(obj.name, formData),
+          onSubmit: data => handleSubmitParameter(obj.name, data),
           nameValidation: newData => validateParamName(obj.name, newData),
           renderType: true,
           title: t("Parameter"),
@@ -268,7 +266,7 @@ const Menu = ({
    * Handle Add group click
    */
   const handleAddGroupClick = useCallback(() => {
-    editGroupName(groupName => model.current.addGroup(groupName));
+    editGroupName(name => model.current.addGroup(name));
   }, [editGroupName, model]);
 
   //========================================================================================
