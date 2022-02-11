@@ -429,6 +429,16 @@ class BaseNode extends BaseNodeStruct {
   }
 
   /**
+   * Return visualization to DB format
+   */
+  get visualizationToDB() {
+    return {
+      x: { Value: this.data.Visualization[0] },
+      y: { Value: this.data.Visualization[1] }
+    };
+  }
+
+  /**
    * setPosition - update the node's position
    *
    * @param {number} x position in x
@@ -669,6 +679,26 @@ class BaseNode extends BaseNodeStruct {
   update = () => {
     this.addPorts().renderHeader().renderStatus().renderPorts();
     return this;
+  };
+
+  /**
+   *
+   * @param {*} data
+   * @returns
+   */
+  updateNode = data => {
+    const fn = {
+      Visualization: _data => this.updatePosition(_data), // Position changes when dragging or when adding a new node
+      default: () => {
+        lodash.merge(this.data, data);
+        this.data.name = this.name;
+      }
+    };
+    Object.keys(data).forEach(key => {
+      (fn[key] || fn["default"])(data);
+      if (!this.noReloadRequired.includes(key)) this.init().addToCanvas();
+    });
+    return true;
   };
 
   /**

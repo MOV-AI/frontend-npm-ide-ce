@@ -17,6 +17,7 @@ class DocManager extends IDEPlugin {
         "getDocTypes",
         "getDocFactory",
         "subscribeToChanges",
+        "unSubscribeToChanges",
         "getDocFromNameType",
         "checkDocumentExists",
         "discardDocChanges",
@@ -78,7 +79,6 @@ class DocManager extends IDEPlugin {
     if (this.docSubscriptions.has(id)) {
       return this.docSubscriptions.delete(id);
     }
-    console.log("debug this.unSubscribeToChanges", this.docSubscriptions);
   }
 
   /**

@@ -57,7 +57,7 @@ class Manager {
   /**
    * @returns {Boolean} : if has any items
    */
-  hasItems(){
+  hasItems() {
     return Boolean(this.data.size);
   }
 
@@ -98,14 +98,14 @@ class Manager {
   }
 
   /**
-   * Renames an item 
+   * Renames an item
    * @param {object} param0: An object with the old name of the item and the new name for the item
    * @param {boolean} preventEmit: A boolean to prevent the second EVENTS.UPDATE emission
    * @returns : The instance
    */
   renameItem({ prevName, name }, preventEmit) {
     const oldItem = this.getItem(prevName);
-    if(oldItem){
+    if (oldItem) {
       oldItem.setName(name);
       this.data.delete(prevName);
       this.data.set(name, oldItem);
@@ -136,6 +136,9 @@ class Manager {
    * @returns {Manager} : The instance
    */
   setData(json) {
+    // Clear current data before setting new data
+    this.data.clear();
+    // Set new data
     Object.entries(json ?? {}).forEach(([name, content]) => {
       this.setItem({ name, content });
     });

@@ -103,6 +103,11 @@ const BaseFlow = React.forwardRef((props, ref) => {
     onReady(mInt);
   }, [getMainInterface, dataFromDB, onNodeSelected, onReady]);
 
+  // On before unmount
+  useEffect(() => {
+    return () => getMainInterface().graph.destroy();
+  }, [getMainInterface]);
+
   usePluginMethods(ref, { mainInterface });
 
   return (

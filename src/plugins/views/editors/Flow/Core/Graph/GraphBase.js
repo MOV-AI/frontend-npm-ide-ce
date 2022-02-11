@@ -1,4 +1,5 @@
 import { Subject } from "rxjs";
+import _isEqual from "lodash/isEqual";
 import StartNode from "../../Components/Nodes/StartNode";
 import BaseLink from "../../Components/Links/BaseLink";
 import GraphValidator from "./GraphValidator";
@@ -7,6 +8,17 @@ import { FLOW_VIEW_MODE, NODE_TYPES } from "../../Constants/constants";
 import { shouldUpdateExposedPorts } from "./Utils";
 import _debounce from "lodash/debounce";
 import Factory from "../../Components/Nodes/Factory";
+
+const NODE_DATA = {
+  NODE: {
+    LABEL: "NodeLabel",
+    TYPE: NODE_TYPES.NODE
+  },
+  CONTAINER: {
+    LABEL: "ContainerLabel",
+    TYPE: NODE_TYPES.CONTAINER
+  }
+};
 
 // to remove
 const t = v => v;
@@ -57,20 +69,21 @@ export default class Graph {
    * @private
    */
   addSubscribers = () => {
+    // Canvas subscribers
     this.mode.default.onEnter.subscribe({
       next: () => this.reset()
     });
     this.mode.addNode.onEnter.subscribe({
       next: () => this.reset()
     });
-    // Subscribe to template update
-    console.log("debug subscribe in graphBase");
+    // Subscribe to node/containers template update
     this.docManager(
       "docManager",
       "subscribeToChanges",
       this.id,
       this.onTemplateUpdate
     );
+
     return this;
   };
 
@@ -95,13 +108,21 @@ export default class Graph {
   /**
    * @private
    */
-  destroy = () => {
+  clear = () => {
     // Clear nodes
     this.nodes.forEach(node => node.obj.destroy());
     this.nodes.clear();
     // Clear links
     this.links.forEach(link => link.destroy());
     this.links.clear();
+  };
+
+  /**
+   * Called before destroying graph
+   */
+  destroy = () => {
+    // Unsubscribe to changes from docManager
+    this.docManager("docManager", "unSubscribeToChanges", this.id);
   };
 
   /**
@@ -142,18 +163,6 @@ export default class Graph {
 
   /**
    * @private
-   * Open confirm alert to inform if there is any sub-flow with invalid params
-   *
-   * @param {Array} invalidContainerParams : array of containers id that has invalid params
-   * @returns this graph instance
-   */
-  invalidContainerParamModal = invalidContainerParams => {
-    // TODO: implement
-    return this;
-  };
-
-  /**
-   * @private
    */
   loadExposedPorts = (exposedPorts, updateAll) => {
     const updates = shouldUpdateExposedPorts(
@@ -181,26 +190,6 @@ export default class Graph {
   get viewMode() {
     return FLOW_VIEW_MODE.default;
   }
-
-  /**
-   * @private
-   */
-  updateContainersWithTemplate = data => {
-    const containers = [...this.nodes]
-      .filter(([id, node]) => node.obj.data.type === "Container")
-      .map(([id, node]) => node.obj);
-    console.log("debug updateContainersWithTemplate", containers, data);
-    // update container with templateName
-    containers.forEach(subFlow => {
-      const container = this.flows.getFlow(subFlow.templateName);
-      const containerNodes = container?.NodeInst || {};
-      const hasTemplate = Object.values(containerNodes).filter(
-        el => el.Template === data.Label
-      ).length;
-      console.log("debug hasTemplate", hasTemplate, subFlow);
-      if (hasTemplate) subFlow.onTemplateUpdate(data);
-    });
-  };
 
   /**
    * @private
@@ -244,10 +233,38 @@ export default class Graph {
     requestAnimationFrame(update);
   };
 
+  /**
+   * On flow update data
+   * @param {*} data
+   */
+  onFlowUpdate = data => {
+    // Add missing nodes and update existing
+    this.updateNodes(data.NodeInst, NODE_TYPES.NODE);
+    this.updateNodes(data.Container, NODE_TYPES.CONTAINER);
+    // Get nodes to remove on update
+    const flowNodes = { ...data.NodeInst, ...data.Container };
+    [...this.nodes.keys()].forEach(nodeId => {
+      if (!flowNodes.hasOwnProperty(nodeId) && nodeId !== "start") {
+        this.deleteNode(nodeId);
+      }
+    });
+    // Update links
+    this.updateLinks(data.Links || {});
+    // Update exposed ports
+    this.updateExposedPorts(data.ExposedPorts || {});
+  };
+
+  /**
+   *
+   * @param {*} data
+   */
   onTemplateUpdate = data => {
-    this.nodes.forEach(node => node.obj.onTemplateUpdate(data));
-    this.loadExposedPorts(this.exposedPorts, true);
-    this.debounceToValidateFlow();
+    if (data.Label === this.id) this.onFlowUpdate(data);
+    else {
+      this.nodes.forEach(node => node.obj.onTemplateUpdate(data));
+      this.loadExposedPorts(this.exposedPorts, true);
+      this.debounceToValidateFlow();
+    }
   };
 
   /**
@@ -275,7 +292,7 @@ export default class Graph {
    * @returns {Promise} Promise to be resolved after all nodes, containers and links are loaded
    */
   async loadData(flow) {
-    this.destroy();
+    this.clear();
 
     return Promise.allSettled([
       this.loadNodes(flow.NodeInst),
@@ -297,6 +314,19 @@ export default class Graph {
   };
 
   /**
+   * Bulk operation to update all nodes
+   * @param {object} nodes
+   * @param {string<NODE_TYPES>} nodeType
+   */
+  updateNodes = (nodes, nodeType) => {
+    Object.values(nodes).forEach(node => {
+      setTimeout(() => {
+        this.updateNode(node, nodeType);
+      });
+    });
+  };
+
+  /**
    * updateNode is called when the subscriber gets changes
    *  if noId is not yet part of the graph means we are
    *  getting a new node
@@ -304,25 +334,28 @@ export default class Graph {
    * @param {string} nodeId node's unique id
    * @param {obj} data node's data that has changed
    */
-  updateNode = (event, nodeId, data, nodeType = NODE_TYPES.NODE) => {
+  updateNode = async (data, nodeType = NODE_TYPES.NODE) => {
+    const nodeId = data[NODE_DATA[nodeType].LABEL];
     const node = this.nodes.get(nodeId);
 
     if (node) {
       // node already exists
-      const isValid =
-        event !== "del" ? node.obj.update(data) : node.obj.deleteKey(data);
-      if (!isValid) {
-        node.obj.destroy();
-        this.nodes.delete(nodeId);
+      const currentNodeData = {
+        ...data,
+        ...node.obj.data,
+        Visualization: node.obj.visualizationToDB
+      };
+      const updatedNodeData = { ...node.obj.data, ...data };
+      if (!_isEqual(currentNodeData, updatedNodeData)) {
+        node.obj.updateNode(updatedNodeData);
       }
     } else {
       // node is not yet part of the graph
-      if (event !== "del") {
-        try {
-          this.addNode({ id: nodeId, ...data }, nodeType);
-        } catch (error) {
-          console.log(error);
-        }
+      try {
+        await this.addNode({ id: nodeId, ...data }, nodeType);
+        this.update();
+      } catch (error) {
+        console.log("debug failed to add node", error);
       }
     }
   };
@@ -343,10 +376,31 @@ export default class Graph {
     return this.nodes.delete(nodeId);
   };
 
+  /**
+   * Update exposed ports in canvas
+   * @param {*} exposedPorts
+   */
   updateExposedPorts = exposedPorts => {
     this.loadExposedPorts(exposedPorts);
   };
 
+  /**
+   * Update links : Remove deleted and add missing
+   * @param {*} links
+   */
+  updateLinks = links => {
+    // Remove deleted links
+    const linksToRemove = [...this.links.keys()].filter(
+      link => !links.hasOwnProperty(link)
+    );
+    this.deleteLinks(linksToRemove);
+    // Add missing links
+    this.loadLinks(links);
+  };
+
+  /**
+   * Add Start Node
+   */
   addStartNode = () => {
     const { canvas } = this;
     const inst = new StartNode({ canvas });
