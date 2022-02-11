@@ -10,7 +10,8 @@ import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlug
 import useDataSubscriber from "../../../DocManager/useDataSubscriber";
 import {
   DEFAULT_KEY_VALUE_DATA,
-  ROS_VALID_NAMES
+  ROS_VALID_NAMES,
+  PLUGINS
 } from "../../../../utils/Constants";
 import { useTranslation } from "../_shared/mocks";
 import Menu from "./Menu";
@@ -75,7 +76,7 @@ const Node = (props, ref) => {
     const details = props.data?.details ?? {};
     const menuName = `${id}-detail-menu`;
     // add bookmark
-    call("rightDrawer", "setBookmark", {
+    call(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.CALL.SET_BOOKMARK, {
       [menuName]: {
         icon: <InfoIcon></InfoIcon>,
         name: menuName,

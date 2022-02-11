@@ -205,7 +205,10 @@ const useLayout = (props, dockRef) => {
         workspaceManager.setTabs(tabsById.current);
         _applyLayout(newLayout);
         // Reset bookmarks
-        call("rightDrawer", "resetBookmarks");
+        call(
+          PLUGINS.RIGHT_DRAWER.NAME,
+          PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS
+        );
       }
     },
     [call, workspaceManager, _applyLayout, _closeDirtyTab]
@@ -410,7 +413,11 @@ const useLayout = (props, dockRef) => {
       const { tabId, keepBookmarks } = data;
       // Close tab dynamically
       _closeTab(tabId);
-      !keepBookmarks && call("rightDrawer", "resetBookmarks");
+      !keepBookmarks &&
+        call(
+          PLUGINS.RIGHT_DRAWER.NAME,
+          PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS
+        );
     },
     [call, _closeTab]
   );
@@ -469,7 +476,11 @@ const useLayout = (props, dockRef) => {
       // Emit new active tab id
       if (!tabId) return;
       if (newActiveTab) emit(`${newActiveTab}-active`);
-      else call("rightDrawer", "resetBookmarks");
+      else
+        call(
+          PLUGINS.RIGHT_DRAWER.NAME,
+          PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS
+        );
     },
     [emit, call, _getFirstContainer, _onLayoutRemoveTab, _applyLayout]
   );

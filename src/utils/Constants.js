@@ -25,15 +25,6 @@ export const SCOPES = {
   Node: "Node"
 };
 
-export const TOPICS = {
-  RIGHT_DRAWER: {
-    CHANGE_BOOKMARK: "changeBookmark",
-    ADD_BOOKMARK: "addBookmark",
-    SET_BOOKMARK: "setBookmark",
-    REMOVE_BOOKMARK: "removeBookmark"
-  }
-};
-
 export const PLUGINS = {
   DOC_MANAGER: {
     NAME: "docManager",
@@ -56,7 +47,8 @@ export const PLUGINS = {
     CALL: {
       ADD_BOOKMARK: "addBookmark",
       SET_BOOKMARK: "setBookmark",
-      REMOVE_BOOKMARK: "removeBookmark"
+      REMOVE_BOOKMARK: "removeBookmark",
+      RESET_BOOKMARKS: "resetBookmarks"
     },
     ON: {
       CHANGE_BOOKMARK: "changeBookmark"

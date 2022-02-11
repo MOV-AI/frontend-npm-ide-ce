@@ -366,8 +366,9 @@ const Flow = (props, ref) => {
         PLUGINS.RIGHT_DRAWER.NAME,
         PLUGINS.RIGHT_DRAWER.CALL.ADD_BOOKMARK,
         getNodeMenuToAdd(node),
+        activeBookmark.current,
         nodeSelection,
-        activeBookmark.current
+        true
       );
     },
     [call, getMenuComponent, getNodeMenuToAdd]
@@ -409,8 +410,9 @@ const Flow = (props, ref) => {
         PLUGINS.RIGHT_DRAWER.NAME,
         PLUGINS.RIGHT_DRAWER.CALL.ADD_BOOKMARK,
         getLinkMenuToAdd(link),
+        activeBookmark.current,
         linkSelection,
-        activeBookmark.current
+        true
       );
     },
     [call, getLinkMenuToAdd]
