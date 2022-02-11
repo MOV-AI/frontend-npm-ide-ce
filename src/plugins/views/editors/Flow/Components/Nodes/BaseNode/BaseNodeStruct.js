@@ -23,6 +23,16 @@ export default class BaseNodeStruct {
   // these keys are required in order to maintain the node valid
   // if any is deleted then the node must be deleted
   requiredKeys = ["NodeLabel", "Template", "Visualization"];
+  // when any of those keys changes, it doesn't require to reload canvas
+  noReloadRequired = [
+    "Dummy",
+    "Persistent",
+    "NodeLayers",
+    "Parameter",
+    "CmdLine",
+    "EnvVar",
+    "Visualization"
+  ];
 
   _ports = new Map();
   minSize = { h: 50, w: 50 };

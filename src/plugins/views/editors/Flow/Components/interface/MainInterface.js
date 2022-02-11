@@ -334,10 +334,8 @@ export default class MainInterface {
   };
 
   onDragEnd = draggedNode => {
-    const nodes = this.selectedNodes.filter(
-      node => node.data.id === draggedNode.data.id
-    );
-    nodes.push(draggedNode);
+    const selectedNodesSet = new Set([draggedNode].concat(this.selectedNodes));
+    const nodes = Array.from(selectedNodesSet).filter(obj => obj);
 
     nodes.forEach(node => {
       const { id } = node.data;
