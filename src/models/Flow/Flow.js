@@ -455,7 +455,7 @@ class Flow extends Model {
   serializeToDB() {
     const { name, description, details } = this.serialize();
 
-    // TODO method is just a temporary fix. Depends on Backend Analysis of this issue
+    // TODO method is just a temporary fix. https://movai.atlassian.net/browse/BP-465
     const getValueToSave = manager => {
       return manager.hasItems() ? manager.serializeToDB() : undefined;
     };

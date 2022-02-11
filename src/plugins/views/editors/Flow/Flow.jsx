@@ -390,11 +390,12 @@ const Flow = (props, ref) => {
             link={link.data}
             flowModel={instance}
             sourceMessage={link?.src?.data?.message}
+            openDialog={openDialog}
           />
         )
       };
     },
-    [LINK_MENU_NAME, call, id, instance]
+    [LINK_MENU_NAME, openDialog, call, id, instance]
   );
 
   /**
@@ -432,6 +433,7 @@ const Flow = (props, ref) => {
             model={instance}
             handleGroupVisibility={handleGroupVisibility}
             editable={isEditableComponentRef.current}
+            openDialog={openDialog}
           ></Menu>
         )
       },
@@ -465,11 +467,12 @@ const Flow = (props, ref) => {
   }, [
     LINK_MENU_NAME,
     NODE_MENU_NAME,
-    call,
     id,
     name,
     instance,
     props.data,
+    call,
+    openDialog,
     getNodeMenuToAdd,
     getLinkMenuToAdd,
     handleGroupVisibility

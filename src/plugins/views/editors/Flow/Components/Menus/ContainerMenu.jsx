@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { Collapse, Divider, ListItem, ListItemText } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import { DATA_TYPES } from "../../../../../../utils/Constants";
+import { DATA_TYPES, PLUGINS } from "../../../../../../utils/Constants";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
 import { TABLE_KEYS_NAMES, DIALOG_TITLE } from "../../Constants/constants";
 import KeyValuesSection from "./sub-components/collapsibleSections/KeyValuesSection";
@@ -12,7 +12,7 @@ import MenuDetails from "./sub-components/MenuDetails";
 
 const ContainerMenu = props => {
   // Props
-  const { nodeInst, call, openDoc, flowModel, editable } = props;
+  const { nodeInst, call, openDoc, flowModel, editable, openDialog } = props;
   // State hooks
   const flowRef = useRef();
   const [templateData, setTemplateData] = useState({});
@@ -69,30 +69,32 @@ const ContainerMenu = props => {
    */
   const handleKeyValueDialog = useCallback(
     (keyValueData, param) => {
+      const paramType = t(DIALOG_TITLE[param.toUpperCase()]);
       const obj = {
         ...keyValueData,
         varName: param,
         type: keyValueData.type ?? DATA_TYPES.ANY,
-        name: keyValueData.key
+        name: keyValueData.key,
+        paramType
       };
-      call(
-        "dialog",
-        "customDialog",
-        {
-          onSubmit: handleSubmitParameter,
-          title: t(DIALOG_TITLE[param.toUpperCase()]),
-          data: obj,
-          showDefault: true,
-          disableName: true,
-          disableType: true,
-          disableDescription: true,
-          preventRenderType: param !== TABLE_KEYS_NAMES.PARAMETERS,
-          call
-        },
-        ParameterEditorDialog
-      );
+
+      const method = PLUGINS.DIALOG.CALL.CUSTOM_DIALOG;
+      const args = {
+        onSubmit: handleSubmitParameter,
+        title: t("Edit {{paramType}}", { paramType }),
+        data: obj,
+        showDefault: true,
+        showValueOptions: true,
+        disableName: true,
+        disableType: true,
+        disableDescription: true,
+        preventRenderType: param !== TABLE_KEYS_NAMES.PARAMETERS,
+        call
+      };
+
+      openDialog({ method, args }, ParameterEditorDialog);
     },
-    [call, handleSubmitParameter, t]
+    [openDialog, call, handleSubmitParameter, t]
   );
 
   //========================================================================================

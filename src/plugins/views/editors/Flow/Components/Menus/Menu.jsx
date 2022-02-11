@@ -18,7 +18,8 @@ import { Utils } from "@mov-ai/mov-fe-lib-core";
 import useDataSubscriber from "../../../../../DocManager/useDataSubscriber";
 import {
   DEFAULT_KEY_VALUE_DATA,
-  DATA_TYPES
+  DATA_TYPES,
+  PLUGINS
 } from "../../../../../../utils/Constants";
 import { validateDocumentName } from "../../../../../../utils/Utils";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
@@ -39,7 +40,8 @@ const Menu = ({
   details: detailsProp,
   editable,
   call,
-  handleGroupVisibility
+  handleGroupVisibility,
+  openDialog
 }) => {
   // State hook
   const [activeItem, setActiveItem] = React.useState(0);
@@ -96,7 +98,8 @@ const Menu = ({
    */
   const editGroupName = useCallback(
     (submitCallback, prevName = "") => {
-      call("dialog", "formDialog", {
+      const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
+      const args = {
         size: "sm",
         title: prevName ? t("Edit Group") : t("Add Group"),
         inputLabel: t("Group Name"),
@@ -113,9 +116,10 @@ const Menu = ({
           }
         },
         onSubmit: submitCallback
-      });
+      };
+      openDialog({ method, args });
     },
-    [t, call]
+    [openDialog, t]
   );
 
   /**
@@ -175,21 +179,20 @@ const Menu = ({
   const handleParameterDialog = useCallback(
     dataId => {
       const obj = model.current.getParameter(dataId) || DEFAULT_KEY_VALUE_DATA;
-      call(
-        "dialog",
-        "customDialog",
-        {
-          onSubmit: formData => handleSubmitParameter(obj.name, formData),
-          nameValidation: newData => validateParamName(obj.name, newData),
-          renderType: true,
-          title: t("Parameter"),
-          data: obj,
-          call
-        },
-        ParameterEditorDialog
-      );
+      const method = PLUGINS.DIALOG.CALL.CUSTOM_DIALOG;
+
+      const args = {
+        onSubmit: formData => handleSubmitParameter(obj.name, formData),
+        nameValidation: newData => validateParamName(obj.name, newData),
+        renderType: true,
+        title: t("Parameter"),
+        data: obj,
+        call
+      };
+
+      openDialog({ method, args }, ParameterEditorDialog);
     },
-    [model, call, validateParamName, handleSubmitParameter, t]
+    [model, openDialog, call, validateParamName, handleSubmitParameter, t]
   );
 
   //========================================================================================
@@ -216,15 +219,17 @@ const Menu = ({
    * Open dialog to edit flow description
    */
   const handleEditDescriptionClick = useCallback(() => {
-    call("dialog", "formDialog", {
+    const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
+    const args = {
       size: "md",
       multiline: true,
       title: t("Edit Description"),
       inputLabel: t("Description"),
       value: model.current.getDescription(),
       onSubmit: description => model.current.setDescription(description)
-    });
-  }, [call, t, model]);
+    };
+    openDialog({ method, args });
+  }, [openDialog, t, model]);
 
   /**
    * Handle Add new Parameter
@@ -251,7 +256,8 @@ const Menu = ({
    */
   const handleParamDelete = useCallback(
     ({ key, value }) => {
-      call("dialog", "confirmation", {
+      const method = PLUGINS.DIALOG.CALL.CONFIRMATION;
+      const args = {
         submitText: t("Delete"),
         title: t('Confirm to delete "{{paramName}}"', { paramName: key }),
         onSubmit: () => model.current.deleteParameter(key),
@@ -259,9 +265,10 @@ const Menu = ({
           'Are you sure you want to delete the param "{{paramName}}" with the value "{{value}}"?',
           { paramName: key, value }
         )
-      });
+      };
+      openDialog({ method, args });
     },
-    [model, call, t]
+    [model, openDialog, t]
   );
 
   /**

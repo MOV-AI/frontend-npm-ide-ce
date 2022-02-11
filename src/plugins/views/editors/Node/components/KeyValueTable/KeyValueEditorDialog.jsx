@@ -5,7 +5,6 @@ import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { makeStyles } from "@material-ui/core/styles";
 import {
   Typography,
   TextField,
@@ -20,20 +19,7 @@ import { DialogTitle } from "../../../../../Dialog/components/AppDialog/AppDialo
 import { useTranslation } from "../../../_shared/mocks";
 import { withTheme } from "../../../../../../decorators/withTheme";
 
-const useStyles = makeStyles(theme => ({
-  input: { fontSize: "13px" },
-  marginTop: { marginTop: "10px" },
-  paper: { minWidth: "50%" },
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    overflow: "hidden"
-  },
-  codeContainer: {
-    height: "100px",
-    width: "100%"
-  }
-}));
+import { keyValueEditorDialogStyles } from "./styles";
 
 const KeyValueEditorDialog = props => {
   // Props
@@ -53,7 +39,7 @@ const KeyValueEditorDialog = props => {
   // State hook
   const [data, setData] = React.useState({});
   // Other hooks
-  const classes = useStyles();
+  const classes = keyValueEditorDialogStyles();
   const { t } = useTranslation();
 
   //========================================================================================
