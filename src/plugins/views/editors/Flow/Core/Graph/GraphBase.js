@@ -320,9 +320,7 @@ export default class Graph {
    */
   updateNodes = (nodes, nodeType) => {
     Object.values(nodes).forEach(node => {
-      setTimeout(() => {
-        this.updateNode(node, nodeType);
-      });
+      this.updateNode(node, nodeType);
     });
   };
 
