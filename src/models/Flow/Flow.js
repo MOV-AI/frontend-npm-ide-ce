@@ -308,12 +308,12 @@ class Flow extends Model {
 
     super.setData({ description, name, details });
 
-    this.nodeInstances.setData(nodeInstances);
-    this.subFlows.setData(subFlows);
-    this.exposedPorts.setData(exposedPorts);
-    this.links.setData(links);
-    this.groups.setData(groups);
-    this.parameters.setData(parameters);
+    this.nodeInstances.clear().setData(nodeInstances);
+    this.subFlows.clear().setData(subFlows);
+    this.exposedPorts.clear().setData(exposedPorts);
+    this.links.clear().setData(links);
+    this.groups.clear().setData(groups);
+    this.parameters.clear().setData(parameters);
 
     return this;
   }
@@ -337,6 +337,7 @@ class Flow extends Model {
    */
   deleteNode(nodeId) {
     this.deleteNodeLinks(nodeId);
+    this.deleteNodeExposedPorts(nodeId);
     return this.getNodeInstances().deleteItem(nodeId);
   }
 
@@ -347,13 +348,14 @@ class Flow extends Model {
    */
   deleteSubFlow(subFlowId) {
     this.deleteNodeLinks(subFlowId);
+    this.deleteNodeExposedPorts(subFlowId);
     return this.getSubFlows().deleteItem(subFlowId);
   }
 
   /**
    * Deletes links connected to the node (nodeInst or subFlow)
    * @param {string} id : The node (nodeInst or subFlow) id
-   * @returns
+   * @returns {array} Deleted links array
    */
   deleteNodeLinks = id => {
     const deletedLinks = [];
@@ -372,6 +374,18 @@ class Flow extends Model {
   };
 
   /**
+   * Delete Exposed Ports of NodeInst or Container
+   * @param {string} id : The node (nodeInst or subFlow) id
+   */
+  deleteNodeExposedPorts = id => {
+    this.getExposedPorts().data.forEach((item, key) => {
+      if (id === key) {
+        this.deleteExposedPorts(key);
+      }
+    });
+  };
+
+  /**
    * Add a new link
    * @param {array} link : Link with format [<from>, <to>]
    */
@@ -386,8 +400,20 @@ class Flow extends Model {
     return { id, ...links[id] };
   }
 
+  /**
+   * Delete Link
+   * @param {string} id : Link ID
+   */
   deleteLink(id) {
     this.getLinks().deleteItem(id);
+  }
+
+  /**
+   * Delete Exposed Port
+   * @param {string} id : ExposedPort ID
+   */
+  deleteExposedPorts(id) {
+    this.getExposedPorts().deleteItem(id);
   }
 
   /**

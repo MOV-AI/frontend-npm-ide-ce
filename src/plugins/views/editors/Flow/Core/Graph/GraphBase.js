@@ -379,7 +379,7 @@ export default class Graph {
    * @param {*} exposedPorts
    */
   updateExposedPorts = exposedPorts => {
-    this.loadExposedPorts(exposedPorts);
+    this.loadExposedPorts(exposedPorts, true);
   };
 
   /**

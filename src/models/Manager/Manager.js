@@ -136,9 +136,6 @@ class Manager {
    * @returns {Manager} : The instance
    */
   setData(json) {
-    // Clear current data before setting new data
-    this.data.clear();
-    // Set new data
     Object.entries(json ?? {}).forEach(([name, content]) => {
       this.setItem({ name, content });
     });
@@ -226,6 +223,15 @@ class Manager {
     if (typeof anyFn === "function") {
       anyFn.call(this, event, name, value);
     }
+  }
+
+  /**
+   * Clear all items
+   * @returns {Manager} Returns its instance
+   */
+  clear() {
+    this.data.clear();
+    return this;
   }
 
   /**
