@@ -290,6 +290,11 @@ const Flow = (props, ref) => {
         const args = {
           title: `${t("Paste")} ${node.model}`,
           value: `${node.id}_copy`,
+          onValidation: newName =>
+            getMainInterface().graph.validator.validateNodeName(
+              newName,
+              t(node.model)
+            ),
           onSubmit: newName =>
             getMainInterface().pasteNode(newName, node, position)
         };
