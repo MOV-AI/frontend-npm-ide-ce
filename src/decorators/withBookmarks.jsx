@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { TOPICS } from "../utils/Constants";
+import { PLUGINS } from "../utils/Constants";
 import { usePluginMethods } from "../engine/ReactPlugin/ViewReactPlugin";
 import BookmarkTab from "./Components/BookmarkTab";
 
@@ -35,7 +35,7 @@ const withBookmarks = Component => {
         } else {
           drawerRef.current.openDrawer();
           setActive(name);
-          emit && emit(TOPICS.RIGHT_DRAWER.CHANGE_BOOKMARK, { name });
+          emit && emit(PLUGINS.RIGHT_DRAWER.ON.CHANGE_BOOKMARK, { name });
         }
       },
       [active, emit]
@@ -52,7 +52,7 @@ const withBookmarks = Component => {
      *  @param {string} activeBookmark : bookmark to make active
      */
     const addBookmark = React.useCallback(
-      (data, isDefault = false, activeBookmark) => {
+      (data, activeBookmark, isDefault = false, shouldOpen = false) => {
         const name = data.name;
         let newActive = isDefault && name;
         setBookmarks(prevState => {
@@ -63,6 +63,7 @@ const withBookmarks = Component => {
         });
 
         if (newActive) setActive(newActive);
+        if (shouldOpen) drawerRef.current.openDrawer();
       },
       []
     );
@@ -101,10 +102,11 @@ const withBookmarks = Component => {
      * @param {*} newBookmarks
      * @param {String} activeBookmark bookmark to make active
      */
-    const setBookmark = React.useCallback((bookmarks = {}, activeBookmark) => {
-      setBookmarks(bookmarks);
+    const setBookmark = React.useCallback((newBookmarks, activeBookmark) => {
+      if (!newBookmarks) return;
+      setBookmarks(newBookmarks);
       const bookmarkToActivate =
-        bookmarks[activeBookmark] || Object.values(bookmarks)[0];
+        newBookmarks[activeBookmark] || Object.values(newBookmarks)[0];
       if (bookmarkToActivate) {
         setActive(bookmarkToActivate.name);
       }
@@ -183,11 +185,6 @@ const withBookmarks = Component => {
   };
 };
 
-export const exposedMethods = [
-  "addBookmark",
-  "resetBookmarks",
-  "removeBookmark",
-  "setBookmark"
-];
+export const exposedMethods = Object.values(PLUGINS.RIGHT_DRAWER.CALL);
 
 export default withBookmarks;

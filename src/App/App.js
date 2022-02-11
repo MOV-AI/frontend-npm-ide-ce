@@ -20,7 +20,7 @@ import Tabs from "../plugins/views/Tabs/Tabs";
 import Placeholder from "../plugins/views/Placeholder/Placeholder";
 import { withTheme } from "../decorators/withTheme";
 import { MainContext } from "../main-context";
-import { FLOW_EXPLORER_PROFILE } from "../utils/Constants";
+import { FLOW_EXPLORER_PROFILE, PLUGINS } from "../utils/Constants";
 
 import "./App.css";
 
@@ -85,7 +85,7 @@ function installAppPlugins() {
     {
       profile: FLOW_EXPLORER_PROFILE,
       factory: profile => new FlowExplorer(profile)
-    },
+    }
   ];
   plugins.forEach(pluginDescription => {
     const plugin = pluginDescription.factory(pluginDescription.profile);
@@ -108,7 +108,7 @@ function installViewPlugins() {
       factory: profile => new Tabs(profile)
     },
     {
-      profile: { name: "placeholder", location: "rightDrawer" },
+      profile: { name: "placeholder", location: PLUGINS.RIGHT_DRAWER.NAME },
       factory: profile => new Placeholder(profile)
     }
   ];
@@ -142,7 +142,7 @@ function getHostedPlugins(classes) {
         ></CentralPanel>
         <DrawerPanel
           className={classes.rightDrawer}
-          hostName="rightDrawer"
+          hostName={PLUGINS.RIGHT_DRAWER.NAME}
           anchor="right"
         ></DrawerPanel>
       </Grid>

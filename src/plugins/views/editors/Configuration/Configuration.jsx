@@ -1,16 +1,17 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Model from "../../../../models/Configuration/Configuration";
-import { DEFAULT_FUNCTION } from "../_shared/mocks";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
+import { AppBar, Toolbar } from "@material-ui/core";
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
+import InfoIcon from "@material-ui/icons/Info";
+import Model from "../../../../models/Configuration/Configuration";
+import { PLUGINS } from "../../../../utils/Constants";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
-import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
-import { AppBar, Toolbar } from "@material-ui/core";
-import InfoIcon from "@material-ui/icons/Info";
-import Menu from "./Menu";
 import useDataSubscriber from "../../../DocManager/useDataSubscriber";
+import { DEFAULT_FUNCTION } from "../_shared/mocks";
+import Menu from "./Menu";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -59,7 +60,7 @@ const Configuration = (props, ref) => {
     const details = props.data?.details || {};
     const menuName = `${id}-detail-menu`;
     // add bookmark
-    call("rightDrawer", "setBookmark", {
+    call(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.CALL.SET_BOOKMARK, {
       [menuName]: {
         icon: <InfoIcon></InfoIcon>,
         name: menuName,

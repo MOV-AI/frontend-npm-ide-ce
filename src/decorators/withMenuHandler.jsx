@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import { PLUGINS } from "../utils/Constants";
 
 /**
  * Handle actions to update right menu of each editor
@@ -14,7 +15,10 @@ const withMenuHandler = Component => {
      * Reset right menu : clear menu and close right drawer
      */
     const resetRightMenu = useCallback(() => {
-      call("rightDrawer", "resetBookmarks");
+      call(
+        PLUGINS.RIGHT_DRAWER.NAME,
+        PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS
+      );
     }, [call]);
 
     /**
