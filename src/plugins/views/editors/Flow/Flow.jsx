@@ -34,6 +34,8 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+let activeBookmark = null;
+
 const Flow = (props, ref) => {
   // Props
   const {
@@ -52,6 +54,11 @@ const Flow = (props, ref) => {
     saveDocument,
     on
   } = props;
+  // Global consts
+  const DETAIL_MENU_NAME = "detail-menu";
+  const NODE_MENU_NAME = "node-menu";
+  const LINK_MENU_NAME = "link-menu";
+
   // State Hooks
   const [dataFromDB, setDataFromDB] = useState();
   const [robotSelected, setRobotSelected] = useState("");
@@ -73,13 +80,9 @@ const Flow = (props, ref) => {
   const baseFlowRef = React.useRef();
   const mainInterfaceRef = React.useRef();
   const debounceSelection = React.useRef();
-  const activeBookmark = React.useRef();
   const selectedNodeRef = React.useRef();
   const selectedLinkRef = React.useRef();
   const isEditableComponentRef = React.useRef(true);
-  // Global consts
-  const NODE_MENU_NAME = `node-menu`;
-  const LINK_MENU_NAME = `link-menu`;
 
   //========================================================================================
   /*                                                                                      *
@@ -116,7 +119,9 @@ const Flow = (props, ref) => {
       PLUGINS.RIGHT_DRAWER.NAME,
       PLUGINS.RIGHT_DRAWER.ON.CHANGE_BOOKMARK,
       bookmark => {
-        activeBookmark.current = bookmark.name;
+        console.log("changing bookmark!?", bookmark.name);
+        activeBookmark = bookmark.name;
+        console.log("activeBookmark", activeBookmark);
       }
     );
 
@@ -371,7 +376,7 @@ const Flow = (props, ref) => {
         PLUGINS.RIGHT_DRAWER.NAME,
         PLUGINS.RIGHT_DRAWER.CALL.ADD_BOOKMARK,
         getNodeMenuToAdd(node),
-        activeBookmark.current,
+        activeBookmark,
         nodeSelection,
         true
       );
@@ -401,7 +406,7 @@ const Flow = (props, ref) => {
         )
       };
     },
-    [LINK_MENU_NAME, openDialog, call, id, instance]
+    [openDialog, call, id, instance]
   );
 
   /**
@@ -415,7 +420,7 @@ const Flow = (props, ref) => {
         PLUGINS.RIGHT_DRAWER.NAME,
         PLUGINS.RIGHT_DRAWER.CALL.ADD_BOOKMARK,
         getLinkMenuToAdd(link),
-        activeBookmark.current,
+        activeBookmark,
         linkSelection,
         true
       );
@@ -426,11 +431,10 @@ const Flow = (props, ref) => {
   const renderRightMenu = useCallback(() => {
     const explorerView = new Explorer(FLOW_EXPLORER_PROFILE);
     const details = props.data?.details || {};
-    const menuName = `detail-menu`;
     const bookmarks = {
-      [menuName]: {
+      [DETAIL_MENU_NAME]: {
         icon: <InfoIcon></InfoIcon>,
-        name: menuName,
+        name: DETAIL_MENU_NAME,
         view: (
           <Menu
             id={id}
@@ -469,11 +473,9 @@ const Flow = (props, ref) => {
       PLUGINS.RIGHT_DRAWER.NAME,
       PLUGINS.RIGHT_DRAWER.CALL.SET_BOOKMARK,
       bookmarks,
-      activeBookmark.current
+      activeBookmark
     );
   }, [
-    LINK_MENU_NAME,
-    NODE_MENU_NAME,
     id,
     name,
     instance,
@@ -575,10 +577,10 @@ const Flow = (props, ref) => {
       PLUGINS.RIGHT_DRAWER.NAME,
       PLUGINS.RIGHT_DRAWER.CALL.REMOVE_BOOKMARK,
       NODE_MENU_NAME,
-      activeBookmark.current
+      DETAIL_MENU_NAME
     );
     selectedNodeRef.current = null;
-  }, [NODE_MENU_NAME, call, selectedNodeRef]);
+  }, [call, selectedNodeRef]);
 
   /**
    * On Node Selected
@@ -592,12 +594,12 @@ const Flow = (props, ref) => {
           unselectNode();
         } else {
           selectedNodeRef.current = node;
-          activeBookmark.current = NODE_MENU_NAME;
+          activeBookmark = NODE_MENU_NAME;
           addNodeMenu(node, true);
         }
       }, 300);
     },
-    [NODE_MENU_NAME, addNodeMenu, unselectNode]
+    [addNodeMenu, unselectNode]
   );
 
   /**
@@ -613,14 +615,14 @@ const Flow = (props, ref) => {
           PLUGINS.RIGHT_DRAWER.NAME,
           PLUGINS.RIGHT_DRAWER.CALL.REMOVE_BOOKMARK,
           LINK_MENU_NAME,
-          activeBookmark.current
+          activeBookmark
         );
       } else {
-        activeBookmark.current = LINK_MENU_NAME;
+        activeBookmark = LINK_MENU_NAME;
         addLinkMenu(link, true);
       }
     },
-    [call, LINK_MENU_NAME, addLinkMenu]
+    [call, addLinkMenu]
   );
 
   /**

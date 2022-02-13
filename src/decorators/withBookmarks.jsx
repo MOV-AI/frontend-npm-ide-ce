@@ -75,7 +75,9 @@ const withBookmarks = Component => {
      */
     const removeBookmark = React.useCallback((name, activeBookmark) => {
       setBookmarks(prevState => {
-        const { [name]: _, ...otherBookmarks } = prevState;
+        const otherBookmarks = { ...prevState };
+        delete otherBookmarks[name];
+
         // Reset active bookmark
         setActive(prevActiveState => {
           if (prevActiveState === name)
