@@ -107,7 +107,7 @@ class Link extends Model {
     ID: "id",
     FROM: "from",
     TO: "to",
-    DEPENDENCY: "dependecy"
+    DEPENDENCY: "dependency"
   };
 }
 

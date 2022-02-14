@@ -24,7 +24,7 @@ class ContainerNode extends BaseContainerNode {
    * Remove init method of the base class
    */
   init() {
-    // Empty on purpose
+    return this;
   }
 
   /**
