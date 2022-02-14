@@ -1,7 +1,10 @@
 import React from "react";
-import "./App.css";
-import PluginManagerIDE from "../engine/PluginManagerIDE/PluginManagerIDE";
+import { withAuthentication, Style } from "@mov-ai/mov-fe-lib-react";
+import { Typography } from "@material-ui/core";
+import Grid from "@material-ui/core/Grid";
+import { makeStyles } from "@material-ui/core/styles";
 import DocManager from "../plugins/DocManager/DocManager";
+import FlowExplorer from "../plugins/views/editors/Flow/Components/Explorer/Explorer";
 import Dialog from "../plugins/Dialog/Dialog";
 import Alerts from "../plugins/Alerts/Alerts";
 import BottomBar from "../plugins/hosts/BottomBar/BottomBar";
@@ -12,14 +15,19 @@ import TopBar from "../plugins/hosts/TopBar/TopBar";
 import AlertPanel from "../plugins/hosts/AlertPanel/AlertPanel";
 import Explorer from "../plugins/views/Explorer/Explorer";
 import MainMenu from "../plugins/views/MainMenu/MainMenu";
+import HomeTab from "../plugins/views/HomeTab/HomeTab";
 import Tabs from "../plugins/views/Tabs/Tabs";
+import PluginManagerIDE from "../engine/PluginManagerIDE/PluginManagerIDE";
 import Placeholder from "../plugins/views/Placeholder/Placeholder";
-import Grid from "@material-ui/core/Grid";
-import { makeStyles } from "@material-ui/core/styles";
-import { withAuthentication, Style } from "@mov-ai/mov-fe-lib-react";
 import { withTheme } from "../decorators/withTheme";
+import {
+  HOMETAB_PROFILE,
+  FLOW_EXPLORER_PROFILE,
+  PLUGINS
+} from "../utils/Constants";
 import { MainContext } from "../main-context";
-import { Typography } from "@material-ui/core";
+
+import "./App.css";
 
 const DEBUG_MODE = false;
 
@@ -78,6 +86,10 @@ function installAppPlugins() {
     {
       profile: { name: "alert" },
       factory: profile => new Alerts(profile)
+    },
+    {
+      profile: FLOW_EXPLORER_PROFILE,
+      factory: profile => new FlowExplorer(profile)
     }
   ];
   plugins.forEach(pluginDescription => {
@@ -93,6 +105,10 @@ function installViewPlugins() {
       factory: profile => new MainMenu(profile)
     },
     {
+      profile: HOMETAB_PROFILE,
+      factory: profile => new HomeTab(profile)
+    },
+    {
       profile: { name: "explorer", location: "leftDrawer" },
       factory: profile => new Explorer(profile)
     },
@@ -101,7 +117,7 @@ function installViewPlugins() {
       factory: profile => new Tabs(profile)
     },
     {
-      profile: { name: "placeholder", location: "rightDrawer" },
+      profile: { name: "placeholder", location: PLUGINS.RIGHT_DRAWER.NAME },
       factory: profile => new Placeholder(profile)
     }
   ];
@@ -135,7 +151,7 @@ function getHostedPlugins(classes) {
         ></CentralPanel>
         <DrawerPanel
           className={classes.rightDrawer}
-          hostName="rightDrawer"
+          hostName={PLUGINS.RIGHT_DRAWER.NAME}
           anchor="right"
         ></DrawerPanel>
       </Grid>

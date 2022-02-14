@@ -26,11 +26,20 @@ const withAlerts = Component => {
       call("alert", "show", options);
     };
 
+    /**
+     * Show Confirmation before action
+     * @param {{title: string, message: string, submitText: string, onSubmit: function}} confirmationData
+     */
+    const confirmationAlert = ({ title, message, onSubmit, submitText }) => {
+      call("dialog", "confirmation", { title, message, onSubmit, submitText });
+    };
+
     return (
       <Component
         {...props}
         ref={ref}
         alert={alert}
+        confirmationAlert={confirmationAlert}
         alertSeverities={SEVERITIES}
       />
     );

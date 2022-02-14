@@ -5,7 +5,6 @@ import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { makeStyles } from "@material-ui/core/styles";
 import {
   Typography,
   TextField,
@@ -20,20 +19,7 @@ import { DialogTitle } from "../../../../../Dialog/components/AppDialog/AppDialo
 import { useTranslation } from "../../../_shared/mocks";
 import { withTheme } from "../../../../../../decorators/withTheme";
 
-const useStyles = makeStyles(theme => ({
-  input: { fontSize: "13px" },
-  marginTop: { marginTop: "10px" },
-  paper: { minWidth: "50%" },
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    overflow: "hidden"
-  },
-  codeContainer: {
-    height: "200px",
-    width: "100%"
-  }
-}));
+import { keyValueEditorDialogStyles } from "./styles";
 
 const KeyValueEditorDialog = props => {
   // Props
@@ -53,7 +39,7 @@ const KeyValueEditorDialog = props => {
   // State hook
   const [data, setData] = React.useState({});
   // Other hooks
-  const classes = useStyles();
+  const classes = keyValueEditorDialogStyles();
   const { t } = useTranslation();
 
   //========================================================================================
@@ -150,7 +136,7 @@ const KeyValueEditorDialog = props => {
             />
           </FormControl>
           {renderCustomContent && renderCustomContent()}
-          <InputLabel className={classes.marginTop}>Value</InputLabel>
+          <InputLabel className={classes.marginTop}>{t("Value")}</InputLabel>
           <FormControl className={classes.marginTop}>
             {renderValueEditor(data.value, {
               isNew,
@@ -162,7 +148,7 @@ const KeyValueEditorDialog = props => {
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography className={classes.heading}>
-                  Default Value
+                  {t("Default Value")}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>

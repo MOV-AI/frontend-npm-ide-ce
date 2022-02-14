@@ -206,11 +206,11 @@ class Node extends Model {
    * Updates an instance of a managed property
    * Can only be used with managed properties
    * @param {string} propName : The name of the property
-   * @param {*} prevName : Previous item name
    * @param {*} content : The data to update the item
+   * @param {*} prevName : Previous item name
    * @returns {Node} : The instance
    */
-  updateKeyValueItem(propName, prevName, content) {
+  updateKeyValueItem(propName, content, prevName) {
     const name = content.name;
     if (prevName !== name) {
       this[propName].renameItem({ prevName, name }, true);
@@ -276,7 +276,7 @@ class Node extends Model {
    * @returns {Node} : The instance
    */
   updatePort(currName, content) {
-    this.updateKeyValueItem("ports", currName, content);
+    this.updateKeyValueItem("ports", content, currName);
     return this;
   }
 
