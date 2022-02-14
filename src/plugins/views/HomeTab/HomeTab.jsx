@@ -2,7 +2,6 @@ import React, { forwardRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { useTheme } from "@material-ui/core/styles";
-import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import withAlerts from "../../../decorators/withAlerts";
@@ -63,18 +62,18 @@ const HomeTab = forwardRef((props, ref) => {
       </div>
       <div className={classes.footer}>
         <Tooltip title={t("MOV.AI Website")}>
-          <IconButton
+          {/* <IconButton
             href="https://mov.ai"
             target="_blank"
             rel="noreferrer"
             className={classes.socialIconBadge}
-          >
-            <img
-              src={theme.label === "dark" ? movaiFullLogoWhite : movaiFullLogo}
-              alt="MOV.AI Logo"
-              className={classes.movaiIcon}
-            />
-          </IconButton>
+          > */}
+          <img
+            src={theme.label === "dark" ? movaiFullLogoWhite : movaiFullLogo}
+            alt="MOV.AI Logo"
+            className={classes.movaiIcon}
+          />
+          {/* </IconButton> */}
         </Tooltip>
       </div>
     </div>
