@@ -14,56 +14,55 @@ const sharedStyles = {
     margin: 7,
     display: "flex",
     flexFlow: "column"
-  },
-}
+  }
+};
 
 export const homeTabStyles = makeStyles(theme => ({
-    root: {
-      height: "100%",
-      width: "100%",
-      display: "flex",
-      overflow: "auto",
-      flexDirection: "column",
-      backgroundColor: theme.robotDetails.backgroundColor
-    },
-    body: {
-      flex: "1 1 auto",
-      display: "flex",
-      height: "calc(100% - 56px - 48px - 12px)",
-      padding: "0 5px",
-      marginTop: 15
-    },
-    column: {
-      flex: "0 0 50%",
-      display: "flex",
-      flexDirection: "column"
-    },
-    footer: {
-      display: "flex",
-      justifyContent: "center",
-      marginTop: 2,
-      marginBottom: 10
-    },
-    socialIconBadge: {
-      color: theme.palette.text.primary,
-      "&:hover": {
-        color: theme.palette.text.primary
-      }
-    },
-    title: {
-      padding: 15,
-      paddingBottom: 0
-    },
-    movaiLogo: {
-      padding: 15,
-      paddingBottom: 0,
-      width: 178,
-      height: 56
-    },
-    movaiIcon: {
-      width: 24,
-      height: 24
-    },
+  root: {
+    height: "100%",
+    width: "100%",
+    display: "flex",
+    overflow: "auto",
+    flexDirection: "column",
+    backgroundColor: theme.robotDetails.backgroundColor
+  },
+  body: {
+    flex: "1 1 auto",
+    display: "flex",
+    height: "calc(100% - 56px - 48px - 12px)",
+    padding: "0 5px",
+    marginTop: 15
+  },
+  column: {
+    flex: "0 0 50%",
+    display: "flex",
+    flexDirection: "column"
+  },
+  footer: {
+    display: "flex",
+    justifyContent: "center",
+    marginTop: 2,
+    marginBottom: 10
+  },
+  socialIconBadge: {
+    color: theme.palette.text.primary,
+    "&:hover": {
+      color: theme.palette.text.primary
+    }
+  },
+  title: {
+    padding: 15,
+    paddingBottom: 0
+  },
+  movaiLogo: {
+    padding: 15,
+    paddingBottom: 0,
+    width: 178,
+    height: 56
+  },
+  movaiIcon: {
+    height: "35px"
+  }
 }));
 
 export const quickAccessStyles = makeStyles(theme => ({
@@ -85,7 +84,7 @@ export const quickAccessStyles = makeStyles(theme => ({
     color: theme.palette.text.primary,
     marginRight: 10,
     fontSize: 20
-  },
+  }
 }));
 
 export const recentDocumentsStyles = makeStyles(theme => ({
@@ -93,7 +92,7 @@ export const recentDocumentsStyles = makeStyles(theme => ({
   flexTitle: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "center"
   },
   recentPaper: {
     maxHeight: "calc(100% - 78px)",
