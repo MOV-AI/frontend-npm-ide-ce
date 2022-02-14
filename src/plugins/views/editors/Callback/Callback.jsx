@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
+import { PLUGINS } from "./../../../../utils/Constants";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import InfoIcon from "@material-ui/icons/Info";
@@ -41,7 +42,7 @@ const Callback = (props, ref) => {
   const renderRightMenu = React.useCallback(() => {
     const menuName = `${id}-detail-menu`;
     // add bookmark
-    call("rightDrawer", "setBookmark", {
+    call(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.CALL.SET_BOOKMARK, {
       [menuName]: {
         icon: <InfoIcon></InfoIcon>,
         name: menuName,

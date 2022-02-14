@@ -4,7 +4,7 @@ import Observable from "./Observable";
  * Abstract class of a Model
  */
 export default class Model extends Observable {
-  constructor({ id, name, version, workspace = "global" }) {
+  constructor({ id, name, version = "-", workspace = "global" }) {
     super();
     this.id = id ?? name;
     this.name = name;

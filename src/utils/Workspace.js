@@ -13,11 +13,13 @@ class Workspace {
     this.storage = new LocalStorage();
     this.TABS_KEY = `movai.${USER_NAME}.${APP_NAME}.tabs`;
     this.LAYOUT_KEY = `movai.${USER_NAME}.${APP_NAME}.layout`;
+    this.SELECTED_ROBOT_KEY = `movai.${USER_NAME}.${APP_NAME}.selectedRobot`;
     this.RECENT_DOCUMENTS_KEY = `movai.${USER_NAME}.${APP_NAME}.recentDocuments`;
     this.layoutAndTabs = this.getLayoutAndTabs();
     this.layout = this.layoutAndTabs[0];
     this.tabs = this.layoutAndTabs[1];
     this.recentDocuments = this.getRecentDocuments();
+    this.selectedRobot = this.getSelectedRobot();
     this.defaultRecentDocuments = [];
   }
 
@@ -26,24 +28,6 @@ class Workspace {
    */
   destroy() {
     instance = null;
-  }
-
-  /**
-   * Sets the Recent Documents
-   * @param {Object} recentDocuments 
-   */
-  setRecentDocuments(recentDocuments) {
-    this.storage.set(this.RECENT_DOCUMENTS_KEY, recentDocuments);
-    this.recentDocuments = recentDocuments;
-  }
-
-  /**
-   * Gets the Recent Documents or the default if it doesn't exist in the local storage
-   * @param {Object} defaultRecentDocuments 
-   * @returns {Object} with the Recent Documents
-   */
-  getRecentDocuments(defaultRecentDocuments = this.defaultRecentDocuments) {
-    return this.storage.get(this.RECENT_DOCUMENTS_KEY) ?? defaultRecentDocuments;
   }
 
   /**
@@ -80,12 +64,59 @@ class Workspace {
   }
 
   /**
-   * Gets the tabs for the Layout
-   * @returns {Map} with the Stored Tabs
+   * Get information about current open tab from local storage
+   * @returns {Map<TabData>}
    */
   getTabs() {
     const storedTabs = this.storage.get(this.TABS_KEY) ?? {};
     return new Map(Object.entries(storedTabs));
+  }
+
+  //========================================================================================
+  /*                                                                                      *
+   *                          Selected Robot : Used in FlowTopBar                         *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Set selected robot in local storage
+   * @param {string} robotId Robot ID
+   */
+  setSelectedRobot(robotId) {
+    this.storage.set(this.SELECTED_ROBOT_KEY, robotId);
+    this.selectedRobot = robotId;
+  }
+
+  /**
+   * Get selected robot ID from local storage
+   * @returns {string} Robot ID
+   */
+  getSelectedRobot() {
+    return this.storage.get(this.SELECTED_ROBOT_KEY) ?? "";
+  }
+
+  //========================================================================================
+/*                                                                                      *
+ *                        Recent Documents : Used in Welcome Tab                        *
+ *                                                                                      */
+//========================================================================================
+
+  /**
+   * Sets the Recent Documents in the layout
+   * @param {Object} recentDocuments 
+   */
+  setRecentDocuments(recentDocuments) {
+    this.storage.set(this.RECENT_DOCUMENTS_KEY, recentDocuments);
+    this.recentDocuments = recentDocuments;
+  }
+
+  /**
+   * Gets the Recent Documents or the default if it doesn't exist in the local storage
+   * @param {Object} defaultRecentDocuments 
+   * @returns {Object} with the Recent Documents
+   */
+  getRecentDocuments(defaultRecentDocuments = this.defaultRecentDocuments) {
+    return this.storage.get(this.RECENT_DOCUMENTS_KEY) ?? defaultRecentDocuments;
   }
 }
 

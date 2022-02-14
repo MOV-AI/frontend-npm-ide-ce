@@ -1,5 +1,5 @@
 import Callback from "./Callback";
-import PyLib from "./PyLib/PyLib";
+import PyLib from "./subModels/PyLib";
 
 test("Smoke test", () => {
   const obj = new Callback();

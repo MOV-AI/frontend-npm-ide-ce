@@ -1,5 +1,4 @@
 import Model from "../../models/Configuration/Configuration";
-import Configuration from "../../plugins/views/editors/Configuration/Configuration";
 import DBSubscriber from "../DBSubscriber";
 import Store from "../Store";
 
@@ -8,7 +7,6 @@ class ConfigurationStore extends Store {
     super({
       workspace,
       model: Model,
-      plugin: Configuration, // TODO: remove
       name: "Configuration",
       title: "Configurations",
       plugins: [DBSubscriber],
