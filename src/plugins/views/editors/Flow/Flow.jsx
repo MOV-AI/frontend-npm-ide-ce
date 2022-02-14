@@ -119,9 +119,7 @@ const Flow = (props, ref) => {
       PLUGINS.RIGHT_DRAWER.NAME,
       PLUGINS.RIGHT_DRAWER.ON.CHANGE_BOOKMARK,
       bookmark => {
-        console.log("changing bookmark!?", bookmark.name);
         activeBookmark = bookmark.name;
-        console.log("activeBookmark", activeBookmark);
       }
     );
 

@@ -75,6 +75,7 @@ const withBookmarks = Component => {
      */
     const removeBookmark = React.useCallback((name, activeBookmark) => {
       setBookmarks(prevState => {
+        // *BEWARE* This is making just a shallow clone, so deep properties are still mutable
         const otherBookmarks = { ...prevState };
         delete otherBookmarks[name];
 
