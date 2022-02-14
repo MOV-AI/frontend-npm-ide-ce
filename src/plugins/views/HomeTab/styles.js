@@ -61,7 +61,7 @@ export const homeTabStyles = makeStyles(theme => ({
     height: 56
   },
   movaiIcon: {
-    height: "50px"
+    height: "35px"
   }
 }));
 
