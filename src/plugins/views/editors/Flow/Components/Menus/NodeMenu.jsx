@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useRef, memo } from "react";
+import React, { useCallback, useEffect, useState, memo } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import {
@@ -53,10 +53,9 @@ const NodeMenu = memo(
   }) => {
     const data = nodeInst.data;
     // State hooks
-    const nodeInstanceRef = useRef();
     const [templateData, setTemplateData] = useState({});
-    const [nodeInstance, setNodeInstance] = useState({});
     const [activeItem, setActiveItem] = useState(0);
+    const [nodeData, setNodeData] = useState({});
     // Other hooks
     const classes = nodeMenuStyles();
     const { t } = useTranslation();
@@ -92,9 +91,9 @@ const NodeMenu = memo(
      * @param {string} id : Node instance Item Id
      * @returns {NodeInstance}
      */
-    const getNodeInstance = useCallback(
-      id => ({ ...flowModel.current.getNodeInstanceItem(id) }),
-      [flowModel]
+    const getNodeData = useCallback(
+      () => flowModel.current.getNodeInstanceItem(data.id).serialize(),
+      [data.id, flowModel]
     );
 
     /**
@@ -103,18 +102,21 @@ const NodeMenu = memo(
     const handleSubmitParameter = useCallback(
       formData => {
         const varName = formData.varName;
-        if (nodeInstanceRef.current.getKeyValue(varName, formData.name)) {
+        const nodeInstance = flowModel.current.getNodeInstanceItem(data.id);
+
+        if (nodeInstance.getKeyValue(varName, formData.name)) {
           if (formData.value === "") {
-            nodeInstanceRef.current.deleteKeyValue(varName, formData.name);
+            nodeInstance.deleteKeyValue(varName, formData.name);
           } else {
-            nodeInstanceRef.current.updateKeyValueItem(varName, formData);
+            nodeInstance.updateKeyValueItem(varName, formData);
           }
         } else {
-          nodeInstanceRef.current.addKeyValue(varName, formData);
+          nodeInstance.addKeyValue(varName, formData);
         }
-        setNodeInstance(getNodeInstance(data.id));
+
+        setNodeData(getNodeData());
       },
-      [data.id, getNodeInstance]
+      [data.id, flowModel, getNodeData]
     );
 
     //========================================================================================
@@ -123,11 +125,9 @@ const NodeMenu = memo(
      *                                                                                      */
     //========================================================================================
 
-    // Component Did Mount
     useEffect(() => {
-      nodeInstanceRef.current = flowModel.current.getNodeInstanceItem(data.id);
-      setNodeInstance(getNodeInstance(data.id));
-    }, [flowModel, data.id, getNodeInstance]);
+      setNodeData(getNodeData());
+    }, [getNodeData]);
 
     useEffect(() => {
       const name = data?.Template;
@@ -151,11 +151,13 @@ const NodeMenu = memo(
      */
     const onChangeProperties = useCallback(
       (prop, value) => {
-        nodeInstanceRef.current.updateKeyValueProp(prop, value);
+        flowModel.current
+          .getNodeInstanceItem(data.id)
+          .updateKeyValueProp(prop, value);
 
-        setNodeInstance(getNodeInstance(data.id));
+        setNodeData(getNodeData());
       },
-      [data.id, getNodeInstance]
+      [flowModel, data.id, getNodeData]
     );
 
     /**
@@ -200,13 +202,14 @@ const NodeMenu = memo(
      */
     const handleBelongGroup = useCallback(
       (groupId, checked) => {
-        if (checked) nodeInstanceRef.current.addGroup(groupId);
-        else nodeInstanceRef.current.removeGroup(groupId);
+        const nodeInstance = flowModel.current.getNodeInstanceItem(data.id);
+        if (checked) nodeInstance.addGroup(groupId);
+        else nodeInstance.removeGroup(groupId);
 
         groupsVisibilities();
-        setNodeInstance(getNodeInstance(data.id));
+        setNodeData(getNodeData());
       },
-      [data.id, getNodeInstance, groupsVisibilities]
+      [data.id, flowModel, groupsVisibilities, getNodeData]
     );
 
     //========================================================================================
@@ -250,7 +253,7 @@ const NodeMenu = memo(
             <PropertiesSection
               editable={editable}
               templateData={templateData}
-              nodeInstance={nodeInstance}
+              nodeInstance={nodeData}
               onChangeProperties={onChangeProperties}
             />
           </Grid>
@@ -269,9 +272,7 @@ const NodeMenu = memo(
           <KeyValuesSection
             editable={editable}
             varName={TABLE_KEYS_NAMES.PARAMETERS}
-            instanceValues={Object.fromEntries(
-              nodeInstance[TABLE_KEYS_NAMES.PARAMETERS]?.data || []
-            )}
+            instanceValues={nodeData[TABLE_KEYS_NAMES.PARAMETERS] || {}}
             templateValues={templateData.parameters}
             handleTableKeyEdit={handleKeyValueDialog}
           />
@@ -290,9 +291,7 @@ const NodeMenu = memo(
           <KeyValuesSection
             editable={editable}
             varName={TABLE_KEYS_NAMES.ENVVARS}
-            instanceValues={Object.fromEntries(
-              nodeInstance[TABLE_KEYS_NAMES.ENVVARS]?.data || []
-            )}
+            instanceValues={nodeData[TABLE_KEYS_NAMES.ENVVARS] || {}}
             templateValues={templateData.envVars}
             handleTableKeyEdit={handleKeyValueDialog}
           />
@@ -311,9 +310,7 @@ const NodeMenu = memo(
           <KeyValuesSection
             editable={editable}
             varName={TABLE_KEYS_NAMES.CMDLINE}
-            instanceValues={Object.fromEntries(
-              nodeInstance[TABLE_KEYS_NAMES.CMDLINE]?.data || []
-            )}
+            instanceValues={nodeData[TABLE_KEYS_NAMES.CMDLINE] || {}}
             templateValues={templateData.commands}
             handleTableKeyEdit={handleKeyValueDialog}
           />
@@ -331,7 +328,7 @@ const NodeMenu = memo(
         <Collapse in={activeItem === ACTIVE_ITEM.GROUP} unmountOnExit>
           <NodeGroupSection
             flowGroups={flowModel.current.getGroups().serialize()}
-            nodeGroups={nodeInstance.groups}
+            nodeGroups={nodeData.groups}
             handleBelongGroup={handleBelongGroup}
           />
           <Divider />

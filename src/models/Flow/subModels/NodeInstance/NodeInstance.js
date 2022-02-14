@@ -342,7 +342,7 @@ class NodeInstance extends Model {
       groups: this.getGroups(),
       position: this.getPosition().serialize(),
       parameters: this.getParameters().serialize(),
-      envvars: this.getEnvVars().serialize(),
+      envVars: this.getEnvVars().serialize(),
       commands: this.getCommands().serialize()
     };
   }
@@ -395,7 +395,7 @@ class NodeInstance extends Model {
       NodeLayers: groups,
       Visualization: position,
       Parameter: parameters,
-      EnvVar: envvars,
+      EnvVar: envVars,
       CmdLine: commands
     } = content;
 
@@ -408,7 +408,7 @@ class NodeInstance extends Model {
       groups,
       position: Position.serializeOfDB(position),
       parameters: Manager.serializeOfDB(parameters, Parameter),
-      envVars: Manager.serializeOfDB(envvars, EnvVar),
+      envVars: Manager.serializeOfDB(envVars, EnvVar),
       commands: Manager.serializeOfDB(commands, Command)
     };
   }

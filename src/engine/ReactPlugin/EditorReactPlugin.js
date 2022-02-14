@@ -4,8 +4,8 @@ import withKeyBinds from "../../decorators/withKeyBinds";
 import withMenuHandler from "../../decorators/withMenuHandler";
 import withLoader from "../../decorators/withLoader";
 import { withDataHandler } from "../../plugins/DocManager/DataHandler";
-import { ViewPlugin } from "./ViewReactPlugin";
 import { PLUGINS } from "../../utils/Constants";
+import { ViewPlugin } from "./ViewReactPlugin";
 
 /**
  * Add decorators to Component always forwarding ref
@@ -80,6 +80,9 @@ export function withEditorPlugin(ReactComponent, methods = []) {
      */
     const saveDocument = React.useCallback(() => {
       // If document is outdated
+
+      if (!instance.current.isDirty) return;
+
       if (instance.current.getOutdated()) {
         call("dialog", "saveOutdatedDocument", {
           name,

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { Collapse, Divider, ListItem, ListItemText } from "@material-ui/core";
@@ -14,9 +14,8 @@ const ContainerMenu = props => {
   // Props
   const { nodeInst, call, openDoc, flowModel, editable, openDialog } = props;
   // State hooks
-  const flowRef = useRef();
   const [templateData, setTemplateData] = useState({});
-  const [flow, setFlow] = useState({});
+  const [flowData, setFlowData] = useState({});
   const [expanded, setExpanded] = useState(false);
   // Other hooks
   const { t } = useTranslation();
@@ -28,9 +27,9 @@ const ContainerMenu = props => {
    *                                                                                      */
   //========================================================================================
 
-  const getSubFlow = useCallback(
-    id => ({ ...flowModel.current.getSubFlowItem(id) }),
-    [flowModel]
+  const getFlowData = useCallback(
+    () => flowModel.current.getSubFlowItem(data.id).serialize(),
+    [data.id, flowModel]
   );
 
   /**
@@ -39,14 +38,19 @@ const ContainerMenu = props => {
   const handleSubmitParameter = useCallback(
     formData => {
       const varName = formData.varName;
-      if (flowRef.current.getKeyValue(varName, formData.name)) {
-        flowRef.current.updateKeyValueItem(varName, formData);
+      const containerInstance = flowModel.current.getSubFlowItem(data.id);
+      if (containerInstance.getKeyValue(varName, formData.name)) {
+        if (formData.value === "") {
+          containerInstance.deleteKeyValue(varName, formData.name);
+        } else {
+          containerInstance.updateKeyValueItem(varName, formData);
+        }
       } else {
-        flowRef.current.addKeyValue(varName, formData);
+        containerInstance.addKeyValue(varName, formData);
       }
-      setFlow(getSubFlow(data.id));
+      setFlowData(getFlowData());
     },
-    [data.id, getSubFlow]
+    [flowModel, data.id, getFlowData]
   );
 
   //========================================================================================
@@ -105,9 +109,8 @@ const ContainerMenu = props => {
 
   // Component Did Mount
   useEffect(() => {
-    flowRef.current = flowModel.current.getSubFlowItem(data.id);
-    setFlow(getSubFlow(data.id));
-  }, [flowModel, data.id, getSubFlow]);
+    setFlowData(getFlowData());
+  }, [getFlowData]);
 
   useEffect(() => {
     const name = data?.ContainerFlow;
@@ -142,9 +145,7 @@ const ContainerMenu = props => {
         <KeyValuesSection
           editable={editable}
           varName={TABLE_KEYS_NAMES.PARAMETERS}
-          instanceValues={Object.fromEntries(
-            flow[TABLE_KEYS_NAMES.PARAMETERS]?.data || []
-          )}
+          instanceValues={flowData[TABLE_KEYS_NAMES.PARAMETERS] || {}}
           templateValues={templateData.parameters}
           handleTableKeyEdit={handleKeyValueDialog}
         />
