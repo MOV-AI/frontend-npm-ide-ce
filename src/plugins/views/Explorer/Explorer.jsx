@@ -9,7 +9,7 @@ import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import { useTranslation } from "../editors/_shared/mocks";
 import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
 import movaiFullLogo from "../editors/_shared/Branding/movai-full-logo.png";
-import movaiFullLogoWhite from "../editors/_shared/Branding/movai-full-logo-white.png";
+import movaiFullLogoWhite from "../editors/_shared/Branding/movai-full-logo-red-white.png";
 
 const useStyles = makeStyles(theme => ({
   typography: {

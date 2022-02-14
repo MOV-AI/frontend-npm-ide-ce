@@ -8,7 +8,7 @@ import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import withAlerts from "../../../decorators/withAlerts";
 import { getNameFromURL } from "../../../utils/Utils";
 import ERROR_MESSAGES from "../../../utils/ErrorMessages";
-import movaiFullLogoWhite from "../editors/_shared/Branding/movai-full-logo-white.png";
+import movaiFullLogoWhite from "../editors/_shared/Branding/movai-full-logo-red-white.png";
 import movaiFullLogo from "../editors/_shared/Branding/movai-full-logo.png";
 import QuickAccessComponent from "./components/QuickAccess";
 import RecentDocumentsComponent from "./components/RecentDocuments";
