@@ -1,9 +1,10 @@
 import React, { Component } from "react";
-import PropTypes from "prop-types";
+import { withTranslation } from "react-i18next";
 import Tree from "react-virtualized-tree";
-import "material-icons/css/material-icons.css";
-import "react-virtualized/styles.css";
-import "react-virtualized-tree/lib/main.css";
+import PropTypes from "prop-types";
+import _get from "lodash/get";
+import _debounce from "lodash/debounce";
+import { ContextMenu } from "@mov-ai/mov-fe-lib-react";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import DeleteIcon from "@material-ui/icons/DeleteOutline";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
@@ -13,12 +14,13 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
-import _get from "lodash/get";
-import _debounce from "lodash/debounce";
-import ContextMenu from "../ContextMenu/ContextMenu";
 import { Tooltip, Typography } from "@material-ui/core";
-import { withTranslation } from "react-i18next";
+import { stopPropagation } from "../../../../../utils/Utils";
 import ListItemsTreeWithSearch from "../ListItemTree/ListItemsTreeWithSearch";
+
+import "react-virtualized/styles.css";
+import "react-virtualized-tree/lib/main.css";
+import "material-icons/css/material-icons.css";
 
 const styles = theme => ({
   horizFlex: {
@@ -55,12 +57,16 @@ const styles = theme => ({
   iconSpace: {
     flex: 1,
     textAlign: "right",
-    maxWidth: "38px",
+    maxWidth: 38,
     "& button": {
       position: "relative",
-      bottom: "7px",
-      padding: "7px"
+      bottom: 7,
+      padding: 7
     }
+  },
+  contextMenuIcon: {
+    color: "white",
+    fontSize: 18
   }
 });
 
@@ -171,6 +177,8 @@ class VirtualizedTree extends Component {
                 return (
                   <div
                     style={style}
+                    onMouseEnter={() => this.props.onMouseEnter(node)}
+                    onMouseLeave={() => this.props.onMouseLeave(node)}
                     onClick={() => this.props.onClickNode(node)}
                     onDoubleClick={() => this.props.onDoubleClickNode(node)}
                     p={2}
@@ -221,13 +229,18 @@ class VirtualizedTree extends Component {
                           {showIcons && node.deepness === 1 && (
                             <div className={classes.iconSpace}>
                               <ContextMenu
-                                isStyled={true}
+                                styledMenuProps={{
+                                  anchorOrigin: {
+                                    vertical: "bottom",
+                                    horizontal: "center"
+                                  },
+                                  transformOrigin: {
+                                    vertical: "top",
+                                    horizontal: "center"
+                                  }
+                                }}
                                 element={
-                                  <IconButton
-                                    onClick={evt => {
-                                      evt.stopPropagation();
-                                    }}
-                                  >
+                                  <IconButton onClick={stopPropagation}>
                                     <MoreHorizIcon />
                                   </IconButton>
                                 }
@@ -241,15 +254,23 @@ class VirtualizedTree extends Component {
                                         )
                                       });
                                     },
-                                    icon: <FileCopyIcon fontSize="small" />,
-                                    label: t("Copy")
+                                    icon: (
+                                      <FileCopyIcon
+                                        className={classes.contextMenuIcon}
+                                      />
+                                    ),
+                                    element: t("Copy")
                                   },
                                   {
                                     onClick: () => {
                                       this.props.handleDeleteClick({ ...node });
                                     },
-                                    icon: <DeleteIcon fontSize="small" />,
-                                    label: t("Delete")
+                                    icon: (
+                                      <DeleteIcon
+                                        className={classes.contextMenuIcon}
+                                      />
+                                    ),
+                                    element: t("Delete")
                                   }
                                   // {
                                   //   onClick: () => {
@@ -283,6 +304,8 @@ VirtualizedTree.propTypes = {
   data: PropTypes.array,
   showIcons: PropTypes.bool,
   onClickNode: PropTypes.func,
+  onMouseEnter: PropTypes.func,
+  onMouseLeave: PropTypes.func,
   onDoubleClickNode: PropTypes.func,
   handleChange: PropTypes.func,
   handleCopyClick: PropTypes.func,
@@ -295,6 +318,8 @@ VirtualizedTree.defaultProps = {
   data: [],
   showIcons: false,
   onClickNode: () => DEFAULT_FUNCTION("onClickNode"),
+  onMouseEnter: () => {},
+  onMouseLeave: () => {},
   onDoubleClickNode: () => DEFAULT_FUNCTION("onDoubleClickNode"),
   handleChange: () => DEFAULT_FUNCTION("handleChange"),
   handleCopyClick: () => DEFAULT_FUNCTION("handleCopyClick"),

@@ -34,6 +34,14 @@ const withKeyBinds = Component => {
     };
 
     /**
+     * Set scope to global
+     *  This will deactivate the current scope
+     */
+    const deactivateKeyBind = () => {
+      hotkeys.setScope("all");
+    };
+
+    /**
      * Add Key bind to its scope
      * @param {*} keys
      * @param {*} callback
@@ -72,6 +80,7 @@ const withKeyBinds = Component => {
         addKeyBind={addKeyBind}
         removeKeyBind={removeKeyBind}
         activateKeyBind={activateKeyBind}
+        deactivateKeyBind={deactivateKeyBind}
       />
     );
   };

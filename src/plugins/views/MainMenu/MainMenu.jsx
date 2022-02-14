@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import {
@@ -7,13 +8,16 @@ import {
   ContextMenu
 } from "@mov-ai/mov-fe-lib-react";
 import { Authentication } from "@mov-ai/mov-fe-lib-core";
+import HomeIcon from "@material-ui/icons/Home";
 import TextSnippetIcon from "@material-ui/icons/Description";
-import AppsIcon from "@material-ui/icons/Apps";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 import { Tooltip } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MainContext } from "../../../main-context";
-import { VERSION } from "../../../utils/Constants";
+import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
+import movaiIconWhite from "../editors/_shared/Branding/movai-logo-white.png";
+import { HOMETAB_PROFILE, VERSION } from "../../../utils/Constants";
+import { getIconByScope, getHomeTab } from "../../../utils/Utils";
 
 const useStyles = makeStyles(theme => ({
   icon: {
@@ -22,67 +26,71 @@ const useStyles = makeStyles(theme => ({
     "& svg": {
       color: theme.palette.primary.main
     }
+  },
+  movaiIcon: {
+    padding: 0,
+    width: 35,
+    height: 35
   }
 }));
 
-const MENUS = [
-  {
-    name: "explorer",
-    icon: props => <TextSnippetIcon {...props}></TextSnippetIcon>,
-    title: "Explorer",
-    isActive: true,
-    getOnClick: (call, emit) => () => {
-      // Toggle left drawer
-      call("leftDrawer", "toggle");
-    }
-  }
-  // {
-  //   name: "fleet",
-  //   icon: props => <AndroidIcon {...props}></AndroidIcon>,
-  //   title: "Fleet",
-  //   getOnClick: (call, emit) => () => {
-  //     // TODO: Open Fleet tab
-  //     console.log("debug open Fleet");
-  //   }
-  // },
-  // {
-  //   name: "debug",
-  //   icon: props => <BugReportIcon {...props}></BugReportIcon>,
-  //   title: "Debug",
-  //   getOnClick: (call, emit) => () => {
-  //     // TODO: Open Debug options
-  //     console.log("debug open Debug");
-  //   }
-  // },
-  // {
-  //   name: "diff",
-  //   icon: props => <CompareIcon {...props}></CompareIcon>,
-  //   title: "Diff tool",
-  //   getOnClick: (call, emit) => () => {
-  //     // TODO: Open DiffTool
-  //     console.log("debug open Diff Tool");
-  //   }
-  // }
-];
-
 const MainMenu = props => {
-  const { call, emit } = props;
-  const [docTypes, setDocTypes] = React.useState([]);
+  const { call } = props;
+  // State hooks
+  const [docTypes, setDocTypes] = useState([]);
+  // Other hooks
   const classes = useStyles();
   const theme = useTheme();
+  const { t } = useTranslation();
+  // Refs
+  const MENUS = useRef([
+    {
+      name: HOMETAB_PROFILE.name,
+      icon: _props => <HomeIcon {..._props}></HomeIcon>,
+      title: t("Get Started"),
+      isActive: true,
+      getOnClick: () => {
+        getHomeTab().then(homeTab => {
+          call("tabs", "open", homeTab);
+        });
+      }
+    },
+    {
+      name: "explorer",
+      icon: _props => <TextSnippetIcon {..._props}></TextSnippetIcon>,
+      title: "Explorer",
+      isActive: true,
+      getOnClick: () => {
+        // Toggle left drawer
+        call("leftDrawer", "toggle");
+      }
+    }
+  ]);
 
-  React.useEffect(() => {
+  //========================================================================================
+  /*                                                                                      *
+   *                                    React Lifecycle                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  // To run when component is initiated
+  useEffect(() => {
     call("docManager", "getDocTypes").then(_docTypes => {
       setDocTypes(_docTypes);
     });
   }, [call]);
 
-  /**
-   * Handle click in home icon
-   */
-  const handleHomeIconClick = () => {
-    window.location.href = "/";
-  };
+  //========================================================================================
+  /*                                                                                      *
+   *                                     Handle Events                                    *
+   *                                                                                      */
+  //========================================================================================
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Render                                        *
+   *                                                                                      */
+  //========================================================================================
 
   return (
     <MainContext.Consumer>
@@ -92,12 +100,11 @@ const MainMenu = props => {
           unsetAccountAreaPadding={true}
           backgroundColor={theme.palette.background.default}
           upperElement={
-            <Tooltip title="Apps" placement="right" arrow>
-              <AppsIcon
-                className={classes.icon}
-                onClick={handleHomeIconClick}
-              ></AppsIcon>
-            </Tooltip>
+            <img
+              src={theme.label === "dark" ? movaiIconWhite : movaiIcon}
+              className={classes.movaiIcon}
+              alt="MOV.AI"
+            />
           }
           creatorElement={
             <ContextMenu
@@ -119,15 +126,16 @@ const MainMenu = props => {
                     }
                   ),
                 element: docType.scope,
+                icon: getIconByScope(docType.scope),
                 onClose: true
               }))}
             ></ContextMenu>
           }
-          navigationList={MENUS.map(menu => (
+          navigationList={MENUS.current.map(menu => (
             <Tooltip title={menu.title} placement="right" arrow>
               {menu.icon({
                 className: classes.icon,
-                onClick: menu.getOnClick(call, emit)
+                onClick: () => menu.getOnClick()
               })}
             </Tooltip>
           ))}

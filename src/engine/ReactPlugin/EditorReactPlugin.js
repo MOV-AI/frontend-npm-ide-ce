@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useMemo, useEffect, useCallback } from "react";
 import withAlerts from "../../decorators/withAlerts";
 import withKeyBinds from "../../decorators/withKeyBinds";
 import withMenuHandler from "../../decorators/withMenuHandler";
 import withLoader from "../../decorators/withLoader";
 import { withDataHandler } from "../../plugins/DocManager/DataHandler";
+import { PLUGINS } from "../../utils/Constants";
 import { ViewPlugin } from "./ViewReactPlugin";
 
 /**
@@ -40,6 +41,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
     const {
       id,
       on,
+      off,
       name,
       call,
       scope,
@@ -51,6 +53,8 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       initRightMenu,
       updateRightMenu
     } = props;
+
+    const TAB_ACTIVE_EVENT = useMemo(() => `${id}-active`, [id]);
 
     /**
      * Handle submit action on save outdated document
@@ -76,6 +80,9 @@ export function withEditorPlugin(ReactComponent, methods = []) {
      */
     const saveDocument = React.useCallback(() => {
       // If document is outdated
+
+      if (!instance.current.isDirty) return;
+
       if (instance.current.getOutdated()) {
         call("dialog", "saveOutdatedDocument", {
           name,
@@ -95,7 +102,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
     /**
      * Activate editor : activate editor's keybinds and update right menu
      */
-    const activateEditor = React.useCallback(() => {
+    const activateEditor = useCallback(() => {
       activateKeyBind();
       updateRightMenu();
     }, [activateKeyBind, updateRightMenu]);
@@ -103,20 +110,24 @@ export function withEditorPlugin(ReactComponent, methods = []) {
     /**
      * Component did mount
      */
-    React.useEffect(() => {
-      addKeyBind("ctrl+s", saveDocument);
+    useEffect(() => {
       initRightMenu();
-      on("tabs", `${id}-active`, activateEditor);
+      addKeyBind("ctrl+s", saveDocument);
+      on(PLUGINS.TABS.NAME, TAB_ACTIVE_EVENT, activateEditor);
 
       // Remove key bind on component unmount
-      return () => removeKeyBind("ctrl+s");
+      return () => {
+        removeKeyBind("ctrl+s");
+        off(PLUGINS.TABS.NAME, TAB_ACTIVE_EVENT);
+      };
     }, [
       activateEditor,
       addKeyBind,
       removeKeyBind,
-      id,
+      TAB_ACTIVE_EVENT,
       initRightMenu,
       on,
+      off,
       saveDocument
     ]);
 
@@ -158,6 +169,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
           profile={this.profile}
           emit={this.emit}
           on={this.on}
+          off={this.off}
           onTopic={this.onTopic}
         />
       );

@@ -1,12 +1,13 @@
-import React, { useCallback } from "react";
+import React, { useCallback, forwardRef } from "react";
 import { MenuItem, Select, FormControl, InputLabel } from "@material-ui/core";
 import { withTheme } from "../../../../../../decorators/withTheme";
 import withAlerts from "../../../../../../decorators/withAlerts";
+import { DATA_TYPES } from "../../../../../../utils/Constants";
+import useDataTypes from "../../../_shared/hooks/useDataTypes";
 import KeyValueEditorDialog from "../KeyValueTable/KeyValueEditorDialog";
-import useDataTypes from "./DataTypes/hooks/useDataTypes";
 
-const ParameterEditorDialog = props => {
-  const { alert } = props;
+const ParameterEditorDialog = forwardRef((props, ref) => {
+  const { alert, alertSeverities } = props;
   // Hooks
   const [data, setData] = React.useState({});
   const { getDataTypes, getLabel, getEditComponent, getValidValue, validate } =
@@ -25,7 +26,9 @@ const ParameterEditorDialog = props => {
    */
   const valueToRender = formData => {
     const type = formData.type;
-    return type === "string" ? JSON.stringify(formData.value) : formData.value;
+    return type === DATA_TYPES.STRING
+      ? JSON.stringify(formData.value)
+      : formData.value;
   };
 
   /**
@@ -35,7 +38,9 @@ const ParameterEditorDialog = props => {
    */
   const valueToSave = formData => {
     const type = formData.type;
-    return type === "string" ? JSON.parse(formData.value) : formData.value;
+    return type === DATA_TYPES.STRING
+      ? JSON.parse(formData.value)
+      : formData.value;
   };
 
   //========================================================================================
@@ -67,7 +72,7 @@ const ParameterEditorDialog = props => {
         return { ...res, data: dataToSubmit };
       })
       .catch(err => {
-        alert({ message: err.message, severity: "error" });
+        alert({ message: err.message, severity: alertSeverities.ERROR });
         return err;
       });
   };
@@ -125,7 +130,7 @@ const ParameterEditorDialog = props => {
         <InputLabel>Type *</InputLabel>
         <Select
           fullWidth
-          value={data.type || "any"}
+          value={data.type || DATA_TYPES.ANY}
           onChange={handleTypeChange}
         >
           {getDataTypes().map(key => (
@@ -166,6 +171,6 @@ const ParameterEditorDialog = props => {
       renderCustomContent={renderTypeSelector}
     />
   );
-};
+});
 
 export default withAlerts(withTheme(ParameterEditorDialog));

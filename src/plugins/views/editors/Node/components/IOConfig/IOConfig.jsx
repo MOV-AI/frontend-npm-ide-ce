@@ -61,13 +61,12 @@ const IOConfig = props => {
 
   // State hooks
   const [scopePorts, setScopePorts] = React.useState({});
-  const [scopeCallback, setScopeCallback] = React.useState({});
   const [scopeSystemPortsData, setScopeSystemPortsData] = React.useState({});
 
   // Other hooks
   const classes = useStyles();
   const { t } = useTranslation();
-  const { getAllCallbacksWithMessage, getEffectiveMessage } = useHelper();
+  const { getEffectiveMessage } = useHelper();
   const { getColumns } = useIOConfigColumns({
     scopeSystemPortsData,
     scopePorts,
@@ -90,10 +89,6 @@ const IOConfig = props => {
       // Get All ports data to fill second selector
       store.helper.getPortsData().then(res => {
         if (res) setScopeSystemPortsData(res);
-      });
-      // Get All callback options
-      store.helper.getScopeCallback().then(res => {
-        if (res) setScopeCallback(res);
       });
     });
   }, [call, scope]);
@@ -121,15 +116,6 @@ const IOConfig = props => {
       }
     });
   };
-
-  /**
-   * Update callback options for each row
-   */
-  const updateCallbackOptions = React.useCallback(
-    (portData, callbacksAvailable) =>
-      console.log("updateCallbackOptions", portData, callbacksAvailable),
-    []
-  );
 
   /**
    * Format data : Convert object in array to be rendered in Material Table
@@ -160,18 +146,9 @@ const IOConfig = props => {
       // Delete LinkEnabled
       delete rowData[direction][key]["LinkEnabled"];
       if (direction === "portOut") return rowData;
-      // Set available callback options for input ports
-      const anyMessage = "movai_msgs/Any";
-      const anyCallback = getAllCallbacksWithMessage(scopeCallback, anyMessage);
-      updateCallbackOptions(rowData.portIn[key], anyCallback);
       return rowData;
     },
-    [
-      getEffectiveMessage,
-      updateCallbackOptions,
-      getAllCallbacksWithMessage,
-      scopeCallback
-    ]
+    [getEffectiveMessage]
   );
 
   /**

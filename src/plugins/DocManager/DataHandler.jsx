@@ -1,14 +1,15 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const MESSAGES = {
-  save: {
-    success: "Saved successfully",
-    error: "Failed to save"
+  SAVE: {
+    SUCCESS: "Saved successfully",
+    ERROR: "Failed to save"
   }
 };
 
 const DataHandler = props => {
-  const { children, call, scope, name, id, alert } = props;
+  const { children, call, scope, name, id, alert, alertSeverities } = props;
   const [data, setData] = React.useState();
   const [loading, setLoading] = React.useState(true);
   const modelRef = React.useRef();
@@ -23,7 +24,10 @@ const DataHandler = props => {
     call("docManager", "save", { scope, name }, newName)
       .then(res => {
         if (res.success) {
-          alert({ message: t(MESSAGES.save.success), severity: "success" });
+          alert({
+            message: t(MESSAGES.SAVE.SUCCESS),
+            severity: alertSeverities.SUCCESS
+          });
           if (newName) {
             const newTabData = {
               id: modelRef.current.getUrl(),
@@ -33,12 +37,18 @@ const DataHandler = props => {
             call("tabs", "updateTabId", id, newTabData);
           }
         } else {
-          alert({ message: t(MESSAGES.save.error), severity: "error" });
+          alert({
+            message: t(MESSAGES.SAVE.ERROR),
+            severity: alertSeverities.ERROR
+          });
         }
       })
       .catch(error => {
         console.log("Failed to save: error", error);
-        alert({ message: t(MESSAGES.save.error), severity: "error" });
+        alert({
+          message: t(MESSAGES.SAVE.ERROR),
+          severity: alertSeverities.ERROR
+        });
       });
   };
 
@@ -71,7 +81,3 @@ const withDataHandler = Component => {
 export default DataHandler;
 
 export { withDataHandler };
-
-function useTranslation() {
-  return { t: s => s };
-}

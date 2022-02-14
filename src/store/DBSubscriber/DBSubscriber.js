@@ -22,7 +22,6 @@ class DBSubscriber extends StoreAbstractPlugin {
   }
 
   name = "DBSubscriber";
-  docName = null;
   [symbols.timer] = null;
   [symbols.subscribers] = new Map();
 
@@ -31,8 +30,6 @@ class DBSubscriber extends StoreAbstractPlugin {
   }
 
   subscribe(docName) {
-    this.docName = docName;
-
     const subscriber = new Subscriber({
       pattern: this.getPattern(docName)
     });
@@ -83,7 +80,7 @@ class DBSubscriber extends StoreAbstractPlugin {
     clearTimeout(this[symbols.timer]);
 
     this[symbols.timer] = setTimeout(
-      () => this.updateDocument(),
+      () => this.updateDocument(data.patterns[0].Name),
       DEBOUNCE_TIME
     );
   }
@@ -91,12 +88,12 @@ class DBSubscriber extends StoreAbstractPlugin {
   /**
    * Updates the document if needed
    */
-  updateDocument() {
+  updateDocument(docName) {
     this.iStore
-      .fetchDoc(this.docName)
+      .fetchDoc(docName)
       .then(updatedData => {
         // get the document instance from the store
-        const doc = this.getDoc(this.docName);
+        const doc = this.getDoc(docName);
 
         // serialize model data
         const currentData = doc.serializeToDB();
@@ -113,7 +110,7 @@ class DBSubscriber extends StoreAbstractPlugin {
 
           doc.getDirty()
             ? doc.setOutdated(true)
-            : this.overwriteDoc(filteredData);
+            : this.overwriteDoc(docName, filteredData);
         }
       })
       .catch(error => console.log(error));
@@ -133,13 +130,17 @@ class DBSubscriber extends StoreAbstractPlugin {
    * Overwrites the document data
    * @param {object} data The data to overwrite the document
    */
-  overwriteDoc(data) {
-    const doc = this.getDoc(this.docName);
+  overwriteDoc(docName, data) {
+    const doc = this.getDoc(docName);
 
-    // get the static method
+    // Get the static method
     const serialized = doc.constructor.serializeOfDB(data);
 
+    // Update data in data model
     doc.setData(serialized).setDirty(false);
+
+    // Emit event to Doc Manager
+    this.iStore.docManager?.onDocumentUpdate(doc);
   }
 
   /**

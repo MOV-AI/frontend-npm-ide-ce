@@ -1,5 +1,5 @@
 import Manager from "./Manager";
-import PyLib from "../Callback/PyLib/PyLib";
+import PyLib from "../Callback/subModels/PyLib";
 
 test("Smoke test", () => {
   const obj = new Manager();
