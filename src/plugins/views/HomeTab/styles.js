@@ -2,75 +2,75 @@ import { makeStyles } from "@material-ui/core/styles";
 
 const sharedStyles = {
   paper: {
-    margin: 10,
+    margin: "10px",
     flex: 1,
-    borderRadius: 5
+    borderRadius: "5px"
   },
   columnTitle: {
-    padding: 14,
-    fontSize: 24
+    padding: "14px",
+    fontSize: "24px"
   },
   columnBody: {
-    margin: 7,
+    margin: "7px",
     display: "flex",
     flexFlow: "column"
-  },
-}
+  }
+};
 
 export const homeTabStyles = makeStyles(theme => ({
-    root: {
-      height: "100%",
-      width: "100%",
-      display: "flex",
-      overflow: "auto",
-      flexDirection: "column",
-      backgroundColor: theme.robotDetails.backgroundColor
-    },
-    body: {
-      flex: "1 1 auto",
-      display: "flex",
-      height: "calc(100% - 56px - 48px - 12px)",
-      padding: "0 5px",
-      marginTop: 15
-    },
-    column: {
-      flex: "0 0 50%",
-      display: "flex",
-      flexDirection: "column"
-    },
-    footer: {
-      display: "flex",
-      justifyContent: "center",
-      marginTop: 2,
-      marginBottom: 10
-    },
-    socialIconBadge: {
-      color: theme.palette.text.primary,
-      "&:hover": {
-        color: theme.palette.text.primary
-      }
-    },
-    title: {
-      padding: 15,
-      paddingBottom: 0
-    },
-    movaiLogo: {
-      padding: 15,
-      paddingBottom: 0,
-      width: 178,
-      height: 56
-    },
-    movaiIcon: {
-      width: 24,
-      height: 24
-    },
+  root: {
+    height: "100%",
+    width: "100%",
+    display: "flex",
+    overflow: "auto",
+    flexDirection: "column",
+    backgroundColor: theme.robotDetails.backgroundColor
+  },
+  body: {
+    flex: "1 1 auto",
+    display: "flex",
+    height: "calc(100% - 56px - 48px - 12px)",
+    padding: "0 5px",
+    marginTop: "15px"
+  },
+  column: {
+    flex: "0 0 50%",
+    display: "flex",
+    flexDirection: "column"
+  },
+  footer: {
+    display: "flex",
+    justifyContent: "center",
+    marginTop: "2px",
+    marginBottom: "10px"
+  },
+  socialIconBadge: {
+    color: theme.palette.text.primary,
+    "&:hover": {
+      color: theme.palette.text.primary
+    }
+  },
+  title: {
+    padding: "15px",
+    paddingBottom: "0px"
+  },
+  movaiLogo: {
+    padding: "15px",
+    paddingBottom: "0px",
+    width: "178px",
+    height: "56px"
+  },
+  movaiIcon: {
+    width: "24px",
+    height: "24px"
+  }
 }));
 
 export const quickAccessStyles = makeStyles(theme => ({
   ...sharedStyles,
   link: {
     color: "#3db5e6",
-    fontSize: 16,
+    fontSize: "16px",
     padding: "5px 10px",
     fontWeight: 600,
     display: "flex",
@@ -83,9 +83,9 @@ export const quickAccessStyles = makeStyles(theme => ({
   },
   linkIcon: {
     color: theme.palette.text.primary,
-    marginRight: 10,
-    fontSize: 20
-  },
+    marginRight: "10px",
+    fontSize: "20px"
+  }
 }));
 
 export const recentDocumentsStyles = makeStyles(theme => ({
@@ -93,7 +93,7 @@ export const recentDocumentsStyles = makeStyles(theme => ({
   flexTitle: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "center"
   },
   recentPaper: {
     maxHeight: "calc(100% - 78px)",
@@ -101,21 +101,21 @@ export const recentDocumentsStyles = makeStyles(theme => ({
   },
   clearIcon: {
     color: theme.palette.text.primary,
-    fontSize: 8
+    fontSize: "8px"
   }
 }));
 
-export const samplesDocumentsStyles = makeStyles(theme => ({
+export const examplesDocumentsStyles = makeStyles(theme => ({
   ...sharedStyles,
-  samplePaper: {
+  examplePaper: {
     maxHeight: "calc(100% - 20px)"
   },
   cardDivider: {
-    height: 3,
+    height: "3px",
     margin: "0 20px"
   },
-  columnSample: {
-    margin: 3,
+  columnExample: {
+    margin: "3px",
     overflow: "auto",
     maxHeight: "calc(100% - 90px)"
   }
@@ -124,19 +124,39 @@ export const samplesDocumentsStyles = makeStyles(theme => ({
 export const homeTabCardStyles = makeStyles(theme => ({
   card: {
     display: "flex",
-    margin: 2,
-    padding: 5,
-    borderRadius: 2,
+    margin: "2px",
+    padding: "5px",
+    borderRadius: "2px",
+    alignItems: "center",
     "&:hover": {
       cursor: "pointer",
       backgroundColor: `${theme.palette.primary.main}26`
+    }
+  },
+  haveImage: {
+    width: "calc(100% - 185px)",
+    marginRight: "15px"
+  },
+  fullWidth: {
+    width: "100%"
+  },
+  exampleImage: {
+    width: 170,
+    height: 170,
+    borderRadius: "5px",
+    border: "4px solid white",
+    boxShadow: "1px 1px 8px 0px #000",
+    "& > img": {
+      width: "100%",
+      height: "100%",
+      objectFit: "cover"
     }
   },
   cardHeader: {
     display: "flex",
     flexFlow: "row",
     margin: "10px 5px",
-    fontSize: 20,
+    fontSize: "20px",
     color: theme.palette.text.primary,
     alignItems: "center"
   },
@@ -146,38 +166,41 @@ export const homeTabCardStyles = makeStyles(theme => ({
     margin: "0px 5px"
   },
   cardFooter: {
-    display: "flex",
-    justifyContent: "flex-end",
-    margin: "3px 5px"
+    margin: "30px 5px 10px",
+    "& > button": {
+      margin: "0px"
+    }
   },
   cardIcon: {
     backgroundColor: theme.palette.text.primary,
     color: "rgb(0, 127, 255)",
-    borderRadius: 5,
-    marginRight: 10
+    borderRadius: "5px",
+    marginRight: "10px",
+    fontSize: "15px"
   },
   title: {
-    fontWeight: 600
+    fontWeight: 600,
+    display: "flex",
+    alignItems: "flex-start"
   },
   icon: {
     color: theme.palette.text.primary,
-    padding: 3,
-    paddingRight: 20,
+    padding: "3px",
+    paddingRight: "20px",
     "&:hover": {
       color: theme.palette.text.primary
     }
   },
   avatar: {
-    display: "flex",
-    marginTop: 10,
-    marginRight: 10
+    display: "inherit",
+    marginLeft: "10px"
   },
   paragraph: {
-    marginBottom: 0
+    marginBottom: "0px"
   },
   movaiIcon: {
-    width: 35,
-    height: 35
+    width: "15px",
+    height: "15px"
   },
   externalLinkButton: {
     fontWeight: 600,
@@ -223,7 +246,7 @@ export const homeTabLinkStyles = makeStyles(theme => ({
   },
   link: {
     color: theme.palette.primary.light,
-    fontSize: 16,
+    fontSize: "16px",
     margin: "2px 10px",
     fontWeight: 600
   },
@@ -231,10 +254,10 @@ export const homeTabLinkStyles = makeStyles(theme => ({
     display: "flex",
     alignItems: "center",
     "& svg": {
-      fontSize: 20
+      fontSize: "20px"
     }
   },
   iconFont: {
-    fontSize: 20
+    fontSize: "20px"
   }
 }));

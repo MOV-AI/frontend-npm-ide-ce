@@ -5,28 +5,28 @@ import Paper from "@material-ui/core/Paper";
 import Divider from "@material-ui/core/Divider";
 import HomeTabCard from "./HomeTabCard";
 
-import { samplesDocumentsStyles } from "../styles";
+import { examplesDocumentsStyles } from "../styles";
 
-const HOME_SAMPLES = window.SERVER_DATA?.Samples || [];
+const HOME_EXAMPLES = window.SERVER_DATA?.Examples || [];
 
-const Samples = props => {
-  const classes = samplesDocumentsStyles();
+const Examples = props => {
+  const classes = examplesDocumentsStyles();
   const { openExistingDocument } = props;
   const { t } = useTranslation();
 
   return (
-    <Paper className={`${classes.paper} ${classes.samplePaper}`}>
-      <div className={classes.columnTitle}>{t("Samples")}</div>
+    <Paper className={`${classes.paper} ${classes.examplePaper}`}>
+      <div className={classes.columnTitle}>{t("Examples")}</div>
       <Divider />
-      <div className={classes.columnSample}>
-        {HOME_SAMPLES?.map((sample, i) => {
+      <div className={classes.columnExample}>
+        {HOME_EXAMPLES?.map((example, i) => {
           return (
-            <div key={sample.title + i}>
+            <div key={example.title + i}>
               {i !== 0 && (
                 <Divider light={true} className={classes.cardDivider} />
               )}
               <HomeTabCard
-                sample={sample}
+                example={example}
                 openDocument={openExistingDocument}
               />
             </div>
@@ -37,9 +37,9 @@ const Samples = props => {
   );
 };
 
-Samples.propTypes = {
+Examples.propTypes = {
   openExistingDocument: PropTypes.func,
   on: PropTypes.func
 };
 
-export default Samples;
+export default Examples;

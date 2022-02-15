@@ -76,6 +76,7 @@ Languages:
       "Edit parameter": "Edit parameter"
       "Env Variables": "Env. Variables"
       "Environment Variables": "Environment Variables"
+      "Examples": "Examples"
       "Exclude property": "Exclude property"
       "Excluded properties": "Excluded properties"
       "Execution Parameters": "Execution Parameters"
@@ -292,6 +293,7 @@ Languages:
       "Edit parameter": "Editar parâmetro"
       "Env Variables": "Variáveis de Ambiente"
       "Environment Variables": "Variáveis de Ambiente"
+      "Examples": "Exemplos"
       "Exclude property": "Excluir propriedade"
       "Excluded properties": "Propriedades excluidas"
       "Execution Parameters": "Parâmetros de execução"
@@ -434,7 +436,7 @@ Languages:
       "Versioning": "Versões"
       "Workspace": "Área de trabalho"
       "Yes": "Sim"
-Samples:
+Examples:
   - title: battery_monitor_init
     description: Nunc varius ultrices velit, in maximus purus maximus et. Curabitur libero diam, finibus nec dictum sed, facilisis a nisi. Duis ultricies efficitur est at pellentesque.
     url: global/Callback/battery_monitor_init
@@ -442,6 +444,8 @@ Samples:
     externalLink: "https://rdmd.readme.io/docs"
     externalLinkLabel: "How to"
     certified: true
+    imageDescription: "HOW MOV.AI MAKES INTELLIGENT MATERIAL HANDLING ROBOTS AFFORDABLE"
+    imageLink: "https://www.mov.ai/wp-content/uploads/2021/04/blog_3-1024x536.jpg"
   - title: backend
     description: Aenean arcu quam, tristique sed accumsan nec, lacinia sed quam. Mauris porta est eros. Sed aliquet, purus ac vulputate placerat, nibh lectus vestibulum eros
     url: global/Node/backend
@@ -454,3 +458,5 @@ Samples:
     externalLink: "https://rdmd.readme.io/docs"
     externalLinkLabel: "How to"
     certified: true
+    imageDescription: "THE FUTURE OF ROBOTS - COLLABORATION OR COOPERATION?"
+    imageLink: "https://www.mov.ai/wp-content/uploads/2021/12/Star-wars-r2d2-2-1024x535.jpg"

@@ -11,7 +11,7 @@ import ERROR_MESSAGES from "../../../utils/ErrorMessages";
 import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
 import QuickAccessComponent from "./components/QuickAccess";
 import RecentDocumentsComponent from "./components/RecentDocuments";
-import SamplesComponent from "./components/Samples";
+import ExamplesComponent from "./components/Examples";
 
 import { homeTabStyles } from "./styles";
 
@@ -57,7 +57,7 @@ const HomeTab = forwardRef((props, ref) => {
           />
         </div>
         <div className={classes.column}>
-          <SamplesComponent openExistingDocument={openExistingDocument} />
+          <ExamplesComponent openExistingDocument={openExistingDocument} />
         </div>
       </div>
       <div className={classes.footer}>
