@@ -32,7 +32,10 @@ const Configuration = props => {
     const menuName = `${path}-detail-menu`;
     const actualConfig = configRef.current;
     // add bookmark
-    call("rightDrawer", "setBookmark", {
+
+    call(
+      PLUGINS.RIGHT_DRAWER.NAME,
+      PLUGINS.RIGHT_DRAWER.CALL.SET_BOOKMARK, {
       [menuName]: {
         icon: <InfoIcon></InfoIcon>,
         name: menuName,

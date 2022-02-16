@@ -70,14 +70,16 @@ export function withViewPlugin(ReactComponent, methods = []) {
       super(profile, props, methods);
     }
 
-    render() {
+    render(otherProps = {}) {
       return (
         <RefComponent
           {...this.props}
+          {...otherProps}
           ref={this.ref}
           call={this.call}
           profile={this.profile}
           emit={this.emit}
+          off={this.off}
           on={this.on}
           onTopic={this.onTopic}
         />

@@ -10,11 +10,12 @@ import {
 import { Authentication } from "@mov-ai/mov-fe-lib-core";
 import HomeIcon from "@material-ui/icons/Home";
 import TextSnippetIcon from "@material-ui/icons/Description";
-import AppsIcon from "@material-ui/icons/Apps";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 import { Tooltip } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MainContext } from "../../../main-context";
+import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
+import movaiIconWhite from "../editors/_shared/Branding/movai-logo-white.png";
 import { HOMETAB_PROFILE, VERSION } from "../../../utils/Constants";
 import { getIconByScope, getHomeTab } from "../../../utils/Utils";
 
@@ -25,6 +26,11 @@ const useStyles = makeStyles(theme => ({
     "& svg": {
       color: theme.palette.primary.main
     }
+  },
+  movaiIcon: {
+    padding: 0,
+    width: 35,
+    height: 35
   }
 }));
 
@@ -80,13 +86,6 @@ const MainMenu = props => {
    *                                                                                      */
   //========================================================================================
 
-  /**
-   * Handle click in home icon
-   */
-  const handleHomeIconClick = () => {
-    window.location.href = "/";
-  };
-
   //========================================================================================
   /*                                                                                      *
    *                                        Render                                        *
@@ -101,12 +100,11 @@ const MainMenu = props => {
           unsetAccountAreaPadding={true}
           backgroundColor={theme.palette.background.default}
           upperElement={
-            <Tooltip title="Apps" placement="right" arrow>
-              <AppsIcon
-                className={classes.icon}
-                onClick={handleHomeIconClick}
-              ></AppsIcon>
-            </Tooltip>
+            <img
+              src={theme.label === "dark" ? movaiIconWhite : movaiIcon}
+              className={classes.movaiIcon}
+              alt="MOV.AI"
+            />
           }
           creatorElement={
             <ContextMenu

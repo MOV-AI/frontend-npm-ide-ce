@@ -12,6 +12,7 @@ class BaseStore extends StorePluginManager {
       title,
       pattern,
       observer,
+      docManager,
       plugins
     } = args;
 
@@ -25,6 +26,7 @@ class BaseStore extends StorePluginManager {
     this._title = title || "Generic Store";
     this.pattern = pattern || { Scope: this.scope, Name: "*", Label: "*" };
     this.observer = observer;
+    this.docManager = docManager;
 
     this.enableSubscriber();
   }

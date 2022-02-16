@@ -1,7 +1,7 @@
 import Model from "../Model/Model";
 import schema from "./schema";
 import Manager from "../Manager";
-import PyLib from "./PyLib";
+import PyLib from "./subModels/PyLib";
 
 export default class Callback extends Model {
   constructor() {

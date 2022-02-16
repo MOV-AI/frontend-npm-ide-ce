@@ -4,13 +4,14 @@ import Helper from "./NodeHelper";
 import Store from "../Store";
 
 class NodeStore extends Store {
-  constructor(workspace, observer) {
+  constructor(workspace, observer, docManager) {
     super({
       workspace,
       model: Model,
       name: "Node",
       title: "Nodes",
       plugins: [DBSubscriber],
+      docManager,
       observer
     });
   }

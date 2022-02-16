@@ -1,11 +1,12 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import _toString from "lodash/toString";
 import InfoLogo from "@material-ui/icons/Info";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
-import { useTranslation } from "../../../_shared/mocks";
+import { DATA_TYPES } from "../../../../../../utils/Constants";
 import { HtmlTooltip } from "../_shared/HtmlTooltip";
 
 const useStyles = makeStyles(theme => ({
@@ -14,7 +15,7 @@ const useStyles = makeStyles(theme => ({
     padding: "0px"
   },
   codeContainer: {
-    height: "200px",
+    height: "100px",
     width: "100%"
   }
 }));
@@ -56,7 +57,8 @@ const useKeyValueMethods = () => {
    * @returns Row value column
    */
   const renderValue = rowData => {
-    if (rowData.type === "string") return JSON.stringify(rowData.value);
+    if (rowData.type === DATA_TYPES.STRING)
+      return JSON.stringify(rowData.value);
     return rowData.value;
   };
 
