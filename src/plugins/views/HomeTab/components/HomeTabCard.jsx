@@ -1,66 +1,59 @@
 import React, { useCallback } from "react";
-import CodeIcon from "@material-ui/icons/Code";
 import CallMadeIcon from "@material-ui/icons/CallMade";
 import Button from "@material-ui/core/Button";
-import movaiIcon from "../../editors/_shared/Loader/movai_red.svg";
 import { stopPropagation } from "../../../../utils/Utils";
 
 import { homeTabCardStyles } from "../styles";
 
 function HomeTabCard(props) {
   const classes = homeTabCardStyles();
-  const { sample, openDocument } = props;
+  const { example, openDocument } = props;
 
   const handleOnClick = useCallback(
-    () => openDocument({ id: sample.url, scope: sample.scope }),
-    [sample, openDocument]
+    () => openDocument({ id: example.url, scope: example.scope }),
+    [example, openDocument]
   );
 
   return (
-    <>
-      <div className={classes.card} onClick={handleOnClick}>
-        <div className={classes.avatar}>
-          {!props.certified ? (
-            <div>
-              <img
-                src={movaiIcon}
-                alt="MOV.AI Logo"
-                className={classes.movaiIcon}
-              />
-            </div>
-          ) : (
-            <CodeIcon className={classes.cardIcon} />
-          )}
+    <div className={classes.card} onClick={handleOnClick}>
+      <div
+        className={example.imageLink ? classes.haveImage : classes.fullWidth}
+      >
+        <div className={classes.cardHeader}>
+          <div className={classes.title}>{example.title}</div>
         </div>
-        <div>
-          <div className={classes.cardHeader}>
-            <div className={classes.title}>{sample.title}</div>
-          </div>
-          <div className={classes.cardBody}>
-            <p className={classes.paragraph}>{sample.description}</p>
-          </div>
-          {sample.externalLink && (
-            <div className={classes.cardFooter}>
-              <Button
-                className={classes.externalLinkButton}
-                variant="outlined"
-                endIcon={<CallMadeIcon />}
+        <div className={classes.cardBody}>
+          <p className={classes.paragraph}>{example.description}</p>
+        </div>
+        {example.externalLink && (
+          <div className={classes.cardFooter}>
+            <Button
+              className={classes.externalLinkButton}
+              variant="outlined"
+              endIcon={<CallMadeIcon />}
+            >
+              <a
+                href={example.externalLink}
+                rel="noopener noreferrer"
+                target="_blank"
+                onClick={stopPropagation}
+                className={classes.externalLinkLabel}
               >
-                <a
-                  href={sample.externalLink}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  onClick={stopPropagation}
-                  className={classes.externalLinkLabel}
-                >
-                  {sample.externalLinkLabel || sample.externalLink}
-                </a>
-              </Button>
-            </div>
-          )}
-        </div>
+                {example.externalLinkLabel || example.externalLink}
+              </a>
+            </Button>
+          </div>
+        )}
       </div>
-    </>
+      {example.imageLink && (
+        <div className={classes.exampleImage}>
+          <img
+            src={example.imageLink}
+            alt={example.imageDescription || example.title}
+          />
+        </div>
+      )}
+    </div>
   );
 }
 
