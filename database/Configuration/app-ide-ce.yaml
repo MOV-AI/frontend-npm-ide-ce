@@ -1,6 +1,34 @@
 ---
 Language: en
 RobotBlackList: []
+Examples:
+  - title: "Navigation: Tugbot"
+    description: "This flow is a demo for autonomous navigation. We use the depot map combined with amcl and ekf to localize and move_base combined with global planner and teb local planner as well as global costmap and local cost map to navigate the robot."
+    url: "global/Flow/tugbot_navigation"
+    scope: "Flow"
+    externalLink: "https://movai-flow.readme.io/reference/tugbot_simple_navigation"
+    externalLinkLabel: "How to"
+    certified: true
+    imageDescription: "Navigation: Tugbot"
+    imageLink: "https://www.mov.ai/wp-content/uploads/2021/04/blog_3-1024x536.jpg"
+  - title: "Mapping: Tugbot"
+    description: "Performs the mapping of a location using SLAM. Relies on 2D Lidar and Odometry information. Joystick should be used to move the robot around and to stop the mapping procedure when finished."
+    url: "global/Flow/tugbot_mapping"
+    scope: "Flow"
+    externalLink: "https://movai-flow.readme.io/reference/tugbot_mapping"
+    externalLinkLabel: "How to"
+    certified: true
+    imageDescription: "Mapping: Tugbot"
+    imageLink: "https://www.mov.ai/wp-content/uploads/2021/04/blog_1-1024x536.jpg"
+  - title: "Monitoring: Tugbot"
+    description: "Nulla dictum est ut elit lobortis, ut fermentum tellus maximus. Nulla libero lectus, semper eget eleifend vel, interdum vel ligula. Donec eget tellus tristique, dapibus felis vitae, interdum orci. Nam dapibus nibh orci, in luctus mi aliquet ut. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos."
+    url: "global/Flow/tugbot_monitoring"
+    scope: "Flow"
+    externalLink: "https://rdmd.readme.io/docs"
+    externalLinkLabel: "How to"
+    certified: true
+    imageDescription: "Monitoring: Tugbot"
+    imageLink: "https://www.mov.ai/wp-content/uploads/2021/04/blog_2-1024x536.jpg"
 Languages:
   en:
     translation:
@@ -436,27 +464,3 @@ Languages:
       "Versioning": "Versões"
       "Workspace": "Área de trabalho"
       "Yes": "Sim"
-Examples:
-  - title: battery_monitor_init
-    description: Nunc varius ultrices velit, in maximus purus maximus et. Curabitur libero diam, finibus nec dictum sed, facilisis a nisi. Duis ultricies efficitur est at pellentesque.
-    url: global/Callback/battery_monitor_init
-    scope: "Callback"
-    externalLink: "https://rdmd.readme.io/docs"
-    externalLinkLabel: "How to"
-    certified: true
-    imageDescription: "HOW MOV.AI MAKES INTELLIGENT MATERIAL HANDLING ROBOTS AFFORDABLE"
-    imageLink: "https://www.mov.ai/wp-content/uploads/2021/04/blog_3-1024x536.jpg"
-  - title: backend
-    description: Aenean arcu quam, tristique sed accumsan nec, lacinia sed quam. Mauris porta est eros. Sed aliquet, purus ac vulputate placerat, nibh lectus vestibulum eros
-    url: global/Node/backend
-    scope: "Node"
-    certified: false
-  - title: actuator_init
-    description: Nulla dictum est ut elit lobortis, ut fermentum tellus maximus. Nulla libero lectus, semper eget eleifend vel, interdum vel ligula. Donec eget tellus tristique, dapibus felis vitae, interdum orci. Nam dapibus nibh orci, in luctus mi aliquet ut. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.
-    url: global/Callback/actuator_init
-    scope: "Callback"
-    externalLink: "https://rdmd.readme.io/docs"
-    externalLinkLabel: "How to"
-    certified: true
-    imageDescription: "THE FUTURE OF ROBOTS - COLLABORATION OR COOPERATION?"
-    imageLink: "https://www.mov.ai/wp-content/uploads/2021/12/Star-wars-r2d2-2-1024x535.jpg"

@@ -7,6 +7,7 @@ import Divider from "@material-ui/core/Divider";
 import AddIcon from "@material-ui/icons/Add";
 import ChromeReaderModeIcon from "@material-ui/icons/ChromeReaderMode";
 import { getIconByScope } from "../../../../utils/Utils";
+// This is already working - just leaving this here for posteriority
 // import {
 //   APP_DEFAULT_CONFIG,
 //   APP_CUSTOM_CONFIG
