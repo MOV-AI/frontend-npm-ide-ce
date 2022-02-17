@@ -97,7 +97,7 @@ export const DOCK_POSITIONS = {
 
 export const FLOW_EXPLORER_PROFILE = {
   name: "FlowExplorer",
-  title: "Flow Explorer"
+  title: "Add Node / Sub-flow"
 };
 
 export const HOMETAB_PROFILE = { name: "HomeTab", title: "Welcome" };
