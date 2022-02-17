@@ -65,6 +65,7 @@ export default class GraphValidator {
 
       if (Boolean(noPortsError)) {
         this.graph.deleteLinks([linkData.id]);
+        this.graph.invalidLinks.push(linkData);
         return;
       }
 
@@ -86,7 +87,7 @@ export default class GraphValidator {
   };
 
   addDeletedLinks = () => {
-    this.graph.invalidLinks.forEach((invalidLink, index) => {
+    this.graph.invalidLinks.forEach(invalidLink => {
       this.graph.addLink({
         ...invalidLink,
         From: `${invalidLink.sourceNode}/${invalidLink.sourcePort}`,
@@ -170,9 +171,9 @@ export default class GraphValidator {
   };
 
   /**
-   *
-   * @param {*} link
-   * @param {*} nodes
+   * Extract the Ports Position of Nodes from link
+   * @param {object} link : link object to get the node ports position
+   * @param {array} nodes : Array of nodes to get ports position
    * @returns
    */
   static extractLinkPortsPos = (link, nodes) => {
@@ -189,9 +190,9 @@ export default class GraphValidator {
   };
 
   /**
-   *
-   * @param {*} link
-   * @param {*} nodes
+   * Validate ports : check if both ports exist for a link to co-exist
+   * @param {object} link : link object to use to validate ports
+   * @param {array} nodes : Array of nodes to get ports position and validate them
    */
   static validatePorts = (link, nodes) => {
     const { sourcePortPos, targetPortPos } = GraphValidator.extractLinkPortsPos(
