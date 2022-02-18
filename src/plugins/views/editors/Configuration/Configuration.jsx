@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
 import { AppBar, Toolbar } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
@@ -49,6 +50,7 @@ const Configuration = (props, ref) => {
   // Style Hooks
   const classes = useStyles();
   const theme = useTheme();
+  const { t } = useTranslation();
 
   //========================================================================================
   /*                                                                                      *
@@ -59,17 +61,19 @@ const Configuration = (props, ref) => {
   const renderRightMenu = React.useCallback(() => {
     const details = props.data?.details || {};
     const menuName = `${id}-detail-menu`;
+    const menuTitle = t("Configuration Details Menu");
     // add bookmark
     call(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.CALL.SET_BOOKMARK, {
       [menuName]: {
         icon: <InfoIcon></InfoIcon>,
         name: menuName,
+        title: menuTitle,
         view: (
           <Menu id={id} name={name} details={details} model={instance}></Menu>
         )
       }
     });
-  }, [call, id, name, instance, props.data]);
+  }, [call, id, name, instance, props.data, t]);
 
   usePluginMethods(ref, {
     renderRightMenu
