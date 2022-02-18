@@ -64,15 +64,15 @@ const Flow = (props, ref) => {
   // Global consts
   const MENUS = useRef(
     Object.freeze({
-      DETAIL_MENU: {
+      DETAIL: {
         NAME: "detail-menu",
         TITLE: "Flow Details"
       },
-      NODE_MENU: {
+      NODE: {
         NAME: "node-menu",
         TITLE: "Node Instance Menu"
       },
-      LINK_MENU: {
+      LINK: {
         NAME: "link-menu",
         TITLE: "Link Instance Menu"
       }
@@ -356,8 +356,8 @@ const Flow = (props, ref) => {
       if (!node || !MenuComponent) return;
       return {
         icon: <i className="icon-Nodes" />,
-        name: MENUS.current.NODE_MENU.NAME,
-        title: t(MENUS.current.NODE_MENU.TITLE),
+        name: MENUS.current.NODE.NAME,
+        title: t(MENUS.current.NODE.TITLE),
         view: (
           <MenuComponent
             id={id}
@@ -413,8 +413,8 @@ const Flow = (props, ref) => {
       if (!link) return;
       return {
         icon: <CompareArrowsIcon />,
-        name: MENUS.current.LINK_MENU.NAME,
-        title: t(MENUS.current.LINK_MENU.TITLE),
+        name: MENUS.current.LINK.NAME,
+        title: t(MENUS.current.LINK.TITLE),
         view: (
           <LinkMenu
             id={id}
@@ -453,10 +453,10 @@ const Flow = (props, ref) => {
     const explorerView = new Explorer(FLOW_EXPLORER_PROFILE);
     const details = props.data?.details || {};
     const bookmarks = {
-      [MENUS.current.DETAIL_MENU.NAME]: {
+      [MENUS.current.DETAIL.NAME]: {
         icon: <InfoIcon></InfoIcon>,
-        name: MENUS.current.DETAIL_MENU.NAME,
-        title: t(MENUS.current.DETAIL_MENU.TITLE),
+        name: MENUS.current.DETAIL.NAME,
+        title: t(MENUS.current.DETAIL.TITLE),
         view: (
           <Menu
             id={id}
@@ -483,14 +483,14 @@ const Flow = (props, ref) => {
 
     // Add node menu if any is selected
     if (selectedNodeRef.current) {
-      bookmarks[MENUS.current.NODE_MENU.NAME] = getNodeMenuToAdd(
+      bookmarks[MENUS.current.NODE.NAME] = getNodeMenuToAdd(
         selectedNodeRef.current
       );
     }
 
     // Add link menu if any is selected
     if (selectedLinkRef.current) {
-      bookmarks[MENUS.current.LINK_MENU.NAME] = getLinkMenuToAdd(
+      bookmarks[MENUS.current.LINK.NAME] = getLinkMenuToAdd(
         selectedLinkRef.current
       );
     }
@@ -605,8 +605,8 @@ const Flow = (props, ref) => {
     call(
       PLUGINS.RIGHT_DRAWER.NAME,
       PLUGINS.RIGHT_DRAWER.CALL.REMOVE_BOOKMARK,
-      MENUS.current.NODE_MENU.NAME,
-      MENUS.current.DETAIL_MENU.NAME
+      MENUS.current.NODE.NAME,
+      MENUS.current.DETAIL.NAME
     );
     selectedNodeRef.current = null;
   }, [MENUS, call, selectedNodeRef]);
@@ -623,7 +623,7 @@ const Flow = (props, ref) => {
           unselectNode();
         } else {
           selectedNodeRef.current = node;
-          activeBookmark = MENUS.current.NODE_MENU.NAME;
+          activeBookmark = MENUS.current.NODE.NAME;
           addNodeMenu(node, true);
         }
       }, 300);
@@ -643,11 +643,11 @@ const Flow = (props, ref) => {
         call(
           PLUGINS.RIGHT_DRAWER.NAME,
           PLUGINS.RIGHT_DRAWER.CALL.REMOVE_BOOKMARK,
-          MENUS.current.LINK_MENU.NAME,
+          MENUS.current.LINK.NAME,
           activeBookmark
         );
       } else {
-        activeBookmark = MENUS.current.LINK_MENU.NAME;
+        activeBookmark = MENUS.current.LINK.NAME;
         addLinkMenu(link, true);
       }
     },
