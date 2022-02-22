@@ -31,7 +31,7 @@ const HomeTab = forwardRef((props, ref) => {
   //========================================================================================
 
   /**
-   * Open Document
+   * Open an existing Document
    * @param {{name: string, scope: string, id: string, isDeleted: bool}} doc : Document data
    */
   const openExistingDocument = useCallback(
