@@ -57,9 +57,20 @@ export default class GraphValidator {
     let linksMismatches = false;
 
     links.forEach((link, _, _links) => {
+      const linkData = link.data;
       linksStart = linksStart || this.isLinkFromStart(link);
+
+      // Validate ports here
+      const noPortsError = GraphValidator.validatePorts(linkData, nodes);
+
+      if (Boolean(noPortsError)) {
+        this.graph.deleteLinks([linkData.id]);
+        this.graph.invalidLinks.push(linkData);
+        return;
+      }
+
       // Validate links message mismatch
-      const error = GraphValidator.validateLinkMismatch(link.data, nodes);
+      const error = GraphValidator.validateLinkMismatch(linkData, nodes);
       link.updateError(error);
       if (!linksMismatches)
         linksMismatches = link.error instanceof MisMatchMessageLink;
@@ -70,7 +81,19 @@ export default class GraphValidator {
     // Check rule nr. 2 : Links between ports with different message types
     if (linksMismatches) warnings.push(messages.linkMismatchMessage);
 
+    this.addDeletedLinks();
+
     return warnings;
+  };
+
+  addDeletedLinks = () => {
+    this.graph.invalidLinks.forEach(invalidLink => {
+      this.graph.addLink({
+        ...invalidLink,
+        From: `${invalidLink.sourceNode}/${invalidLink.sourcePort}`,
+        To: `${invalidLink.targetNode}/${invalidLink.targetPort}`
+      });
+    });
   };
 
   /**
@@ -148,12 +171,12 @@ export default class GraphValidator {
   };
 
   /**
-   * validateLinkMismatch : check if link has message type mismatch
-   * @param {*} link : parsed link object
-   * @param {*} nodes : graph nodes
-   * @returns null or error MisMatchMessageLink object
+   * Extract the Ports Position of Nodes from link
+   * @param {object} link : link object to get the node ports position
+   * @param {array} nodes : Array of nodes to get ports position
+   * @returns
    */
-  static validateLinkMismatch = (link, nodes) => {
+  static extractLinkPortsPos = (link, nodes) => {
     const [sourceNode, targetNode] = ["sourceNode", "targetNode"].map(key => {
       const node = nodes.get(link[key]);
       if (!node) throw new Error(`Node ${link[key]} not found`);
@@ -162,6 +185,37 @@ export default class GraphValidator {
 
     const sourcePortPos = sourceNode.obj.getPortPos(link.sourcePort);
     const targetPortPos = targetNode.obj.getPortPos(link.targetPort);
+
+    return { sourcePortPos, targetPortPos };
+  };
+
+  /**
+   * Validate ports : check if both ports exist for a link to co-exist
+   * @param {object} link : link object to use to validate ports
+   * @param {array} nodes : Array of nodes to get ports position and validate them
+   */
+  static validatePorts = (link, nodes) => {
+    const { sourcePortPos, targetPortPos } = GraphValidator.extractLinkPortsPos(
+      link,
+      nodes
+    );
+
+    if (!sourcePortPos || !targetPortPos) {
+      return "Ports not found";
+    }
+  };
+
+  /**
+   * validateLinkMismatch : check if link has message type mismatch
+   * @param {*} link : parsed link object
+   * @param {*} nodes : graph nodes
+   * @returns null or error MisMatchMessageLink object
+   */
+  static validateLinkMismatch = (link, nodes) => {
+    const { sourcePortPos, targetPortPos } = GraphValidator.extractLinkPortsPos(
+      link,
+      nodes
+    );
 
     // Check if link is invalid to define error
     const error = !isLinkeable(sourcePortPos.data, targetPortPos.data)

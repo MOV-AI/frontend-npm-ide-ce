@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  useRef
+} from "react";
 import { useTranslation } from "react-i18next";
 import { filter } from "rxjs/operators";
 import { makeStyles } from "@material-ui/core/styles";
@@ -54,10 +60,24 @@ const Flow = (props, ref) => {
     saveDocument,
     on
   } = props;
+
   // Global consts
-  const DETAIL_MENU_NAME = "detail-menu";
-  const NODE_MENU_NAME = "node-menu";
-  const LINK_MENU_NAME = "link-menu";
+  const MENUS = useRef(
+    Object.freeze({
+      DETAIL: {
+        NAME: "detail-menu",
+        TITLE: "Flow Details"
+      },
+      NODE: {
+        NAME: "node-menu",
+        TITLE: "Node Instance Menu"
+      },
+      LINK: {
+        NAME: "link-menu",
+        TITLE: "Link Instance Menu"
+      }
+    })
+  );
 
   // State Hooks
   const [dataFromDB, setDataFromDB] = useState();
@@ -336,7 +356,8 @@ const Flow = (props, ref) => {
       if (!node || !MenuComponent) return;
       return {
         icon: <i className="icon-Nodes" />,
-        name: NODE_MENU_NAME,
+        name: MENUS.current.NODE.NAME,
+        title: t(MENUS.current.NODE.TITLE),
         view: (
           <MenuComponent
             id={id}
@@ -352,14 +373,15 @@ const Flow = (props, ref) => {
       };
     },
     [
-      NODE_MENU_NAME,
+      MENUS,
       call,
       id,
       instance,
       openDoc,
       openDialog,
       getMenuComponent,
-      groupsVisibilities
+      groupsVisibilities,
+      t
     ]
   );
 
@@ -391,7 +413,8 @@ const Flow = (props, ref) => {
       if (!link) return;
       return {
         icon: <CompareArrowsIcon />,
-        name: LINK_MENU_NAME,
+        name: MENUS.current.LINK.NAME,
+        title: t(MENUS.current.LINK.TITLE),
         view: (
           <LinkMenu
             id={id}
@@ -404,7 +427,7 @@ const Flow = (props, ref) => {
         )
       };
     },
-    [openDialog, call, id, instance]
+    [MENUS, openDialog, call, id, instance, t]
   );
 
   /**
@@ -430,9 +453,10 @@ const Flow = (props, ref) => {
     const explorerView = new Explorer(FLOW_EXPLORER_PROFILE);
     const details = props.data?.details || {};
     const bookmarks = {
-      [DETAIL_MENU_NAME]: {
+      [MENUS.current.DETAIL.NAME]: {
         icon: <InfoIcon></InfoIcon>,
-        name: DETAIL_MENU_NAME,
+        name: MENUS.current.DETAIL.NAME,
+        title: t(MENUS.current.DETAIL.TITLE),
         view: (
           <Menu
             id={id}
@@ -449,6 +473,7 @@ const Flow = (props, ref) => {
       FlowExplorer: {
         icon: <Add />,
         name: FLOW_EXPLORER_PROFILE.name,
+        title: t(FLOW_EXPLORER_PROFILE.title),
         view: explorerView.render({
           flowId: id,
           mainInterface: getMainInterface()
@@ -458,12 +483,16 @@ const Flow = (props, ref) => {
 
     // Add node menu if any is selected
     if (selectedNodeRef.current) {
-      bookmarks[NODE_MENU_NAME] = getNodeMenuToAdd(selectedNodeRef.current);
+      bookmarks[MENUS.current.NODE.NAME] = getNodeMenuToAdd(
+        selectedNodeRef.current
+      );
     }
 
     // Add link menu if any is selected
     if (selectedLinkRef.current) {
-      bookmarks[LINK_MENU_NAME] = getLinkMenuToAdd(selectedLinkRef.current);
+      bookmarks[MENUS.current.LINK.NAME] = getLinkMenuToAdd(
+        selectedLinkRef.current
+      );
     }
 
     // add bookmark
@@ -474,6 +503,7 @@ const Flow = (props, ref) => {
       activeBookmark
     );
   }, [
+    MENUS,
     id,
     name,
     instance,
@@ -482,7 +512,8 @@ const Flow = (props, ref) => {
     openDialog,
     getNodeMenuToAdd,
     getLinkMenuToAdd,
-    handleGroupVisibility
+    handleGroupVisibility,
+    t
   ]);
 
   usePluginMethods(ref, {
@@ -574,11 +605,11 @@ const Flow = (props, ref) => {
     call(
       PLUGINS.RIGHT_DRAWER.NAME,
       PLUGINS.RIGHT_DRAWER.CALL.REMOVE_BOOKMARK,
-      NODE_MENU_NAME,
-      DETAIL_MENU_NAME
+      MENUS.current.NODE.NAME,
+      MENUS.current.DETAIL.NAME
     );
     selectedNodeRef.current = null;
-  }, [call, selectedNodeRef]);
+  }, [MENUS, call, selectedNodeRef]);
 
   /**
    * On Node Selected
@@ -592,12 +623,12 @@ const Flow = (props, ref) => {
           unselectNode();
         } else {
           selectedNodeRef.current = node;
-          activeBookmark = NODE_MENU_NAME;
+          activeBookmark = MENUS.current.NODE.NAME;
           addNodeMenu(node, true);
         }
       }, 300);
     },
-    [addNodeMenu, unselectNode]
+    [MENUS, addNodeMenu, unselectNode]
   );
 
   /**
@@ -612,15 +643,15 @@ const Flow = (props, ref) => {
         call(
           PLUGINS.RIGHT_DRAWER.NAME,
           PLUGINS.RIGHT_DRAWER.CALL.REMOVE_BOOKMARK,
-          LINK_MENU_NAME,
+          MENUS.current.LINK.NAME,
           activeBookmark
         );
       } else {
-        activeBookmark = LINK_MENU_NAME;
+        activeBookmark = MENUS.current.LINK.NAME;
         addLinkMenu(link, true);
       }
     },
-    [call, addLinkMenu]
+    [MENUS, call, addLinkMenu]
   );
 
   /**

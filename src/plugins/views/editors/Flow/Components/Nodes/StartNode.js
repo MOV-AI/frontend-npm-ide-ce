@@ -37,6 +37,13 @@ class StartNode extends BaseNode {
   };
 
   /**
+   * @override Override onSelected from BaseNode
+   */
+  onSelected = () => {
+    // Emtpy on purpose
+  };
+
+  /**
    * disable all port events except the onClick
    */
   portEvents = () => {

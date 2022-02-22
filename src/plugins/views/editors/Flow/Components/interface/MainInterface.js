@@ -1,12 +1,13 @@
 import lodash from "lodash";
 import { BehaviorSubject } from "rxjs";
 import { filter } from "rxjs/operators";
-import Canvas from "./canvas";
-import Graph from "../../Core/Graph/GraphBase";
-import InterfaceModes from "./InterfaceModes";
 import { maxMovingPixels, NODE_TYPES } from "../../Constants/constants";
-import Events from "./Events";
+import Graph from "../../Core/Graph/GraphBase";
 import { EVT_NAMES } from "../../events";
+import StartNode from "../Nodes/StartNode";
+import InterfaceModes from "./InterfaceModes";
+import Events from "./Events";
+import Canvas from "./canvas";
 
 const TYPES = {
   NODE: "NodeInst",
@@ -367,11 +368,15 @@ export default class MainInterface {
   onSelectNode = data => {
     const { nodes, shiftKey } = data;
     const { selectedNodes } = this;
+    const filterNodes = nodes.filter(
+      n => n.constructor.name !== StartNode.name
+    );
+
     this.selectedLink = null;
 
     if (!shiftKey) selectedNodes.length = 0;
 
-    nodes.forEach(node => {
+    filterNodes.forEach(node => {
       node.selected
         ? selectedNodes.push(node)
         : lodash.pull(selectedNodes, node);

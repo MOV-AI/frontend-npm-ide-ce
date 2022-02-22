@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
 import InfoIcon from "@material-ui/icons/Info";
@@ -13,7 +14,6 @@ import {
   ROS_VALID_NAMES,
   PLUGINS
 } from "../../../../utils/Constants";
-import { useTranslation } from "../_shared/mocks";
 import Menu from "./Menu";
 import Description from "./components/Description/Description";
 import ExecutionParameters from "./components/ExecutionParameters/ExecutionParameters";
@@ -75,17 +75,19 @@ const Node = (props, ref) => {
   const renderRightMenu = React.useCallback(() => {
     const details = props.data?.details ?? {};
     const menuName = `${id}-detail-menu`;
+    const menuTitle = t("Node Details Menu");
     // add bookmark
     call(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.CALL.SET_BOOKMARK, {
       [menuName]: {
         icon: <InfoIcon></InfoIcon>,
         name: menuName,
+        title: menuTitle,
         view: (
           <Menu id={id} name={name} details={details} model={instance}></Menu>
         )
       }
     });
-  }, [call, id, name, props.data, instance]);
+  }, [call, id, name, props.data, instance, t]);
 
   usePluginMethods(ref, {
     renderRightMenu

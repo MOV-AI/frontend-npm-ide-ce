@@ -157,7 +157,7 @@ export default class Graph {
   /**
    * @private Clear invalid links property
    */
-  clearInvalidLinks = () => () => {
+  clearInvalidLinks = () => {
     this.invalidLinks = [];
   };
 
@@ -425,7 +425,7 @@ export default class Graph {
 
       return inst;
     } catch (error) {
-      console.log("Error creating node", error);
+      console.warn("Error creating node", error);
     }
   }
 
@@ -439,15 +439,8 @@ export default class Graph {
 
     try {
       const parsedLink = BaseLink.parseLink(data);
-
-      const [sourceNode, targetNode] = ["sourceNode", "targetNode"].map(key => {
-        const node = this.nodes.get(parsedLink[key]);
-        if (!node) throw new Error(`Node ${parsedLink[key]} not found`);
-        return node;
-      });
-
-      const sourcePortPos = sourceNode.obj.getPortPos(parsedLink.sourcePort);
-      const targetPortPos = targetNode.obj.getPortPos(parsedLink.targetPort);
+      const { sourcePortPos, targetPortPos } =
+        GraphValidator.extractLinkPortsPos(parsedLink, this.nodes);
 
       if (!sourcePortPos || !targetPortPos) {
         throw new InvalidLink(parsedLink);
@@ -477,8 +470,13 @@ export default class Graph {
       this.canvas.append(() => {
         return obj.el;
       }, "links");
+
+      this.invalidLinks = this.invalidLinks.filter(l => l.id !== parsedLink.id);
     } catch (error) {
-      if (error instanceof InvalidLink) {
+      if (
+        error instanceof InvalidLink &&
+        !this.invalidLinks.find(l => l.id === error.link.id)
+      ) {
         this.invalidLinks.push(error.link);
       }
       console.error(error.message);
