@@ -6,21 +6,21 @@
  *
  */
 
+import i18n from "../../../../../../i18n/i18n";
+import { ROS_VALID_NAMES } from "../../../../../../utils/Constants";
 import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
 import { MisMatchMessageLink } from "../../Components/Links/Errors";
 import { isLinkeable } from "../../Components/Nodes/BaseNode/PortValidator";
 
-const t = v => v;
-
 const messages = {
   startLink: {
-    message: t("Start link(s) not found"),
+    message: i18n.t("Start link(s) not found"),
     type: "warning",
     isRuntime: true,
     isPersistent: false
   },
   linkMismatchMessage: {
-    message: t("There're links with message mismatch"),
+    message: i18n.t("There're links with message mismatch"),
     type: "warning",
     isRuntime: false,
     isPersistent: true
@@ -57,9 +57,20 @@ export default class GraphValidator {
     let linksMismatches = false;
 
     links.forEach((link, _, _links) => {
+      const linkData = link.data;
       linksStart = linksStart || this.isLinkFromStart(link);
+
+      // Validate ports here
+      const noPortsError = GraphValidator.validatePorts(linkData, nodes);
+
+      if (Boolean(noPortsError)) {
+        this.graph.deleteLinks([linkData.id]);
+        this.graph.invalidLinks.push(linkData);
+        return;
+      }
+
       // Validate links message mismatch
-      const error = GraphValidator.validateLinkMismatch(link.data, nodes);
+      const error = GraphValidator.validateLinkMismatch(linkData, nodes);
       link.updateError(error);
       if (!linksMismatches)
         linksMismatches = link.error instanceof MisMatchMessageLink;
@@ -70,7 +81,19 @@ export default class GraphValidator {
     // Check rule nr. 2 : Links between ports with different message types
     if (linksMismatches) warnings.push(messages.linkMismatchMessage);
 
+    this.addDeletedLinks();
+
     return warnings;
+  };
+
+  addDeletedLinks = () => {
+    this.graph.invalidLinks.forEach(invalidLink => {
+      this.graph.addLink({
+        ...invalidLink,
+        From: `${invalidLink.sourceNode}/${invalidLink.sourcePort}`,
+        To: `${invalidLink.targetNode}/${invalidLink.targetPort}`
+      });
+    });
   };
 
   /**
@@ -115,37 +138,71 @@ export default class GraphValidator {
   };
 
   /**
-   * check conditions for a valid name
+   * Validates the given name to add a new instance
    * 1 - should be unique
    * 2 - should pass regex test
-   * @param {string} name value to validate
-   * @param {Map} nodes list of nodes already added to the flow
-   *
+   * @param {name} string : New name for this instance
+   * @param {instType} string : Type of instance (Node/Sub-flow)
    * @returns {object} {result <bool>, error <string>}
    */
-  static validateNodeName = (name, nodes) => {
-    const rosValidation = new RegExp(/^[a-zA-Z]\w*$/);
-
-    const re = new RegExp(/(_{2,})/);
-
+  validateNodeName = (newName, instType) => {
     try {
-      let nodeExists = false;
-      nodes.forEach(node => {
-        if (name === node.obj.name) {
-          nodeExists = true;
-        }
-      });
+      const re = ROS_VALID_NAMES;
+      if (!newName)
+        throw new Error(
+          i18n.t("{{instance}} name is mandatory", { instance: instType })
+        );
+      if (!re.test(newName))
+        throw new Error(
+          i18n.t("Invalid {{instance}} name", { instance: instType })
+        );
+      if (this.graph.nodes.has(newName))
+        throw new Error(
+          i18n.t("Cannot have multiple instances with same name")
+        );
 
-      if (nodeExists) {
-        throw new Error("Node already exists");
-      }
-      if (!rosValidation.test(name) || re.test(name)) {
-        throw new Error("Invalid name");
-      }
-    } catch (error) {
-      return { result: false, error: error.message };
+      return { result: true, error: "" };
+    } catch (err) {
+      return {
+        result: false,
+        error: err.message
+      };
     }
-    return { result: true, error: "" };
+  };
+
+  /**
+   * Extract the Ports Position of Nodes from link
+   * @param {object} link : link object to get the node ports position
+   * @param {array} nodes : Array of nodes to get ports position
+   * @returns
+   */
+  static extractLinkPortsPos = (link, nodes) => {
+    const [sourceNode, targetNode] = ["sourceNode", "targetNode"].map(key => {
+      const node = nodes.get(link[key]);
+      if (!node) throw new Error(`Node ${link[key]} not found`);
+      return node;
+    });
+
+    const sourcePortPos = sourceNode.obj.getPortPos(link.sourcePort);
+    const targetPortPos = targetNode.obj.getPortPos(link.targetPort);
+
+    return { sourcePortPos, targetPortPos };
+  };
+
+  /**
+   * Validate ports : check if both ports exist for a link to co-exist
+   * @param {object} link : link object to use to validate ports
+   * @param {array} nodes : Array of nodes to get ports position and validate them
+   */
+  static validatePorts = (link, nodes) => {
+    const { sourcePortPos, targetPortPos } = GraphValidator.extractLinkPortsPos(
+      link,
+      nodes
+    );
+
+    if (!sourcePortPos || !targetPortPos) {
+      return "Ports not found";
+    }
   };
 
   /**
@@ -155,14 +212,10 @@ export default class GraphValidator {
    * @returns null or error MisMatchMessageLink object
    */
   static validateLinkMismatch = (link, nodes) => {
-    const [sourceNode, targetNode] = ["sourceNode", "targetNode"].map(key => {
-      const node = nodes.get(link[key]);
-      if (!node) throw new Error(`Node ${link[key]} not found`);
-      return node;
-    });
-
-    const sourcePortPos = sourceNode.obj.getPortPos(link.sourcePort);
-    const targetPortPos = targetNode.obj.getPortPos(link.targetPort);
+    const { sourcePortPos, targetPortPos } = GraphValidator.extractLinkPortsPos(
+      link,
+      nodes
+    );
 
     // Check if link is invalid to define error
     const error = !isLinkeable(sourcePortPos.data, targetPortPos.data)

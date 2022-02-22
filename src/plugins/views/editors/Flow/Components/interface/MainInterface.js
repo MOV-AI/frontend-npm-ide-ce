@@ -1,16 +1,32 @@
 import lodash from "lodash";
 import { BehaviorSubject } from "rxjs";
 import { filter } from "rxjs/operators";
-import Canvas from "./canvas";
+import { maxMovingPixels, NODE_TYPES } from "../../Constants/constants";
 import Graph from "../../Core/Graph/GraphBase";
-import InterfaceModes from "./InterfaceModes";
-import { maxMovingPixels } from "../../Constants/constants";
-import Events from "./Events";
 import { EVT_NAMES } from "../../events";
+import StartNode from "../Nodes/StartNode";
+import InterfaceModes from "./InterfaceModes";
+import Events from "./Events";
+import Canvas from "./canvas";
 
 const TYPES = {
   NODE: "NodeInst",
   CONTAINER: "Container"
+};
+
+const NODE_PROPS = {
+  Node: {
+    LABEL: "NodeLabel",
+    MODEL_ADD_METHOD: "addNode",
+    MODEL_DEL_METHOD: "deleteNode",
+    TYPE: NODE_TYPES.NODE
+  },
+  Flow: {
+    LABEL: "ContainerLabel",
+    MODEL_ADD_METHOD: "addSubFlow",
+    MODEL_DEL_METHOD: "deleteSubFlow",
+    TYPE: NODE_TYPES.CONTAINER
+  }
 };
 
 export default class MainInterface {
@@ -144,11 +160,6 @@ export default class MainInterface {
     this.graph.nodeStatusUpdated(nodeStatus, robotStatus);
   };
 
-  // TODO: move to where it matters
-  validateNodeTocopy = data => {
-    return data.node?.ContainerFlow !== this.id;
-  };
-
   addLink = () => {
     const { src, trg, link, toCreate } = this.mode.linking.props;
 
@@ -169,18 +180,91 @@ export default class MainInterface {
     this.graph.deleteLinks([linkId]);
   };
 
-  deleteNode = (nodeId, deletedLinks) => {
-    this.graph.deleteNode(nodeId);
+  addNode = name => {
+    const node = {
+      ...this.mode.current.props.node.data,
+      NodeLabel: name,
+      name: name,
+      id: name
+    };
+    this.modelView.current.addNode(node);
+    this.graph.addNode(node, NODE_TYPES.NODE).then(() => {
+      this.graph.update();
+      this.setMode(EVT_NAMES.DEFAULT);
+    });
+
+    return this;
   };
 
-  deleteNodeInst = nodeId => {
-    const deletedLinks = this.modelView.current.deleteNode(nodeId);
-    this.deleteNode(nodeId, deletedLinks);
+  addFlow = name => {
+    const node = {
+      ...this.mode.current.props.node.data,
+      ContainerLabel: name,
+      name: name,
+      id: name
+    };
+    this.modelView.current.addSubFlow(node);
+    this.graph.addNode(node, NODE_TYPES.CONTAINER).then(() => {
+      this.graph.update();
+      this.setMode(EVT_NAMES.DEFAULT);
+    });
+
+    return this;
   };
 
-  deleteSubFlow = subFlowId => {
-    const deletedLinks = this.modelView.current.deleteSubFlow(subFlowId);
-    this.deleteNode(subFlowId, deletedLinks);
+  /**
+   * Paste node/sub-flow
+   *  Add it to model data and to canvas
+   * @param {string} name : Copy new name
+   * @param {*} nodeData : Node original data
+   * @param {{x: number, y: number}} position : Position to paste node
+   */
+  pasteNode = (name, nodeData, position) => {
+    // Gather information from model
+    const NODE_PROP_DATA = NODE_PROPS[nodeData.model];
+    // Build node data
+    const node = {
+      ...nodeData,
+      Visualization: [position.x, position.y],
+      [NODE_PROP_DATA.LABEL]: name,
+      Label: name,
+      name: name,
+      id: name
+    };
+    // Add node to model data
+    this.modelView.current[NODE_PROP_DATA.MODEL_ADD_METHOD](node);
+    // Add node to canvas
+    this.graph.addNode(node, NODE_PROP_DATA.TYPE).then(() => {
+      this.graph.update();
+      this.setMode(EVT_NAMES.DEFAULT);
+    });
+  };
+
+  /**
+   * Delete Nodes/Sub-Flows
+   * @param {*} node : Node data
+   */
+  deleteNode = node => {
+    // Gather information from model
+    const NODE_PROP_DATA = NODE_PROPS[node.model];
+    // Delete from model data
+    this.modelView.current[NODE_PROP_DATA.MODEL_DEL_METHOD](node.id);
+    // Delete from canvas
+    this.graph.deleteNode(node.id);
+    // Remove from selected nodes
+    this.selectedNodes = this.selectedNodes.filter(
+      el => el.data.id !== node.id
+    );
+  };
+
+  toggleExposedPort = port => {
+    const templateName = port.node.getExposedName();
+    const nodeName = port.node.name;
+    const portName = port.name;
+
+    this.graph.updateExposedPorts(
+      this.modelView.current.toggleExposedPort(templateName, nodeName, portName)
+    );
   };
 
   //========================================================================================
@@ -222,6 +306,26 @@ export default class MainInterface {
 
   //========================================================================================
   /*                                                                                      *
+   *                                    Helper Methods                                    *
+   *                                                                                      */
+  //========================================================================================
+
+  hideLinks = (node, visitedLinks) => {
+    node.links.forEach(linkId => {
+      const link = this.graph.links.get(linkId);
+      if (
+        // link was not yet visited or is visible
+        !visitedLinks.has(linkId) ||
+        link.visible
+      ) {
+        link.visibility = node.obj.visible;
+      }
+      visitedLinks.add(linkId);
+    });
+  };
+
+  //========================================================================================
+  /*                                                                                      *
    *                                    Event Handlers                                    *
    *                                                                                      */
   //========================================================================================
@@ -231,10 +335,8 @@ export default class MainInterface {
   };
 
   onDragEnd = draggedNode => {
-    const nodes = this.selectedNodes.filter(
-      node => node.data.id === draggedNode.data.id
-    );
-    nodes.push(draggedNode);
+    const selectedNodesSet = new Set([draggedNode].concat(this.selectedNodes));
+    const nodes = Array.from(selectedNodesSet).filter(obj => obj);
 
     nodes.forEach(node => {
       const { id } = node.data;
@@ -266,11 +368,15 @@ export default class MainInterface {
   onSelectNode = data => {
     const { nodes, shiftKey } = data;
     const { selectedNodes } = this;
+    const filterNodes = nodes.filter(
+      n => n.constructor.name !== StartNode.name
+    );
+
     this.selectedLink = null;
 
     if (!shiftKey) selectedNodes.length = 0;
 
-    nodes.forEach(node => {
+    filterNodes.forEach(node => {
       node.selected
         ? selectedNodes.push(node)
         : lodash.pull(selectedNodes, node);
@@ -286,23 +392,21 @@ export default class MainInterface {
     return this.stateSub.subscribe(fn);
   };
 
-  onLayersChange = layers => {
+  onGroupsChange = groups => {
     const visitedLinks = new Set();
-
     this.graph.nodes.forEach(node => {
-      node.obj.onLayersChange(layers);
+      node.obj.onGroupsChange(groups);
+      this.hideLinks(node, visitedLinks);
+    });
+  };
 
-      node.links.forEach(linkId => {
-        const link = this.graph.links.get(linkId);
-        if (
-          // link was not yet visited or is visible
-          !visitedLinks.has(linkId) ||
-          link.visible
-        ) {
-          link.visibility = node.obj.visible;
-        }
-        visitedLinks.add(linkId);
-      });
+  onGroupChange = (groupId, visibility) => {
+    const visitedLinks = new Set();
+    this.graph.nodes.forEach(node => {
+      if (node.obj.data.NodeLayers?.includes(groupId)) {
+        node.obj.visibility = !visibility;
+        this.hideLinks(node, visitedLinks);
+      }
     });
   };
 

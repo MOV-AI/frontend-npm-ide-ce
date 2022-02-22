@@ -38,6 +38,10 @@ class BasePortStruct {
   requiredKeys = ["message", "template"];
   _visible = true;
 
+  get name() {
+    return this.data.name;
+  }
+
   get visible() {
     return this._visible;
   }

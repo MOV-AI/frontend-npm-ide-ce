@@ -1,6 +1,11 @@
 import Model from "../../../Model";
 import schema from "./schema";
 
+const SEPARATOR = {
+  SUBFLOW: "__",
+  NODE: "/"
+};
+
 class Link extends Model {
   constructor() {
     // inject imported schema and forward constructor arguments
@@ -55,7 +60,7 @@ class Link extends Model {
 
   getNodes() {
     return [this.getFrom(), this.getTo()].map(value => {
-      return value.split("/")[0].split("__")[0];
+      return value.split(SEPARATOR.NODE)[0].split(SEPARATOR.SUBFLOW)[0];
     });
   }
 
@@ -102,7 +107,7 @@ class Link extends Model {
     ID: "id",
     FROM: "from",
     TO: "to",
-    DEPENDENCY: "dependecy"
+    DEPENDENCY: "dependency"
   };
 }
 

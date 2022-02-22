@@ -1,24 +1,39 @@
-import React, { forwardRef, useCallback } from "react";
+import React, { forwardRef, useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
-import IconButton from "@material-ui/core/IconButton";
+import { useTheme } from "@material-ui/core/styles";
 import Tooltip from "@material-ui/core/Tooltip";
-import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import withAlerts from "../../../decorators/withAlerts";
+import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
+import Workspace from "../../../utils/Workspace";
 import { getNameFromURL } from "../../../utils/Utils";
+import { HOMETAB_PROFILE, PLUGINS } from "../../../utils/Constants";
 import ERROR_MESSAGES from "../../../utils/ErrorMessages";
-import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
+import movaiFullLogoWhite from "../editors/_shared/Branding/movai-full-logo-red-white.png";
+import movaiFullLogo from "../editors/_shared/Branding/movai-full-logo.png";
 import QuickAccessComponent from "./components/QuickAccess";
 import RecentDocumentsComponent from "./components/RecentDocuments";
-import SamplesComponent from "./components/Samples";
+import ExamplesComponent from "./components/Examples";
 
 import { homeTabStyles } from "./styles";
 
 const HomeTab = forwardRef((props, ref) => {
-  const { workspaceManager, call, on, alert, alertSeverities } = props;
+  const { call, on, off, alert, alertSeverities } = props;
+  const workspaceManager = useMemo(() => new Workspace(), []);
   const classes = homeTabStyles();
   const { t } = useTranslation();
+  const theme = useTheme();
 
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Methods                                       *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Open Document
+   * @param {{name: string, scope: string, id: string, isDeleted: bool}} doc : Document data
+   */
   const openExistingDocument = useCallback(
     doc => {
       if (!doc.name) doc.name = getNameFromURL(doc.id);
@@ -39,6 +54,26 @@ const HomeTab = forwardRef((props, ref) => {
 
   //========================================================================================
   /*                                                                                      *
+   *                                    React Lifecycle                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  useEffect(() => {
+    const HOMETAB_ID_TOPIC = `${HOMETAB_PROFILE.name}-active`;
+    call(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS);
+    on("tabs", HOMETAB_ID_TOPIC, () => {
+      call(
+        PLUGINS.RIGHT_DRAWER.NAME,
+        PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS
+      );
+    });
+    return () => {
+      off("tabs", HOMETAB_ID_TOPIC);
+    };
+  }, [call, on, off]);
+
+  //========================================================================================
+  /*                                                                                      *
    *                                        Renders                                       *
    *                                                                                      */
   //========================================================================================
@@ -55,23 +90,23 @@ const HomeTab = forwardRef((props, ref) => {
           />
         </div>
         <div className={classes.column}>
-          <SamplesComponent openExistingDocument={openExistingDocument} />
+          <ExamplesComponent openExistingDocument={openExistingDocument} />
         </div>
       </div>
       <div className={classes.footer}>
-        <Tooltip title={t("MOV.AI Website")}>
-          <IconButton
+        <Tooltip title={t("MOV.AI")}>
+          {/* <IconButton
             href="https://mov.ai"
             target="_blank"
             rel="noreferrer"
             className={classes.socialIconBadge}
-          >
-            <img
-              src={movaiIcon}
-              alt="MOV.AI Logo"
-              className={classes.movaiIcon}
-            />
-          </IconButton>
+          > */}
+          <img
+            src={theme.label === "dark" ? movaiFullLogoWhite : movaiFullLogo}
+            alt="MOV.AI Logo"
+            className={classes.movaiIcon}
+          />
+          {/* </IconButton> */}
         </Tooltip>
       </div>
     </div>
@@ -81,7 +116,6 @@ const HomeTab = forwardRef((props, ref) => {
 export default withViewPlugin(withAlerts(HomeTab));
 
 HomeTab.propTypes = {
-  call: PropTypes.func,
-  on: PropTypes.func,
-  workspaceManager: PropTypes.object
+  call: PropTypes.func.isRequired,
+  on: PropTypes.func.isRequired
 };

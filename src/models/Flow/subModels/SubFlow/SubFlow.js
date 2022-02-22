@@ -90,6 +90,56 @@ class SubFlow extends Model {
   }
 
   /**
+   * Updates an instance of a managed property
+   * Can only be used with managed properties
+   * @param {string} propName : The name of the property
+   * @param {*} content : The data to update the item
+   * @returns {Node} : The instance
+   */
+  updateKeyValueItem(propName, content) {
+    const name = content.name;
+    this[propName]?.updateItem({ name, content });
+
+    return this;
+  }
+
+  /**
+   * Deletes an instance of a managed property
+   * Can only be used with managed properties
+   * @param {string} varName : The name of the property
+   * @param {any} key : The name of the item
+   * @returns {Node} : The instance
+   */
+  deleteKeyValue(varName, key) {
+    this[varName]?.deleteItem(key);
+    return this;
+  }
+
+  /**
+   * Returns an instance of a managed property
+   * Can only be used with managed properties
+   * @param {string} varName : The name of the property
+   * @param {any} key : The name of the item
+   * @returns {any}
+   */
+  getKeyValue(varName, key) {
+    return this[varName]?.getItem(key);
+  }
+
+  /**
+   * Sets an instance of a managed property
+   * Can only be used with managed properties
+   * @param {string} varName : The name of the property
+   * @param {any} content : The content of the item
+   * @returns {Node} : The instance
+   */
+  addKeyValue(varName, content) {
+    const name = content.name;
+    this[varName]?.setItem({ name, content });
+    return this;
+  }
+
+  /**
    * Updates the properties of the instance
    * @param {object} json : The data to update the instance
    * @returns {SubFlow} : The instance

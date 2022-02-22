@@ -1,13 +1,24 @@
 import { Subject } from "rxjs";
+import _isEqual from "lodash/isEqual";
 import StartNode from "../../Components/Nodes/StartNode";
 import BaseLink from "../../Components/Links/BaseLink";
 import GraphValidator from "./GraphValidator";
 import { InvalidLink } from "../../Components/Links/Errors";
-import { FLOW_VIEW_MODE } from "../../Constants/constants";
+import { FLOW_VIEW_MODE, NODE_TYPES } from "../../Constants/constants";
 import { shouldUpdateExposedPorts } from "./Utils";
 import _debounce from "lodash/debounce";
-import { NODE_TYPES } from "./constants";
 import Factory from "../../Components/Nodes/Factory";
+
+const NODE_DATA = {
+  NODE: {
+    LABEL: "NodeLabel",
+    TYPE: NODE_TYPES.NODE
+  },
+  CONTAINER: {
+    LABEL: "ContainerLabel",
+    TYPE: NODE_TYPES.CONTAINER
+  }
+};
 
 // to remove
 const t = v => v;
@@ -38,6 +49,7 @@ export default class Graph {
   warningsVisibility = true;
   validator = new GraphValidator(this);
   onFlowValidated = new Subject();
+  onLinksValidated = new Subject();
   invalidLinks = [];
 
   //========================================================================================
@@ -57,12 +69,20 @@ export default class Graph {
    * @private
    */
   addSubscribers = () => {
+    // Canvas subscribers
     this.mode.default.onEnter.subscribe({
       next: () => this.reset()
     });
     this.mode.addNode.onEnter.subscribe({
       next: () => this.reset()
     });
+    // Subscribe to node/containers template update
+    this.docManager(
+      "docManager",
+      "subscribeToChanges",
+      this.id,
+      this.onTemplateUpdate
+    );
 
     return this;
   };
@@ -88,13 +108,21 @@ export default class Graph {
   /**
    * @private
    */
-  destroy = () => {
+  clear = () => {
     // Clear nodes
     this.nodes.forEach(node => node.obj.destroy());
     this.nodes.clear();
     // Clear links
     this.links.forEach(link => link.destroy());
     this.links.clear();
+  };
+
+  /**
+   * Called before destroying graph
+   */
+  destroy = () => {
+    // Unsubscribe to changes from docManager
+    this.docManager("docManager", "unSubscribeToChanges", this.id);
   };
 
   /**
@@ -118,36 +146,19 @@ export default class Graph {
     Object.entries(links).forEach(([id, value]) => {
       this.addLink({ id, ...value });
     });
-    this.removeLinksModal();
-
+    // Emits result of links validation
+    this.onLinksValidated.next({
+      invalidLinks: this.invalidLinks,
+      callback: this.clearInvalidLinks
+    });
     return this;
   }
 
   /**
-   * @private
+   * @private Clear invalid links property
    */
-  removeLinksModal = () => {
-    // TODO: implement
-    return this;
-  };
-
-  /**
-   * @private
-   */
-  getRemoveInvalidLinks = () => () => {
-    // TODO: implement
-  };
-
-  /**
-   * @private
-   * Open confirm alert to inform if there is any sub-flow with invalid params
-   *
-   * @param {Array} invalidContainerParams : array of containers id that has invalid params
-   * @returns this graph instance
-   */
-  invalidContainerParamModal = invalidContainerParams => {
-    // TODO: implement
-    return this;
+  clearInvalidLinks = () => {
+    this.invalidLinks = [];
   };
 
   /**
@@ -179,24 +190,6 @@ export default class Graph {
   get viewMode() {
     return FLOW_VIEW_MODE.default;
   }
-
-  /**
-   * @private
-   */
-  updateContainersWithTemplate = templateName => {
-    const containers = [...this.nodes]
-      .filter(([id, node]) => node.obj.data.type === "Container")
-      .map(([id, node]) => node.obj);
-    // update container with templateName
-    containers.forEach(subFlow => {
-      const container = this.flows.getFlow(subFlow.templateName);
-      const containerNodes = container?.NodeInst || {};
-      const hasTemplate = Object.values(containerNodes).filter(
-        el => el.Template === templateName
-      ).length;
-      if (hasTemplate) subFlow.onTemplateUpdate(subFlow.templateName);
-    });
-  };
 
   /**
    * @private
@@ -240,14 +233,39 @@ export default class Graph {
     requestAnimationFrame(update);
   };
 
-  onTemplateUpdate = _debounce(templateName => {
-    this.nodes.forEach(node => node.obj.onTemplateUpdate(templateName));
-    setTimeout(() => {
+  /**
+   * On flow update data
+   * @param {*} data
+   */
+  onFlowUpdate = data => {
+    // Add missing nodes and update existing
+    this.updateNodes(data.NodeInst, NODE_TYPES.NODE);
+    this.updateNodes(data.Container, NODE_TYPES.CONTAINER);
+    // Get nodes to remove on update
+    const flowNodes = { ...data.NodeInst, ...data.Container };
+    [...this.nodes.keys()].forEach(nodeId => {
+      if (!flowNodes.hasOwnProperty(nodeId) && nodeId !== "start") {
+        this.deleteNode(nodeId);
+      }
+    });
+    // Update links
+    this.updateLinks(data.Links || {});
+    // Update exposed ports
+    this.updateExposedPorts(data.ExposedPorts || {});
+  };
+
+  /**
+   *
+   * @param {*} data
+   */
+  onTemplateUpdate = data => {
+    if (data.Label === this.id) this.onFlowUpdate(data);
+    else {
+      this.nodes.forEach(node => node.obj.onTemplateUpdate(data));
       this.loadExposedPorts(this.exposedPorts, true);
-      this.updateContainersWithTemplate(templateName);
       this.debounceToValidateFlow();
-    }, 100);
-  });
+    }
+  };
 
   /**
    * Event triggered on mouse over link
@@ -268,8 +286,13 @@ export default class Graph {
     this.links.forEach(value => (value.transparent = false));
   };
 
-  loadData(flow) {
-    this.destroy();
+  /**
+   * Load Flow Data
+   * @param {*} flow : Data from DB
+   * @returns {Promise} Promise to be resolved after all nodes, containers and links are loaded
+   */
+  async loadData(flow) {
+    this.clear();
 
     return Promise.allSettled([
       this.loadNodes(flow.NodeInst),
@@ -286,10 +309,19 @@ export default class Graph {
    */
   validateFlow = () => {
     const { warnings, invalidContainersParam } = this.validator.validateFlow();
-    this.onFlowValidated.next({ warnings: warnings });
+    this.onFlowValidated.next({ warnings: warnings, invalidContainersParam });
     this.warnings = warnings;
-    // Validate sub-flows parameters
-    this.invalidContainerParamModal(invalidContainersParam);
+  };
+
+  /**
+   * Bulk operation to update all nodes
+   * @param {object} nodes
+   * @param {string<NODE_TYPES>} nodeType
+   */
+  updateNodes = (nodes, nodeType) => {
+    Object.values(nodes).forEach(node => {
+      this.updateNode(node, nodeType);
+    });
   };
 
   /**
@@ -300,25 +332,28 @@ export default class Graph {
    * @param {string} nodeId node's unique id
    * @param {obj} data node's data that has changed
    */
-  updateNode = (event, nodeId, data, nodeType = NODE_TYPES.NODE) => {
+  updateNode = async (data, nodeType = NODE_TYPES.NODE) => {
+    const nodeId = data[NODE_DATA[nodeType].LABEL];
     const node = this.nodes.get(nodeId);
 
     if (node) {
       // node already exists
-      const isValid =
-        event !== "del" ? node.obj.update(data) : node.obj.deleteKey(data);
-      if (!isValid) {
-        node.obj.destroy();
-        this.nodes.delete(nodeId);
+      const currentNodeData = {
+        ...data,
+        ...node.obj.data,
+        Visualization: node.obj.visualizationToDB
+      };
+      const updatedNodeData = { ...node.obj.data, ...data };
+      if (!_isEqual(currentNodeData, updatedNodeData)) {
+        node.obj.updateNode(updatedNodeData);
       }
     } else {
       // node is not yet part of the graph
-      if (event !== "del") {
-        try {
-          this.addNode({ id: nodeId, ...data }, nodeType);
-        } catch (error) {
-          console.log(error);
-        }
+      try {
+        await this.addNode({ id: nodeId, ...data }, nodeType);
+        this.update();
+      } catch (error) {
+        console.log("debug failed to add node", error);
       }
     }
   };
@@ -339,10 +374,31 @@ export default class Graph {
     return this.nodes.delete(nodeId);
   };
 
+  /**
+   * Update exposed ports in canvas
+   * @param {*} exposedPorts
+   */
   updateExposedPorts = exposedPorts => {
-    this.loadExposedPorts(exposedPorts);
+    this.loadExposedPorts(exposedPorts, true);
   };
 
+  /**
+   * Update links : Remove deleted and add missing
+   * @param {*} links
+   */
+  updateLinks = links => {
+    // Remove deleted links
+    const linksToRemove = [...this.links.keys()].filter(
+      link => !links.hasOwnProperty(link)
+    );
+    this.deleteLinks(linksToRemove);
+    // Add missing links
+    this.loadLinks(links);
+  };
+
+  /**
+   * Add Start Node
+   */
   addStartNode = () => {
     const { canvas } = this;
     const inst = new StartNode({ canvas });
@@ -369,7 +425,7 @@ export default class Graph {
 
       return inst;
     } catch (error) {
-      console.log("Error creating node", error);
+      console.warn("Error creating node", error);
     }
   }
 
@@ -383,15 +439,8 @@ export default class Graph {
 
     try {
       const parsedLink = BaseLink.parseLink(data);
-
-      const [sourceNode, targetNode] = ["sourceNode", "targetNode"].map(key => {
-        const node = this.nodes.get(parsedLink[key]);
-        if (!node) throw new Error(`Node ${parsedLink[key]} not found`);
-        return node;
-      });
-
-      const sourcePortPos = sourceNode.obj.getPortPos(parsedLink.sourcePort);
-      const targetPortPos = targetNode.obj.getPortPos(parsedLink.targetPort);
+      const { sourcePortPos, targetPortPos } =
+        GraphValidator.extractLinkPortsPos(parsedLink, this.nodes);
 
       if (!sourcePortPos || !targetPortPos) {
         throw new InvalidLink(parsedLink);
@@ -421,8 +470,13 @@ export default class Graph {
       this.canvas.append(() => {
         return obj.el;
       }, "links");
+
+      this.invalidLinks = this.invalidLinks.filter(l => l.id !== parsedLink.id);
     } catch (error) {
-      if (error instanceof InvalidLink) {
+      if (
+        error instanceof InvalidLink &&
+        !this.invalidLinks.find(l => l.id === error.link.id)
+      ) {
         this.invalidLinks.push(error.link);
       }
       console.error(error.message);
@@ -458,6 +512,9 @@ export default class Graph {
     });
   };
 
+  /**
+   * Set all temporary warnings as permanents
+   */
   setPermanentWarnings = () => {
     this.warnings = this.warnings.map(wn => ({ ...wn, isPersistent: true }));
     this.onFlowValidated.next({ warnings: this.warnings });

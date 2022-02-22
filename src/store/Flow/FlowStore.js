@@ -4,13 +4,14 @@ import Store from "../Store";
 import Helper from "./FlowHelper";
 
 class FlowStore extends Store {
-  constructor(workspace, observer) {
+  constructor(workspace, observer, docManager) {
     super({
       workspace,
       model: Model,
       name: "Flow",
       title: "Flows",
       plugins: [DBSubscriber],
+      docManager,
       observer
     });
   }

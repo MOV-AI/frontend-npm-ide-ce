@@ -1,14 +1,24 @@
-import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef
+} from "react";
 import { Tooltip } from "@material-ui/core";
-import { HOMETAB_PROFILE, DEFAULT_LAYOUT } from "../../../utils/Constants";
-import { getIconByScope } from "../../../utils/Utils";
+import {
+  HOMETAB_PROFILE,
+  DEFAULT_LAYOUT,
+  DOCK_POSITIONS,
+  PLUGINS
+} from "../../../utils/Constants";
+import { getIconByScope, getHomeTab } from "../../../utils/Utils";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Workspace from "../../../utils/Workspace";
-import HomeTab from "../HomeTab/HomeTab";
 import TOPICS from "./topics";
 
 const useLayout = (props, dockRef) => {
-  const { emit, call, on } = props;
+  const { emit, call, on, off } = props;
   const workspaceManager = useMemo(() => new Workspace(), []);
   const tabsById = useRef(new Map());
   const [layout, setLayout] = useState({ ...DEFAULT_LAYOUT });
@@ -91,7 +101,6 @@ const useLayout = (props, dockRef) => {
    * @returns {Element} Tab element to render
    */
   const _getCustomTab = useCallback((docData, onCloseTab, isDirty) => {
-
     return (
       <Tooltip title={docData.tabTitle || docData.id}>
         <div onAuxClick={() => onCloseTab(docData.id)}>
@@ -195,7 +204,10 @@ const useLayout = (props, dockRef) => {
         workspaceManager.setTabs(tabsById.current);
         _applyLayout(newLayout);
         // Reset bookmarks
-        call("rightDrawer", "resetBookmarks");
+        call(
+          PLUGINS.RIGHT_DRAWER.NAME,
+          PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS
+        );
       }
     },
     [call, workspaceManager, _applyLayout, _closeDirtyTab]
@@ -231,7 +243,7 @@ const useLayout = (props, dockRef) => {
       const tabData = dockRef.current.find(tabId);
       if (!tabData) return;
       const currentLayout = dockRef.current.saveLayout();
-      const locations = ["windowbox", "maxbox", "floatbox", "dockbox"];
+      const locations = Object.values(DOCK_POSITIONS);
       // look for tab in layout locations
       for (const location of locations) {
         const found = _deleteTabFromLayout(currentLayout, tabId, location);
@@ -250,8 +262,9 @@ const useLayout = (props, dockRef) => {
       const { instance: model, value: isDirty } = data;
       const tabId = model.getUrl();
       const currentTabData = tabsById.current.get(tabId);
+      const currentDirtyState = Boolean(currentTabData?.isDirty);
       // Doesn't trigger update if dirty state didn't change
-      if (!currentTabData || currentTabData.isDirty === isDirty) return;
+      if (!currentTabData || currentDirtyState === isDirty) return;
       // Set new dirty state
       const newTabData = { ...currentTabData, isDirty: isDirty };
       tabsById.current.set(tabId, newTabData);
@@ -302,31 +315,6 @@ const useLayout = (props, dockRef) => {
     [props, _getCustomTab, _closeTab]
   );
 
-  /**
-   * Installs the HomeTab Plugin
-   * @private
-   * @returns the HomeTab
-   */
-  const installHomeTabPlugin = useCallback(() => {
-    const viewPlugin = new HomeTab(
-      HOMETAB_PROFILE,
-      { workspaceManager }
-    );
-
-    return PluginManagerIDE.install(HOMETAB_PROFILE.name, viewPlugin).then(() => {
-      // Create and return tab data
-      // Return TabData
-      return {
-        id: HOMETAB_PROFILE.name,
-        name: HOMETAB_PROFILE.title,
-        tabTitle: HOMETAB_PROFILE.title,
-        scope: HOMETAB_PROFILE.name,
-        extension: "",
-        content: viewPlugin.render()
-      };
-    });
-  }, [workspaceManager]);
-
   //========================================================================================
   /*                                                                                      *
    *                                    Exposed Methods                                   *
@@ -339,23 +327,38 @@ const useLayout = (props, dockRef) => {
    */
   const open = useCallback(
     tabData => {
+      const tabPosition = tabData.dockPosition ?? DOCK_POSITIONS.DOCK;
+      const position = tabData.position ?? {
+        h: 500,
+        w: 600,
+        x: 145,
+        y: 100,
+        z: 1
+      };
       tabsById.current.set(tabData.id, tabData);
       workspaceManager.setTabs(tabsById.current);
 
       setLayout(prevState => {
         const newState = { ...prevState };
-        // If is first tab
-        if (newState.dockbox.children.length === 0) {
-          newState.dockbox.children = [{ tabs: [tabData] }];
+        if (newState[tabPosition].children.length === 0) {
+          newState[tabPosition].children = [{ ...position, tabs: [tabData] }];
         } else {
           const existingTab = dockRef.current.find(tabData.id);
           if (existingTab) dockRef.current.updateTab(tabData.id, tabData);
           else {
-            const firstContainer = _getFirstContainer(newState.dockbox);
-            firstContainer.tabs.push(tabData);
-            firstContainer.activeId = tabData.id;
+            if (tabPosition === DOCK_POSITIONS.FLOAT) {
+              newState[tabPosition].children.push({
+                ...position,
+                tabs: [tabData]
+              });
+            } else {
+              const firstContainer = _getFirstContainer(newState[tabPosition]);
+              firstContainer.tabs.push(tabData);
+              firstContainer.activeId = tabData.id;
+            }
           }
         }
+
         workspaceManager.setLayout(newState);
         return { ...newState };
       });
@@ -380,11 +383,19 @@ const useLayout = (props, dockRef) => {
   /**
    * Close Tab
    */
-  const close = useCallback(() => {
-    // Close tab dynamically
-    console.log("removeTab");
-    call("rightDrawer", "resetBookmarks");
-  }, [call]);
+  const close = useCallback(
+    data => {
+      const { tabId, keepBookmarks } = data;
+      // Close tab dynamically
+      _closeTab(tabId);
+      !keepBookmarks &&
+        call(
+          PLUGINS.RIGHT_DRAWER.NAME,
+          PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS
+        );
+    },
+    [call, _closeTab]
+  );
 
   /**
    * Load tab data
@@ -429,9 +440,10 @@ const useLayout = (props, dockRef) => {
       const firstContainer = _getFirstContainer(newLayout.dockbox);
       const newActiveTab =
         direction !== "remove" ? tabId : firstContainer.activeId;
+
       // Attempt to close tab
       if (direction === "remove") {
-        _onLayoutRemoveTab(newLayout, tabId);
+        _closeTab(tabId);
       } else {
         // Update layout
         _applyLayout(newLayout);
@@ -439,9 +451,13 @@ const useLayout = (props, dockRef) => {
       // Emit new active tab id
       if (!tabId) return;
       if (newActiveTab) emit(`${newActiveTab}-active`);
-      else call("rightDrawer", "resetBookmarks");
+      else
+        call(
+          PLUGINS.RIGHT_DRAWER.NAME,
+          PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS
+        );
     },
-    [emit, call, _getFirstContainer, _onLayoutRemoveTab, _applyLayout]
+    [emit, call, _getFirstContainer, _closeTab, _applyLayout]
   );
 
   /**
@@ -454,7 +470,7 @@ const useLayout = (props, dockRef) => {
       _getTabData(newTabData).then(tabData => {
         setLayout(prevState => {
           // look for tab in windowbox
-          const locations = ["windowbox", "maxbox", "floatbox", "dockbox"];
+          const locations = Object.values(DOCK_POSITIONS);
           for (const location of locations) {
             const f = _setTabInLayout(prevState, prevTabId, location, tabData);
             if (f.box) return f.newLayout;
@@ -477,38 +493,51 @@ const useLayout = (props, dockRef) => {
    */
   useEffect(() => {
     // Update doc dirty state
-    on("docManager", "updateDocDirty", data => _updateDocDirty(data));
+    on(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.ON.UPDATE_DOC_DIRTY,
+      data => _updateDocDirty(data)
+    );
     // On delete document
-    on("docManager", "deleteDoc", data => _closeTab(data.url));
-  }, [on, emit, _updateDocDirty, _closeTab]);
+    on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.DELETE_DOC, data =>
+      _closeTab(data.url)
+    );
+    // Unsubscribe on unmount
+    return () => {
+      off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.UPDATE_DOC_DIRTY);
+      off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.DELETE_DOC);
+    };
+  }, [on, emit, off, _updateDocDirty, _closeTab]);
 
   /**
    * Load workspace
    */
   useEffect(() => {
-    const [ lastLayout, lastTabs ] = workspaceManager.getLayoutAndTabs();
+    const [lastLayout, lastTabs] = workspaceManager.getLayoutAndTabs();
     const tabs = [];
 
     tabsById.current = lastTabs;
     // Install current tabs plugins
     lastTabs.forEach(tab => {
       const { id, name, scope } = tab;
-      
-      if(id === HOMETAB_PROFILE.name)
-        tabs.push(installHomeTabPlugin());
-      else
-        tabs.push(_getTabData({ id, name, scope }));
+
+      if (id === HOMETAB_PROFILE.name) tabs.push(getHomeTab());
+      else tabs.push(_getTabData({ id, name, scope }));
     });
     // after all plugins are installed
     Promise.allSettled(tabs).then(_tabs => {
-      _tabs.forEach(tab => tab.status === "fulfilled" && tabsById.current.set(tab.value.id, tab.value));
+      _tabs.forEach(
+        tab =>
+          tab.status === "fulfilled" &&
+          tabsById.current.set(tab.value.id, tab.value)
+      );
       setLayout(lastLayout);
     });
     // Destroy local workspace manager instance on unmount
     return () => {
       workspaceManager.destroy();
     };
-  }, [workspaceManager, on, call, installHomeTabPlugin, _closeTab, _getTabData, open]);
+  }, [workspaceManager, on, call, _closeTab, _getTabData, open]);
 
   //========================================================================================
   /*                                                                                      *

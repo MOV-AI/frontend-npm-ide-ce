@@ -1,13 +1,11 @@
 import React, { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/styles";
-import styles from "../../styles";
 import TableKeyValue from "../TableKeyValue";
-import { DEFAULT_FUNCTION, useTranslation } from "../../../../../_shared/mocks";
 import { EMPTY_MESSAGE } from "../../../../Constants/constants";
 
-const useStyles = makeStyles(styles);
+import { keyValueSectionStyles } from "../../styles";
 
 const KeyValuesSection = props => {
   const {
@@ -20,7 +18,7 @@ const KeyValuesSection = props => {
   // State hooks
   const [keyValues, setKeyValues] = React.useState([]);
   // Other hooks
-  const classes = useStyles();
+  const classes = keyValueSectionStyles();
   const { t } = useTranslation();
 
   //========================================================================================
@@ -35,21 +33,20 @@ const KeyValuesSection = props => {
    */
   const getTableValues = useCallback(() => {
     const output = [];
-    const allValues = [
-      ...Object.keys(instanceValues),
-      ...Object.keys(templateValues)
-    ];
-    allValues.forEach(key => {
-      const value = instanceValues[key]?.Value || "";
-      const defaultValue = templateValues[key]?.Value;
-      const description = templateValues[key]?.Description || "";
+    Object.keys(templateValues).forEach(key => {
+      const value = instanceValues[key]?.value || "";
+      const type = templateValues[key]?.type;
+      const defaultValue = templateValues[key]?.value;
+      const description = templateValues[key]?.description || "";
       output.push({
         key,
         value,
         description,
-        defaultValue
+        defaultValue,
+        type
       });
     });
+
     // Set state
     setKeyValues(output);
   }, [instanceValues, templateValues]);
@@ -82,25 +79,21 @@ const KeyValuesSection = props => {
     </Typography>
   ) : (
     <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-      {t(EMPTY_MESSAGE[varName])}
+      {t(EMPTY_MESSAGE[varName.toUpperCase()])}
     </Typography>
   );
 };
 
 KeyValuesSection.propTypes = {
-  editable: PropTypes.bool,
-  varName: PropTypes.string,
-  handleParamEdit: PropTypes.func,
-  instanceValues: PropTypes.object,
-  templateValues: PropTypes.object
+  varName: PropTypes.string.isRequired,
+  handleTableKeyEdit: PropTypes.func.isRequired,
+  instanceValues: PropTypes.object.isRequired,
+  templateValues: PropTypes.object,
+  editable: PropTypes.bool
 };
 
 KeyValuesSection.defaultProps = {
-  editable: false,
-  varName: "",
-  instanceValues: {},
-  templateValues: {},
-  handleTableKeyEdit: () => DEFAULT_FUNCTION("handleTableKeyEdit")
+  editable: false
 };
 
 export default KeyValuesSection;

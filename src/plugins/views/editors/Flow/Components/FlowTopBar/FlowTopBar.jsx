@@ -18,9 +18,9 @@ import Toolbar from "@material-ui/core/Toolbar";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import StopIcon from "@material-ui/icons/Stop";
 import { RobotManager } from "@mov-ai/mov-fe-lib-core";
-import { FLOW_VIEW_MODE, ROBOT_BLACKLIST } from "../../Constants/constants";
-import { DEFAULT_FUNCTION, useTranslation } from "../../../_shared/mocks";
 import Workspace from "../../../../../../utils/Workspace";
+import { DEFAULT_FUNCTION, useTranslation } from "../../../_shared/mocks";
+import { FLOW_VIEW_MODE, ROBOT_BLACKLIST } from "../../Constants/constants";
 import useNodeStatusUpdate from "./hooks/useNodeStatusUpdate";
 
 const useStyles = makeStyles(theme => ({

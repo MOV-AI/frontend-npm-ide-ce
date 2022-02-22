@@ -14,6 +14,11 @@ const styles = theme => ({
     flexDirection: "column",
     position: "relative"
   },
+  flowCanvas: {
+    width: "100%",
+    height: "100%",
+    flexGrow: 1
+  },
   flowEditor: {
     interfaceColor: theme.palette.background.primary
   }

@@ -13,19 +13,11 @@ import {
   Select,
   Typography
 } from "@material-ui/core";
-import { makeStyles } from "@material-ui/styles";
 import { useTranslation } from "react-i18next";
 import { TRANSITION_LINK } from "../../Constants/constants";
 import BasePort from "../Nodes/BaseNode/BasePort";
 
-const useStyles = makeStyles(theme => ({
-  dependencyContainer: {
-    padding: "5px 25px"
-  },
-  directionContainer: {
-    padding: "0 10px"
-  }
-}));
+import { linkMenuStyles } from "./styles";
 
 const LinkMenu = props => {
   // Props
@@ -34,7 +26,7 @@ const LinkMenu = props => {
   const [dependencyLevel, setDependencyLevel] = useState(0);
   // Other Hooks
   const { t } = useTranslation();
-  const classes = useStyles();
+  const classes = linkMenuStyles();
 
   //========================================================================================
   /*                                                                                      *
@@ -164,13 +156,13 @@ const LinkMenu = props => {
 };
 
 LinkMenu.propTypes = {
-  link: PropTypes.object,
+  flowModel: PropTypes.object.isRequired,
+  link: PropTypes.object.isRequired,
   editable: PropTypes.bool,
   sourceMessage: PropTypes.string
 };
 
 LinkMenu.defaultProps = {
-  link: {},
   editable: true,
   sourceMessage: ""
 };

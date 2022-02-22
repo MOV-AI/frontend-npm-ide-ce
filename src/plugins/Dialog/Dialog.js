@@ -46,7 +46,7 @@ class Dialog extends IDEPlugin {
       <AlertDialog
         title={data.title}
         message={data.message}
-        onClose={this._handleDialogClose}
+        onClose={() => this._handleDialogClose(data.onClose)}
       />,
       targetElement
     );
@@ -64,7 +64,7 @@ class Dialog extends IDEPlugin {
         onSubmit={data.onSubmit}
         message={data.message}
         submitText={data.submitText}
-        onClose={this._handleDialogClose}
+        onClose={() => this._handleDialogClose(data.onClose)}
       />,
       targetElement
     );
@@ -83,7 +83,7 @@ class Dialog extends IDEPlugin {
         submitText={"Create"}
         scope={data.scope}
         onSubmit={data.onSubmit}
-        onClose={this._handleDialogClose}
+        onClose={() => this._handleDialogClose(data.onClose)}
       />,
       targetElement
     );
@@ -103,7 +103,7 @@ class Dialog extends IDEPlugin {
         loadingMessage={"Copying document"}
         submitText={"Copy"}
         onSubmit={data.onSubmit}
-        onClose={this._handleDialogClose}
+        onClose={() => this._handleDialogClose(data.onClose)}
       />,
       targetElement
     );
@@ -115,8 +115,17 @@ class Dialog extends IDEPlugin {
    */
   formDialog(data) {
     const targetElement = this._handleDialogOpen();
-    const { title, submitText, onSubmit, size, multiline, inputLabel, value } =
-      data;
+    const {
+      title,
+      submitText,
+      onSubmit,
+      onClose,
+      size,
+      multiline,
+      inputLabel,
+      value,
+      onValidation
+    } = data;
     ReactDOM.render(
       <FormDialog
         call={this.call}
@@ -127,7 +136,8 @@ class Dialog extends IDEPlugin {
         inputLabel={inputLabel}
         submitText={submitText}
         onSubmit={onSubmit}
-        onClose={this._handleDialogClose}
+        onValidation={onValidation}
+        onClose={() => this._handleDialogClose(onClose)}
       />,
       targetElement
     );
@@ -155,7 +165,7 @@ class Dialog extends IDEPlugin {
         message={message}
         actions={actions}
         onSubmit={data.onSubmit}
-        onClose={this._handleDialogClose}
+        onClose={() => this._handleDialogClose(data.onClose)}
       />,
       targetElement
     );
@@ -180,7 +190,7 @@ class Dialog extends IDEPlugin {
         message={message}
         actions={actions}
         onSubmit={data.onSubmit}
-        onClose={this._handleDialogClose}
+        onClose={() => this._handleDialogClose(data.onClose)}
       />,
       targetElement
     );
@@ -201,7 +211,7 @@ class Dialog extends IDEPlugin {
         actions={actions}
         submitText={submitText}
         onSubmit={onSubmit}
-        onClose={this._handleDialogClose}
+        onClose={() => this._handleDialogClose(data.onClose)}
       >
         <Component {...props} />
       </AppDialog>,
@@ -211,14 +221,17 @@ class Dialog extends IDEPlugin {
 
   /**
    * Show custom dialog component
-   * @param {*} props : Props to pass to DialogComponent
+   * @param {*} data : Props to pass to DialogComponent
    * @param {ReactComponent} DialogComponent : Custom dialog component
    */
-  customDialog(props, DialogComponent) {
+  customDialog(data, DialogComponent) {
     const targetElement = this._handleDialogOpen();
     // Show dialog
     ReactDOM.render(
-      <DialogComponent {...props} onClose={this._handleDialogClose} />,
+      <DialogComponent
+        {...data}
+        onClose={() => this._handleDialogClose(data.onClose)}
+      />,
       targetElement
     );
   }
@@ -246,7 +259,7 @@ class Dialog extends IDEPlugin {
         selected={selected}
         allowArchive={false}
         scopeList={scopeList}
-        onCancel={this._handleDialogClose}
+        onCancel={() => this._handleDialogClose(data.onClose)}
         onSubmit={handleDialogSubmit}
       />,
       targetElement
@@ -275,11 +288,12 @@ class Dialog extends IDEPlugin {
   /**
    * @private Handle dialog close : Unmount dialog component and remove target element
    */
-  _handleDialogClose() {
+  _handleDialogClose(onClose) {
     document.body.classList.remove(Dialog.BODY_CLASS_NAME);
     const targetElement = document.getElementById(Dialog.TARGET_ELEMENT_ID);
     ReactDOM.unmountComponentAtNode(targetElement);
     targetElement.parentNode.removeChild(targetElement);
+    onClose && onClose();
   }
 
   //========================================================================================

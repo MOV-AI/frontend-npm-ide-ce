@@ -169,6 +169,8 @@ class ExposedPortsManager extends Manager {
     obj.togglePort(port);
 
     this.removeEmpties();
+
+    this.emit(EVENTS.UPDATE);
   }
 
   //========================================================================================
@@ -189,8 +191,8 @@ class ExposedPortsManager extends Manager {
 
       const nodeInstances = {};
 
-      Object.entries(item).forEach(([key, obj]) => {
-        nodeInstances[key] = obj.serialize();
+      Object.entries(item).forEach(([_key, _obj]) => {
+        nodeInstances[_key] = _obj.serialize();
       });
 
       output[key] = nodeInstances;

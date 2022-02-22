@@ -1,13 +1,19 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Model from "../../../../models/Node/Node";
-import CallbackModel from "../../../../models/Callback/Callback";
-import { useTranslation } from "../_shared/mocks";
+import { useTranslation } from "react-i18next";
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
+import InfoIcon from "@material-ui/icons/Info";
+import Model from "../../../../models/Node/Node";
+import CallbackModel from "../../../../models/Callback/Callback";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
-import InfoIcon from "@material-ui/icons/Info";
+import useDataSubscriber from "../../../DocManager/useDataSubscriber";
+import {
+  DEFAULT_KEY_VALUE_DATA,
+  ROS_VALID_NAMES,
+  PLUGINS
+} from "../../../../utils/Constants";
 import Menu from "./Menu";
 import Description from "./components/Description/Description";
 import ExecutionParameters from "./components/ExecutionParameters/ExecutionParameters";
@@ -16,7 +22,6 @@ import KeyValueTable from "./components/KeyValueTable/KeyValueTable";
 import KeyValueEditorDialog from "./components/KeyValueTable/KeyValueEditorDialog";
 import IOConfig from "./components/IOConfig/IOConfig";
 import useKeyValueMethods from "./components/KeyValueTable/useKeyValueMethods";
-import useDataSubscriber from "../../../DocManager/useDataSubscriber";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -61,17 +66,6 @@ const Node = (props, ref) => {
     envVars: t("Environment Variable")
   };
 
-  const DEFAULT_KEY_VALUE_DATA = {
-    name: "",
-    description: "",
-    type: "any",
-    value: ""
-  };
-
-  const ROS_VALID_NAMES = new RegExp(
-    /(?!.*__.*)^[a-zA-Z~/]{1}?[a-zA-Z0-9_/]*$/
-  );
-
   //========================================================================================
   /*                                                                                      *
    *                                   React callbacks                                    *
@@ -81,17 +75,19 @@ const Node = (props, ref) => {
   const renderRightMenu = React.useCallback(() => {
     const details = props.data?.details ?? {};
     const menuName = `${id}-detail-menu`;
+    const menuTitle = t("Node Details Menu");
     // add bookmark
-    call("rightDrawer", "setBookmark", {
+    call(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.CALL.SET_BOOKMARK, {
       [menuName]: {
         icon: <InfoIcon></InfoIcon>,
         name: menuName,
+        title: menuTitle,
         view: (
           <Menu id={id} name={name} details={details} model={instance}></Menu>
         )
       }
     });
-  }, [call, id, name, props.data, instance]);
+  }, [call, id, name, props.data, instance, t]);
 
   usePluginMethods(ref, {
     renderRightMenu
@@ -337,7 +333,7 @@ const Node = (props, ref) => {
       } else {
         // add key value
         if (instance.current)
-          instance.current.updateKeyValueItem(varName, oldData.name, newData);
+          instance.current.updateKeyValueItem(varName, newData, oldData.name);
       }
     } catch (err) {
       if (err.message) alert({ message: err.message, severity: "error" });

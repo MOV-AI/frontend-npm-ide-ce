@@ -250,8 +250,8 @@ class TreeNode extends BaseNode {
    */
   eventsOn = fn => {
     // Exit function if click is not on clickable area to select/unselect
-    const targetClasses = d3.event.target.className.baseVal;
-    if (!targetClasses.includes("node-inst-click-area")) return;
+    const targetClasses = d3.event?.target?.className?.baseVal;
+    if (!targetClasses?.includes("node-inst-click-area")) return;
     // Execute function if node is visible
     if (this.visible) fn();
   };

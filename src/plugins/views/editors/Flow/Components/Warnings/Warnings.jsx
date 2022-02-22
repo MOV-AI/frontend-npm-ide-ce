@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import clsx from "clsx";
@@ -8,7 +8,7 @@ import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import ErrorIcon from "@material-ui/icons/Error";
 import InfoIcon from "@material-ui/icons/Info";
 import { amber, green } from "@material-ui/core/colors";
-import { withStyles } from "@material-ui/styles";
+import { makeStyles } from "@material-ui/styles";
 
 const variantIcon = {
   success: CheckCircleIcon,
@@ -17,7 +17,16 @@ const variantIcon = {
   info: InfoIcon
 };
 
-const styles = theme => ({
+const useStyles = makeStyles(theme => ({
+  root: {
+    position: "absolute",
+    top: "20px",
+    right: "50px"
+  },
+  snackbar: {
+    margin: "5px",
+    minWidth: "200px"
+  },
   success: {
     backgroundColor: green[600]
   },
@@ -42,41 +51,39 @@ const styles = theme => ({
     whiteSpace: "pre",
     alignItems: "center"
   }
-});
+}));
 
-class Warnings extends Component {
-  state = {
-    isVisible: true
-  };
-  constructor(props) {
-    super(props);
-    this.domNode = this.props.domNode;
-    this.el = document.createElement("div");
-    // Update warning position
-    this.el.style.position = "absolute";
-    this.el.style.right = `${20}px`;
-    this.el.style.top = `${20}px`;
-    this.domNode.current.appendChild(this.el);
-  }
+const Warnings = React.forwardRef((props, ref) => {
+  // Props
+  const { domNode, warnings = [], isVisible } = props;
+  // Other hooks
+  const classes = useStyles();
+  // Ref
+  const el = useRef(document.createElement("div"));
 
-  componentDidUpdate() {
-    this.domNode = this.props.domNode;
-  }
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
 
-  handleOpen = isVisible => {
-    this.setState({ isVisible });
-  };
-
-  createSnacks = () => {
-    const { warnings, classes, className } = this.props;
+  /**
+   *
+   * @returns
+   */
+  const createSnacks = useCallback(() => {
     return warnings.map((warning, index) => {
       const { type, message } = warning;
       const Icon = variantIcon[type];
-      const html = warning.html ? warning.html : () => {};
+      const html = warning.html
+        ? warning.html
+        : () => {
+            /* empty */
+          };
       return (
         <SnackbarContent
           key={index}
-          className={clsx(classes[type], className)}
+          className={`${clsx(classes[type])} ${classes.snackbar}`}
           message={
             <span className={classes.message}>
               <Icon className={clsx(classes.icon, classes.iconVariant)} />
@@ -84,17 +91,30 @@ class Warnings extends Component {
               {html()}
             </span>
           }
-          style={{ margin: "5px", minWidth: "200px" }}
         />
       );
     });
-  };
+  }, [classes, warnings]);
 
-  render() {
-    const isVisible = this.state.isVisible;
-    return isVisible ? createPortal(this.createSnacks(), this.el) : <></>;
-  }
-}
+  //========================================================================================
+  /*                                                                                      *
+   *                                    React Lifecycle                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  useEffect(() => {
+    el.current.classList.add(classes.root);
+    domNode.current.appendChild(el.current);
+  }, [classes.root, domNode]);
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Render                                        *
+   *                                                                                      */
+  //========================================================================================
+
+  return isVisible ? createPortal(createSnacks(), el.current) : <></>;
+});
 
 Warnings.propTypes = {
   warnings: PropTypes.array.isRequired,
@@ -106,4 +126,4 @@ Warnings.defaultProps = {
   domNode: null
 };
 
-export default withStyles(styles)(Warnings);
+export default Warnings;
