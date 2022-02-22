@@ -1,5 +1,9 @@
 # latest
 
+**System Bar**
+
+- [FP - 1534 - Added systembar, medium refactor](https://movai.atlassian.net/browse/FP-1534)
+
 **Flow Editor**
 
 - [FP-1286 - Feature/fp 1286 port flow editor ](https://movai.atlassian.net/browse/FP-1286)
