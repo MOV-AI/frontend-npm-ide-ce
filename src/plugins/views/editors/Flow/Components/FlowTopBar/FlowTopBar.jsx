@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import GrainIcon from "@material-ui/icons/Grain";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -19,7 +20,8 @@ import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import StopIcon from "@material-ui/icons/Stop";
 import { RobotManager } from "@mov-ai/mov-fe-lib-core";
 import Workspace from "../../../../../../utils/Workspace";
-import { DEFAULT_FUNCTION, useTranslation } from "../../../_shared/mocks";
+import { PLUGINS } from "../../../../../../utils/Constants";
+import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
 import { FLOW_VIEW_MODE, ROBOT_BLACKLIST } from "../../Constants/constants";
 import useNodeStatusUpdate from "./hooks/useNodeStatusUpdate";
 
@@ -128,7 +130,11 @@ const FlowTopBar = props => {
    * @private Get store helper to use cloud functions
    */
   const initStoreHelper = useCallback(() => {
-    return call("docManager", "getStore", scope).then(store => {
+    return call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.GET_STORE,
+      scope
+    ).then(store => {
       helperRef.current = store.helper;
       return store.helper;
     });

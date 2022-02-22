@@ -32,6 +32,7 @@ Examples:
 Languages:
   en:
     translation:
+      "About {{brandName}}": "About {{brandName}}"
       "Accept": "Accept"
       "Actions": "Actions"
       "Add": "Add"
@@ -69,6 +70,7 @@ Languages:
       "children": "children"
       "Client": "Client"
       "Command Line": "Command Line"
+      "Commit": "Commit"
       "Compare": "Compare"
       "Compare dependencies": "Compare dependencies"
       "Configuration": "Configuration"
@@ -81,8 +83,10 @@ Languages:
       "Could not load workspaces": "Could not load workspaces"
       "Create a version of the existing work under the workspace": "Create a version of the existing work under the workspace"
       "Create New": "Create New"
+      "Create new document": "Create new document"
       "Create new version": "Create new version"
       "Custom": "Custom"
+      "Date": "Date"
       "Dashboard name": "Dashboard name"
       "Data validation failed": "Data validation failed"
       "Debug": "Debug"
@@ -270,6 +274,7 @@ Languages:
       "{{instance}} name is mandatory": "{{instance}} name is mandatory"
   pt:
     translation:
+      "About {{brandName}}": "Sobre {{brandName}}"
       "Accept": "Aceitar"
       "Actions": "Ações"
       "Add": "Adicionar"
@@ -307,6 +312,7 @@ Languages:
       "children": "filho"
       "Client": "Cliente"
       "Command Line": "Linha de Comando"
+      "Commit": "Commit"
       "Compare": "Comparar"
       "Compare dependencies": "Comparar dependências"
       "Configuration": "Configuração"
@@ -319,8 +325,10 @@ Languages:
       "Could not load workspaces": "Não foi possível carregar os espaços de trabalho"
       "Create a version of the existing work under the workspace": "Criar uma versão de um documento existente na área de trabalho"
       "Create New": "Criar Novo"
+      "Create new document": "Criar novo Documento"
       "Create new version": "Criar nova versão"
       "Custom": "Personalizado"
+      "Date": "Data"
       "Dashboard name": "Nome do painel"
       "Data validation failed": "Validação de dados falhou"
       "Debug": "Depurar"

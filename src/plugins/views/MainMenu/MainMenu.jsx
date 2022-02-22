@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
-import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import {
   VerticalBar,
   ProfileMenu,
@@ -13,10 +12,16 @@ import TextSnippetIcon from "@material-ui/icons/Description";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 import { Tooltip } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import { MainContext } from "../../../main-context";
 import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
 import movaiIconWhite from "../editors/_shared/Branding/movai-logo-white.png";
-import { HOMETAB_PROFILE, VERSION } from "../../../utils/Constants";
+import {
+  HOMETAB_PROFILE,
+  APP_INFORMATION,
+  PLUGINS,
+  HOSTS
+} from "../../../utils/Constants";
 import { getIconByScope, getHomeTab } from "../../../utils/Utils";
 
 const useStyles = makeStyles(theme => ({
@@ -51,18 +56,18 @@ const MainMenu = props => {
       isActive: true,
       getOnClick: () => {
         getHomeTab().then(homeTab => {
-          call("tabs", "open", homeTab);
+          call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN, homeTab);
         });
       }
     },
     {
-      name: "explorer",
+      name: PLUGINS.EXPLORER.NAME,
       icon: _props => <TextSnippetIcon {..._props}></TextSnippetIcon>,
       title: "Explorer",
       isActive: true,
       getOnClick: () => {
         // Toggle left drawer
-        call("leftDrawer", "toggle");
+        call(HOSTS.LEFT_DRAWER.NAME, HOSTS.LEFT_DRAWER.CALL.TOGGLE);
       }
     }
   ]);
@@ -75,9 +80,11 @@ const MainMenu = props => {
 
   // To run when component is initiated
   useEffect(() => {
-    call("docManager", "getDocTypes").then(_docTypes => {
-      setDocTypes(_docTypes);
-    });
+    call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.GET_DOC_TYPES).then(
+      _docTypes => {
+        setDocTypes(_docTypes);
+      }
+    );
   }, [call]);
 
   //========================================================================================
@@ -109,22 +116,33 @@ const MainMenu = props => {
           creatorElement={
             <ContextMenu
               element={
-                <Tooltip title="Create new document" placement="right" arrow>
-                  <AddBoxIcon className={classes.icon}></AddBoxIcon>
+                <Tooltip
+                  title={t("Create new document")}
+                  placement="right"
+                  arrow
+                >
+                  <AddBoxIcon
+                    id="mainMenuCreateNewDocument"
+                    className={classes.icon}
+                  ></AddBoxIcon>
                 </Tooltip>
               }
               menuList={docTypes.map(docType => ({
                 onClick: () =>
-                  call("docManager", "create", { scope: docType.scope }).then(
-                    document => {
-                      call("tabs", "openEditor", {
-                        id: document.getUrl(),
-                        name: document.getName(),
-                        scope: docType.scope,
-                        isNew: true
-                      });
+                  call(
+                    PLUGINS.DOC_MANAGER.NAME,
+                    PLUGINS.DOC_MANAGER.CALL.CREATE,
+                    {
+                      scope: docType.scope
                     }
-                  ),
+                  ).then(document => {
+                    call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, {
+                      id: document.getUrl(),
+                      name: document.getName(),
+                      scope: docType.scope,
+                      isNew: true
+                    });
+                  }),
                 element: docType.scope,
                 icon: getIconByScope(docType.scope),
                 onClose: true
@@ -141,7 +159,7 @@ const MainMenu = props => {
           ))}
           lowerElement={
             <ProfileMenu
-              version={VERSION}
+              version={APP_INFORMATION.VERSION}
               userName={Authentication.getTokenData().message.name ?? ""}
               isDarkTheme={isDarkTheme}
               handleLogout={handleLogOut}
@@ -160,8 +178,4 @@ MainMenu.propTypes = {
   call: PropTypes.func.isRequired,
   emit: PropTypes.func.isRequired,
   profile: PropTypes.object.isRequired
-};
-
-MainMenu.defaultProps = {
-  profile: { name: "mainMenu" }
 };

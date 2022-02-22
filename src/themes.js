@@ -13,7 +13,7 @@ const overrideTheme = {
   // Override dark theme
   dark: {
     background: "black",
-    topBarColor: Themes.dark.palette.background.secondary,
+    topBarColor: Themes.dark.palette.grey[300],
     backdrop: {
       color: Themes.dark.textColor,
       background: Themes.dark.palette.background.secondary

@@ -1,10 +1,5 @@
 import React from "react";
-import DetailsMenu from "../_shared/DetailsMenu/DetailsMenu";
-import AddImportDialog from "./dialogs/AddImport";
-import EditMessageDialog from "./dialogs/EditMessage";
-import Model from "../../../../models/Callback/Callback";
-import { useTranslation } from "../_shared/mocks";
-import { withDataHandler } from "../../../DocManager/DataHandler";
+import { useTranslation } from "react-i18next";
 import {
   Collapse,
   List,
@@ -22,7 +17,13 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 import AddIcon from "@material-ui/icons/Add";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
+import Model from "../../../../models/Callback/Callback";
+import { PLUGINS } from "../../../../utils/Constants";
+import { withDataHandler } from "../../../DocManager/DataHandler";
 import useDataSubscriber from "../../../DocManager/useDataSubscriber";
+import DetailsMenu from "../_shared/DetailsMenu/DetailsMenu";
+import AddImportDialog from "./dialogs/AddImport";
+import EditMessageDialog from "./dialogs/EditMessage";
 
 const useStyles = makeStyles(theme => ({
   itemValue: {
@@ -102,8 +103,8 @@ const Menu = props => {
    */
   const handleEditMessageClick = () => {
     call(
-      "dialog",
-      "customDialog",
+      PLUGINS.DIALOG.NAME,
+      PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
       {
         onSubmit: setMessage,
         selectedMessage: data.message,
@@ -119,8 +120,8 @@ const Menu = props => {
    */
   const handleAddImportsClick = () => {
     call(
-      "dialog",
-      "customDialog",
+      PLUGINS.DIALOG.NAME,
+      PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
       {
         onSubmit: addImports,
         scope: scope,

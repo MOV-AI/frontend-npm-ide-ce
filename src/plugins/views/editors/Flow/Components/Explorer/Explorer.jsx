@@ -144,7 +144,7 @@ const Explorer = props => {
   //========================================================================================
 
   useEffect(() => {
-    on("docManager", "loadDocs", loadDocs);
+    on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.LOAD_DOCS, loadDocs);
   }, [on, loadDocs]);
 
   //========================================================================================

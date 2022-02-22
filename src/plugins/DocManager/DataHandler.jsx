@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { PLUGINS } from "../../utils/Constants";
 
 const MESSAGES = {
   SAVE: {
@@ -21,7 +22,12 @@ const DataHandler = props => {
    * @param {String} newName : Document name (used to set document name when creating a new document)
    */
   const save = newName => {
-    call("docManager", "save", { scope, name }, newName)
+    call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.SAVE,
+      { scope, name },
+      newName
+    )
       .then(res => {
         if (res.success) {
           alert({
@@ -34,7 +40,12 @@ const DataHandler = props => {
               name: newName,
               scope: scope
             };
-            call("tabs", "updateTabId", id, newTabData);
+            call(
+              PLUGINS.TABS.NAME,
+              PLUGINS.TABS.CALL.UPDATE_TAB_ID,
+              id,
+              newTabData
+            );
           }
         } else {
           alert({
@@ -56,7 +67,10 @@ const DataHandler = props => {
    * On Load : read data and set model in modelRef
    */
   React.useEffect(() => {
-    call("docManager", "read", { scope, name }).then(model => {
+    call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.READ, {
+      scope,
+      name
+    }).then(model => {
       setData(model.serialize());
       modelRef.current = model;
       setLoading(false);
