@@ -1,20 +1,19 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
-import { useTranslation } from "react-i18next";
-import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from "@material-ui/icons/Info";
 import Model from "../../../../models/Node/Node";
 import CallbackModel from "../../../../models/Callback/Callback";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
-import useDataSubscriber from "../../../DocManager/useDataSubscriber";
 import {
   DEFAULT_KEY_VALUE_DATA,
   ROS_VALID_NAMES,
   PLUGINS
 } from "../../../../utils/Constants";
+import useDataSubscriber from "../../../DocManager/useDataSubscriber";
 import Menu from "./Menu";
 import Description from "./components/Description/Description";
 import ExecutionParameters from "./components/ExecutionParameters/ExecutionParameters";
