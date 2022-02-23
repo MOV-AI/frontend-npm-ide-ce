@@ -5,8 +5,10 @@ export const MANAGER = "manager";
 
 export const APP_INFORMATION = {
   VERSION: window.SERVER_DATA?.Application?.Version || "0.0.1",
-  COMMIT: window.SERVER_DATA?.Application?.Commit || "-",
-  DATE: window.SERVER_DATA?.Application?.Date || "-"
+  LAST_UPDATE: window.SERVER_DATA?.Application?.LastUpdate || "-",
+  CONFIGURATION_FILE: window.SERVER_DATA?.Application?.Configuration || "-",
+  CUSTOM_CONFIGURATION_FILE: window.SERVER_DATA?.CustomConfiguration || "-",
+  DESCRIPTION: window.SERVER_DATA?.Application?.Description || "-"
 };
 
 export const BRANDING = {
