@@ -34,8 +34,7 @@ export const systemMenuStyles = makeStyles(theme => ({
   listHolder: {
     minWidth: "300px",
     borderRadius: "0px 0px 5px 5px",
-    background: theme.palette.grey[100],
-    overflow: "hidden"
+    background: theme.palette.grey[100]
   },
   list: {
     ...menuButtonStyles
@@ -47,7 +46,10 @@ export const systemMenuStyles = makeStyles(theme => ({
 
 export const systemMenuItemStyles = makeStyles(theme => ({
   listItem: {
-    ...menuButtonStyles
+    ...menuButtonStyles,
+    "&:last-of-type > button": {
+      borderRadius: "0px 0px 5px 5px"
+    }
   },
   menuButton: {
     ...menuButtonStyles,
@@ -56,13 +58,37 @@ export const systemMenuItemStyles = makeStyles(theme => ({
     color: theme.palette.grey[900],
     "& > .MuiButton-label": { paddingLeft: "10px" },
     "&:hover": {
-      background: theme.palette.grey[400]
+      background: theme.palette.grey[400],
+      "& > .MuiButton-label > div[class*=subMenuHolder]": {
+        opacity: "1",
+        maxWidth: "500px"
+      }
+    }
+  },
+  icon: {
+    verticalAlign: "text-top",
+    marginRight: "10px",
+    "& > svg": {
+      fontSize: "1rem"
     }
   },
   keybind: {
     paddingRight: "10px",
     fontStyle: "italic",
     color: theme.palette.grey[600]
+  },
+  subMenuHolder: {
+    position: "absolute",
+    top: "0px",
+    right: "0px",
+    minWidth: "300px",
+    maxWidth: "0px",
+    opacity: "0",
+    borderRadius: "3px",
+    boxShadow: "1px 1px 2px 1px #333",
+    background: theme.palette.grey[100],
+    transform: "translate(99%)",
+    transition: "opacity .3s, max-width .3s"
   }
 }));
 

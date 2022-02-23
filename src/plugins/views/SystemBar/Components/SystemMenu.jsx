@@ -38,7 +38,7 @@ const SystemMenu = ({ data, menuOpen, anchorEl, closeMenu }) => {
                       return (
                         <MenuItem
                           key={item.id}
-                          data={item}
+                          item={item}
                           closeMenu={closeMenu}
                         />
                       );

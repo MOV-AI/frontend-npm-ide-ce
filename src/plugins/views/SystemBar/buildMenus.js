@@ -1,10 +1,39 @@
 import i18n from "../../../i18n/i18n";
-import { simulateMouseClick } from "../../../utils/Utils";
+import { getIconByScope } from "../../../utils/Utils";
 import { BRANDING, PLUGINS, APP_INFORMATION } from "../../../utils/Constants";
 import { KEYBINDINGS } from "../../../utils/Keybindings";
 import movaiIconWhite from "../editors/_shared/Branding/movai-logo-white.png";
 
-const buildMenus = (call, classes) => {
+const buildMenus = async (call, classes) => {
+  const buildNewFileSubmenu = async () => {
+    const menu = [];
+    await call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.GET_DOC_TYPES
+    ).then(docTypes => {
+      docTypes.forEach(docType => {
+        menu.push({
+          id: docType.name,
+          title: docType.scope,
+          icon: getIconByScope(docType.scope),
+          callback: () => {
+            call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.CREATE, {
+              scope: docType.scope
+            }).then(document => {
+              call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, {
+                id: document.getUrl(),
+                name: document.getName(),
+                scope: docType.scope,
+                isNew: true
+              });
+            });
+          }
+        });
+      });
+    });
+    return menu;
+  };
+
   const renderPopupInfo = () => {
     return (
       <div className={classes.contentHolder}>
@@ -12,17 +41,20 @@ const buildMenus = (call, classes) => {
           {i18n.t("Version")}: {APP_INFORMATION.VERSION}
         </p>
         <p>
-          {i18n.t("Commit")}: {APP_INFORMATION.COMMIT}
+          {i18n.t("Last update")}: {APP_INFORMATION.LAST_UPDATE}
         </p>
         <p>
-          {i18n.t("Date")}: {APP_INFORMATION.DATE}
+          {i18n.t("Configuration File")}: {APP_INFORMATION.CONFIGURATION_FILE}
+        </p>
+        <p>
+          {i18n.t("Custom Configuration File")}:
+          {APP_INFORMATION.CUSTOM_CONFIGURATION_FILE}
+        </p>
+        <p>
+          {i18n.t("App Description")}: {APP_INFORMATION.DESCRIPTION}
         </p>
       </div>
     );
-  };
-  const newDocument = () => {
-    const newDocTrigger = document.getElementById("mainMenuCreateNewDocument");
-    simulateMouseClick(newDocTrigger);
   };
 
   const saveDocument = () => {
@@ -41,7 +73,7 @@ const buildMenus = (call, classes) => {
             className={classes.movaiIcon}
             src={movaiIconWhite}
             alt="MOV.AI Logo"
-          />{" "}
+          />
           <span>{BRANDING.NAME}</span>
         </>
       ),
@@ -58,7 +90,7 @@ const buildMenus = (call, classes) => {
         {
           id: "newFile",
           title: "New File",
-          callback: newDocument
+          data: await buildNewFileSubmenu()
         },
         {},
         {

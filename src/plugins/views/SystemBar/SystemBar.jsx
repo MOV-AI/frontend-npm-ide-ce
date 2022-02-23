@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import Button from "@material-ui/core/Button";
@@ -14,14 +14,12 @@ const SystemBar = props => {
   const [openedMenuId, setOpenedMenuId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [systemMenus, setSystemMenus] = useState(false);
 
   // Other Hooks
   const classes = systemBarStyles(debugMode)();
   const dialogClasses = helpDialogStyles();
   const { t } = useTranslation();
-
-  // Refs
-  const systemMenus = useRef(buildMenus(call, dialogClasses));
 
   //========================================================================================
   /*                                                                                      *
@@ -79,11 +77,21 @@ const SystemBar = props => {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Component Did Mount
+   */
+  useEffect(() => {
+    buildMenus(call, dialogClasses).then(data => {
+      console.log(data);
+      setSystemMenus(data);
+    });
+  }, [call, dialogClasses]);
+
   return (
     <>
-      {systemMenus.current && (
+      {systemMenus && (
         <div className={classes.systemBar}>
-          {systemMenus.current.map(menu => {
+          {systemMenus.map(menu => {
             const activeButtonClass =
               openedMenuId === menu.id ? classes.activeMenu : "";
             return (
@@ -101,9 +109,7 @@ const SystemBar = props => {
             <SystemMenu
               menuOpen={menuOpen}
               anchorEl={anchorEl}
-              data={
-                systemMenus.current.find(menu => menu.id === openedMenuId)?.data
-              }
+              data={systemMenus.find(menu => menu.id === openedMenuId)?.data}
               closeMenu={closeMenu}
             />
           )}

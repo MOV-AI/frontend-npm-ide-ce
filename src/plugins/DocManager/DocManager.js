@@ -174,9 +174,10 @@ class DocManager extends IDEPlugin {
    * Saves the tab that is currently active
    */
   saveActiveEditor() {
-    this.call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.GET_ACTIVE_TAB).then(url =>
-      this.save({ name: getNameFromURL(url), scope: getScopeFromURL(url) })
-    );
+    this.call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.GET_ACTIVE_TAB).then(url => {
+      if (url.includes("/"))
+        this.save({ name: getNameFromURL(url), scope: getScopeFromURL(url) });
+    });
   }
 
   /**
