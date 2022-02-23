@@ -103,18 +103,20 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
     formData => {
       const type = formData.type;
 
-      if (valueOption === VALUE_OPTIONS.DEFAULT) {
-        return "";
-      }
-      if (valueOption === VALUE_OPTIONS.DISABLED) {
-        return DISABLED_VALUE;
+      if (showValueOptions) {
+        if (valueOption === VALUE_OPTIONS.DEFAULT) {
+          return "";
+        }
+        if (valueOption === VALUE_OPTIONS.DISABLED) {
+          return DISABLED_VALUE;
+        }
       }
 
       return type === DATA_TYPES.STRING
         ? JSON.parse(formData.value)
         : formData.value;
     },
-    [valueOption]
+    [showValueOptions, valueOption]
   );
 
   //========================================================================================
@@ -131,7 +133,10 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
     formData => {
       const dataToValidate = {
         ...formData,
-        value: valueOption === VALUE_OPTIONS.DEFAULT ? "" : data.value,
+        value:
+          showValueOptions && valueOption === VALUE_OPTIONS.DEFAULT
+            ? ""
+            : data.value,
         type: data.type
       };
 
@@ -155,6 +160,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
         });
     },
     [
+      showValueOptions,
       valueOption,
       data,
       alertSeverities.ERROR,
@@ -241,8 +247,8 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
   const renderTypeSelector = useCallback(() => {
     if (preventRenderType) return null;
     return (
-      <FormControl style={{ marginTop: 15 }}>
-        <InputLabel>Type *</InputLabel>
+      <FormControl className={classes.marginTop}>
+        <InputLabel>{`${t("Type")} *`}</InputLabel>
         <Select
           fullWidth
           value={data.type || DATA_TYPES.ANY}
@@ -258,12 +264,14 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
       </FormControl>
     );
   }, [
+    classes,
     data,
     preventRenderType,
     disableType,
     getDataTypes,
     getLabel,
-    handleTypeChange
+    handleTypeChange,
+    t
   ]);
 
   const renderValueOptions = useCallback(() => {
