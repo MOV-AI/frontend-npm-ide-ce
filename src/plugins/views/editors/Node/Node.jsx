@@ -292,7 +292,6 @@ const Node = (props, ref) => {
       const method = "customDialog";
       const args = {
         onSubmit: formData => {
-          console.log("formData", formData);
           return updateKeyValue(param, formData, obj, isNew);
         },
         nameValidation: newData =>

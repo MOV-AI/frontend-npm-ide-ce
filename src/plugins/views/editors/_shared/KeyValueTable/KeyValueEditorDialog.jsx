@@ -126,18 +126,15 @@ const KeyValueEditorDialog = props => {
    * Submit form and close dialog
    */
   const onSave = useCallback(() => {
-    console.log("props.data", props.data);
-    console.log("data", data);
     validate(data).then(res => {
       if (res.result ?? res.success) {
-        console.log("res", res);
         onSubmit(res.data);
         onClose();
       } else {
         setValidation({ error: true, message: res.error });
       }
     });
-  }, [props.data, data, onClose, onSubmit, validate]);
+  }, [data, onClose, onSubmit, validate]);
 
   //========================================================================================
   /*                                                                                      *
