@@ -1,6 +1,11 @@
 import { Themes } from "@mov-ai/mov-fe-lib-react";
 import lodash from "lodash";
 
+const commonColors = {
+  black: "#000000",
+  white: "#ffffff"
+};
+
 const overrides = {
   MuiAppBar: {
     positionStatic: {
@@ -12,7 +17,8 @@ const overrides = {
 const overrideTheme = {
   // Override dark theme
   dark: {
-    background: "black",
+    commonColors,
+    background: commonColors.black,
     topBarColor: Themes.dark.palette.background.secondary,
     backdrop: {
       color: Themes.dark.textColor,
@@ -43,13 +49,14 @@ const overrideTheme = {
     layoutEditor: {
       background: Themes.dark.palette.background.secondary,
       gridItemDev: "#ffdeb7",
-      gridItemPreview: "#ffffff",
+      gridItemPreview: commonColors.white,
       itemBoxColor: "#969696",
-      itemBoxColorHover: "#ffffff"
+      itemBoxColorHover: commonColors.white
     }
   },
   // Override light theme
   light: {
+    commonColors,
     background: Themes.light.palette.background.primary,
     topBarColor: Themes.light.palette.background.secondary,
     backdrop: {
@@ -72,9 +79,9 @@ const overrideTheme = {
     layoutEditor: {
       background: Themes.light.palette.background.primary,
       gridItemDev: "lightgrey",
-      gridItemPreview: "#ffffff",
+      gridItemPreview: commonColors.white,
       itemBoxColor: "#3e3e3e",
-      itemBoxColorHover: "#000000"
+      itemBoxColorHover: commonColors.black
     },
     diffTool: {
       background: Themes.light.palette.background.secondary,

@@ -29,7 +29,7 @@ const useStyles = makeStyles(theme => ({
     "& .dock-layout": {
       width: "100%",
       height: "100%",
-      background: "#fff",
+      background: theme.commonColors.white,
       "& .dock-panel": {
         background: theme.palette.background.default,
         borderColor: theme.palette.background.default,
