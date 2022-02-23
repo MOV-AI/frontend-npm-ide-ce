@@ -17,7 +17,6 @@ const overrides = {
 const overrideTheme = {
   // Override dark theme
   dark: {
-    commonColors,
     background: commonColors.black,
     dockLayout: {
       background: commonColors.white
@@ -59,7 +58,6 @@ const overrideTheme = {
   },
   // Override light theme
   light: {
-    commonColors,
     dockLayout: {
       background: commonColors.black
     },
