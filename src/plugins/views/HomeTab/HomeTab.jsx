@@ -31,7 +31,7 @@ const HomeTab = forwardRef((props, ref) => {
   //========================================================================================
 
   /**
-   * Open Document
+   * Open an existing Document
    * @param {{name: string, scope: string, id: string, isDeleted: bool}} doc : Document data
    */
   const openExistingDocument = useCallback(
@@ -46,7 +46,7 @@ const HomeTab = forwardRef((props, ref) => {
           severity: alertSeverities.WARNING
         });
       } else {
-        call("tabs", "openEditor", doc);
+        call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, doc);
       }
     },
     [alertSeverities, alert, call, t]
@@ -59,16 +59,17 @@ const HomeTab = forwardRef((props, ref) => {
   //========================================================================================
 
   useEffect(() => {
-    const HOMETAB_ID_TOPIC = `${HOMETAB_PROFILE.name}-active`;
     call(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS);
-    on("tabs", HOMETAB_ID_TOPIC, () => {
-      call(
-        PLUGINS.RIGHT_DRAWER.NAME,
-        PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS
-      );
+    on(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE, data => {
+      if (data.id === HOMETAB_PROFILE.name) {
+        call(
+          PLUGINS.RIGHT_DRAWER.NAME,
+          PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS
+        );
+      }
     });
     return () => {
-      off("tabs", HOMETAB_ID_TOPIC);
+      off(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE);
     };
   }, [call, on, off]);
 

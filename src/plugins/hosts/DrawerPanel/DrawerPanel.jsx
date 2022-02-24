@@ -2,6 +2,7 @@ import { Drawer, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import React from "react";
+import { HOSTS } from "../../../utils/Constants";
 import { withHostReactPlugin } from "../../../engine/ReactPlugin/HostReactPlugin";
 import { usePluginMethods } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import withBookmarks, {
@@ -105,7 +106,12 @@ const DrawerPanel = React.forwardRef((props, ref) => {
   );
 });
 
-DrawerPanel.pluginMethods = [...exposedMethods, "open", "close", "toggle"];
+DrawerPanel.pluginMethods = [
+  ...exposedMethods,
+  HOSTS.LEFT_DRAWER.CALL.OPEN,
+  HOSTS.LEFT_DRAWER.CALL.CLOSE,
+  HOSTS.LEFT_DRAWER.CALL.TOGGLE
+];
 
 export default withHostReactPlugin(
   withBookmarks(DrawerPanel),
@@ -118,6 +124,5 @@ DrawerPanel.propTypes = {
 };
 
 DrawerPanel.defaultProps = {
-  hostName: "drawer",
   initialOpenState: false
 };

@@ -1,5 +1,9 @@
 # latest
 
+**System Bar**
+
+- [FP - 1534 - Added systembar, medium refactor](https://movai.atlassian.net/browse/FP-1534)
+
 **IDE**
 
 - [FP - 1538 - Color between tabs now, more clearer](https://movai.atlassian.net/browse/FP-1538)

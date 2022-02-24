@@ -1,15 +1,17 @@
 import React, { useCallback, useRef, memo } from "react";
+import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
-import { MTableToolbar, MTableEditRow } from "material-table";
-import MaterialTable from "../../../_shared/MaterialTable/MaterialTable";
-import IOPorts from "./IOPorts/IOPorts";
-import CollapsibleHeader from "../_shared/CollapsibleHeader";
-import { Typography } from "@material-ui/core";
 import _isEqual from "lodash/isEqual";
-import { useTranslation, DEFAULT_FUNCTION } from "../../../_shared/mocks";
+import { MTableToolbar, MTableEditRow } from "material-table";
+import { makeStyles } from "@material-ui/core/styles";
+import { Typography } from "@material-ui/core";
+import { PLUGINS } from "../../../../../../utils/Constants";
+import MaterialTable from "../../../_shared/MaterialTable/MaterialTable";
+import CollapsibleHeader from "../_shared/CollapsibleHeader";
+import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
 import useIOConfigColumns from "./hooks/useIOConfigColumns";
 import useHelper from "./hooks/useHelper";
+import IOPorts from "./IOPorts/IOPorts";
 
 const useStyles = makeStyles(theme => ({
   details: {
@@ -81,7 +83,11 @@ const IOConfig = props => {
 
   React.useEffect(() => {
     // Initialize state
-    call("docManager", "getStore", scope).then(store => {
+    call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.GET_STORE,
+      scope
+    ).then(store => {
       // Get All transport / protocol to fill first selector
       store.helper.getAllTransportProtocol().then(res => {
         if (res) setScopePorts(res);

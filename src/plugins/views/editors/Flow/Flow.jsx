@@ -14,6 +14,7 @@ import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { FLOW_EXPLORER_PROFILE, PLUGINS } from "../../../../utils/Constants";
+import { KEYBINDINGS } from "../../../../utils/Keybindings";
 import Clipboard, { KEYS } from "./Utils/Clipboard";
 import Vec2 from "./Utils/Vec2";
 import BaseFlow from "./Views/BaseFlow";
@@ -1031,14 +1032,14 @@ const Flow = (props, ref) => {
   //========================================================================================
 
   useEffect(() => {
-    addKeyBind("ctrl+c", handleCopyNode);
-    addKeyBind("ctrl+v", handlePasteNodes);
+    addKeyBind(KEYBINDINGS.COPY, handleCopyNode);
+    addKeyBind(KEYBINDINGS.PASTE, handlePasteNodes);
     addKeyBind("esc", setFlowsToDefault);
     addKeyBind(["del", "backspace"], handleDeleteNode);
     // remove keyBind on unmount
     return () => {
-      removeKeyBind("ctrl+c");
-      removeKeyBind("ctrl+v");
+      removeKeyBind(KEYBINDINGS.COPY);
+      removeKeyBind(KEYBINDINGS.PASTE);
       removeKeyBind("esc");
       removeKeyBind(["del", "backspace"]);
     };

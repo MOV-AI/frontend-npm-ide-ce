@@ -6,6 +6,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import Divider from "@material-ui/core/Divider";
 import DeleteIcon from "@material-ui/icons/DeleteForever";
+import { PLUGINS } from "../../../../utils/Constants";
 import HomeLink from "./HomeLink";
 
 import { recentDocumentsStyles } from "../styles";
@@ -21,9 +22,9 @@ const RecentDocuments = props => {
   const [recentDocs, setRecentDocs] = useState([]);
 
   const setRecentDocuments = useCallback(
-    recentDocs => {
-      workspaceManager.setRecentDocuments(recentDocs);
-      setRecentDocs(recentDocs);
+    documents => {
+      workspaceManager.setRecentDocuments(documents);
+      setRecentDocs(documents);
     },
     [workspaceManager]
   );
@@ -38,40 +39,40 @@ const RecentDocuments = props => {
 
   const removeRecentDocument = useCallback(
     id => {
-      const recentDocs = filterRecentDocuments(id);
+      const documents = filterRecentDocuments(id);
 
-      setRecentDocuments(recentDocs);
+      setRecentDocuments(documents);
     },
     [setRecentDocuments, filterRecentDocuments]
   );
 
   const addRecentDocument = useCallback(
     (id, name, scope) => {
-      const recentDocs = filterRecentDocuments(id);
+      const documents = filterRecentDocuments(id);
 
-      if (recentDocs.length === MAX_RECENT_DOCS) recentDocs.shift();
+      if (documents.length === MAX_RECENT_DOCS) documents.shift();
 
-      recentDocs.push({
+      documents.push({
         id: id,
         name: name,
         scope: scope
       });
 
-      setRecentDocuments(recentDocs);
+      setRecentDocuments(documents);
     },
     [setRecentDocuments, filterRecentDocuments]
   );
 
   const setDeletedRecentDocument = useCallback(
     id => {
-      const recentDocs = workspaceManager.getRecentDocuments();
-      const deletedDoc = recentDocs.find(doc => doc.id === id);
+      const documents = workspaceManager.getRecentDocuments();
+      const deletedDoc = documents.find(doc => doc.id === id);
 
       if (deletedDoc) {
         deletedDoc.isDeleted = true;
       }
 
-      setRecentDocuments(recentDocs);
+      setRecentDocuments(documents);
     },
     [workspaceManager, setRecentDocuments]
   );
@@ -101,15 +102,15 @@ const RecentDocuments = props => {
   useEffect(() => {
     setRecentDocs(workspaceManager.getRecentDocuments());
 
-    on("tabs", "openEditor", data => {
+    on(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, data => {
       if (!data.isNew) addRecentDocument(data.id, data.name, data.scope);
     });
 
-    on("docManager", "deleteDoc", data => {
+    on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.DELETE_DOC, data => {
       setDeletedRecentDocument(data.url);
     });
 
-    on("docManager", "saveDoc", data => {
+    on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.SAVE_DOC, data => {
       if (data.newName) {
         const { workspace, type: scope } = data.doc;
         const id = `${workspace}/${scope}/${data.newName}`;

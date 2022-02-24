@@ -15,10 +15,10 @@ import {
 import { getIconByScope, getHomeTab } from "../../../utils/Utils";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Workspace from "../../../utils/Workspace";
-import TOPICS from "./topics";
 
 const useLayout = (props, dockRef) => {
   const { emit, call, on, off } = props;
+  const activeTabId = useRef(null);
   const workspaceManager = useMemo(() => new Workspace(), []);
   const tabsById = useRef(new Map());
   const [layout, setLayout] = useState({ ...DEFAULT_LAYOUT });
@@ -125,19 +125,22 @@ const useLayout = (props, dockRef) => {
   const _saveDoc = useCallback(
     (docData, newLayout) => {
       const { name, scope } = docData;
-      call("docManager", "save", { name, scope })
+      call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.SAVE, {
+        name,
+        scope
+      })
         .then(res => {
           if (res.success) {
             if (newLayout) _applyLayout(newLayout);
-            call("alert", "show", {
+            call(PLUGINS.ALERT.NAME, PLUGINS.ALERT.CALL.SHOW, {
               message: "Saved successfully",
               severity: "success"
             });
           }
         })
         .catch(err => {
-          console.log("failed to save", err);
-          call("alert", "show", {
+          console.warn("failed to save", err);
+          call(PLUGINS.ALERT.NAME, PLUGINS.ALERT.CALL.SHOW, {
             message: "Failed to save",
             severity: "error"
           });
@@ -154,7 +157,11 @@ const useLayout = (props, dockRef) => {
   const _discardChanges = useCallback(
     (docData, newLayout) => {
       const { name, scope } = docData;
-      call("docManager", "discardDocChanges", { name, scope }).then(() => {
+      call(
+        PLUGINS.DOC_MANAGER.NAME,
+        PLUGINS.DOC_MANAGER.CALL.DISCARD_DOC_CHANGES,
+        { name, scope }
+      ).then(() => {
         if (newLayout) _applyLayout(newLayout);
       });
     },
@@ -169,7 +176,7 @@ const useLayout = (props, dockRef) => {
    */
   const _closeDirtyTab = useCallback(
     (name, scope, newLayout) => {
-      call("dialog", "closeDirtyDocument", {
+      call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CLOSE_DIRTY_DOC, {
         name,
         scope,
         onSubmit: action => {
@@ -198,7 +205,12 @@ const useLayout = (props, dockRef) => {
         _closeDirtyTab(name, scope, newLayout);
       } else {
         // Remove doc locally if is new and not dirty
-        if (isNew) call("docManager", "discardDocChanges", { name, scope });
+        if (isNew)
+          call(
+            PLUGINS.DOC_MANAGER.NAME,
+            PLUGINS.DOC_MANAGER.CALL.DISCARD_DOC_CHANGES,
+            { name, scope }
+          );
         // Remove tab and apply new layout
         tabsById.current.delete(tabId);
         workspaceManager.setTabs(tabsById.current);
@@ -284,7 +296,11 @@ const useLayout = (props, dockRef) => {
   const _getTabData = useCallback(
     async docData => {
       return props
-        .call("docManager", "getDocFactory", docData.scope)
+        .call(
+          PLUGINS.DOC_MANAGER.NAME,
+          PLUGINS.DOC_MANAGER.CALL.GET_DOC_FACTORY,
+          docData.scope
+        )
         .then(docFactory => {
           try {
             const Plugin = docFactory.plugin;
@@ -307,7 +323,7 @@ const useLayout = (props, dockRef) => {
               };
             });
           } catch (err) {
-            console.log("debug can't open tab", err);
+            console.warn("debug can't open tab", err);
             return docData;
           }
         });
@@ -373,7 +389,7 @@ const useLayout = (props, dockRef) => {
   const openEditor = useCallback(
     docData => {
       _getTabData(docData).then(tabData => {
-        emit(TOPICS.openEditor, tabData);
+        emit(PLUGINS.TABS.ON.OPEN_EDITOR, tabData);
         open(tabData);
       });
     },
@@ -450,12 +466,15 @@ const useLayout = (props, dockRef) => {
       }
       // Emit new active tab id
       if (!tabId) return;
-      if (newActiveTab) emit(`${newActiveTab}-active`);
-      else
+      if (newActiveTab) {
+        activeTabId.current = newActiveTab;
+        emit(PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE, { id: newActiveTab });
+      } else {
         call(
           PLUGINS.RIGHT_DRAWER.NAME,
           PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS
         );
+      }
     },
     [emit, call, _getFirstContainer, _closeTab, _applyLayout]
   );
@@ -481,6 +500,14 @@ const useLayout = (props, dockRef) => {
     },
     [_getTabData, _setTabInLayout]
   );
+
+  /**
+   * Get currently active tab
+   * @returns {string} active tab id
+   */
+  const getActiveTab = useCallback(() => {
+    return activeTabId.current;
+  }, []);
 
   //========================================================================================
   /*                                                                                      *
@@ -526,11 +553,12 @@ const useLayout = (props, dockRef) => {
     });
     // after all plugins are installed
     Promise.allSettled(tabs).then(_tabs => {
-      _tabs.forEach(
-        tab =>
-          tab.status === "fulfilled" &&
-          tabsById.current.set(tab.value.id, tab.value)
-      );
+      _tabs.forEach(tab => {
+        tab.status === "fulfilled" &&
+          tabsById.current.set(tab.value.id, tab.value);
+        // This is to get the last tab rendered (which is the one focused when we mount the component)
+        activeTabId.current = tab.value.id;
+      });
       setLayout(lastLayout);
     });
     // Destroy local workspace manager instance on unmount
@@ -552,6 +580,7 @@ const useLayout = (props, dockRef) => {
     close,
     loadTab,
     onLayoutChange,
+    getActiveTab,
     updateTabId
   };
 };

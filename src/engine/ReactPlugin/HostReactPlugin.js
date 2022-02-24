@@ -1,6 +1,6 @@
 import React from "react";
-import PluginManagerIDE from "../PluginManagerIDE/PluginManagerIDE";
 import PropTypes from "prop-types";
+import PluginManagerIDE from "../PluginManagerIDE/PluginManagerIDE";
 import IDEPlugin from "../IDEPlugin/IDEPlugin";
 
 export class HostReactPlugin extends IDEPlugin {
@@ -46,8 +46,8 @@ export class HostReactPlugin extends IDEPlugin {
 export function withHostReactPlugin(ReactComponent, methods = []) {
   const InnerHost = props => {
     const ref = React.useRef();
-    const RefComponent = React.forwardRef((props, ref) =>
-      ReactComponent(props, ref)
+    const RefComponent = React.forwardRef((_props, _ref) =>
+      ReactComponent(_props, _ref)
     );
     const { viewPlugins, plugin } = useHostReactPlugin(
       {
@@ -65,6 +65,7 @@ export function withHostReactPlugin(ReactComponent, methods = []) {
         onTopic={plugin.onTopic}
         call={plugin.call}
         emit={plugin.emit}
+        off={plugin.off}
         on={plugin.on}
       />
     );
@@ -88,8 +89,8 @@ export const useHostReactPlugin = ({ name, methods }, componentRef) => {
       }
 
       initMethods = () => {
-        methods.forEach(name => {
-          this[name] = (...args) => componentRef.current[name](...args);
+        methods.forEach(_name => {
+          this[_name] = (...args) => componentRef.current[_name](...args);
         });
       };
 
@@ -129,5 +130,6 @@ const DEFAULT_PLUGIN = {
   call: () => {},
   emit: () => {},
   on: () => {},
+  off: () => {},
   onTopic: () => {}
 };

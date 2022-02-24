@@ -2,6 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import DockLayout from "rc-dock";
 import "rc-dock/dist/rc-dock.css";
+import { makeStyles } from "@material-ui/core/styles";
+import { PLUGINS } from "../../../utils/Constants";
 import {
   withViewPlugin,
   usePluginMethods
@@ -19,6 +21,7 @@ const Tabs = (props, ref) => {
     openEditor,
     close,
     onLayoutChange,
+    getActiveTab,
     loadTab,
     updateTabId
   } = useLayout(props, dockRef);
@@ -27,6 +30,7 @@ const Tabs = (props, ref) => {
     open,
     openEditor,
     updateTabId,
+    getActiveTab,
     close
   });
 
@@ -43,7 +47,7 @@ const Tabs = (props, ref) => {
   );
 };
 
-Tabs.pluginMethods = ["open", "openEditor", "close", "updateTabId"];
+Tabs.pluginMethods = [...Object.values(PLUGINS.TABS.CALL)];
 
 export default withViewPlugin(Tabs, Tabs.pluginMethods);
 
@@ -53,8 +57,4 @@ Tabs.propTypes = {
   emit: PropTypes.func.isRequired,
   onTopic: PropTypes.func.isRequired,
   profile: PropTypes.object.isRequired
-};
-
-Tabs.defaultProps = {
-  profile: { name: "tabs" }
 };

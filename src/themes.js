@@ -18,10 +18,10 @@ const overrideTheme = {
   // Override dark theme
   dark: {
     background: commonColors.black,
+    topBarColor: Themes.dark.palette.grey[300],
     dockLayout: {
       background: commonColors.white
     },
-    topBarColor: Themes.dark.palette.background.secondary,
     backdrop: {
       color: Themes.dark.textColor,
       background: Themes.dark.palette.background.secondary
