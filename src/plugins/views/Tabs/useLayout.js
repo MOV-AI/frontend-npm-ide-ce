@@ -501,6 +501,10 @@ const useLayout = (props, dockRef) => {
     [_getTabData, _setTabInLayout]
   );
 
+  /**
+   * Get currently active tab
+   * @returns {string} active tab id
+   */
   const getActiveTab = useCallback(() => {
     return activeTabId.current;
   }, []);

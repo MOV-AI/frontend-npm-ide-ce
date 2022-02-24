@@ -11,6 +11,11 @@ export const APP_INFORMATION = {
   DESCRIPTION: window.SERVER_DATA?.Application?.Description || "-"
 };
 
+export const APP_LINKS = {
+  DOCUMENTATION: "https://movai-flow.readme.io/docs",
+  FORUM: "https://discourse.aws.cloud.mov.ai/"
+};
+
 export const BRANDING = {
   NAME: "Mov.ai Flow™"
 };

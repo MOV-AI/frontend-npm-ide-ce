@@ -1,6 +1,11 @@
 import i18n from "../../../i18n/i18n";
 import { getIconByScope } from "../../../utils/Utils";
-import { BRANDING, PLUGINS, APP_INFORMATION } from "../../../utils/Constants";
+import {
+  APP_INFORMATION,
+  APP_LINKS,
+  BRANDING,
+  PLUGINS
+} from "../../../utils/Constants";
 import { KEYBINDINGS } from "../../../utils/Keybindings";
 import movaiIconWhite from "../editors/_shared/Branding/movai-logo-white.png";
 
@@ -82,6 +87,10 @@ const buildMenus = async (call, classes) => {
     });
   };
 
+  function openLink(link) {
+    window.open(link, "_blank");
+  }
+
   return [
     {
       id: "fileMenu",
@@ -134,15 +143,13 @@ const buildMenus = async (call, classes) => {
           id: "documentation",
           title: "Documentation",
           externalLink: true,
-          callback: () =>
-            window.open("https://movai-flow.readme.io/docs", "_blank")
+          callback: () => openLink(APP_LINKS.DOCUMENTATION)
         },
         {
           id: "forum",
           title: "Forum",
           externalLink: true,
-          callback: () =>
-            window.open("https://discourse.aws.cloud.mov.ai/", "_blank")
+          callback: () => openLink(APP_LINKS.FORUM)
         },
         {},
         {

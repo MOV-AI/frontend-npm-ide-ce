@@ -20,7 +20,10 @@ export const systemBarStyles = debugMode =>
     menuButton: {
       ...menuButtonStyles,
       minWidth: "40px",
-      color: theme.palette.grey[900]
+      color: theme.palette.grey[900],
+      "&:hover": {
+        background: theme.palette.grey[400]
+      }
     },
     activeMenu: {
       background: theme.palette.grey[400]

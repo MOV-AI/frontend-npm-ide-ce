@@ -6,7 +6,7 @@ import Paper from "@material-ui/core/Paper";
 import Divider from "@material-ui/core/Divider";
 import AddIcon from "@material-ui/icons/Add";
 import ChromeReaderModeIcon from "@material-ui/icons/ChromeReaderMode";
-import { PLUGINS } from "../../../../utils/Constants";
+import { APP_LINKS, PLUGINS } from "../../../../utils/Constants";
 import { getIconByScope } from "../../../../utils/Utils";
 // This is already working - just leaving this here for posteriority
 // import {
@@ -107,7 +107,7 @@ const QuickAccess = props => {
           }))}
         ></ContextMenu>
         <a
-          href="https://movai-flow.readme.io/docs"
+          href={APP_LINKS.DOCUMENTATION}
           target="_blank"
           rel="noreferrer"
           className={classes.link}
@@ -117,7 +117,7 @@ const QuickAccess = props => {
           {t("Documentation")}
         </a>
         <a
-          href="https://discourse.aws.cloud.mov.ai/"
+          href={APP_LINKS.FORUM}
           target="_blank"
           rel="noreferrer"
           className={classes.link}
