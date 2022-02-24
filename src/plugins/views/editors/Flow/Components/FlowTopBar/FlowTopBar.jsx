@@ -1,7 +1,6 @@
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import GrainIcon from "@material-ui/icons/Grain";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Typography,
@@ -9,8 +8,6 @@ import {
   Button,
   CircularProgress
 } from "@material-ui/core";
-import ToggleButton from "@material-ui/lab/ToggleButton";
-import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -22,7 +19,7 @@ import { RobotManager } from "@mov-ai/mov-fe-lib-core";
 import Workspace from "../../../../../../utils/Workspace";
 import { PLUGINS } from "../../../../../../utils/Constants";
 import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
-import { FLOW_VIEW_MODE, ROBOT_BLACKLIST } from "../../Constants/constants";
+import { ROBOT_BLACKLIST } from "../../Constants/constants";
 import useNodeStatusUpdate from "./hooks/useNodeStatusUpdate";
 
 const useStyles = makeStyles(theme => ({
@@ -87,8 +84,8 @@ const FlowTopBar = props => {
     id,
     onRobotChange,
     defaultViewMode,
-    confirmationAlert,
-    onViewModeChange
+    confirmationAlert
+    // onViewModeChange
   } = props;
   // State hooks
   const [loading, setLoading] = React.useState(false);
@@ -235,6 +232,9 @@ const FlowTopBar = props => {
   React.useEffect(() => {
     // On unmount
     return () => {
+      // TEMPORARY HACK: Added log to remove warning of unused
+      // Once that handleViewModeChange method is uncommented, this should be removed
+      console.log(setViewMode);
       robotUnsubscribe();
     };
   }, [robotUnsubscribe]);
@@ -383,17 +383,18 @@ const FlowTopBar = props => {
    * @param {string} newViewMode : New value
    * @returns
    */
-  const handleViewModeChange = useCallback(
-    (_, newViewMode) => {
-      if (!newViewMode) return;
-      setViewMode(prevState => {
-        if (prevState === newViewMode) return prevState;
-        onViewModeChange(newViewMode);
-        return newViewMode;
-      });
-    },
-    [onViewModeChange]
-  );
+  // Commented out for posterity
+  // const handleViewModeChange = useCallback(
+  //   (_, newViewMode) => {
+  //     if (!newViewMode) return;
+  //     setViewMode(prevState => {
+  //       if (prevState === newViewMode) return prevState;
+  //       onViewModeChange(newViewMode);
+  //       return newViewMode;
+  //     });
+  //   },
+  //   [onViewModeChange]
+  // );
 
   //========================================================================================
   /*                                                                                      *
@@ -475,7 +476,7 @@ const FlowTopBar = props => {
           )}
         </Typography>
         <Typography component="div" className={classes.visualizationToggle}>
-          <ToggleButtonGroup
+          {/* <ToggleButtonGroup
             exclusive
             size="small"
             value={viewMode}
@@ -491,7 +492,7 @@ const FlowTopBar = props => {
                 <i className="icon-tree" style={{ fontSize: "1.2rem" }}></i>
               </Tooltip>
             </ToggleButton>
-          </ToggleButtonGroup>
+          </ToggleButtonGroup> */}
         </Typography>
       </Toolbar>
     </AppBar>
