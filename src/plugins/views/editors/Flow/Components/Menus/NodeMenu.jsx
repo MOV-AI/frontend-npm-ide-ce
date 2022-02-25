@@ -14,7 +14,8 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 import {
   DATA_TYPES,
   TABLE_KEYS_NAMES,
-  DIALOG_TITLE
+  DIALOG_TITLE,
+  PLUGINS
 } from "../../../../../../utils/Constants";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
 import MenuDetails from "./sub-components/MenuDetails";
@@ -136,7 +137,10 @@ const NodeMenu = memo(
       const name = data?.Template;
       if (!data?.Template) return;
       // Read node template
-      call("docManager", "read", { name, scope: data.model }).then(doc => {
+      call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.READ, {
+        name,
+        scope: data.model
+      }).then(doc => {
         setTemplateData(doc.serialize());
       });
     }, [data, call]);
@@ -179,7 +183,7 @@ const NodeMenu = memo(
           paramType
         };
 
-        const method = "customDialog";
+        const method = PLUGINS.DIALOG.CALL.CUSTOM_DIALOG;
         const args = {
           onSubmit: handleSubmitParameter,
           title: t("Edit {{paramType}}", { paramType }),

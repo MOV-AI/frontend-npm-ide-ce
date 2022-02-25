@@ -50,7 +50,7 @@ export class ViewPlugin extends ViewReactPlugin {
         if (!this.ref.current) {
           return console.warn("debug method not implemented in component");
         }
-        this.ref.current[name](...a);
+        return this.ref.current[name](...a);
       };
     });
   };

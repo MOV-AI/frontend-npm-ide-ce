@@ -1,4 +1,5 @@
 import React from "react";
+import { PLUGINS } from "../utils/Constants";
 
 /**
  * Pass snackbar alerts to components
@@ -23,7 +24,7 @@ const withAlerts = Component => {
      * @param {{title: String, message: String, location: String, severity: String}} alertData
      */
     const alert = options => {
-      call("alert", "show", options);
+      call(PLUGINS.ALERT.NAME, PLUGINS.ALERT.CALL.SHOW, options);
     };
 
     /**
@@ -31,7 +32,12 @@ const withAlerts = Component => {
      * @param {{title: string, message: string, submitText: string, onSubmit: function}} confirmationData
      */
     const confirmationAlert = ({ title, message, onSubmit, submitText }) => {
-      call("dialog", "confirmation", { title, message, onSubmit, submitText });
+      call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
+        title,
+        message,
+        onSubmit,
+        submitText
+      });
     };
 
     return (

@@ -120,7 +120,10 @@ const ContainerMenu = props => {
     const name = data?.ContainerFlow;
     if (!name) return;
     // Read node template
-    call("docManager", "read", { name, scope: data.model }).then(doc => {
+    call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.READ, {
+      name,
+      scope: data.model
+    }).then(doc => {
       setTemplateData(doc.serialize());
     });
   }, [data, call]);

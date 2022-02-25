@@ -1,14 +1,13 @@
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from "@material-ui/icons/Info";
 import Model from "../../../../models/Node/Node";
 import CallbackModel from "../../../../models/Callback/Callback";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
-import useDataSubscriber from "../../../DocManager/useDataSubscriber";
 import {
   DEFAULT_KEY_VALUE_DATA,
   TABLE_KEYS_NAMES,
@@ -18,6 +17,7 @@ import {
   PLUGINS
 } from "../../../../utils/Constants";
 import ParameterEditorDialog from "../_shared/KeyValueTable/ParametersEditorDialog";
+import useDataSubscriber from "../../../DocManager/useDataSubscriber";
 import Menu from "./Menu";
 import Description from "./components/Description/Description";
 import ExecutionParameters from "./components/ExecutionParameters/ExecutionParameters";
@@ -289,7 +289,7 @@ const Node = (props, ref) => {
         name: objData.key || dataId,
         paramType
       };
-      const method = "customDialog";
+      const method = PLUGINS.DIALOG.CALL.CUSTOM_DIALOG;
       const args = {
         onSubmit: formData => {
           return updateKeyValue(param, formData, obj, isNew);
@@ -315,16 +315,19 @@ const Node = (props, ref) => {
    */
   const handleNewCallback = (defaultMsg, ioConfigName, portName) => {
     const scope = CallbackModel.SCOPE;
-    call("dialog", "newDocument", {
+    call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
       scope,
       onSubmit: newName => {
-        call("docManager", "create", {
+        call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.CREATE, {
           scope,
           name: newName
         }).then(doc => {
           doc.setMessage(defaultMsg);
           // Create callback in DB
-          call("docManager", "save", { scope, name: newName }).then(res => {
+          call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.SAVE, {
+            scope,
+            name: newName
+          }).then(res => {
             if (res.success) {
               alert({
                 message: "Callback created",
@@ -336,7 +339,11 @@ const Node = (props, ref) => {
                 name: newName,
                 scope
               };
-              call("tabs", "openEditor", newTabData);
+              call(
+                PLUGINS.TABS.NAME,
+                PLUGINS.TABS.CALL.OPEN_EDITOR,
+                newTabData
+              );
               // Set new callback in Node Port
               updatePortCallback(ioConfigName, portName, newName);
             }
@@ -355,8 +362,11 @@ const Node = (props, ref) => {
     if (!callbackName) return;
     // Open existing callback
     const scope = CallbackModel.SCOPE;
-    call("docManager", "read", { scope, name: callbackName }).then(doc => {
-      call("tabs", "openEditor", {
+    call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.READ, {
+      scope,
+      name: callbackName
+    }).then(doc => {
+      call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, {
         id: doc.getUrl(),
         name: doc.getName(),
         scope
@@ -371,7 +381,7 @@ const Node = (props, ref) => {
    * @param {string} portName : Port name
    */
   const handleOpenSelectScopeModal = (modalData, ioConfigName, portName) => {
-    call("dialog", "selectScopeModal", {
+    call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.SELECT_SCOPE_MODAL, {
       ...modalData,
       onSubmit: selectedCallback => {
         const splitURL = selectedCallback.split("/");

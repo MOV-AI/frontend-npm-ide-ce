@@ -2,6 +2,7 @@ import { Document } from "@mov-ai/mov-fe-lib-core";
 import { PLUGINS } from "../../utils/Constants";
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
 import docsFactory from "./docs";
+import { getNameFromURL, getScopeFromURL } from "../../utils/Utils";
 
 /**
  * Document Manager plugin to handle requests, subscribers and more
@@ -12,21 +13,7 @@ class DocManager extends IDEPlugin {
     const methods = Array.from(
       new Set([
         ...(profile.methods ?? []),
-        "broadcast",
-        "getStore",
-        "getDocTypes",
-        "getDocFactory",
-        "subscribeToChanges",
-        "unSubscribeToChanges",
-        "getDocFromNameType",
-        "checkDocumentExists",
-        "discardDocChanges",
-        "reloadDoc",
-        "copy",
-        "delete",
-        "create",
-        "read",
-        "save"
+        ...Object.values(PLUGINS.DOC_MANAGER.CALL)
       ])
     );
     super({ ...profile, methods });
@@ -181,6 +168,16 @@ class DocManager extends IDEPlugin {
       newName
     });
     return this.getStore(scope).saveDoc(name, newName);
+  }
+
+  /**
+   * Saves the tab that is currently active
+   */
+  saveActiveEditor() {
+    this.call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.GET_ACTIVE_TAB).then(url => {
+      if (url.includes("/"))
+        this.save({ name: getNameFromURL(url), scope: getScopeFromURL(url) });
+    });
   }
 
   /**

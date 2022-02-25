@@ -1,13 +1,14 @@
-import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
 import ReactDOM from "react-dom";
+import { SelectScopeModal } from "@mov-ai/mov-fe-lib-react";
+import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
+import { PLUGINS } from "../../utils/Constants";
+import { withTheme } from "../../decorators/withTheme";
 import ConfirmationDialog from "./components/ConfirmationDialog/ConfirmationDialog";
 import NewDocumentDialog from "./components/FormDialog/NewDocumentDialog";
 import FormDialog from "./components/FormDialog/FormDialog";
 import AlertDialog from "./components/AlertDialog/AlertDialog";
 import AlertBeforeAction from "./components/AlertDialog/AlertBeforeAction";
 import AppDialog from "./components/AppDialog/AppDialog";
-import { SelectScopeModal } from "@mov-ai/mov-fe-lib-react";
-import { withTheme } from "../../decorators/withTheme";
 
 class Dialog extends IDEPlugin {
   constructor(profile = {}) {
@@ -15,16 +16,7 @@ class Dialog extends IDEPlugin {
     const methods = Array.from(
       new Set([
         ...(profile.methods ?? []),
-        "alert",
-        "custom",
-        "customDialog",
-        "confirmation",
-        "newDocument",
-        "formDialog",
-        "copyDocument",
-        "selectScopeModal",
-        "closeDirtyDocument",
-        "saveOutdatedDocument"
+        ...Object.values(PLUGINS.DIALOG.CALL)
       ])
     );
     super({ ...profile, methods });
