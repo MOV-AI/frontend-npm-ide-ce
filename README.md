@@ -18,7 +18,7 @@ npm ci
 npm start
 ```
 
-Note: ~/.npmrc must be previously configured with access to github
+Note: ~/.npmrc must be previously configured with access to github.
 
 ## Proxy
 
