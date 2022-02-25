@@ -28,20 +28,20 @@ module.exports = function override(config, env) {
         options: { presets: ["@babel/preset-env"] }
       }
     },
-    // {
-    //   test: /\.css$/,
-    //   resolve: {
-    //     extensions: [".css"]
-    //   },
-    //   use: ["style-loader", "css-loader"],
-    //   include: [
-    //     path.resolve(__dirname, "./node_modules/monaco-editor")
-    //   ]
-    // },
-    // {
-    //   test: /\.ttf$/,
-    //   use: ['file-loader'],
-    // },
+    {
+      test: /.css$/,
+      resolve: {
+        extensions: [".css"]
+      },
+      use: ["style-loader", "css-loader", "postcss-loader"],
+      include: [
+        path.resolve(__dirname, "./node_modules/monaco-editor")
+      ]
+    },
+    {
+      test: /\.ttf$/,
+      use: ['file-loader'],
+    },
   ];
   // return config
   return config;
