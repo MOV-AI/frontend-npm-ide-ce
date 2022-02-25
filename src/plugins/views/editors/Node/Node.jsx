@@ -1,6 +1,6 @@
-import React from "react";
-import { useTranslation } from "react-i18next";
+import React, { useCallback } from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import { Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from "@material-ui/icons/Info";
@@ -10,16 +10,19 @@ import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import {
   DEFAULT_KEY_VALUE_DATA,
+  TABLE_KEYS_NAMES,
+  DIALOG_TITLE,
+  DATA_TYPES,
   ROS_VALID_NAMES,
   PLUGINS
 } from "../../../../utils/Constants";
+import ParameterEditorDialog from "../_shared/KeyValueTable/ParametersEditorDialog";
 import useDataSubscriber from "../../../DocManager/useDataSubscriber";
 import Menu from "./Menu";
 import Description from "./components/Description/Description";
 import ExecutionParameters from "./components/ExecutionParameters/ExecutionParameters";
 import ParametersTable from "./components/ParametersTable/ParametersTable";
 import KeyValueTable from "./components/KeyValueTable/KeyValueTable";
-import KeyValueEditorDialog from "./components/KeyValueTable/KeyValueEditorDialog";
 import IOConfig from "./components/IOConfig/IOConfig";
 import useKeyValueMethods from "./components/KeyValueTable/useKeyValueMethods";
 
@@ -37,12 +40,21 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Node = (props, ref) => {
-  const { id, name, call, alert, instance, editable = true } = props;
+  const {
+    id,
+    name,
+    call,
+    alert,
+    instance,
+    editable = true,
+    activateKeyBind,
+    deactivateKeyBind
+  } = props;
 
   // Hooks
   const classes = useStyles();
   const { t } = useTranslation();
-  const { getColumns, renderValueEditor } = useKeyValueMethods();
+  const { getColumns } = useKeyValueMethods();
   const { data } = useDataSubscriber({
     instance,
     propsData: props.data,
@@ -56,14 +68,154 @@ const Node = (props, ref) => {
 
   //========================================================================================
   /*                                                                                      *
-   *                                       Constants                                      *
+   *                                      Validation                                      *
    *                                                                                      */
   //========================================================================================
 
-  const DIALOG_TITLE = {
-    parameters: t("Parameter"),
-    commands: t("Command Line"),
-    envVars: t("Environment Variable")
+  /**
+   * @summary: Validate document name against invalid characters. It accept ROS valid names
+   * and can't accept two consecutive underscores.
+   * @param {string} paramName : name of the document
+   * @param {string} type : one of options "port" or "keyValue"
+   * @param {object} previousData : Previous data row
+   * @returns {object} {result: <boolean>, error: <string>}
+   **/
+  const validateName = useCallback(
+    (paramName, type, previousData) => {
+      const typeName = DIALOG_TITLE[type.toUpperCase()] ?? type;
+      const newName = paramName.name ?? paramName;
+      const re = ROS_VALID_NAMES;
+      try {
+        if (!paramName) throw new Error(`${typeName} name is mandatory`);
+        else if (!re.test(newName)) {
+          throw new Error(`Invalid ${typeName} name`);
+        }
+
+        // Validate against repeated names
+        const checkNewName = !previousData && data[type][newName];
+        const checkNameChanged =
+          previousData && previousData !== newName && data[type][newName];
+
+        if (checkNameChanged || checkNewName) {
+          throw new Error(`Cannot have 2 entries with the same name`);
+        }
+      } catch (error) {
+        return { result: false, error: error.message };
+      }
+      return { result: true, error: "" };
+    },
+    [data]
+  );
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                 Document Functions                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  const updateDescription = value => {
+    if (instance.current) instance.current.setDescription(value);
+  };
+
+  const updateExecutionParams = (param, value) => {
+    if (instance.current) instance.current.setExecutionParameter(param, value);
+  };
+
+  const updatePath = value => {
+    if (instance.current) instance.current.setPath(value);
+  };
+
+  const setPort = (value, resolve, reject, previousData) => {
+    try {
+      // Trim name
+      value.name = value.name.trim();
+
+      // Validate port name
+      const validation = validateName(value.name, "ports", previousData);
+      if (!validation.result) {
+        throw new Error(validation.error);
+      }
+
+      // Check for transport/package/message
+      if (!value.template) throw new Error("No Transport and Protocol chosen");
+      else if (!value.msgPackage) throw new Error("No Package chosen");
+      else if (!value.message) throw new Error("No Message chosen");
+
+      if (previousData) {
+        // Update port
+        if (instance.current)
+          instance.current.updatePort(previousData.name, value);
+      } else {
+        // Proceed with saving
+        const dataToSave = { [value.name]: value };
+        if (instance.current) instance.current.setPort(dataToSave);
+      }
+      resolve();
+    } catch (err) {
+      // Show alert
+      alert({ message: err.message, severity: "error" });
+      // Reject promise
+      reject();
+    }
+  };
+
+  const deletePort = (port, resolve) => {
+    if (instance.current) instance.current.deletePort(port.name);
+    resolve();
+  };
+
+  const updatePortCallback = (ioConfigId, portName, callback) => {
+    instance.current.setPortCallback(ioConfigId, portName, callback);
+  };
+
+  const updateIOPortInputs = (
+    value,
+    ioConfigName,
+    direction,
+    ioPortKey,
+    paramName
+  ) => {
+    instance.current.setPortParameter(
+      ioConfigName,
+      direction,
+      ioPortKey,
+      paramName,
+      value
+    );
+  };
+
+  const updateKeyValue = useCallback(
+    (varName, newData, oldData, isNew) => {
+      try {
+        const keyName = newData.name;
+        const dataToSave = { [keyName]: newData };
+        // Validate port name
+        const validation = validateName(keyName, varName, oldData.name);
+        if (!validation.result) {
+          throw new Error(validation.error);
+        }
+        if (isNew) {
+          // update key value
+          if (instance.current)
+            instance.current.setKeyValue(varName, dataToSave);
+        } else {
+          // add key value
+          if (instance.current)
+            instance.current.updateKeyValueItem(varName, newData, oldData.name);
+        }
+      } catch (err) {
+        if (err.message) alert({ message: err.message, severity: "error" });
+      }
+    },
+    [instance, alert, validateName]
+  );
+
+  const deleteKeyValue = (varName, key) => {
+    return new Promise((resolve, reject) => {
+      if (instance.current) instance.current.deleteKeyValue(varName, key);
+      if (instance.current.getKeyValue(varName, key)) reject();
+      else resolve();
+    });
   };
 
   //========================================================================================
@@ -72,7 +224,28 @@ const Node = (props, ref) => {
    *                                                                                      */
   //========================================================================================
 
-  const renderRightMenu = React.useCallback(() => {
+  /**
+   * Handle dialog opening
+   * @param {*} method
+   * @param {*} args
+   * @param {*} resolve
+   */
+  const openDialog = useCallback(
+    ({ method, args, resolve }, dialogComponent) => {
+      // Deactivate key bind before opening dialog
+      deactivateKeyBind();
+      // On close dialog reactivate keybind and resolve promise
+      args.onClose = () => {
+        activateKeyBind();
+        resolve && resolve();
+      };
+      // Call dialog plugin with given method and args
+      call(PLUGINS.DIALOG.NAME, method, args, dialogComponent);
+    },
+    [activateKeyBind, call, deactivateKeyBind]
+  );
+
+  const renderRightMenu = useCallback(() => {
     const details = props.data?.details ?? {};
     const menuName = `${id}-detail-menu`;
     const menuTitle = t("Node Details Menu");
@@ -100,33 +273,39 @@ const Node = (props, ref) => {
   //========================================================================================
 
   /**
-   * Open dialog to edit/add new Parameter/CmdLine/EnvVars
-   * @param {string} varName : One of options ("parameters", "commands", "envVars")
-   * @param {string} dataId : Unique identifier of item (undefined when not created yet)
+   * Open dialog to edit/add new Parameter
+   * @param {object} objData : data to construct the object
    * @param {ReactComponent} DialogComponent : Dialog component to render
    */
-  const handleOpenEditDialog = (
-    varName,
-    dataId,
-    DialogComponent = KeyValueEditorDialog
-  ) => {
-    const obj = data[varName][dataId] || DEFAULT_KEY_VALUE_DATA;
-    const isNew = !dataId;
-    call(
-      PLUGINS.DIALOG.NAME,
-      PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
-      {
-        onSubmit: (...args) => updateKeyValue(...args, obj, isNew),
-        renderValueEditor: renderValueEditor,
-        title: DIALOG_TITLE[varName],
+  const handleOpenEditDialog = useCallback(
+    (param, dataId) => {
+      const paramType = t(DIALOG_TITLE[param.toUpperCase()]);
+      const isNew = !dataId;
+      const objData = data[param][dataId] || DEFAULT_KEY_VALUE_DATA;
+      const obj = {
+        ...objData,
+        varName: param,
+        type: objData.type ?? DATA_TYPES.ANY,
+        name: objData.key || dataId,
+        paramType
+      };
+      const method = PLUGINS.DIALOG.CALL.CUSTOM_DIALOG;
+      const args = {
+        onSubmit: formData => {
+          return updateKeyValue(param, formData, obj, isNew);
+        },
+        nameValidation: newData =>
+          Promise.resolve(validateName(newData, param, obj.name)),
+        title: t("Edit {{paramType}}", { paramType }),
         data: obj,
-        varName,
-        isNew,
+        preventRenderType: param !== TABLE_KEYS_NAMES.PARAMETERS,
         call
-      },
-      DialogComponent
-    );
-  };
+      };
+
+      openDialog({ method, args }, ParameterEditorDialog);
+    },
+    [data, validateName, updateKeyValue, openDialog, call, t]
+  );
 
   /**
    * Create new callback, set it in node port and open editor
@@ -210,151 +389,6 @@ const Node = (props, ref) => {
         // Set new callback in Node Port
         updatePortCallback(ioConfigName, portName, callback);
       }
-    });
-  };
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                      Validation                                      *
-   *                                                                                      */
-  //========================================================================================
-
-  /**
-   * @summary: Validate document name against invalid characters. It accept ROS valid names
-   * and can't accept two consecutive underscores.
-   * @param {string} paramName : name of the document
-   * @param {string} type : one of options "port" or "keyValue"
-   * @param {object} previousData : Previous data row
-   * @returns {object} {result: <boolean>, error: <string>}
-   **/
-  const validateName = (paramName, type, previousData) => {
-    const re = ROS_VALID_NAMES;
-    try {
-      if (!paramName) throw new Error(`${type} name is mandatory`);
-      else if (type === "ports" && !re.test(paramName)) {
-        throw new Error(`Invalid ${type} name`);
-      }
-
-      // Validate against repeated names
-      const checkNewName = !previousData && data[type][paramName];
-      const checkNameChanged =
-        previousData &&
-        previousData.name !== paramName &&
-        data[type][paramName];
-      if (checkNameChanged || checkNewName) {
-        throw new Error(`Cannot have 2 entries with the same name`);
-      }
-    } catch (error) {
-      return { result: false, error: error.message };
-    }
-    return { result: true, error: "" };
-  };
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                 Document Functions                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  const updateDescription = value => {
-    if (instance.current) instance.current.setDescription(value);
-  };
-
-  const updateExecutionParams = (param, value) => {
-    if (instance.current) instance.current.setExecutionParameter(param, value);
-  };
-
-  const updatePath = value => {
-    if (instance.current) instance.current.setPath(value);
-  };
-
-  const setPort = (value, resolve, reject, previousData) => {
-    try {
-      // Trim name
-      value.name = value.name.trim();
-
-      // Validate port name
-      const validation = validateName(value.name, "ports", previousData);
-      if (!validation.result) {
-        throw new Error(validation.error);
-      }
-
-      // Check for transport/package/message
-      if (!value.template) throw new Error("No Transport and Protocol chosen");
-      else if (!value.msgPackage) throw new Error("No Package chosen");
-      else if (!value.message) throw new Error("No Message chosen");
-
-      if (previousData) {
-        // Update port
-        if (instance.current)
-          instance.current.updatePort(previousData.name, value);
-      } else {
-        // Proceed with saving
-        const dataToSave = { [value.name]: value };
-        if (instance.current) instance.current.setPort(dataToSave);
-      }
-      resolve();
-    } catch (err) {
-      // Show alert
-      alert({ message: err.message, severity: "error" });
-      // Reject promise
-      reject();
-    }
-  };
-
-  const deletePort = (port, resolve) => {
-    if (instance.current) instance.current.deletePort(port.name);
-    resolve();
-  };
-
-  const updatePortCallback = (ioConfigId, portName, callback) => {
-    instance.current.setPortCallback(ioConfigId, portName, callback);
-  };
-
-  const updateIOPortInputs = (
-    value,
-    ioConfigName,
-    direction,
-    ioPortKey,
-    paramName
-  ) => {
-    instance.current.setPortParameter(
-      ioConfigName,
-      direction,
-      ioPortKey,
-      paramName,
-      value
-    );
-  };
-
-  const updateKeyValue = (varName, newData, oldData, isNew) => {
-    try {
-      const keyName = newData.name;
-      const dataToSave = { [keyName]: newData };
-      const previousData = !isNew && data[varName]?.[keyName];
-      // Validate port name
-      const validation = validateName(keyName, varName, previousData);
-      if (!validation.result) {
-        throw new Error(validation.error);
-      }
-      if (isNew) {
-        // update key value
-        if (instance.current) instance.current.setKeyValue(varName, dataToSave);
-      } else {
-        // add key value
-        if (instance.current)
-          instance.current.updateKeyValueItem(varName, newData, oldData.name);
-      }
-    } catch (err) {
-      if (err.message) alert({ message: err.message, severity: "error" });
-    }
-  };
-
-  const deleteKeyValue = (varName, key) => {
-    return new Promise((resolve, reject) => {
-      if (instance.current) instance.current.deleteKeyValue(varName, key);
-      if (instance.current.getKeyValue(varName, key)) reject();
-      else resolve();
     });
   };
 

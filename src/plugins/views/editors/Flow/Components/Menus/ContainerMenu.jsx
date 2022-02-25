@@ -4,9 +4,13 @@ import PropTypes from "prop-types";
 import { Collapse, Divider, ListItem, ListItemText } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import { DATA_TYPES, PLUGINS } from "../../../../../../utils/Constants";
+import {
+  DATA_TYPES,
+  PLUGINS,
+  TABLE_KEYS_NAMES,
+  DIALOG_TITLE
+} from "../../../../../../utils/Constants";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
-import { TABLE_KEYS_NAMES, DIALOG_TITLE } from "../../Constants/constants";
 import KeyValuesSection from "./sub-components/collapsibleSections/KeyValuesSection";
 import MenuDetails from "./sub-components/MenuDetails";
 

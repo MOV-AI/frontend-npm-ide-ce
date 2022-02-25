@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import DockLayout from "rc-dock";
 import "rc-dock/dist/rc-dock.css";
-import { makeStyles } from "@material-ui/core/styles";
 import { PLUGINS } from "../../../utils/Constants";
 import {
   withViewPlugin,

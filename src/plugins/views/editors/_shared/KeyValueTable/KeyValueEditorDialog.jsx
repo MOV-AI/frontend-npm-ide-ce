@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { useCallback, memo } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import _isEqual from "lodash/isEqual";
@@ -125,7 +125,7 @@ const KeyValueEditorDialog = props => {
   /**
    * Submit form and close dialog
    */
-  const onSave = () => {
+  const onSave = useCallback(() => {
     validate(data).then(res => {
       if (res.result ?? res.success) {
         onSubmit(res.data);
@@ -134,7 +134,7 @@ const KeyValueEditorDialog = props => {
         setValidation({ error: true, message: res.error });
       }
     });
-  };
+  }, [data, onClose, onSubmit, validate]);
 
   //========================================================================================
   /*                                                                                      *
@@ -150,7 +150,7 @@ const KeyValueEditorDialog = props => {
       <DialogContent>
         <Typography component="div" className={classes.container}>
           <TextField
-            label="Name *"
+            label={`${t("Name")} *`}
             error={validation.component === COMPONENTS.NAME && validation.error}
             helperText={
               validation.component === COMPONENTS.NAME && validation.message
@@ -163,7 +163,7 @@ const KeyValueEditorDialog = props => {
           />
           <FormControl className={classes.marginTop}>
             <TextField
-              label="Description"
+              label={t("Description")}
               value={data.description}
               className={classes.input}
               multiline
@@ -211,7 +211,7 @@ const KeyValueEditorDialog = props => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t("Cancel")}</Button>
-        <Button color="primary" onClick={onSave}>
+        <Button color="primary" onClick={onSave} disabled={validation.error}>
           {t("Save")}
         </Button>
       </DialogActions>
@@ -232,8 +232,8 @@ KeyValueEditorDialog.propTypes = {
   onSubmit: PropTypes.func,
   renderValueEditor: PropTypes.func,
   renderCustomContent: PropTypes.func,
-  validateNameOnChange: PropTypes.func,
-  validateValueOnChange: PropTypes.func
+  nameValidation: PropTypes.func,
+  valueValidation: PropTypes.func
 };
 
 KeyValueEditorDialog.defaultProps = {

@@ -11,9 +11,13 @@ import {
 } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import { DATA_TYPES, PLUGINS } from "../../../../../../utils/Constants";
+import {
+  DATA_TYPES,
+  TABLE_KEYS_NAMES,
+  DIALOG_TITLE,
+  PLUGINS
+} from "../../../../../../utils/Constants";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
-import { TABLE_KEYS_NAMES, DIALOG_TITLE } from "../../Constants/constants";
 import MenuDetails from "./sub-components/MenuDetails";
 import PortsDetails from "./sub-components/PortsDetails";
 import PropertiesSection from "./sub-components/collapsibleSections/PropertiesSection";

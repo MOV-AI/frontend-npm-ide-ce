@@ -158,6 +158,24 @@ export const PLUGINS = {
   }
 };
 
+export const TABLE_KEYS_NAMES = {
+  PARAMETERS: "parameters",
+  ENVVARS: "envVars",
+  CMDLINE: "commands"
+};
+
+export const EMPTY_MESSAGE = {
+  PARAMETERS: "No Parameters",
+  ENVVARS: "No Environment Variables",
+  COMMANDS: "No Command Lines"
+};
+
+export const DIALOG_TITLE = {
+  PARAMETERS: "Parameter",
+  ENVVARS: "Environment Variable",
+  COMMANDS: "Command Line"
+};
+
 export const DEFAULT_KEY_VALUE_DATA = {
   name: "",
   description: "",
