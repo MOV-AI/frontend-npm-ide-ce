@@ -17,7 +17,7 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.60",
     "@material-ui/styles": "^4.11.4",
-    "@mov-ai/mov-fe-lib-code-editor": "^1.0.6",
+    "@mov-ai/mov-fe-lib-code-editor": "^0.0.1",
     "@mov-ai/mov-fe-lib-core": "^1.0.36",
     "@mov-ai/mov-fe-lib-react": "^1.0.34",
     "@remixproject/engine": "^0.3.19",
@@ -41,9 +41,9 @@
     "web-vitals": "^1.1.2"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts --max_old_space_size=4096 build && python3 ./scripts/detach_manifest.py",
-    "test": "react-scripts test",
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired --max_old_space_size=4096 build && python3 ./scripts/detach_manifest.py",
+    "test": "react-app-rewired test",
     "eject": "react-scripts eject",
     "clean": "rm -r node_modules; rm package-lock.json",
     "deploy": "./scripts/deployApp.sh mov-fe-app-ide-ce",
@@ -68,7 +68,11 @@
     ]
   },
   "devDependencies": {
-    "http-proxy-middleware": "^2.0.1"
+    "customize-cra": "^1.0.0",
+    "http-proxy-middleware": "^2.0.1",
+    "monaco-editor-webpack-plugin": "^7.0.1",
+    "react-app-rewired": "^2.2.1",
+    "webpack-node-externals": "^3.0.0"
   },
   "jest": {
     "transformIgnorePatterns": [
