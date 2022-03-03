@@ -1,5 +1,5 @@
 import React from "react";
-import loader from "./movai_red.svg";
+import loader from "../Branding/movai-logo-transparent.png";
 import { makeStyles } from "@material-ui/core/styles";
 import { LinearProgress } from "@material-ui/core";
 
