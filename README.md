@@ -11,7 +11,7 @@ MOVAI-IDE-CE is an integrated development environment offering multiple editors 
 ## Development
 
 Open the project in VS Code and then choose to reopen in container.
-Once the container is ready, open a new terminal inside VS Code and run
+Once the container is ready, open a new terminal inside VS Code and run.
 
 ```
 npm ci
