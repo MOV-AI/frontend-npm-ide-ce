@@ -1,5 +1,5 @@
 const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
+const nodeExternals = require('webpack-node-externals');
 const path = require("path");
 
 module.exports = function override(config, env) {
@@ -9,8 +9,12 @@ module.exports = function override(config, env) {
   );
   // target
   config.target = "web";
+  config.entry = "./src/index.js"
   // Add plugins
   config.plugins = [...config.plugins, new MonacoWebpackPlugin()];
+  config.externals = [nodeExternals({importType: "umd"})]
+  config.output.libraryTarget = "amd";
+  config.output.library = "IDE_CE";
   // Optimizations
   config.optimization =  {
     ...config.optimization,
