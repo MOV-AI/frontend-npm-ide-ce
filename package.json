@@ -88,7 +88,7 @@
   ],
   "movai": {
     "name": "mov-fe-app-ide-ce",
-    "Label": "MOV.AI Flow",
+    "Label": "MOV.AI Flow ™",
     "Type": "application",
     "Package": "mov-fe-app-ide-ce",
     "EntryPoint": "index.html",
