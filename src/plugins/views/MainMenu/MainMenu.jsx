@@ -14,8 +14,7 @@ import AddBoxIcon from "@material-ui/icons/AddBox";
 import { Tooltip } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { MainContext } from "../../../main-context";
-import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
-import movaiIconWhite from "../editors/_shared/Branding/movai-logo-white.png";
+import movaiIcon from "../editors/_shared/Branding/movai-logo-white.png";
 import { HOMETAB_PROFILE, VERSION } from "../../../utils/Constants";
 import { getIconByScope, getHomeTab } from "../../../utils/Utils";
 
@@ -101,7 +100,7 @@ const MainMenu = props => {
           backgroundColor={theme.palette.background.default}
           upperElement={
             <img
-              src={theme.label === "dark" ? movaiIconWhite : movaiIcon}
+              src={movaiIcon}
               className={classes.movaiIcon}
               alt="MOV.AI"
             />
