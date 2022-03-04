@@ -372,7 +372,7 @@ export default class MainInterface {
     const { selectedNodes } = this;
     console.log("debug onSelectNode selectedNodes", selectedNodes, nodes)
     const filterNodes = nodes.filter(
-      n => n.constructor.name !== StartNode.name
+      n => n.data.model !== StartNode.model
     );
 
     this.selectedLink = null;
