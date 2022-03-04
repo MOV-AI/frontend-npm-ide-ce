@@ -54,9 +54,12 @@ Helper.getAllTransportProtocol = async () => {
         portsPattern,
         () => EMPTY_ARROW_FN("updateScopePorts"),
         res => {
-          const scopePorts = res?.value?.Ports || {};
-          data.scopePorts = scopePorts;
-          resolve(scopePorts);
+          const allPorts = res?.value?.Ports || {};
+          // Filter ports without data
+          const filteredPorts = Object.values(allPorts).filter(port => port.Data)
+          // Set scopePorts and return result
+          data.scopePorts = filteredPorts.reduce((a, v) => ({ ...a, [v.Label]: v}), {}) ;
+          resolve(data.scopePorts);
         }
       );
     } catch (err) {
