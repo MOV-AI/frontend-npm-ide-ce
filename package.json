@@ -1,6 +1,6 @@
 {
   "name": "@mov-ai/mov-fe-app-ide-ce",
-  "version": "0.0.2-0beta.4",
+  "version": "0.0.2-0beta.5",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/mov-ai"
   },
