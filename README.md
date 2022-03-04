@@ -2,7 +2,7 @@
 
 ![Movai](https://www.mov.ai/wp-content/uploads/2021/06/MOV.AI-logo-3.png)
 
-MOVAI-IDE-CE is an integrated development environment offering multiple editors for the robotics developer.
+MOVAI-IDE-CE is an integrated development environment offering multiple editors for the robotics developer
 
 **main branch:**
 
