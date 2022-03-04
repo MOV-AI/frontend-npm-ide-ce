@@ -338,6 +338,8 @@ export default class MainInterface {
     const selectedNodesSet = new Set([draggedNode].concat(this.selectedNodes));
     const nodes = Array.from(selectedNodesSet).filter(obj => obj);
 
+    console.log("debug onDragEnd nodes", nodes)
+
     nodes.forEach(node => {
       const { id } = node.data;
       const [x, y] = node.data.Visualization;

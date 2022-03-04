@@ -344,6 +344,7 @@ const Flow = (props, ref) => {
       Node: NodeMenu,
       Flow: ContainerMenu
     };
+    console.log("debug getMenuComponent model", model)
     return model in componentByModel ? componentByModel[model] : null;
   }, []);
 
@@ -390,8 +391,11 @@ const Flow = (props, ref) => {
    */
   const addNodeMenu = useCallback(
     (node, nodeSelection) => {
+      console.log("debug addNodeMenu", node)
       const MenuComponent = getMenuComponent(node?.data?.model);
+      console.log("debug addNodeMenu pass 1 MenuComponent", MenuComponent)
       if (!node || !MenuComponent) return;
+      console.log("debug addNodeMenu pass 2", node.data)
       call(
         PLUGINS.RIGHT_DRAWER.NAME,
         PLUGINS.RIGHT_DRAWER.CALL.ADD_BOOKMARK,
@@ -617,14 +621,17 @@ const Flow = (props, ref) => {
    */
   const onNodeSelected = useCallback(
     node => {
+      console.log("debug init onNodeSelected")
       clearTimeout(debounceSelection.current);
       debounceSelection.current = setTimeout(() => {
+        console.log("debug onNodeSelected in timeout", node)
         if (!node) {
           unselectNode();
         } else {
           selectedNodeRef.current = node;
           activeBookmark = MENUS.current.NODE.NAME;
           addNodeMenu(node, true);
+          console.log("debug onNodeSelected", node)
         }
       }, 300);
     },
@@ -698,8 +705,11 @@ const Flow = (props, ref) => {
 
       // Subscribe to on node select event
       mainInterface.mode.selectNode.onEnter.subscribe(() => {
+        console.log("debug mainInterface", mainInterface)
         const selectedNodes = mainInterface.selectedNodes;
+        console.log("debug selectedNodes", selectedNodes)
         const node = selectedNodes.length !== 1 ? null : selectedNodes[0];
+        console.log("debug selectNode", node)
         onNodeSelected(node);
       });
 
