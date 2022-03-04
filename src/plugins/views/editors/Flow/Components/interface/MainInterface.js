@@ -370,6 +370,7 @@ export default class MainInterface {
   onSelectNode = data => {
     const { nodes, shiftKey } = data;
     const { selectedNodes } = this;
+    console.log("debug onSelectNode selectedNodes", selectedNodes, nodes)
     const filterNodes = nodes.filter(
       n => n.constructor.name !== StartNode.name
     );
@@ -377,6 +378,8 @@ export default class MainInterface {
     this.selectedLink = null;
 
     if (!shiftKey) selectedNodes.length = 0;
+
+    console.log("debug onSelectNode filterNodes", filterNodes)
 
     filterNodes.forEach(node => {
       node.selected
