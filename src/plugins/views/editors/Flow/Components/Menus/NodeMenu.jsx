@@ -126,7 +126,10 @@ const NodeMenu = memo(
     //========================================================================================
 
     useEffect(() => {
-      setNodeData(getNodeData());
+      console.log("debug node data 1")
+      const _nodeData = getNodeData()
+      setNodeData(_nodeData);
+      console.log("debug node data 2", _nodeData)
     }, [getNodeData]);
 
     useEffect(() => {

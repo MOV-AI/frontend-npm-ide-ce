@@ -26,9 +26,10 @@ const PortsDetails = props => {
    * @param {*} ports
    * @returns {array} Input and Output ports
    */
-  const getPorts = useCallback(ports => {
+  const getPorts = useCallback((ports = {}) => {
     const _inputPorts = [];
     const _outputPorts = [];
+    console.log("debug getPorts", ports)
     Object.keys(ports).forEach(portName => {
       const port = ports[portName];
       const inputs = Object.values(port.portIn);

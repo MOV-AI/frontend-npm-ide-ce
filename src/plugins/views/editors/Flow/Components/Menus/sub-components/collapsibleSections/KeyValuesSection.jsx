@@ -11,8 +11,8 @@ const KeyValuesSection = props => {
   const {
     editable,
     handleTableKeyEdit,
-    instanceValues,
-    templateValues,
+    instanceValues = {},
+    templateValues = {},
     varName
   } = props;
   // State hooks
@@ -33,6 +33,7 @@ const KeyValuesSection = props => {
    */
   const getTableValues = useCallback(() => {
     const output = [];
+    console.log("debug getTableValues", templateValues)
     Object.keys(templateValues).forEach(key => {
       const value = instanceValues[key]?.value || "";
       const type = templateValues[key]?.type;
