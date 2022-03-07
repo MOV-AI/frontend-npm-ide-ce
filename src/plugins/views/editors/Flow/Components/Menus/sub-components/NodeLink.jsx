@@ -1,9 +1,6 @@
 import React, { useCallback } from "react";
-import styles from "../styles";
-import { makeStyles } from "@material-ui/styles";
 import { Link } from "@material-ui/core";
-
-const useStyles = makeStyles(styles);
+import menuStyles from "../styles";
 
 /**
  * Node Link Component
@@ -12,7 +9,7 @@ const useStyles = makeStyles(styles);
  */
 const NodeLink = props => {
   const { scope, name, openDoc, children } = props;
-  const classes = useStyles();
+  const classes = menuStyles();
 
   //========================================================================================
   /*                                                                                      *
