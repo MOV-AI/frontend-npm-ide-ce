@@ -73,7 +73,7 @@ class StartNode extends BaseNode {
     };
   }
 
-  static model = "start"
+  static model = START_NAME
 }
 
 export default StartNode;
