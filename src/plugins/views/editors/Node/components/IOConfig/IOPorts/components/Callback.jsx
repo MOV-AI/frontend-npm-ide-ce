@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useCallback } from "react";
 import FolderOpenIcon from "@material-ui/icons/FolderOpen";
 import Grid from "@material-ui/core/Grid";
 import Circle from "@material-ui/icons/FiberManualRecord";
 import { Link, Tooltip, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useTranslation } from "../../../../../_shared/mocks";
-import { Edit, Visibility } from "@material-ui/icons";
+import { Edit, AddBox } from "@material-ui/icons";
 
 const useStyles = makeStyles(theme => {
   return {
@@ -59,7 +59,7 @@ const Callback = props => {
   /**
    * Open Select scope modal
    */
-  const openSelectScopeModal = React.useCallback(() => {
+  const openSelectScopeModal = useCallback(() => {
     handleOpenSelectScopeModal(
       {
         message,
@@ -71,6 +71,20 @@ const Callback = props => {
       ioPort
     );
   }, [callback, handleOpenSelectScopeModal, ioPort, message, portName]);
+
+  /**
+   * Handler to open a callback by a given id
+   */
+  const openCallback = useCallback(() => {
+    handleOpenCallback(id);
+  }, [id, handleOpenCallback]);
+
+  /**
+   * Handler to create a new Callback
+   */
+  const createNewCallback = useCallback(() => {
+    handleNewCallback(message, portName, ioPort);
+  }, [message, portName, ioPort, handleNewCallback]);
 
   //========================================================================================
   /*                                                                                      *
@@ -99,9 +113,9 @@ const Callback = props => {
           alignItems: "center"
         }}
       >
-        {/* EditIcon - Open Modal to Select Callback (with Workspace and Version) */}
+        {/* FolderIcon - Open Modal to Select Callback (with Workspace and Version) */}
         {props.editable && (
-          <Tooltip title={t("Select a Callback")}>
+          <Tooltip title={t("Select a callback")}>
             <Link
               className={classes.icon}
               component="button"
@@ -112,26 +126,26 @@ const Callback = props => {
           </Tooltip>
         )}
 
-        {/* EyeIcon - Call Callback Editor */}
+        {/* EditIcon - Call Callback Editor */}
         <Tooltip title={t("Edit callback")}>
           <Link
             className={classes.icon}
             component="button"
-            onClick={() => handleOpenCallback(id)}
+            onClick={openCallback}
           >
-            <Visibility />
+            <Edit />
           </Link>
         </Tooltip>
 
-        {/* EditIcon - Create new Callback with associated Message */}
+        {/* AddIcon - Create new Callback with associated Message */}
         {props.editable && (
           <Tooltip title={t("Create callback")}>
             <Link
               className={classes.icon}
               component="button"
-              onClick={() => handleNewCallback(message, portName, ioPort)}
+              onClick={createNewCallback}
             >
-              <Edit />
+              <AddBox />
             </Link>
           </Tooltip>
         )}

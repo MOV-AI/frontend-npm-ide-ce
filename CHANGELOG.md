@@ -1,4 +1,4 @@
-# latest
+# 3.0.0
 
 **System Bar**
 
@@ -10,7 +10,11 @@
 
 **Flow Editor**
 
-- [FP-1286 - Feature/fp 1286 port flow editor ](https://movai.atlassian.net/browse/FP-1286)
+- [FP-1286 - Feature/fp 1286 port flow editor](https://movai.atlassian.net/browse/FP-1286)
+
+**Node Editor**
+
+- [FP-1516 - Changed the IO/Config Port icons to be more coherent](https://movai.atlassian.net/browse/FP-1516)
 
 **Home Tab**
 
