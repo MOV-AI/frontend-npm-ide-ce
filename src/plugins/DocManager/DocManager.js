@@ -167,7 +167,11 @@ class DocManager extends IDEPlugin {
       doc: Document.parsePath(name, scope),
       newName
     });
-    return this.getStore(scope).saveDoc(name, newName);
+    let ret = this.getStore(scope).saveDoc(name, newName);
+
+    if (newName) this.reloadDoc({ name: newName, scope });
+
+    return ret;
   }
 
   /**
