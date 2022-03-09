@@ -1,42 +1,12 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
 import Accordion from "@material-ui/core/Accordion";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Divider from "@material-ui/core/Divider";
+import { IOPortStyles } from "./styles";
 import Callback from "./components/Callback";
 import Parameters from "./components/Parameters";
-
-const useStyles = makeStyles(theme => {
-  return {
-    root: {
-      padding: "0 12px",
-      width: "calc(100% - 24px)"
-    },
-    heading: {
-      fontSize: "0.875rem"
-    },
-    ioPortTitle: {
-      boxShadow: "none",
-      padding: "0px 50px 0px 50px"
-    },
-    row: {
-      display: "flex",
-      flexDirection: "row",
-      alignItems: "center"
-    },
-    paddingLR: {
-      padding: "0px 12px",
-      lineHeight: "100%"
-    },
-    details: {
-      display: "flex",
-      flexDirection: "column",
-      padding: "0px 100px 0px 100px"
-    }
-  };
-});
 
 const IOPorts = props => {
   // Props
@@ -47,10 +17,10 @@ const IOPorts = props => {
     handleOpenSelectScopeModal
   } = props;
   // Hooks
-  const classes = useStyles();
+  const classes = IOPortStyles();
 
   /**
-   *
+   * Get port icons
    * @param {*} direction
    * @returns
    */
@@ -75,10 +45,12 @@ const IOPorts = props => {
       <div>
         {props.rowData[direction] !== undefined &&
           Object.keys(props.rowData[direction]).map((ioPort, ioPortIndex) => {
-            const callback = props.rowData[direction][ioPort].callback;
-            const message = props.rowData[direction][ioPort].message;
-            const parameters = props.rowData[direction][ioPort].parameters;
-            const disableAccordion = !parameters && !callback;
+            const portData = props.rowData[direction][ioPort];
+            const callback = portData?.callback;
+            const message = portData?.message;
+            const parameters = portData?.parameters || {};
+            const disableAccordion =
+              Object.keys(parameters).length === 0 && !callback;
             return (
               <Accordion
                 defaultExpanded
