@@ -7,7 +7,7 @@
 **IDE**
 
 - [FP-1538 - Color between tabs now, more clearer](https://movai.atlassian.net/browse/FP-1538)
-- [FP-1509 - Saving a new document will now reload de doc](https://movai.atlassian.net/browse/FP-1509)
+- [FP-1509 - Saving a new document will now reload the doc](https://movai.atlassian.net/browse/FP-1509)
 
 **Flow Editor**
 
