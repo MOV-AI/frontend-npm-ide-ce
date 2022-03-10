@@ -82,7 +82,6 @@ const SystemBar = props => {
    */
   useEffect(() => {
     buildMenus(call, dialogClasses).then(data => {
-      console.log(data);
       setSystemMenus(data);
     });
   }, [call, dialogClasses]);
