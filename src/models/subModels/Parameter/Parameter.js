@@ -14,11 +14,11 @@ class Parameter extends Model {
    *                                                                                      */
   //========================================================================================
   value = "";
-  type = Parameter.defaults.type;
+  type = this.constructor.defaults.type;
   description = "";
 
   // Define observable properties
-  observables = Object.values(Parameter.OBSERVABLE_KEYS);
+  observables = Object.values(this.constructor.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -134,17 +134,22 @@ class Parameter extends Model {
     return { name, value, type, description };
   }
 
+  /**
+   * Observable keys
+   */
   static OBSERVABLE_KEYS = {
     NAME: "name",
     VALUE: "value",
     DESCRIPTION: "description",
     TYPE: "type"
   };
-}
 
-// Default model values
-Parameter.defaults = {
-  type: DATA_TYPES.ANY
-};
+  /**
+   * Defalt values
+   */
+  static defaults = {
+    type: DATA_TYPES.ANY
+  }
+}
 
 export default Parameter;

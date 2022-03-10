@@ -35,13 +35,13 @@
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-i18next": "^11.13.0",
-    "react-scripts": "4.0.3",
+    "react-scripts": "5.0.0",
     "react-virtualized-tree": "^3.4.1",
     "rxjs": "^6.6.7",
     "web-vitals": "^1.1.2"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "GENERATE_SOURCEMAP=false react-scripts start",
     "build": "react-scripts --max_old_space_size=4096 build && python3 ./scripts/detach_manifest.py",
     "test": "react-scripts test",
     "eject": "react-scripts eject",

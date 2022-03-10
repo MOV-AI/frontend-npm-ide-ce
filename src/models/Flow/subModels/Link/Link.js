@@ -23,7 +23,7 @@ class Link extends Model {
   dependency = 0;
 
   // Define observable properties
-  observables = Object.values(Link.OBSERVABLE_KEYS);
+  observables = Object.values(this.constructor.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
