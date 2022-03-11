@@ -331,6 +331,18 @@ const useLayout = (props, dockRef) => {
     [props, _getCustomTab, _closeTab]
   );
 
+  /**
+   * Returns the default Tab position
+   * @private function
+   * @returns {Enumerable} DOCK_POSITIONS: based on if the maxbox has children
+   */
+  const getDefaultTabPosition = useCallback(() => {
+    if (dockRef.current.state.layout.maxbox?.children?.length > 0)
+      return DOCK_POSITIONS.MAX;
+
+    return DOCK_POSITIONS.DOCK;
+  }, [dockRef]);
+
   //========================================================================================
   /*                                                                                      *
    *                                    Exposed Methods                                   *
@@ -343,7 +355,7 @@ const useLayout = (props, dockRef) => {
    */
   const open = useCallback(
     tabData => {
-      const tabPosition = tabData.dockPosition ?? DOCK_POSITIONS.DOCK;
+      const tabPosition = tabData.dockPosition ?? getDefaultTabPosition();
       const position = tabData.position ?? {
         h: 500,
         w: 600,
@@ -379,7 +391,7 @@ const useLayout = (props, dockRef) => {
         return { ...newState };
       });
     },
-    [dockRef, workspaceManager, _getFirstContainer]
+    [dockRef, workspaceManager, _getFirstContainer, getDefaultTabPosition]
   );
 
   /**
