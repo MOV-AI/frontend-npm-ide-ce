@@ -110,14 +110,11 @@ const RecentDocuments = props => {
   useEffect(() => {
     setRecentDocs(workspaceManager.getRecentDocuments());
 
-    console.log("mount hometab");
-
     on(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.OPEN_EDITOR, data => {
       if (!data.isNew) addRecentDocument(data.id, data.name, data.scope);
     });
 
     on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.DELETE_DOC, data => {
-      console.log("ON.DELETE_DOC data", data);
       setDeletedRecentDocument(data.url);
     });
 
@@ -130,7 +127,6 @@ const RecentDocuments = props => {
     });
 
     return () => {
-      console.log("-- unmount hometab --");
       off(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.OPEN_EDITOR);
       off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.DELETE_DOC);
       off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.SAVE_DOC);
