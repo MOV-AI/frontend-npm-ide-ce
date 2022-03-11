@@ -277,6 +277,7 @@ class DocManager extends IDEPlugin {
    * @param {{url: string, name: string}} data : Document data
    */
   onDocumentDeleted(store, data) {
+    console.log("onDocumentDeleted data", data);
     this.emit(PLUGINS.DOC_MANAGER.ON.DELETE_DOC, { ...data, scope: store });
   }
 

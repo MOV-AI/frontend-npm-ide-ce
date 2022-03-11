@@ -561,11 +561,18 @@ const useLayout = (props, dockRef) => {
       });
       setLayout(lastLayout);
     });
+
+    // if (lastTabs.has(HOMETAB_PROFILE.name)) {
+    //   getHomeTab().then(homeTab => {
+    //     console.log("homeTab", homeTab);
+    //     open(homeTab);
+    //   });
+    // }
     // Destroy local workspace manager instance on unmount
     return () => {
       workspaceManager.destroy();
     };
-  }, [workspaceManager, on, call, _closeTab, _getTabData, open]);
+  }, [workspaceManager, on, call, _closeTab, _getTabData]);
 
   //========================================================================================
   /*                                                                                      *
