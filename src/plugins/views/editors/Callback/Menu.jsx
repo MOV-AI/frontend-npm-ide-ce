@@ -270,7 +270,7 @@ const Menu = props => {
             primary={data.message}
           />
           <ListItemSecondaryAction>
-            <Tooltip title={t("Remove import")}>
+            <Tooltip title={t("Remove message")}>
               <IconButton edge="end" onClick={handleRemoveMessage}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
