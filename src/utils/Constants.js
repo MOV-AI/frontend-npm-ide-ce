@@ -7,6 +7,8 @@ export const MANAGER = "manager";
 
 export const VERSION = get(window, "SERVER_DATA.Application.Version", "0.0.1");
 
+export const LABEL = window.SERVER_DATA?.Application?.Label || "MOV.AI";
+
 export const DISABLED_VALUE = "None";
 
 export const DATA_TYPES = {
@@ -41,7 +43,7 @@ export const PLUGINS = {
       SAVE_DOC: "saveDoc"
     }
   },
-  TABS: { NAME: "tabs", CALL: { OPEN_EDITOR: "openEditor" } },
+  TABS: { NAME: "tabs", CALL: { OPEN_EDITOR: "openEditor", OPEN: "open" } },
   RIGHT_DRAWER: {
     NAME: "rightDrawer",
     CALL: {

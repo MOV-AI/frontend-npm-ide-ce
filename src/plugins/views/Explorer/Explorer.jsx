@@ -4,32 +4,16 @@ import _get from "lodash/get";
 import _set from "lodash/set";
 import { Maybe } from "monet";
 import { Typography } from "@material-ui/core";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { explorerStyles } from "./styles";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import { useTranslation } from "../editors/_shared/mocks";
+import { useTranslation } from "react-i18next";
+import { LABEL } from "../../../utils/Constants";
 import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
-import movaiFullLogo from "../editors/_shared/Branding/movai-full-logo.png";
-import movaiFullLogoWhite from "../editors/_shared/Branding/movai-full-logo-red-white.png";
-
-const useStyles = makeStyles(theme => ({
-  typography: {
-    overflowY: "auto",
-    overflowX: "hidden",
-    justifyContent: "center",
-    width: "100%"
-  },
-  header: {
-    marginBottom: 6,
-    "& img": {
-      maxWidth: "65%"
-    }
-  }
-}));
+import movaiLogo from "../editors/_shared/Branding/movai-flow-logo-red.png";
 
 const Explorer = props => {
   const { call, on, height } = props;
-  const classes = useStyles();
-  const theme = useTheme();
+  const classes = explorerStyles();
   const [data, setData] = React.useState([]);
 
   const { t } = useTranslation();
@@ -295,10 +279,7 @@ const Explorer = props => {
   return (
     <Typography component="div">
       <h1 className={classes.header}>
-        <img
-          src={theme.label === "dark" ? movaiFullLogoWhite : movaiFullLogo}
-          alt={t("Mov.AI Logo")}
-        />
+        <img src={movaiLogo} alt={LABEL} />
       </h1>
       <Typography component="div" className={classes.typography}>
         <VirtualizedTree
