@@ -548,10 +548,10 @@ const useLayout = (props, dockRef) => {
     lastTabs.forEach(tab => {
       const { id, name, scope } = tab;
 
-      if (id === HOMETAB_PROFILE.name) tabs.push(getHomeTab());
-      else tabs.push(_getTabData({ id, name, scope }));
+      if (id !== HOMETAB_PROFILE.name)
+        tabs.push(_getTabData({ id, name, scope }));
     });
-    // after all plugins are installed
+    // After all plugins are installed
     Promise.allSettled(tabs).then(_tabs => {
       _tabs.forEach(tab => {
         tab.status === "fulfilled" &&
@@ -560,19 +560,20 @@ const useLayout = (props, dockRef) => {
         activeTabId.current = tab.value.id;
       });
       setLayout(lastLayout);
+
+      // Open Home Tab
+      if (lastTabs.has(HOMETAB_PROFILE.name)) {
+        getHomeTab().then(tabData => {
+          open(tabData);
+        });
+      }
     });
 
-    // if (lastTabs.has(HOMETAB_PROFILE.name)) {
-    //   getHomeTab().then(homeTab => {
-    //     console.log("homeTab", homeTab);
-    //     open(homeTab);
-    //   });
-    // }
     // Destroy local workspace manager instance on unmount
     return () => {
       workspaceManager.destroy();
     };
-  }, [workspaceManager, on, call, _closeTab, _getTabData]);
+  }, [workspaceManager, on, call, _closeTab, _getTabData, open]);
 
   //========================================================================================
   /*                                                                                      *
