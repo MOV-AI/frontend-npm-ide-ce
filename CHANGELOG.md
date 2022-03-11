@@ -10,6 +10,10 @@
 - [FP-1509 - Saving a new document will now reload the doc](https://movai.atlassian.net/browse/FP-1509)
 - [FP-1595 - Removed unused function that contained vulnerabilities](https://movai.atlassian.net/browse/FP-1595)
 
+**Callback Editor**
+
+- [FP-1327 - Added a way to remove messages from Callback](https://movai.atlassian.net/browse/FP-1327)
+
 **Flow Editor**
 
 - [FP-1286 - Feature/fp 1286 port flow editor](https://movai.atlassian.net/browse/FP-1286)
