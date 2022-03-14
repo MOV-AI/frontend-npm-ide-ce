@@ -548,8 +548,7 @@ const useLayout = (props, dockRef) => {
     lastTabs.forEach(tab => {
       const { id, name, scope } = tab;
 
-      if (id !== HOMETAB_PROFILE.name)
-        tabs.push(_getTabData({ id, name, scope }));
+      tabs.push(_getTabData({ id, name, scope }));
     });
     // After all plugins are installed
     Promise.allSettled(tabs).then(_tabs => {
@@ -562,11 +561,7 @@ const useLayout = (props, dockRef) => {
       setLayout(lastLayout);
 
       // Open Home Tab
-      if (lastTabs.has(HOMETAB_PROFILE.name)) {
-        getHomeTab().then(tabData => {
-          open(tabData);
-        });
-      }
+      if (lastTabs.has(HOMETAB_PROFILE.name)) open(getHomeTab());
     });
 
     // Destroy local workspace manager instance on unmount

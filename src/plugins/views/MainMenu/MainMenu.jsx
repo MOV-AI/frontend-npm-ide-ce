@@ -55,9 +55,7 @@ const MainMenu = props => {
       title: t("Get Started"),
       isActive: true,
       getOnClick: () => {
-        getHomeTab().then(homeTab => {
-          call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN, homeTab);
-        });
+        call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN, getHomeTab());
       }
     },
     {
