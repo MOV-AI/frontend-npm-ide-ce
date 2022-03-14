@@ -30,6 +30,18 @@ const useLayout = (props, dockRef) => {
   //========================================================================================
 
   /**
+   * Helper function to find if a tab exists in the DockLayout
+   * @private function
+   * @returns {TabData}: TabData if found
+   */
+  const findTab = useCallback(
+    tabId => {
+      return dockRef.current.find(tabId);
+    },
+    [dockRef]
+  );
+
+  /**
    * Apply layout and save changes
    * @param {LayoutData} layout
    */
@@ -282,10 +294,10 @@ const useLayout = (props, dockRef) => {
       tabsById.current.set(tabId, newTabData);
       // Trigger tab update
       if (!dockRef.current) return;
-      const currentTab = dockRef.current.find(tabId);
+      const currentTab = findTab(tabId);
       dockRef.current.updateTab(tabId, currentTab);
     },
-    [dockRef]
+    [dockRef, findTab]
   );
 
   /**
@@ -331,6 +343,39 @@ const useLayout = (props, dockRef) => {
     [props, _getCustomTab, _closeTab]
   );
 
+  /**
+   * Returns the default Tab position
+   * @private function
+   * @returns {Enumerable} DOCK_POSITIONS: based on if the maxbox has children
+   */
+  const getDefaultTabPosition = useCallback(() => {
+    if (dockRef.current.state.layout.maxbox.children.length)
+      return DOCK_POSITIONS.MAX;
+
+    return DOCK_POSITIONS.DOCK;
+  }, [dockRef]);
+
+  /**
+   * Focus on a tab by a given tabId
+   * - Will check if there's maximized tabs to properly focus the current tab
+   * @private function
+   * @param {string} tabId : The tab id to be focused
+   */
+  const focusExistingTab = useCallback(
+    tabId => {
+      const maxboxChildren = dockRef.current.state.layout.maxbox.children;
+      dockRef.current.updateTab(tabId, null);
+
+      if (
+        maxboxChildren.length &&
+        !maxboxChildren[0].tabs.find(t => t.id === tabId)
+      ) {
+        dockRef.current.dockMove(maxboxChildren[0], null, "maximize");
+      }
+    },
+    [dockRef]
+  );
+
   //========================================================================================
   /*                                                                                      *
    *                                    Exposed Methods                                   *
@@ -343,7 +388,7 @@ const useLayout = (props, dockRef) => {
    */
   const open = useCallback(
     tabData => {
-      const tabPosition = tabData.dockPosition ?? DOCK_POSITIONS.DOCK;
+      const tabPosition = tabData.dockPosition ?? getDefaultTabPosition();
       const position = tabData.position ?? {
         h: 500,
         w: 600,
@@ -354,32 +399,43 @@ const useLayout = (props, dockRef) => {
       tabsById.current.set(tabData.id, tabData);
       workspaceManager.setTabs(tabsById.current);
 
+      const existingTab = findTab(tabData.id);
+      if (existingTab) {
+        focusExistingTab(tabData.id);
+        return;
+      }
+
       setLayout(prevState => {
         const newState = { ...prevState };
         if (newState[tabPosition].children.length === 0) {
           newState[tabPosition].children = [{ ...position, tabs: [tabData] }];
+
+          workspaceManager.setLayout(newState);
+          return { ...newState };
+        }
+
+        if (tabPosition === DOCK_POSITIONS.FLOAT) {
+          newState[tabPosition].children.push({
+            ...position,
+            tabs: [tabData]
+          });
         } else {
-          const existingTab = dockRef.current.find(tabData.id);
-          if (existingTab) dockRef.current.updateTab(tabData.id, tabData);
-          else {
-            if (tabPosition === DOCK_POSITIONS.FLOAT) {
-              newState[tabPosition].children.push({
-                ...position,
-                tabs: [tabData]
-              });
-            } else {
-              const firstContainer = _getFirstContainer(newState[tabPosition]);
-              firstContainer.tabs.push(tabData);
-              firstContainer.activeId = tabData.id;
-            }
-          }
+          const firstContainer = _getFirstContainer(newState[tabPosition]);
+          firstContainer.tabs.push(tabData);
+          firstContainer.activeId = tabData.id;
         }
 
         workspaceManager.setLayout(newState);
         return { ...newState };
       });
     },
-    [dockRef, workspaceManager, _getFirstContainer]
+    [
+      workspaceManager,
+      _getFirstContainer,
+      getDefaultTabPosition,
+      focusExistingTab,
+      findTab
+    ]
   );
 
   /**
