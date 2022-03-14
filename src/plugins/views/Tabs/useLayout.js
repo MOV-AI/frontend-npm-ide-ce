@@ -362,13 +362,13 @@ const useLayout = (props, dockRef) => {
    * @param {string} tabId : The tab id to be focused
    */
   const focusExistingTab = useCallback(
-    tabId => {
+    (tabData, preventFocus) => {
       const maxboxChildren = dockRef.current.state.layout.maxbox.children;
-      dockRef.current.updateTab(tabId, null);
+      dockRef.current.updateTab(tabData.id, tabData, !preventFocus);
 
       if (
         maxboxChildren.length &&
-        !maxboxChildren[0].tabs.find(t => t.id === tabId)
+        !maxboxChildren[0].tabs.find(t => t.id === tabData.id)
       ) {
         dockRef.current.dockMove(maxboxChildren[0], null, "maximize");
       }
@@ -387,7 +387,7 @@ const useLayout = (props, dockRef) => {
    * @param {TabData} tabData : Set Tab data in Layout
    */
   const open = useCallback(
-    tabData => {
+    (tabData, preventFocus) => {
       const tabPosition = tabData.dockPosition ?? getDefaultTabPosition();
       const position = tabData.position ?? {
         h: 500,
@@ -401,7 +401,7 @@ const useLayout = (props, dockRef) => {
 
       const existingTab = findTab(tabData.id);
       if (existingTab) {
-        focusExistingTab(tabData.id);
+        focusExistingTab(tabData, preventFocus);
         return;
       }
 
@@ -617,7 +617,7 @@ const useLayout = (props, dockRef) => {
       setLayout(lastLayout);
 
       // Open Home Tab
-      if (lastTabs.has(HOMETAB_PROFILE.name)) open(getHomeTab());
+      if (lastTabs.has(HOMETAB_PROFILE.name)) open(getHomeTab(), true);
     });
 
     // Destroy local workspace manager instance on unmount
