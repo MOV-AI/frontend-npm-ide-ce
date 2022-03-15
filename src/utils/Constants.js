@@ -187,6 +187,13 @@ export const ROS_VALID_NAMES = new RegExp(
   /(?!.*__.*)^[a-zA-Z~/]{1}?[a-zA-Z0-9_/]*$/
 );
 
+export const ALERT_SEVERITIES = {
+  SUCCESS: "success",
+  ERROR: "error",
+  INFO: "info",
+  WARNING: "warning"
+};
+
 //========================================================================================
 /*                                                                                      *
  *                                   Layout Constants                                   *

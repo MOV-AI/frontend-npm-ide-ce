@@ -7,8 +7,12 @@ import withAlerts from "../../../decorators/withAlerts";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import Workspace from "../../../utils/Workspace";
 import { getNameFromURL } from "../../../utils/Utils";
-import { HOMETAB_PROFILE, PLUGINS } from "../../../utils/Constants";
-import ERROR_MESSAGES from "../../../utils/ErrorMessages";
+import {
+  HOMETAB_PROFILE,
+  PLUGINS,
+  ALERT_SEVERITIES
+} from "../../../utils/Constants";
+import { ERROR_MESSAGES } from "../../../utils/Messages";
 import movaiFullLogoWhite from "../editors/_shared/Branding/movai-full-logo-red-white.png";
 import movaiFullLogo from "../editors/_shared/Branding/movai-full-logo.png";
 import QuickAccessComponent from "./components/QuickAccess";
@@ -18,7 +22,7 @@ import ExamplesComponent from "./components/Examples";
 import { homeTabStyles } from "./styles";
 
 const HomeTab = forwardRef((props, ref) => {
-  const { call, on, off, alert, alertSeverities } = props;
+  const { call, on, off, alert } = props;
   const workspaceManager = useMemo(() => new Workspace(), []);
   const classes = homeTabStyles();
   const { t } = useTranslation();
@@ -43,13 +47,13 @@ const HomeTab = forwardRef((props, ref) => {
           message: t(ERROR_MESSAGES.FILE_DOESNT_EXIST, {
             FILE_URL: doc.id
           }),
-          severity: alertSeverities.WARNING
+          severity: ALERT_SEVERITIES.WARNING
         });
       } else {
         call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, doc);
       }
     },
-    [alertSeverities, alert, call, t]
+    [alert, call, t]
   );
 
   //========================================================================================

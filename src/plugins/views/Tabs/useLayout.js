@@ -6,12 +6,15 @@ import React, {
   useRef
 } from "react";
 import { Tooltip } from "@material-ui/core";
+import i18n from "../../../i18n/i18n";
 import {
   HOMETAB_PROFILE,
   DEFAULT_LAYOUT,
   DOCK_POSITIONS,
-  PLUGINS
+  PLUGINS,
+  ALERT_SEVERITIES
 } from "../../../utils/Constants";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../../utils/Messages";
 import { getIconByScope, getHomeTab } from "../../../utils/Utils";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Workspace from "../../../utils/Workspace";
@@ -136,25 +139,29 @@ const useLayout = (props, dockRef) => {
    */
   const _saveDoc = useCallback(
     (docData, newLayout) => {
-      const { name, scope } = docData;
-      call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.SAVE, {
-        name,
-        scope
-      })
+      const { name, scope, newName } = docData;
+      call(
+        PLUGINS.DOC_MANAGER.NAME,
+        PLUGINS.DOC_MANAGER.CALL.SAVE,
+        {
+          name,
+          scope
+        },
+        newName
+      )
         .then(res => {
           if (res.success) {
             if (newLayout) _applyLayout(newLayout);
             call(PLUGINS.ALERT.NAME, PLUGINS.ALERT.CALL.SHOW, {
-              message: "Saved successfully",
-              severity: "success"
+              message: i18n.t(SUCCESS_MESSAGES.SAVED_SUCCESSFULLY),
+              severity: ALERT_SEVERITIES.SUCCESS
             });
           }
         })
         .catch(err => {
-          console.warn("failed to save", err);
           call(PLUGINS.ALERT.NAME, PLUGINS.ALERT.CALL.SHOW, {
-            message: "Failed to save",
-            severity: "error"
+            message: i18n.t(ERROR_MESSAGES.FAILED_TO_SAVE),
+            severity: ALERT_SEVERITIES.ERROR
           });
         });
     },
@@ -187,14 +194,22 @@ const useLayout = (props, dockRef) => {
    * @param {LayoutData} newLayout : New layout
    */
   const _closeDirtyTab = useCallback(
-    (name, scope, newLayout) => {
+    (name, scope, newLayout, isNew) => {
       call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CLOSE_DIRTY_DOC, {
         name,
         scope,
         onSubmit: action => {
           const triggerAction = {
             // Save changes and close document
-            save: () => _saveDoc({ name, scope }, newLayout),
+            save: () =>
+              isNew
+                ? call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
+                    scope,
+                    onSubmit: newName => {
+                      _saveDoc({ name, scope, newName }, newLayout);
+                    }
+                  })
+                : _saveDoc({ name, scope }, newLayout),
             // Discard changes and close document
             dontSave: () => _discardChanges({ name, scope }, newLayout)
           };
@@ -214,7 +229,7 @@ const useLayout = (props, dockRef) => {
     (newLayout, tabId) => {
       const { name, scope, isNew, isDirty } = tabsById.current.get(tabId);
       if (isDirty) {
-        _closeDirtyTab(name, scope, newLayout);
+        _closeDirtyTab(name, scope, newLayout, isNew);
       } else {
         // Remove doc locally if is new and not dirty
         if (isNew)

@@ -1,16 +1,10 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { PLUGINS } from "../../utils/Constants";
-
-const MESSAGES = {
-  SAVE: {
-    SUCCESS: "Saved successfully",
-    ERROR: "Failed to save"
-  }
-};
+import { PLUGINS, ALERT_SEVERITIES } from "../../utils/Constants";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../utils/Messages";
 
 const DataHandler = props => {
-  const { children, call, scope, name, id, alert, alertSeverities } = props;
+  const { children, call, scope, name, id, alert } = props;
   const [data, setData] = React.useState();
   const [loading, setLoading] = React.useState(true);
   const modelRef = React.useRef();
@@ -31,8 +25,8 @@ const DataHandler = props => {
       .then(res => {
         if (res.success) {
           alert({
-            message: t(MESSAGES.SAVE.SUCCESS),
-            severity: alertSeverities.SUCCESS
+            message: t(SUCCESS_MESSAGES.SAVED_SUCCESSFULLY),
+            severity: ALERT_SEVERITIES.SUCCESS
           });
           if (newName) {
             const newTabData = {
@@ -49,16 +43,16 @@ const DataHandler = props => {
           }
         } else {
           alert({
-            message: t(MESSAGES.SAVE.ERROR),
-            severity: alertSeverities.ERROR
+            message: t(ERROR_MESSAGES.FAILED_TO_SAVE),
+            severity: ALERT_SEVERITIES.ERROR
           });
         }
       })
       .catch(error => {
         console.log("Failed to save: error", error);
         alert({
-          message: t(MESSAGES.SAVE.ERROR),
-          severity: alertSeverities.ERROR
+          message: t(ERROR_MESSAGES.FAILED_TO_SAVE),
+          severity: ALERT_SEVERITIES.ERROR
         });
       });
   };
