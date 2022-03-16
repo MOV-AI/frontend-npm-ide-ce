@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
@@ -12,48 +12,23 @@ import HomeIcon from "@material-ui/icons/Home";
 import TextSnippetIcon from "@material-ui/icons/Description";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 import { Tooltip } from "@material-ui/core";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { useTheme } from "@material-ui/core/styles";
+import { mainMenuStyles } from "./styles";
 import { MainContext } from "../../../main-context";
-import movaiIcon from "../editors/_shared/Branding/movai-logo-white.png";
-import { HOMETAB_PROFILE, VERSION } from "../../../utils/Constants";
+import movaiIcon from "../editors/_shared/Branding/movai-logo-transparent.png";
+import { VERSION, PLUGINS } from "../../../utils/Constants";
 import { getIconByScope, getHomeTab } from "../../../utils/Utils";
-
-const useStyles = makeStyles(theme => ({
-  icon: {
-    color: theme.palette.primary.main,
-    cursor: "pointer",
-    "& svg": {
-      color: theme.palette.primary.main
-    }
-  },
-  movaiIcon: {
-    padding: 0,
-    width: 35,
-    height: 35
-  }
-}));
 
 const MainMenu = props => {
   const { call } = props;
   // State hooks
   const [docTypes, setDocTypes] = useState([]);
   // Other hooks
-  const classes = useStyles();
+  const classes = mainMenuStyles();
   const theme = useTheme();
   const { t } = useTranslation();
   // Refs
   const MENUS = useRef([
-    {
-      name: HOMETAB_PROFILE.name,
-      icon: _props => <HomeIcon {..._props}></HomeIcon>,
-      title: t("Get Started"),
-      isActive: true,
-      getOnClick: () => {
-        getHomeTab().then(homeTab => {
-          call("tabs", "open", homeTab);
-        });
-      }
-    },
     {
       name: "explorer",
       icon: _props => <TextSnippetIcon {..._props}></TextSnippetIcon>,
@@ -85,6 +60,15 @@ const MainMenu = props => {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Open Welcome Tab
+   */
+  const openHomeTab = useCallback(() => {
+    getHomeTab().then(homeTab => {
+      call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN, homeTab);
+    });
+  }, [call]);
+
   //========================================================================================
   /*                                                                                      *
    *                                        Render                                        *
@@ -95,17 +79,25 @@ const MainMenu = props => {
     <MainContext.Consumer>
       {({ isDarkTheme, handleLogOut, handleToggleTheme }) => (
         <VerticalBar
-          useDividers={true}
           unsetAccountAreaPadding={true}
           backgroundColor={theme.palette.background.default}
           upperElement={
-            <img
-              src={movaiIcon}
-              className={classes.movaiIcon}
-              alt="MOV.AI"
-            />
+            <Tooltip title={t("Open Welcome Tab")} placement="right" arrow>
+              <HomeIcon
+                className={classes.icon}
+                onClick={openHomeTab}
+              ></HomeIcon>
+            </Tooltip>
           }
-          creatorElement={
+          navigationList={[
+            ...MENUS.current.map(menu => (
+              <Tooltip title={menu.title} placement="right" arrow>
+                {menu.icon({
+                  className: classes.icon,
+                  onClick: menu.getOnClick
+                })}
+              </Tooltip>
+            )),
             <ContextMenu
               element={
                 <Tooltip title="Create new document" placement="right" arrow>
@@ -129,24 +121,16 @@ const MainMenu = props => {
                 onClose: true
               }))}
             ></ContextMenu>
-          }
-          navigationList={MENUS.current.map(menu => (
-            <Tooltip title={menu.title} placement="right" arrow>
-              {menu.icon({
-                className: classes.icon,
-                onClick: () => menu.getOnClick()
-              })}
-            </Tooltip>
-          ))}
-          lowerElement={
+          ]}
+          lowerElement={[
             <ProfileMenu
               version={VERSION}
               userName={Authentication.getTokenData().message.name ?? ""}
               isDarkTheme={isDarkTheme}
               handleLogout={handleLogOut}
-              handleToggleTheme={handleToggleTheme}
-            />
-          }
+            />,
+            <img src={movaiIcon} className={classes.movaiIcon} alt="MOV.AI" />
+          ]}
         ></VerticalBar>
       )}
     </MainContext.Consumer>

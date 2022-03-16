@@ -235,6 +235,7 @@ const NodeMenu = memo(
           id={data.id}
           model={data.model}
           template={data.Template}
+          label={"Template Name:"}
           type={templateData.type}
           openDoc={openDoc}
         />
