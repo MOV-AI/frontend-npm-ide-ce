@@ -1095,13 +1095,14 @@ const Flow = (props, ref) => {
       />
       {contextMenuOptions && (
         <FlowContextMenu
-          {...contextMenuOptions}
+          onClose={handleContextClose}
           onNodeCopy={handleCopyNode}
           onCanvasPaste={handlePasteNodes}
           onLinkDelete={handleDeleteLink}
           onNodeDelete={handleDeleteNode}
           onSubFlowDelete={handleDeleteNode}
           onPortToggle={handleToggleExposedPort}
+          {...contextMenuOptions}
         />
       )}
       {tooltipConfig && <PortTooltip {...tooltipConfig} />}
