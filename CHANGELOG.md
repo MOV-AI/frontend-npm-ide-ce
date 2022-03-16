@@ -17,6 +17,7 @@
 **Flow Editor**
 
 - [FP-1286 - Feature/fp 1286 port flow editor](https://movai.atlassian.net/browse/FP-1286)
+- [FP-1563 - Filtering new files from Flow Explorer](https://movai.atlassian.net/browse/FP-1563)
 
 **Node Editor**
 
