@@ -33,3 +33,4 @@
 **Tabs**
 
 - [FP-1310 - Allow a tab to be opened on a max box tab](https://movai.atlassian.net/browse/FP-1310)
+- [FP-1604 - Minimize tabs before removing them to prevent errors](https://movai.atlassian.net/browse/FP-1604)
