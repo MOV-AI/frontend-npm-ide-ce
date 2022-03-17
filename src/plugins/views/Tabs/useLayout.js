@@ -256,8 +256,10 @@ const useLayout = (props, dockRef) => {
         if (box) {
           // If it's in a maximized tab, let's minimize it and then call _closeTab again
           if (location === DOCK_POSITIONS.MAX && box.tabs.length === 1) {
+            const maxboxMainTab =
+              dockRef.current.state.layout.maxbox.children[0];
             await dockRef.current.dockMove(
-              dockRef.current.state.layout.maxbox.children[0],
+              maxboxMainTab,
               null,
               DOCK_MODES.MAXIMIZE
             );
@@ -347,8 +349,8 @@ const useLayout = (props, dockRef) => {
    * @returns {Enumerable} DOCK_POSITIONS: based on if the maxbox has children
    */
   const getDefaultTabPosition = useCallback(() => {
-    if (dockRef.current.state.layout.maxbox.children.length)
-      return DOCK_POSITIONS.MAX;
+    const maximizedTabs = dockRef.current.state.layout.maxbox.children;
+    if (maximizedTabs.length) return DOCK_POSITIONS.MAX;
 
     return DOCK_POSITIONS.DOCK;
   }, [dockRef]);
