@@ -88,6 +88,7 @@ const HomeTab = forwardRef((props, ref) => {
             workspaceManager={workspaceManager}
             openRecentDocument={openExistingDocument}
             on={on}
+            off={off}
           />
         </div>
         <div className={classes.column}>

@@ -109,10 +109,6 @@ function installViewPlugins() {
       factory: profile => new MainMenu(profile)
     },
     {
-      profile: HOMETAB_PROFILE,
-      factory: profile => new HomeTab(profile)
-    },
-    {
       profile: {
         name: PLUGINS.EXPLORER.NAME,
         location: HOSTS.LEFT_DRAWER.NAME
@@ -122,6 +118,10 @@ function installViewPlugins() {
     {
       profile: { name: PLUGINS.TABS.NAME, location: HOSTS.MAIN_PANEL.NAME },
       factory: profile => new Tabs(profile)
+    },
+    {
+      profile: HOMETAB_PROFILE,
+      factory: profile => new HomeTab(profile)
     },
     {
       profile: {

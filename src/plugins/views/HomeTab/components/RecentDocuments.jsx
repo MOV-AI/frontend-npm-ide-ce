@@ -15,11 +15,19 @@ const MAX_RECENT_DOCS = 10;
 
 const RecentDocuments = props => {
   const classes = recentDocumentsStyles();
-  const { workspaceManager, openRecentDocument, on } = props;
+  const { workspaceManager, openRecentDocument, on, off } = props;
   const { t } = useTranslation();
 
   // State
-  const [recentDocs, setRecentDocs] = useState([]);
+  const [recentDocs, setRecentDocs] = useState(
+    workspaceManager.getRecentDocuments()
+  );
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
 
   const setRecentDocuments = useCallback(
     documents => {
@@ -102,7 +110,7 @@ const RecentDocuments = props => {
   useEffect(() => {
     setRecentDocs(workspaceManager.getRecentDocuments());
 
-    on(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, data => {
+    on(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.OPEN_EDITOR, data => {
       if (!data.isNew) addRecentDocument(data.id, data.name, data.scope);
     });
 
@@ -117,7 +125,13 @@ const RecentDocuments = props => {
         addRecentDocument(id, data.newName, scope);
       }
     });
-  }, [workspaceManager, addRecentDocument, setDeletedRecentDocument, on]);
+
+    return () => {
+      off(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.OPEN_EDITOR);
+      off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.DELETE_DOC);
+      off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.SAVE_DOC);
+    };
+  }, [workspaceManager, addRecentDocument, setDeletedRecentDocument, on, off]);
 
   return (
     <Paper className={classes.paper}>
