@@ -16,7 +16,7 @@ class IdBased extends Model {
   id = "";
 
   // Define observable properties
-  observables = Object.values(IdBased.OBSERVABLE_KEYS);
+  observables = Object.values(this.constructor.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
