@@ -67,15 +67,16 @@ class Dialog extends IDEPlugin {
    * @param {*} data
    */
   newDocument(data) {
-    const targetElement = this._handleDialogOpen();
+    const targetElement = this._handleDialogOpen(data.customId);
     ReactDOM.render(
       <NewDocumentDialog
         call={this.call}
         title={`New ${data.scope}`}
         submitText={"Create"}
+        placeholder={data.placeholder}
         scope={data.scope}
         onSubmit={data.onSubmit}
-        onClose={() => this._handleDialogClose(data.onClose)}
+        onClose={() => this._handleDialogClose(data.onClose, data.customId)}
       />,
       targetElement
     );
@@ -268,11 +269,11 @@ class Dialog extends IDEPlugin {
    * @private Handle dialog open : Prepare element where the dialog will be rendered
    * @returns {DOMElement} Target element to render dialog
    */
-  _handleDialogOpen() {
+  _handleDialogOpen(customId) {
     document.body.classList.add(Dialog.BODY_CLASS_NAME);
     const containerElement = document.getElementById("alertPanel");
     const targetElement = document.createElement("div");
-    targetElement.id = Dialog.TARGET_ELEMENT_ID;
+    targetElement.id = customId || Dialog.TARGET_ELEMENT_ID;
     containerElement.appendChild(targetElement);
     return targetElement;
   }
@@ -280,9 +281,11 @@ class Dialog extends IDEPlugin {
   /**
    * @private Handle dialog close : Unmount dialog component and remove target element
    */
-  _handleDialogClose(onClose) {
+  _handleDialogClose(onClose, customId) {
     document.body.classList.remove(Dialog.BODY_CLASS_NAME);
-    const targetElement = document.getElementById(Dialog.TARGET_ELEMENT_ID);
+    const targetElement = document.getElementById(
+      customId || Dialog.TARGET_ELEMENT_ID
+    );
     ReactDOM.unmountComponentAtNode(targetElement);
     targetElement.parentNode.removeChild(targetElement);
     onClose && onClose();

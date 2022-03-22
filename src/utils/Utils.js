@@ -65,16 +65,6 @@ export const getIconByScope = (scope, style) => {
 };
 
 /**
- * Document scopes
- */
-export const SCOPES = {
-  CALLBACK: "Callback",
-  CONFIGURATION: "Configuration",
-  NODE: "Node",
-  FLOW: "Flow"
-};
-
-/**
  * Simple Event to Stop Propagation
  * @param e: event to stop the propagation
  */
@@ -137,6 +127,16 @@ export function validateDocumentName(name) {
   } else {
     return true;
   }
+}
+
+/**
+ * Build a document path from a doc
+ * @param {Document} doc
+ * @returns
+ */
+export function buildDocPath(doc) {
+  const { workspace, scope, name } = doc;
+  return `${workspace}/${scope}/${name}`;
 }
 
 const boolToPythonOptions = {

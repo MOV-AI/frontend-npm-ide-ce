@@ -33,6 +33,7 @@ const FormDialog = props => {
     onValidation,
     onPostValidation,
     submitText,
+    placeholder,
     inputLabel,
     multiline,
     loadingMessage,
@@ -190,6 +191,7 @@ const FormDialog = props => {
             label={t(inputLabel)}
             InputLabelProps={{ shrink: true }}
             defaultValue={value}
+            placeholder={placeholder}
             multiline={multiline}
             onPaste={handlePaste}
             onKeyPress={handleKeyPress}
@@ -222,6 +224,7 @@ FormDialog.propTypes = {
   onPostValidation: PropTypes.func,
   inputLabel: PropTypes.string,
   submitText: PropTypes.string,
+  placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
   maxLength: PropTypes.number,
   multiline: PropTypes.bool,

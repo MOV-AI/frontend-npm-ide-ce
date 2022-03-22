@@ -1,60 +1,23 @@
 import React from "react";
-import { useTranslation } from "react-i18next";
-import { PLUGINS, ALERT_SEVERITIES } from "../../utils/Constants";
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../utils/Messages";
+import { PLUGINS } from "../../utils/Constants";
 
 const DataHandler = props => {
-  const { children, call, scope, name, id, alert } = props;
+  const { children, call, scope, name } = props;
   const [data, setData] = React.useState();
   const [loading, setLoading] = React.useState(true);
   const modelRef = React.useRef();
-
-  const { t } = useTranslation();
 
   /**
    * Save document
    * @param {String} newName : Document name (used to set document name when creating a new document)
    */
-  const save = newName => {
+  const save = isNew => {
     call(
       PLUGINS.DOC_MANAGER.NAME,
       PLUGINS.DOC_MANAGER.CALL.SAVE,
       { scope, name },
-      newName
-    )
-      .then(res => {
-        if (res.success) {
-          alert({
-            message: t(SUCCESS_MESSAGES.SAVED_SUCCESSFULLY),
-            severity: ALERT_SEVERITIES.SUCCESS
-          });
-          if (newName) {
-            const newTabData = {
-              id: modelRef.current.getUrl(),
-              name: newName,
-              scope: scope
-            };
-            call(
-              PLUGINS.TABS.NAME,
-              PLUGINS.TABS.CALL.UPDATE_TAB_ID,
-              id,
-              newTabData
-            );
-          }
-        } else {
-          alert({
-            message: t(ERROR_MESSAGES.FAILED_TO_SAVE),
-            severity: ALERT_SEVERITIES.ERROR
-          });
-        }
-      })
-      .catch(error => {
-        console.log("Failed to save: error", error);
-        alert({
-          message: t(ERROR_MESSAGES.FAILED_TO_SAVE),
-          severity: ALERT_SEVERITIES.ERROR
-        });
-      });
+      isNew
+    );
   };
 
   /**

@@ -1,8 +1,9 @@
 import { Document } from "@mov-ai/mov-fe-lib-core";
-import { PLUGINS } from "../../utils/Constants";
+import i18n from "../../i18n/i18n";
+import { PLUGINS, ALERT_SEVERITIES } from "../../utils/Constants";
+import { SUCCESS_MESSAGES, ERROR_MESSAGES } from "../../utils/Messages";
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
 import docsFactory from "./docs";
-import { getNameFromURL, getScopeFromURL } from "../../utils/Utils";
 
 /**
  * Document Manager plugin to handle requests, subscribers and more
@@ -24,6 +25,7 @@ class DocManager extends IDEPlugin {
     window.onunload = this.onUnload;
     // Subscriber
     this.docSubscriptions = new Map();
+    this.saveStack = new Map();
   }
 
   getName() {
@@ -157,31 +159,74 @@ class DocManager extends IDEPlugin {
   /**
    * Update existing document
    * @param {{name: String, scope: String}} modelKey
-   * @param {String} newName : Used in document creation, where we need to replace "untitled" by newName
+   * @param {String} isNew : Used to determine if it's a new file and prompt the user for a name or if we are just saving an old file
+   * @param {Function} callback : Used to call said function after all is done (more reliable than a .then)
    * @returns {Promise<Model>}
    */
-  save(modelKey, newName) {
+  save(modelKey, isNew, callback) {
     const { name, scope } = modelKey;
-    this.emit(PLUGINS.DOC_MANAGER.ON.SAVE_DOC, {
-      docManager: this,
-      doc: Document.parsePath(name, scope),
-      newName
+
+    if (!isNew) return this.doSave(modelKey, null, callback);
+    if (this.saveStack.has(`${name}_${scope}`)) return;
+
+    this.saveStack.set(`${name}_${scope}`, { name, scope });
+    this.call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
+      scope,
+      placeholder: name,
+      customId: `dialog_${name}_${scope}`,
+      onSubmit: newName => this.doSave(modelKey, newName, callback),
+      onClose: () => this.saveStack.delete(`${name}_${scope}`)
     });
-    const model = this.getStore(scope).saveDoc(name, newName);
+  }
 
-    if (newName) this.reloadDoc({ name: newName, scope });
+  /**
+   * Actually saves the document passed in the "save" function
+   * @param {{name: String, scope: String}} modelKey
+   * @param {String} newName : Used in document creation, where we need to replace "untitled" by newName
+   * @param {Function} callback : Used to call said function after all is done (more reliable than a .then)
+   * @returns {Promise<Model>}
+   */
+  async doSave(modelKey, newName, callback) {
+    const { name, scope } = modelKey;
+    let returnMessage = { success: false };
 
-    return model;
+    try {
+      const model = await this.getStore(scope).saveDoc(name, newName);
+
+      this.emit(PLUGINS.DOC_MANAGER.ON.SAVE_DOC, {
+        docManager: this,
+        doc: Document.parsePath(name, scope),
+        newName
+      });
+
+      this.call(PLUGINS.ALERT.NAME, PLUGINS.ALERT.CALL.SHOW, {
+        message: i18n.t(SUCCESS_MESSAGES.SAVED_SUCCESSFULLY),
+        severity: ALERT_SEVERITIES.SUCCESS
+      });
+
+      returnMessage = model;
+    } catch (error) {
+      returnMessage.message = error;
+      console.warn("failed to save document", error);
+
+      this.call(PLUGINS.ALERT.NAME, PLUGINS.ALERT.CALL.SHOW, {
+        message: i18n.t(ERROR_MESSAGES.FAILED_TO_SAVE),
+        severity: ALERT_SEVERITIES.ERROR
+      });
+    }
+
+    callback && callback(returnMessage);
+    this.saveStack.delete(`${name}_${scope}`);
+    return returnMessage;
   }
 
   /**
    * Saves the tab that is currently active
    */
   saveActiveEditor() {
-    this.call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.GET_ACTIVE_TAB).then(url => {
-      if (url.includes("/"))
-        this.save({ name: getNameFromURL(url), scope: getScopeFromURL(url) });
-    });
+    this.call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.GET_ACTIVE_TAB).then(tab =>
+      this.save({ name: tab.name, scope: tab.scope }, tab.isNew)
+    );
   }
 
   /**
@@ -226,11 +271,13 @@ class DocManager extends IDEPlugin {
    * @returns {Promise<Array>}
    */
   saveDirties() {
-    const promises = this.getStores().map(store => {
-      return store.saveDirties();
+    this.getStores().forEach(store => {
+      store.getDirties().forEach(obj => {
+        const { name, isNew } = obj;
+        const scope = obj.getScope();
+        this.save({ name, scope }, isNew);
+      });
     });
-
-    return Promise.allSettled(promises);
   }
 
   //========================================================================================

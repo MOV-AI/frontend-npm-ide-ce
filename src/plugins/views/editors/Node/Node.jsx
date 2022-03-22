@@ -27,7 +27,7 @@ import IOConfig from "./components/IOConfig/IOConfig";
 import useKeyValueMethods from "./components/KeyValueTable/useKeyValueMethods";
 
 import { nodeStyles } from "./styles";
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../../../utils/Messages";
+import { ERROR_MESSAGES } from "../../../../utils/Messages";
 
 const Node = (props, ref) => {
   const {
@@ -319,41 +319,44 @@ const Node = (props, ref) => {
       call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
         scope,
         onSubmit: newName => {
+          // Create callback in DB
           call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.CREATE, {
             scope,
             name: newName
           }).then(doc => {
             doc.setMessage(defaultMsg);
-            // Create callback in DB
-            call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.SAVE, {
-              scope,
-              name: newName
-            }).then(res => {
-              if (res.success) {
-                alert({
-                  message: t(SUCCESS_MESSAGES.CALLBACK_CREATED),
-                  severity: ALERT_SEVERITIES.SUCCESS
-                });
-                // Open editor of new callback
-                const newTabData = {
-                  id: doc.getUrl(),
-                  name: newName,
-                  scope
-                };
-                call(
-                  PLUGINS.TABS.NAME,
-                  PLUGINS.TABS.CALL.OPEN_EDITOR,
-                  newTabData
-                );
-                // Set new callback in Node Port
-                updatePortCallback(ioConfigName, portName, newName);
+
+            // Save callback in DB
+            call(
+              PLUGINS.DOC_MANAGER.NAME,
+              PLUGINS.DOC_MANAGER.CALL.SAVE,
+              {
+                scope,
+                name: newName
+              },
+              false,
+              res => {
+                if (res.success) {
+                  const newTabData = {
+                    id: doc.getUrl(),
+                    name: newName,
+                    scope
+                  };
+                  call(
+                    PLUGINS.TABS.NAME,
+                    PLUGINS.TABS.CALL.OPEN_EDITOR,
+                    newTabData
+                  );
+                  // Set new callback in Node Port
+                  updatePortCallback(ioConfigName, portName, newName);
+                }
               }
-            });
+            );
           });
         }
       });
     },
-    [alert, call, t, updatePortCallback]
+    [call, updatePortCallback]
   );
 
   /**

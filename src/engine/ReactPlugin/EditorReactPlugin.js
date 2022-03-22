@@ -94,21 +94,13 @@ export function withEditorPlugin(ReactComponent, methods = []) {
           onSubmit: _handleOutdatedSave
         });
       } else {
-        instance.current.getIsNew()
-          ? call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
-              scope,
-              onSubmit: newName => save(newName)
-            })
-          : save();
+        save(instance.current.getIsNew());
       }
     }, [call, instance, save, _handleOutdatedSave, scope, name]);
 
     /**
-     * Save document :
-     *  if document is outdated => prompt alert to the user before saving
-     *  else => Proceed with saving document
-     *    if doc is new => Create document in DB
-     *    else => Update document in DB
+     * Save all documents :
+     *  Saves all documents that are dirty
      */
     const saveAllDocuments = React.useCallback(() => {
       call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.SAVE_DIRTIES);
@@ -138,6 +130,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       // Remove key bind on component unmount
       return () => {
         removeKeyBind(KEYBINDINGS.SAVE);
+        removeKeyBind(KEYBINDINGS.SAVE_ALL);
         off(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE);
       };
     }, [

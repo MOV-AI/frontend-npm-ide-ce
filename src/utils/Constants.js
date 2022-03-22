@@ -32,10 +32,10 @@ export const DATA_TYPES = {
 };
 
 export const SCOPES = {
-  Callback: "Callback",
-  Configuration: "Configuration",
-  Flow: "Flow",
-  Node: "Node"
+  CALLBACK: "Callback",
+  CONFIGURATION: "Configuration",
+  NODE: "Node",
+  FLOW: "Flow"
 };
 
 export const HOSTS = {
