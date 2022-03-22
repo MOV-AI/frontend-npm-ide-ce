@@ -14,7 +14,7 @@ export const systemBarStyles = debugMode =>
     systemBar: {
       background: theme.topBarColor,
       height: "26px",
-      borderBottom: debugMode ? "solid 5px purple" : "",
+      borderBottom: debugMode ? "solid 5px purple" : "1px solid #000",
       width: "100%"
     },
     menuButton: {
@@ -40,7 +40,8 @@ export const systemMenuStyles = makeStyles(theme => ({
     background: theme.topBarColor
   },
   list: {
-    ...menuButtonStyles
+    ...menuButtonStyles,
+    marginTop: "1px"
   },
   menuDivider: {
     background: theme.palette.grey[200]
