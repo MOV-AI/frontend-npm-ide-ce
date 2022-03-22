@@ -261,6 +261,9 @@ const FlowTopBar = props => {
   const canRunFlow = useCallback(
     action => {
       const graph = mainInterface.current?.current?.graph;
+      // let's validate flow before continuing
+      graph?.validateFlow();
+
       const warnings = graph?.warnings || [];
       const warningsVisibility = graph.warningsVisibility;
       const runtimeWarnings = warnings.filter(wn => wn.isRuntime);
