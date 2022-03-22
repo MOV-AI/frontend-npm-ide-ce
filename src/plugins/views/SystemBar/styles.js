@@ -14,19 +14,19 @@ export const systemBarStyles = debugMode =>
     systemBar: {
       background: theme.topBarColor,
       height: "26px",
-      borderBottom: debugMode ? "solid 5px purple" : "",
+      borderBottom: debugMode ? "solid 5px purple" : "1px solid #000",
       width: "100%"
     },
     menuButton: {
       ...menuButtonStyles,
       minWidth: "40px",
-      color: theme.palette.grey[900],
+      color: theme.palette.grey[200],
       "&:hover": {
-        background: theme.palette.grey[400]
+        background: theme.palette.grey[900]
       }
     },
     activeMenu: {
-      background: theme.palette.grey[400]
+      background: theme.palette.grey[900]
     }
   }));
 
@@ -37,13 +37,14 @@ export const systemMenuStyles = makeStyles(theme => ({
   listHolder: {
     minWidth: "300px",
     borderRadius: "0px 0px 5px 5px",
-    background: theme.palette.grey[100]
+    background: theme.topBarColor
   },
   list: {
-    ...menuButtonStyles
+    ...menuButtonStyles,
+    marginTop: "1px"
   },
   menuDivider: {
-    background: theme.palette.grey[400]
+    background: theme.palette.grey[200]
   }
 }));
 
@@ -58,10 +59,10 @@ export const systemMenuItemStyles = makeStyles(theme => ({
     ...menuButtonStyles,
     width: "100%",
     justifyContent: "space-between",
-    color: theme.palette.grey[900],
+    color: theme.palette.grey[200],
     "& > .MuiButton-label": { paddingLeft: "10px" },
     "&:hover": {
-      background: theme.palette.grey[400],
+      background: theme.palette.grey[900],
       "& > .MuiButton-label > div[class*=subMenuHolder]": {
         opacity: "1",
         maxWidth: "500px"
@@ -78,7 +79,7 @@ export const systemMenuItemStyles = makeStyles(theme => ({
   keybind: {
     paddingRight: "10px",
     fontStyle: "italic",
-    color: theme.palette.grey[600]
+    color: theme.palette.grey[400]
   },
   subMenuHolder: {
     position: "absolute",
@@ -89,7 +90,7 @@ export const systemMenuItemStyles = makeStyles(theme => ({
     opacity: "0",
     borderRadius: "3px",
     boxShadow: "1px 1px 2px 1px #333",
-    background: theme.palette.grey[100],
+    background: theme.topBarColor,
     transform: "translate(99%)",
     transition: "opacity .3s, max-width .3s"
   }

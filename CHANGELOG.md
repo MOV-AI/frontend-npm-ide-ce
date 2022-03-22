@@ -3,6 +3,7 @@
 **System Bar**
 
 - [FP-1534 - Added systembar, medium refactor](https://movai.atlassian.net/browse/FP-1534)
+- [FP-1609 - Re-styled the systembar to be more aligned with the theme](https://movai.atlassian.net/browse/FP-1609)
 
 **IDE**
 
