@@ -1057,6 +1057,7 @@ const Flow = (props, ref) => {
         <FlowTopBar
           id={id}
           call={call}
+          name={name}
           alert={alert}
           confirmationAlert={confirmationAlert}
           scope={scope}

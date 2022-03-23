@@ -1,4 +1,10 @@
-import React, { useCallback } from "react";
+import React, {
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+  useEffect
+} from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import {
@@ -53,28 +59,31 @@ const FlowTopBar = props => {
     scope,
     mainInterface,
     id,
+    name,
     onRobotChange,
     defaultViewMode,
     confirmationAlert
     // onViewModeChange
   } = props;
   // State hooks
-  const [loading, setLoading] = React.useState(false);
-  const [robotSelected, setRobotSelected] = React.useState("");
-  const [robotList, setRobotList] = React.useState({});
-  const [viewMode, setViewMode] = React.useState(defaultViewMode);
+  const [loading, setLoading] = useState(false);
+  const [robotSelected, setRobotSelected] = useState("");
+  const [robotList, setRobotList] = useState({});
+  const [viewMode, setViewMode] = useState(defaultViewMode);
   // Other hooks
   const classes = flowTopBarStyles();
   const { t } = useTranslation();
   const { robotSubscribe, robotUnsubscribe, getFlowPath, robotStatus } =
     useNodeStatusUpdate(props, robotSelected, viewMode);
   // Refs
-  const buttonDOMRef = React.useRef();
-  const helperRef = React.useRef();
-  const commandRobotTimeoutRef = React.useRef();
+  const buttonDOMRef = useRef();
+  const helperRef = useRef();
+  const commandRobotTimeoutRef = useRef();
+  const isMounted = useRef();
+  const flowInstanceRef = useRef();
   // Managers Memos
-  const robotManager = React.useMemo(() => new RobotManager(), []);
-  const workspaceManager = React.useMemo(() => new Workspace(), []);
+  const robotManager = useMemo(() => new RobotManager(), []);
+  const workspaceManager = useMemo(() => new Workspace(), []);
 
   //========================================================================================
   /*                                                                                      *
@@ -107,6 +116,19 @@ const FlowTopBar = props => {
       return store.helper;
     });
   }, [call, scope]);
+
+  /**
+   * @private Get store helper to use cloud functions
+   */
+  const initFlowInstance = useCallback(() => {
+    return call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.READ, {
+      scope,
+      name
+    }).then(document => {
+      flowInstanceRef.current = document;
+      return document;
+    });
+  }, [call, scope, name]);
 
   /**
    * @private Init selected robot
@@ -192,30 +214,36 @@ const FlowTopBar = props => {
   /**
    * On component mount
    */
-  React.useEffect(() => {
+  useEffect(() => {
     // Load store loader and robot list
     initStoreHelper().then(() => {
       robotManager.getAll(onLoadRobotList);
     });
-  }, [robotManager, onLoadRobotList, initStoreHelper]);
+    // Load flow instance
+    initFlowInstance();
+    // Set isMounted
+    isMounted.current = true;
+  }, [robotManager, onLoadRobotList, initStoreHelper, initFlowInstance]);
 
   /**
    * On component unmount
    */
-  React.useEffect(() => {
+  useEffect(() => {
     // On unmount
     return () => {
       // TEMPORARY HACK: Added log to remove warning of unused
       // Once that handleViewModeChange method is uncommented, this should be removed
       console.log(setViewMode);
       robotUnsubscribe();
+      // Unmount
+      isMounted.current = false;
     };
   }, [robotUnsubscribe]);
 
   /**
    * Finish loading when there's an update on activeFlow
    */
-  React.useEffect(() => {
+  useEffect(() => {
     setLoading(false);
     clearTimeout(commandRobotTimeoutRef.current);
   }, [robotStatus.activeFlow, setLoading]);
@@ -287,7 +315,7 @@ const FlowTopBar = props => {
    * @returns To avoid starting flow if flow is not eligible to start
    */
   const sendActionToRobot = useCallback(
-    action => {
+    (action, flowPath) => {
       const canStart = canRunFlow(action);
       if (!canStart) return;
       setLoading(true);
@@ -295,12 +323,15 @@ const FlowTopBar = props => {
       helperRef.current
         .sendToRobot({
           action,
-          flowPath: getFlowPath(),
+          flowPath: flowPath || getFlowPath(),
           robotId: robotSelected
         })
         .then(res => {
           if (!res) return;
           commandRobotTimeoutRef.current = setTimeout(() => {
+            // If flow reloads (creation of a new) the old is unmounted
+            if(!isMounted.current) return;
+            // Set loading false and show error message
             setLoading(false);
             alert({
               message: t("Failed to {{action}} flow", {
@@ -326,10 +357,11 @@ const FlowTopBar = props => {
   /**
    * Handle Start flow button click
    */
-  const handleStartFlow = useCallback(() => {
+  const handleStartFlow = useCallback((saveResponse) => {
     // Start Flow if there's no active flow
+    const flowUrl = saveResponse?.model?.getUrl();
     if (robotStatus.activeFlow === "") {
-      sendActionToRobot("START");
+      sendActionToRobot("START", flowUrl);
     } else {
       // Confirmation alert if Another flow is running!
       const title = t("Another flow is running!");
@@ -345,17 +377,17 @@ const FlowTopBar = props => {
         title,
         message,
         submitText: t("Run"),
-        onSubmit: () => sendActionToRobot("START")
+        onSubmit: () => sendActionToRobot("START", flowUrl)
       });
     }
   }, [
-    id,
     robotStatus.activeFlow,
+    sendActionToRobot,
+    t,
     robotList,
     robotSelected,
-    confirmationAlert,
-    sendActionToRobot,
-    t
+    id,
+    confirmationAlert
   ]);
 
   /**
@@ -364,6 +396,26 @@ const FlowTopBar = props => {
   const handleStopFlow = useCallback(() => {
     sendActionToRobot("STOP");
   }, [sendActionToRobot]);
+
+  /**
+   * Handle Save before starting a flow
+   */
+  const handleSaveBeforeStart = useCallback(() => {
+    const isDirty = flowInstanceRef.current?.getDirty();
+    if (isDirty) {
+      call(
+        PLUGINS.DOC_MANAGER.NAME,
+        PLUGINS.DOC_MANAGER.CALL.SAVE,
+        {
+          scope,
+          name
+        },
+        handleStartFlow
+      );
+    } else {
+      handleStartFlow();
+    }
+  }, [call, handleStartFlow, name, scope]);
 
   /**
    * Handle view mode change : default view to tree view
@@ -457,7 +509,7 @@ const FlowTopBar = props => {
             <ButtonTopBar
               ref={buttonDOMRef}
               disabled={!robotStatus.isOnline || loading}
-              onClick={handleStartFlow}
+              onClick={handleSaveBeforeStart}
             >
               {renderStartButton()}
             </ButtonTopBar>
