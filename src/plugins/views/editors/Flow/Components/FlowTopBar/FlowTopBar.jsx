@@ -223,13 +223,10 @@ const FlowTopBar = props => {
     initFlowInstance();
     // Set isMounted
     isMounted.current = true;
-  }, [robotManager, onLoadRobotList, initStoreHelper, initFlowInstance]);
 
-  /**
-   * On component unmount
-   */
-  useEffect(() => {
-    // On unmount
+    /**
+     * On component unmount
+     */
     return () => {
       // TEMPORARY HACK: Added log to remove warning of unused
       // Once that handleViewModeChange method is uncommented, this should be removed
@@ -238,7 +235,13 @@ const FlowTopBar = props => {
       // Unmount
       isMounted.current = false;
     };
-  }, [robotUnsubscribe]);
+  }, [
+    initFlowInstance,
+    initStoreHelper,
+    onLoadRobotList,
+    robotManager,
+    robotUnsubscribe
+  ]);
 
   /**
    * Finish loading when there's an update on activeFlow
@@ -330,7 +333,7 @@ const FlowTopBar = props => {
           if (!res) return;
           commandRobotTimeoutRef.current = setTimeout(() => {
             // If flow reloads (creation of a new) the old is unmounted
-            if(!isMounted.current) return;
+            if (!isMounted.current) return;
             // Set loading false and show error message
             setLoading(false);
             alert({
@@ -357,38 +360,41 @@ const FlowTopBar = props => {
   /**
    * Handle Start flow button click
    */
-  const handleStartFlow = useCallback((saveResponse) => {
-    // Start Flow if there's no active flow
-    const flowUrl = saveResponse?.model?.getUrl();
-    if (robotStatus.activeFlow === "") {
-      sendActionToRobot("START", flowUrl);
-    } else {
-      // Confirmation alert if Another flow is running!
-      const title = t("Another flow is running!");
-      const message = t(
-        "'{{robotName}}' is running flow '{{activeFlow}}'.\nAre you sure you want to run the flow '{{id}}'?",
-        {
-          robotName: robotList[robotSelected].RobotName,
-          activeFlow: robotStatus.activeFlow,
-          id: id
-        }
-      );
-      confirmationAlert({
-        title,
-        message,
-        submitText: t("Run"),
-        onSubmit: () => sendActionToRobot("START", flowUrl)
-      });
-    }
-  }, [
-    robotStatus.activeFlow,
-    sendActionToRobot,
-    t,
-    robotList,
-    robotSelected,
-    id,
-    confirmationAlert
-  ]);
+  const handleStartFlow = useCallback(
+    saveResponse => {
+      // Start Flow if there's no active flow
+      const flowUrl = saveResponse?.model?.getUrl();
+      if (robotStatus.activeFlow === "") {
+        sendActionToRobot("START", flowUrl);
+      } else {
+        // Confirmation alert if Another flow is running!
+        const title = t("Another flow is running!");
+        const message = t(
+          "'{{robotName}}' is running flow '{{activeFlow}}'.\nAre you sure you want to run the flow '{{id}}'?",
+          {
+            robotName: robotList[robotSelected].RobotName,
+            activeFlow: robotStatus.activeFlow,
+            id: id
+          }
+        );
+        confirmationAlert({
+          title,
+          message,
+          submitText: t("Run"),
+          onSubmit: () => sendActionToRobot("START", flowUrl)
+        });
+      }
+    },
+    [
+      robotStatus.activeFlow,
+      sendActionToRobot,
+      t,
+      robotList,
+      robotSelected,
+      id,
+      confirmationAlert
+    ]
+  );
 
   /**
    * Handle Stop flow button click
