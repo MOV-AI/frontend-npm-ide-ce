@@ -176,6 +176,12 @@ export const DIALOG_TITLE = {
   COMMANDS: "Command Line"
 };
 
+export const SAVE_OUTDATED_DOC_ACTIONS = {
+  UPDATE_DOC: "updateDoc",
+  OVERWRITE_DOC: "overwriteDoc",
+  CANCEL: "cancel"
+};
+
 export const DEFAULT_KEY_VALUE_DATA = {
   name: "",
   description: "",

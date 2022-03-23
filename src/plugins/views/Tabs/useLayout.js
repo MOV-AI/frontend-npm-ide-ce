@@ -136,7 +136,7 @@ const useLayout = (props, dockRef) => {
    */
   const _saveDoc = useCallback(
     (docData, newLayout) => {
-      const { name, scope, isNew } = docData;
+      const { name, scope } = docData;
       call(
         PLUGINS.DOC_MANAGER.NAME,
         PLUGINS.DOC_MANAGER.CALL.SAVE,
@@ -144,7 +144,6 @@ const useLayout = (props, dockRef) => {
           name,
           scope
         },
-        isNew,
         res => {
           if (res.success) {
             if (newLayout) _applyLayout(newLayout);
@@ -613,7 +612,7 @@ const useLayout = (props, dockRef) => {
       off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.DELETE_DOC);
       off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.SAVE_DOC);
     };
-  }, [on, call, emit, off, _updateDocDirty, updateTabId, _closeTab]);
+  }, [on, call, off, _updateDocDirty, updateTabId, _closeTab]);
 
   /**
    * Load workspace
@@ -644,7 +643,7 @@ const useLayout = (props, dockRef) => {
     return () => {
       workspaceManager.destroy();
     };
-  }, [workspaceManager, on, call, _closeTab, _getTabData, open]);
+  }, [workspaceManager, _getTabData]);
 
   //========================================================================================
   /*                                                                                      *

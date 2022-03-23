@@ -1,6 +1,10 @@
 import { Document } from "@mov-ai/mov-fe-lib-core";
 import i18n from "../../i18n/i18n";
-import { PLUGINS, ALERT_SEVERITIES } from "../../utils/Constants";
+import {
+  PLUGINS,
+  ALERT_SEVERITIES,
+  SAVE_OUTDATED_DOC_ACTIONS
+} from "../../utils/Constants";
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from "../../utils/Messages";
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
 import docsFactory from "./docs";
@@ -159,22 +163,52 @@ class DocManager extends IDEPlugin {
   /**
    * Update existing document
    * @param {{name: String, scope: String}} modelKey
-   * @param {String} isNew : Used to determine if it's a new file and prompt the user for a name or if we are just saving an old file
    * @param {Function} callback : Used to call said function after all is done (more reliable than a .then)
    * @returns {Promise<Model>}
    */
-  save(modelKey, isNew, callback) {
+  async save(modelKey, callback) {
     const { name, scope } = modelKey;
 
-    if (!isNew) return this.doSave(modelKey, null, callback);
-    if (this.saveStack.has(`${name}_${scope}`)) return;
+    const thisDoc = await this.read(modelKey);
+    const { isNew, isDirty, isOutdated } = thisDoc;
 
+    if (!isDirty) return;
+    if (!isNew && !isOutdated) return this.doSave(modelKey, callback);
+
+    if (this.saveStack.has(`${name}_${scope}`)) return;
     this.saveStack.set(`${name}_${scope}`, { name, scope });
-    this.call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
+
+    if (isOutdated) {
+      return this.call(
+        PLUGINS.DIALOG.NAME,
+        PLUGINS.DIALOG.CALL.SAVE_OUTDATED_DOC,
+        {
+          name,
+          scope,
+          onSubmit: action => {
+            switch (action) {
+              case SAVE_OUTDATED_DOC_ACTIONS.UPDATE_DOC:
+                // TODO this is not working, needs development from https://movai.atlassian.net/browse/FP-1621
+                this.reloadDoc(modelKey);
+                this.saveStack.delete(`${name}_${scope}`);
+                break;
+              case SAVE_OUTDATED_DOC_ACTIONS.OVERWRITE_DOC:
+                this.doSave(modelKey, callback);
+                break;
+              case SAVE_OUTDATED_DOC_ACTIONS.CANCEL:
+              default:
+                return;
+            }
+          },
+          onClose: () => this.saveStack.delete(`${name}_${scope}`)
+        }
+      );
+    }
+
+    return this.call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
       scope,
       placeholder: name,
-      customId: `dialog_${name}_${scope}`,
-      onSubmit: newName => this.doSave(modelKey, newName, callback),
+      onSubmit: newName => this.doSave(modelKey, callback, newName),
       onClose: () => this.saveStack.delete(`${name}_${scope}`)
     });
   }
@@ -186,7 +220,7 @@ class DocManager extends IDEPlugin {
    * @param {Function} callback : Used to call said function after all is done (more reliable than a .then)
    * @returns {Promise<Model>}
    */
-  async doSave(modelKey, newName, callback) {
+  async doSave(modelKey, callback, newName) {
     const { name, scope } = modelKey;
     let returnMessage = { success: false };
 

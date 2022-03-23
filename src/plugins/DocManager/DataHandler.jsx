@@ -11,13 +11,11 @@ const DataHandler = props => {
    * Save document
    * @param {String} newName : Document name (used to set document name when creating a new document)
    */
-  const save = isNew => {
-    call(
-      PLUGINS.DOC_MANAGER.NAME,
-      PLUGINS.DOC_MANAGER.CALL.SAVE,
-      { scope, name },
-      isNew
-    );
+  const save = () => {
+    call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.SAVE, {
+      scope,
+      name
+    });
   };
 
   /**

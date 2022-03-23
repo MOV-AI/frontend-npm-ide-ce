@@ -1,7 +1,8 @@
 import ReactDOM from "react-dom";
 import { SelectScopeModal } from "@mov-ai/mov-fe-lib-react";
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
-import { PLUGINS } from "../../utils/Constants";
+import { randomId } from "../../utils/Utils";
+import { PLUGINS, SAVE_OUTDATED_DOC_ACTIONS } from "../../utils/Constants";
 import { withTheme } from "../../decorators/withTheme";
 import ConfirmationDialog from "./components/ConfirmationDialog/ConfirmationDialog";
 import NewDocumentDialog from "./components/FormDialog/NewDocumentDialog";
@@ -38,7 +39,7 @@ class Dialog extends IDEPlugin {
       <AlertDialog
         title={data.title}
         message={data.message}
-        onClose={() => this._handleDialogClose(data.onClose)}
+        onClose={() => this._handleDialogClose(targetElement, data.onClose)}
       />,
       targetElement
     );
@@ -56,7 +57,7 @@ class Dialog extends IDEPlugin {
         onSubmit={data.onSubmit}
         message={data.message}
         submitText={data.submitText}
-        onClose={() => this._handleDialogClose(data.onClose)}
+        onClose={() => this._handleDialogClose(targetElement, data.onClose)}
       />,
       targetElement
     );
@@ -67,7 +68,7 @@ class Dialog extends IDEPlugin {
    * @param {*} data
    */
   newDocument(data) {
-    const targetElement = this._handleDialogOpen(data.customId);
+    const targetElement = this._handleDialogOpen();
     ReactDOM.render(
       <NewDocumentDialog
         call={this.call}
@@ -76,7 +77,7 @@ class Dialog extends IDEPlugin {
         placeholder={data.placeholder}
         scope={data.scope}
         onSubmit={data.onSubmit}
-        onClose={() => this._handleDialogClose(data.onClose, data.customId)}
+        onClose={() => this._handleDialogClose(targetElement, data.onClose)}
       />,
       targetElement
     );
@@ -96,7 +97,7 @@ class Dialog extends IDEPlugin {
         loadingMessage={"Copying document"}
         submitText={"Copy"}
         onSubmit={data.onSubmit}
-        onClose={() => this._handleDialogClose(data.onClose)}
+        onClose={() => this._handleDialogClose(targetElement, data.onClose)}
       />,
       targetElement
     );
@@ -130,7 +131,7 @@ class Dialog extends IDEPlugin {
         submitText={submitText}
         onSubmit={onSubmit}
         onValidation={onValidation}
-        onClose={() => this._handleDialogClose(onClose)}
+        onClose={() => this._handleDialogClose(targetElement, onClose)}
       />,
       targetElement
     );
@@ -158,7 +159,7 @@ class Dialog extends IDEPlugin {
         message={message}
         actions={actions}
         onSubmit={data.onSubmit}
-        onClose={() => this._handleDialogClose(data.onClose)}
+        onClose={() => this._handleDialogClose(targetElement, data.onClose)}
       />,
       targetElement
     );
@@ -172,9 +173,11 @@ class Dialog extends IDEPlugin {
       "This document has recent updates in the Database. The version you are working is outdated.\n\nIf you update document your changes will be lost.";
     // Set dialog actions
     const actions = {
-      updateDoc: { label: "Update document" },
-      overwriteDoc: { label: "Overwrite document" },
-      cancel: { label: "Cancel" }
+      [SAVE_OUTDATED_DOC_ACTIONS.UPDATE_DOC]: { label: "Update document" },
+      [SAVE_OUTDATED_DOC_ACTIONS.OVERWRITE_DOC]: {
+        label: "Overwrite document"
+      },
+      [SAVE_OUTDATED_DOC_ACTIONS.CANCEL]: { label: "Cancel" }
     };
     // Show dialog
     ReactDOM.render(
@@ -183,7 +186,7 @@ class Dialog extends IDEPlugin {
         message={message}
         actions={actions}
         onSubmit={data.onSubmit}
-        onClose={() => this._handleDialogClose(data.onClose)}
+        onClose={() => this._handleDialogClose(targetElement, data.onClose)}
       />,
       targetElement
     );
@@ -204,7 +207,7 @@ class Dialog extends IDEPlugin {
         actions={actions}
         submitText={submitText}
         onSubmit={onSubmit}
-        onClose={() => this._handleDialogClose(data.onClose)}
+        onClose={() => this._handleDialogClose(targetElement, data.onClose)}
       >
         <Component {...props} />
       </AppDialog>,
@@ -223,7 +226,7 @@ class Dialog extends IDEPlugin {
     ReactDOM.render(
       <DialogComponent
         {...data}
-        onClose={() => this._handleDialogClose(data.onClose)}
+        onClose={() => this._handleDialogClose(targetElement, data.onClose)}
       />,
       targetElement
     );
@@ -234,14 +237,14 @@ class Dialog extends IDEPlugin {
    * @param {*} data : Modal props
    */
   selectScopeModal(data) {
-    const { onSubmit, message, selected, scopeList } = data;
+    const { onSubmit, message, selected, scopeList, onClose } = data;
     const targetElement = this._handleDialogOpen();
     const ThemedModal = withTheme(SelectScopeModal);
 
     // Handle submit
     const handleDialogSubmit = selectedItem => {
       onSubmit(selectedItem);
-      this._handleDialogClose();
+      this._handleDialogClose(targetElement, onClose);
     };
 
     // Show dialog
@@ -252,7 +255,7 @@ class Dialog extends IDEPlugin {
         selected={selected}
         allowArchive={false}
         scopeList={scopeList}
-        onCancel={() => this._handleDialogClose(data.onClose)}
+        onCancel={() => this._handleDialogClose(targetElement, onClose)}
         onSubmit={handleDialogSubmit}
       />,
       targetElement
@@ -273,7 +276,7 @@ class Dialog extends IDEPlugin {
     document.body.classList.add(Dialog.BODY_CLASS_NAME);
     const containerElement = document.getElementById("alertPanel");
     const targetElement = document.createElement("div");
-    targetElement.id = customId || Dialog.TARGET_ELEMENT_ID;
+    targetElement.id = randomId();
     containerElement.appendChild(targetElement);
     return targetElement;
   }
@@ -281,11 +284,8 @@ class Dialog extends IDEPlugin {
   /**
    * @private Handle dialog close : Unmount dialog component and remove target element
    */
-  _handleDialogClose(onClose, customId) {
+  _handleDialogClose(targetElement, onClose) {
     document.body.classList.remove(Dialog.BODY_CLASS_NAME);
-    const targetElement = document.getElementById(
-      customId || Dialog.TARGET_ELEMENT_ID
-    );
     ReactDOM.unmountComponentAtNode(targetElement);
     targetElement.parentNode.removeChild(targetElement);
     onClose && onClose();

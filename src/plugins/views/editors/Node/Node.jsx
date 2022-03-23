@@ -334,7 +334,6 @@ const Node = (props, ref) => {
                 scope,
                 name: newName
               },
-              false,
               res => {
                 if (res.success) {
                   const newTabData = {
