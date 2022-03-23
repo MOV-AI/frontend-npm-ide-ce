@@ -1,0 +1,11 @@
+{
+    "Callback": {
+        "place_holder": {
+            "Label": "place_holder",
+            "User": "filipa",
+            "Code": "#print(\"No callback required\")",
+            "Message": "movai_msgs/Any",
+            "VersionDelta": {}
+        }
+    }
+}
