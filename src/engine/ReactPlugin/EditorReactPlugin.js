@@ -51,6 +51,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       save,
       instance,
       activateKeyBind,
+      deactivateKeyBind,
       initRightMenu,
       updateRightMenu
     } = props;
@@ -153,7 +154,11 @@ export function withEditorPlugin(ReactComponent, methods = []) {
     ]);
 
     return (
-      <div onFocus={activateEditor} className={`container-${scope}`}>
+      <div
+        onFocus={activateEditor}
+        onBlur={deactivateKeyBind}
+        className={`container-${scope}`}
+      >
         <RefComponent
           {...props}
           activateEditor={activateEditor}
