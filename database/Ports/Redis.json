@@ -1,0 +1,43 @@
+{
+    "Ports": {
+        "Redis/Subscriber": {
+            "Data": {
+                "Message": "redis_sub",
+                "Package": "movai_msgs"
+            },
+            "In": {
+                "in": {
+                    "Callback": "place_holder",
+                    "LinkEnabled": false,
+                    "Message": "&",
+                    "Parameter": {
+                        "Pattern": {}
+                    },
+                    "Protocol": "Subscriber",
+                    "Transport": "Redis"
+                }
+            },
+            "Label": "Redis/Subscriber"
+        },
+        "Redis/VarSubscriber": {
+            "Data": {
+                "Message": "redis_sub",
+                "Package": "movai_msgs"
+            },
+            "In": {
+                "in": {
+                    "Callback": "place_holder",
+                    "LinkEnabled": false,
+                    "Message": "&",
+                    "Parameter": {
+                        "Type": "Node",
+                        "Variable": ""
+                    },
+                    "Protocol": "VarSubscriber",
+                    "Transport": "Redis"
+                }
+            },
+            "Label": "Redis/VarSubscriber"
+        }
+    }
+}

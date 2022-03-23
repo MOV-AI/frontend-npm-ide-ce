@@ -1,0 +1,62 @@
+{
+    "Ports": {
+        "ROS2/Publisher": {
+            "Label": "ROS2/Publisher",
+            "Data": {
+                "type": "ROS1_msg"
+            },
+            "Out": {
+                "out": {
+                    "Transport": "ROS2",
+                    "Protocol": "Publisher",
+                    "Message": "&",
+                    "LinkEnabled": true
+                }
+            }
+        },
+        "ROS2/ServiceClient": {
+            "Label": "ROS2/ServiceClient",
+            "Data": {
+                "type": "ROS1_srv"
+            },
+            "Out": {
+                "out": {
+                    "Transport": "ROS2",
+                    "Protocol": "ServiceClient",
+                    "Message": "&",
+                    "LinkEnabled": true
+                }
+            }
+        },
+        "ROS2/ServiceServer": {
+            "Label": "ROS2/ServiceServer",
+            "Data": {
+                "type": "ROS1_srv"
+            },
+            "In": {
+                "in": {
+                    "Transport": "ROS2",
+                    "Protocol": "ServiceServer",
+                    "Message": "&",
+                    "Callback": "place_holder",
+                    "LinkEnabled": true
+                }
+            }
+        },
+        "ROS2/Subscriber": {
+            "Label": "ROS2/Subscriber",
+            "Data": {
+                "type": "ROS1_msg"
+            },
+            "In": {
+                "in": {
+                    "Transport": "ROS2",
+                    "Protocol": "Subscriber",
+                    "Message": "&",
+                    "Callback": "place_holder",
+                    "LinkEnabled": true
+                }
+            }
+        }
+    }
+}

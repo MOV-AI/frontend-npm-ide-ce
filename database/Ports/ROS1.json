@@ -1,0 +1,345 @@
+{
+    "Ports": {
+        "ROS1/ActionClient": {
+            "Label": "ROS1/ActionClient",
+            "Data": {
+                "type": "ROS1_action"
+            },
+            "In": {
+                "result": {
+                    "Transport": "ROS1",
+                    "Protocol": "ActionClient",
+                    "Message": "&Result",
+                    "Callback": "place_holder",
+                    "LinkEnabled": true
+                },
+                "status": {
+                    "Transport": "ROS1",
+                    "Protocol": "ActionClient",
+                    "Message": "actionlib_msgs/GoalStatusArray",
+                    "Callback": "place_holder",
+                    "LinkEnabled": true
+                },
+                "feedback": {
+                    "Transport": "ROS1",
+                    "Protocol": "ActionClient",
+                    "Message": "&Feedback",
+                    "Callback": "place_holder",
+                    "LinkEnabled": true
+                }
+            },
+            "Out": {
+                "goal": {
+                    "Transport": "ROS1",
+                    "Protocol": "Action",
+                    "Message": "&Goal",
+                    "LinkEnabled": true
+                },
+                "cancel": {
+                    "Transport": "ROS1",
+                    "Protocol": "Action",
+                    "Message": "actionlib_msgs/GoalID",
+                    "LinkEnabled": true
+                }
+            }
+        },
+        "ROS1/ActionServer": {
+            "Label": "ROS1/ActionServer",
+            "Data": {
+                "type": "ROS1_action"
+            },
+            "In": {
+                "cancel": {
+                    "Transport": "ROS1",
+                    "Protocol": "Subscriber",
+                    "Message": "actionlib_msgs/GoalID",
+                    "LinkEnabled": true
+                },
+                "goal": {
+                    "Transport": "ROS1",
+                    "Protocol": "Action",
+                    "Message": "&Goal",
+                    "LinkEnabled": true
+                }
+            },
+            "Out": {
+                "result": {
+                    "Transport": "ROS1",
+                    "Protocol": "Publisher",
+                    "Message": "&Result",
+                    "LinkEnabled": true
+                },
+                "feedback": {
+                    "Transport": "ROS1",
+                    "Protocol": "Publisher",
+                    "Message": "&Feedback",
+                    "LinkEnabled": true
+                },
+                "status": {
+                    "Transport": "ROS1",
+                    "Protocol": "Publisher",
+                    "Message": "actionlib_msgs/GoalStatusArray",
+                    "LinkEnabled": true
+                }
+            }
+        },
+        "ROS1/Bag": {
+            "Label": "ROS1/Bag",
+            "Out": {
+                "out": {
+                    "Transport": "ROS1",
+                    "Protocol": "Bag",
+                    "Message": "&",
+                    "Parameter": {
+                        "FileName": "rosbag"
+                    },
+                    "LinkEnabled": true
+                }
+            },
+            "Data": {}
+        },
+        "ROS1/NodeletClient": {
+            "Label": "ROS1/NodeletClient",
+            "Data": {
+                "Package": "movai_msgs",
+                "Message": "Nodelet"
+            },
+            "Out": {
+                "out": {
+                    "Transport": "MovAI",
+                    "Protocol": "Nodelet",
+                    "Message": "&",
+                    "LinkEnabled": true
+                }
+            }
+        },
+        "ROS1/NodeletServer": {
+            "Label": "MovAI/NodeletServer",
+            "Data": {
+                "Package": "movai_msgs",
+                "Message": "Nodelet"
+            },
+            "In": {
+                "in": {
+                    "Transport": "MovAI",
+                    "Protocol": "Nodelet",
+                    "Message": "&",
+                    "LinkEnabled": true
+                }
+            }
+        },
+        "ROS1/ParameterServer": {
+            "Label": "ROS1/ParameterServer",
+            "Data": {
+                "Package": "movai_msgs",
+                "Message": "Parameter"
+            },
+            "Out": {
+                "out": {
+                    "Transport": "ROS1",
+                    "Protocol": "ParameterServer",
+                    "Message": "&",
+                    "Parameter": {
+                        "Namespace": ""
+                    },
+                    "LinkEnabled": false
+                }
+            }
+        },
+        "ROS1/PluginClient": {
+            "Label": "MovAI/PluginClient",
+            "Data": {
+                "Package": "movai_msgs",
+                "Message": "Plugin"
+            },
+            "Out": {
+                "out": {
+                    "Transport": "MovAI",
+                    "Protocol": "Plugin",
+                    "Message": "&",
+                    "LinkEnabled": true
+                }
+            }
+        },
+        "ROS1/PluginServer": {
+            "Label": "MovAI/PluginServer",
+            "Data": {
+                "Package": "movai_msgs",
+                "Message": "Plugin"
+            },
+            "In": {
+                "in": {
+                    "Transport": "MovAI",
+                    "Protocol": "Plugin",
+                    "Message": "&",
+                    "LinkEnabled": true
+                }
+            }
+        },
+        "ROS1/Publisher": {
+            "Label": "ROS1/Publisher",
+            "Data": {
+                "type": "ROS1_msg"
+            },
+            "Out": {
+                "out": {
+                    "Transport": "ROS1",
+                    "Protocol": "Publisher",
+                    "Message": "&",
+                    "LinkEnabled": true
+                }
+            }
+        },
+        "ROS1/ReconfigureClient": {
+            "Label": "ROS1/ReconfigureClient",
+            "Data": {
+                "Package": "movai_msgs",
+                "Message": "Reconfigure"
+            },
+            "Out": {
+                "out": {
+                    "Transport": "ROS1",
+                    "Protocol": "Reconfigure",
+                    "Message": "&",
+                    "LinkEnabled": true
+                }
+            }
+        },
+        "ROS1/ReconfigureServer": {
+            "Label": "ROS1/ReconfigureServer",
+            "In": {
+                "in": {
+                    "Transport": "ROS1",
+                    "Protocol": "Reconfigure",
+                    "Message": "&",
+                    "LinkEnabled": true
+                }
+            },
+            "Data": {}
+        },
+        "ROS1/ServiceClient": {
+            "Label": "ROS1/ServiceClient",
+            "Data": {
+                "type": "ROS1_srv"
+            },
+            "Out": {
+                "out": {
+                    "Transport": "ROS1",
+                    "Protocol": "Service",
+                    "Message": "&",
+                    "LinkEnabled": true
+                }
+            }
+        },
+        "ROS1/ServiceServer": {
+            "Label": "ROS1/ServiceServer",
+            "Data": {
+                "type": "ROS1_srv"
+            },
+            "In": {
+                "in": {
+                    "Transport": "ROS1",
+                    "Protocol": "Service",
+                    "Message": "&",
+                    "Callback": "place_holder",
+                    "LinkEnabled": true
+                }
+            }
+        },
+        "ROS1/Subscriber": {
+            "Label": "ROS1/Subscriber",
+            "Data": {
+                "type": "ROS1_msg"
+            },
+            "In": {
+                "in": {
+                    "Transport": "ROS1",
+                    "Protocol": "Subscriber",
+                    "Message": "&",
+                    "Callback": "place_holder",
+                    "LinkEnabled": true
+                }
+            }
+        },
+        "ROS1/TFPublisher": {
+            "Label": "ROS1/TFPublisher",
+            "Data": {
+                "Package": "movai_msgs",
+                "Message": "TF"
+            },
+            "Out": {
+                "out": {
+                    "Transport": "ROS1",
+                    "Protocol": "TF",
+                    "Message": "&",
+                    "Parameter": {
+                        "Child": "from",
+                        "Parent": "to"
+                    },
+                    "LinkEnabled": true
+                }
+            }
+        },
+        "ROS1/TFSubscriber": {
+            "Data": {
+                "Message": "TF",
+                "Package": "movai_msgs"
+            },
+            "In": {
+                "in": {
+                    "Callback": "place_holder",
+                    "LinkEnabled": true,
+                    "Message": "&",
+                    "Parameter": {
+                        "Child": "from",
+                        "Frequency": 20,
+                        "Parent": "to"
+                    },
+                    "Protocol": "TF",
+                    "Transport": "ROS1"
+                }
+            },
+            "Label": "ROS1/TFSubscriber"
+        },
+        "ROS1/Timer": {
+            "Data": {
+                "Message": "Timer",
+                "Package": "movai_msgs"
+            },
+            "In": {
+                "in": {
+                    "Callback": "place_holder",
+                    "LinkEnabled": false,
+                    "Message": "&",
+                    "Parameter": {
+                        "Frequency": 10,
+                        "Oneshot": false
+                    },
+                    "Protocol": "Timer",
+                    "Transport": "ROS1"
+                }
+            },
+            "Label": "ROS1/Timer"
+        },
+        "ROS1/TopicHz": {
+            "Data": {
+                "Message": "Any",
+                "Package": "movai_msgs"
+            },
+            "In": {
+                "in": {
+                    "Callback": "place_holder",
+                    "LinkEnabled": true,
+                    "Message": "&",
+                    "Parameter": {
+                        "Frequency": 1,
+                        "WindowSize": 20
+                    },
+                    "Protocol": "TopicHz",
+                    "Transport": "ROS1"
+                }
+            },
+            "Label": "ROS1/TopicHz"
+        }
+    }
+}

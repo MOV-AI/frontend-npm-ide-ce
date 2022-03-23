@@ -1,0 +1,220 @@
+{
+    "Ports": {
+        "MovAI/ContextClient": {
+            "Data": {
+                "Message": "Context",
+                "Package": "movai_msgs"
+            },
+            "In": {
+                "in": {
+                    "Callback": "place_holder",
+                    "LinkEnabled": false,
+                    "Message": "&",
+                    "Parameter": {
+                        "Namespace": "global"
+                    },
+                    "Protocol": "ContextClientIn",
+                    "Transport": "MovAI"
+                }
+            },
+            "Label": "MovAI/ContextClient",
+            "Out": {
+                "out": {
+                    "LinkEnabled": false,
+                    "Message": "&",
+                    "Parameter": {
+                        "Namespace": "global"
+                    },
+                    "Protocol": "ContextClientOut",
+                    "Transport": "MovAI"
+                }
+            }
+        },
+        "MovAI/ContextServer": {
+            "Data": {
+                "Message": "Context",
+                "Package": "movai_msgs"
+            },
+            "In": {
+                "in": {
+                    "Callback": "place_holder",
+                    "LinkEnabled": false,
+                    "Message": "&",
+                    "Parameter": {
+                        "Namespace": "global"
+                    },
+                    "Protocol": "ContextServerIn",
+                    "Transport": "MovAI"
+                }
+            },
+            "Label": "MovAI/ContextServer",
+            "Out": {
+                "out": {
+                    "LinkEnabled": false,
+                    "Message": "&",
+                    "Parameter": {
+                        "Namespace": "global"
+                    },
+                    "Protocol": "ContextServerOut",
+                    "Transport": "MovAI"
+                }
+            }
+        },
+        "MovAI/Dependency": {
+            "Data": {
+                "Message": "Dependency",
+                "Package": "movai_msgs"
+            },
+            "In": {
+                "in": {
+                    "LinkEnabled": true,
+                    "Message": "&",
+                    "Protocol": "Dependency",
+                    "Transport": "MovAI"
+                }
+            },
+            "Label": "MovAI/Dependency"
+        },
+        "MovAI/Depends": {
+            "Data": {
+                "Message": "Dependency",
+                "Package": "movai_msgs"
+            },
+            "Label": "MovAI/Depends",
+            "Out": {
+                "out": {
+                    "LinkEnabled": true,
+                    "Message": "&",
+                    "Protocol": "Depends",
+                    "Transport": "MovAI"
+                }
+            }
+        },
+        "MovAI/Exit": {
+            "Data": {
+                "Message": "Exit",
+                "Package": "movai_msgs"
+            },
+            "In": {
+                "in": {
+                    "Callback": "place_holder",
+                    "LinkEnabled": false,
+                    "Message": "&",
+                    "Protocol": "Exit",
+                    "Transport": "MovAI"
+                }
+            },
+            "Label": "MovAI/Exit"
+        },
+        "MovAI/Init": {
+            "Data": {
+                "Message": "Init",
+                "Package": "movai_msgs"
+            },
+            "In": {
+                "in": {
+                    "Callback": "place_holder",
+                    "LinkEnabled": false,
+                    "Message": "&",
+                    "Protocol": "Init",
+                    "Transport": "MovAI"
+                }
+            },
+            "Info": "Provides an initial callback when a GD_Node is launched.It runs after the outputs ports are launched and before the rest of the inputs.",
+            "Label": "MovAI/Init"
+        },
+        "MovAI/StateMachine": {
+            "Data": {
+                "Message": "StateMachine",
+                "Package": "movai_msgs"
+            },
+            "In": {
+                "in": {
+                    "LinkEnabled": false,
+                    "Message": "&",
+                    "Parameter": {
+                        "Frequency": "10",
+                        "StateMachine": "random_id"
+                    },
+                    "Protocol": "StateMachine",
+                    "Transport": "MovAI"
+                }
+            },
+            "Label": "MovAI/StateMachine"
+        },
+        "MovAI/TransitionFor": {
+            "Data": {
+                "Message": "Transition",
+                "Package": "movai_msgs"
+            },
+            "Label": "MovAI/TransitionOut",
+            "Out": {
+                "out": {
+                    "LinkEnabled": true,
+                    "Message": "&",
+                    "Protocol": "Transition",
+                    "Transport": "MovAI"
+                }
+            }
+        },
+        "MovAI/TransitionTo": {
+            "Data": {
+                "Message": "Transition",
+                "Package": "movai_msgs"
+            },
+            "In": {
+                "in": {
+                    "Callback": "place_holder",
+                    "LinkEnabled": true,
+                    "Message": "&",
+                    "Protocol": "Transition",
+                    "Transport": "MovAI"
+                }
+            },
+            "Label": "MovAI/TransitionIn"
+        },
+        "MovAI/WidgetAio": {
+            "In": {
+                "data_in": {
+                    "LinkEnabled": false,
+                    "Protocol": "Websocket",
+                    "Transport": "AioHttp"
+                },
+                "sub": {
+                    "LinkEnabled": false,
+                    "Protocol": "Subscriber",
+                    "Transport": "Redis"
+                }
+            },
+            "Info": "Widget with aio_http websocket",
+            "Label": "MovAI/WidgetAio",
+            "Data": {}
+        },
+        "MovAI/Widget": {
+            "Data": {
+                "Message": "Widget",
+                "Package": "movai_msgs"
+            },
+            "In": {
+                "data_in": {
+                    "LinkEnabled": false,
+                    "Protocol": "Subscriber",
+                    "Transport": "SocketIOFlask"
+                },
+                "sub": {
+                    "LinkEnabled": false,
+                    "Protocol": "Subscriber",
+                    "Transport": "Redis"
+                }
+            },
+            "Label": "MovAI/Widget",
+            "Out": {
+                "data_out": {
+                    "LinkEnabled": false,
+                    "Protocol": "Publisher",
+                    "Transport": "SocketIOFlask"
+                }
+            }
+        }
+    }
+}
