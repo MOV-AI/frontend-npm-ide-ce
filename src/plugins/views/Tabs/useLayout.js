@@ -13,7 +13,7 @@ import {
   DOCK_MODES,
   PLUGINS
 } from "../../../utils/Constants";
-import { getIconByScope, getHomeTab } from "../../../utils/Utils";
+import { getIconByScope, getHomeTab, buildDocPath } from "../../../utils/Utils";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Workspace from "../../../utils/Workspace";
 
@@ -138,26 +138,19 @@ const useLayout = (props, dockRef) => {
   const _saveDoc = useCallback(
     (docData, newLayout) => {
       const { name, scope } = docData;
-      call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.SAVE, {
-        name,
-        scope
-      })
-        .then(res => {
+      call(
+        PLUGINS.DOC_MANAGER.NAME,
+        PLUGINS.DOC_MANAGER.CALL.SAVE,
+        {
+          name,
+          scope
+        },
+        res => {
           if (res.success) {
             if (newLayout) _applyLayout(newLayout);
-            call(PLUGINS.ALERT.NAME, PLUGINS.ALERT.CALL.SHOW, {
-              message: "Saved successfully",
-              severity: "success"
-            });
           }
-        })
-        .catch(err => {
-          console.warn("failed to save", err);
-          call(PLUGINS.ALERT.NAME, PLUGINS.ALERT.CALL.SHOW, {
-            message: "Failed to save",
-            severity: "error"
-          });
-        });
+        }
+      );
     },
     [call, _applyLayout]
   );
@@ -188,16 +181,18 @@ const useLayout = (props, dockRef) => {
    * @param {LayoutData} newLayout : New layout
    */
   const _closeDirtyTab = useCallback(
-    (name, scope, newLayout) => {
+    (document, newLayout) => {
+      const { name, scope } = document;
+
       call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CLOSE_DIRTY_DOC, {
         name,
         scope,
         onSubmit: action => {
           const triggerAction = {
             // Save changes and close document
-            save: () => _saveDoc({ name, scope }, newLayout),
+            save: () => _saveDoc(document, newLayout),
             // Discard changes and close document
-            dontSave: () => _discardChanges({ name, scope }, newLayout)
+            dontSave: () => _discardChanges(document, newLayout)
           };
           return action in triggerAction ? triggerAction[action]() : false;
         }
@@ -215,7 +210,8 @@ const useLayout = (props, dockRef) => {
     (newLayout, tabId) => {
       const { name, scope, isNew, isDirty } = tabsById.current.get(tabId);
       if (isDirty) {
-        _closeDirtyTab(name, scope, newLayout);
+        const document = { name, scope, isNew };
+        _closeDirtyTab(document, newLayout);
       } else {
         // Remove doc locally if is new and not dirty
         if (isNew)
@@ -562,7 +558,7 @@ const useLayout = (props, dockRef) => {
    * @returns {string} active tab id
    */
   const getActiveTab = useCallback(() => {
-    return activeTabId.current;
+    return tabsById.current.get(activeTabId.current);
   }, []);
 
   //========================================================================================
@@ -585,12 +581,38 @@ const useLayout = (props, dockRef) => {
     on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.DELETE_DOC, data =>
       _closeTab(data.url)
     );
+
+    // We want to reload the tabData if it was a new tab
+    on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.SAVE_DOC, data => {
+      if (data.newName) {
+        const doc = data.doc;
+        const scope = doc.type;
+        const name = data.newName;
+        const newTabData = {
+          id: buildDocPath({
+            workspace: doc.workspace,
+            scope,
+            name
+          }),
+          name,
+          scope
+        };
+
+        updateTabId(doc.path.replace(`/${doc.version}`, ""), newTabData);
+
+        call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.RELOAD_DOC, {
+          scope,
+          name
+        });
+      }
+    });
     // Unsubscribe on unmount
     return () => {
       off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.UPDATE_DOC_DIRTY);
       off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.DELETE_DOC);
+      off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.SAVE_DOC);
     };
-  }, [on, emit, off, _updateDocDirty, _closeTab]);
+  }, [on, call, off, _updateDocDirty, updateTabId, _closeTab]);
 
   /**
    * Load workspace
@@ -624,7 +646,7 @@ const useLayout = (props, dockRef) => {
     return () => {
       workspaceManager.destroy();
     };
-  }, [workspaceManager, on, call, _closeTab, _getTabData, open]);
+  }, [workspaceManager, _getTabData, open]);
 
   //========================================================================================
   /*                                                                                      *
