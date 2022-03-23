@@ -32,10 +32,10 @@ export const DATA_TYPES = {
 };
 
 export const SCOPES = {
-  Callback: "Callback",
-  Configuration: "Configuration",
-  Flow: "Flow",
-  Node: "Node"
+  CALLBACK: "Callback",
+  CONFIGURATION: "Configuration",
+  NODE: "Node",
+  FLOW: "Flow"
 };
 
 export const HOSTS = {
@@ -176,6 +176,12 @@ export const DIALOG_TITLE = {
   COMMANDS: "Command Line"
 };
 
+export const SAVE_OUTDATED_DOC_ACTIONS = {
+  UPDATE_DOC: "updateDoc",
+  OVERWRITE_DOC: "overwriteDoc",
+  CANCEL: "cancel"
+};
+
 export const DEFAULT_KEY_VALUE_DATA = {
   name: "",
   description: "",
@@ -186,6 +192,13 @@ export const DEFAULT_KEY_VALUE_DATA = {
 export const ROS_VALID_NAMES = new RegExp(
   /(?!.*__.*)^[a-zA-Z~/]{1}?[a-zA-Z0-9_/]*$/
 );
+
+export const ALERT_SEVERITIES = {
+  SUCCESS: "success",
+  ERROR: "error",
+  INFO: "info",
+  WARNING: "warning"
+};
 
 //========================================================================================
 /*                                                                                      *

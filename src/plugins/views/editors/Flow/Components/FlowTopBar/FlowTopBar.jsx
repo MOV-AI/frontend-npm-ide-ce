@@ -1,7 +1,6 @@
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { makeStyles } from "@material-ui/core/styles";
 import {
   Typography,
   Tooltip,
@@ -17,48 +16,20 @@ import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import StopIcon from "@material-ui/icons/Stop";
 import { RobotManager } from "@mov-ai/mov-fe-lib-core";
 import Workspace from "../../../../../../utils/Workspace";
-import { PLUGINS } from "../../../../../../utils/Constants";
+import { PLUGINS, ALERT_SEVERITIES } from "../../../../../../utils/Constants";
+import { ERROR_MESSAGES } from "../../../../../../utils/Messages";
 import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
 import { ROBOT_BLACKLIST } from "../../Constants/constants";
 import useNodeStatusUpdate from "./hooks/useNodeStatusUpdate";
 
-const useStyles = makeStyles(theme => ({
-  flowLink: {
-    textDecoration: "underline",
-    cursor: "pointer"
-  },
-  buttonPill: {
-    borderRadius: "99px"
-  },
-  defaultRobot: {
-    fontWeight: "bold"
-  },
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 170,
-    maxWidth: 350,
-    "& i": {
-      marginRight: 15
-    }
-  },
-  whichFlowText: {
-    marginLeft: theme.spacing(5),
-    fontSize: "15px",
-    flexGrow: 1
-  },
-  visualizationToggle: {
-    marginRight: "10px"
-  },
-  grow: {
-    flexGrow: 1
-  }
-}));
+import { buttonStyles, flowTopBarStyles } from "./styles";
 
+const BACKEND_CALLBACK_NAME = "backend.FlowTopBar";
 const FEEDBACK_TIMEOUT = 10000;
 
 const ButtonTopBar = React.forwardRef((props, ref) => {
   const { disabled, onClick, children } = props;
-  const classes = useStyles();
+  const classes = buttonStyles();
   return (
     <Button
       ref={ref}
@@ -93,7 +64,7 @@ const FlowTopBar = props => {
   const [robotList, setRobotList] = React.useState({});
   const [viewMode, setViewMode] = React.useState(defaultViewMode);
   // Other hooks
-  const classes = useStyles();
+  const classes = flowTopBarStyles();
   const { t } = useTranslation();
   const { robotSubscribe, robotUnsubscribe, getFlowPath, robotStatus } =
     useNodeStatusUpdate(props, robotSelected, viewMode);
@@ -179,14 +150,16 @@ const FlowTopBar = props => {
           }
         })
         .catch(err => {
-          console.log("getRunningRobot error", err);
+          console.warn("getRunningRobot error", err);
           alert({
-            message: "Error running backend.FlowTopBar callback",
-            severity: "error"
+            message: t(ERROR_MESSAGES.ERROR_RUNNING_SPECIFIC_CALLBACK, {
+              callbackName: BACKEND_CALLBACK_NAME
+            }),
+            severity: ALERT_SEVERITIES.ERROR
           });
         });
     },
-    [initSelectedRobot, workspaceManager, alert]
+    [initSelectedRobot, workspaceManager, alert, t]
   );
 
   //========================================================================================
@@ -330,20 +303,24 @@ const FlowTopBar = props => {
           commandRobotTimeoutRef.current = setTimeout(() => {
             setLoading(false);
             alert({
-              message: `Failed to ${action.toLowerCase()} flow`,
-              severity: "error"
+              message: t("Failed to {{action}} flow", {
+                action: t(action.toLowerCase())
+              }),
+              severity: ALERT_SEVERITIES.ERROR
             });
           }, FEEDBACK_TIMEOUT);
         })
         .catch(err => {
           alert({
-            message: "Error running backend.FlowTopBar callback",
-            severity: "error"
+            message: t(ERROR_MESSAGES.ERROR_RUNNING_SPECIFIC_CALLBACK, {
+              callbackName: BACKEND_CALLBACK_NAME
+            }),
+            severity: ALERT_SEVERITIES.ERROR
           });
         });
       if (buttonDOMRef.current) buttonDOMRef.current.blur();
     },
-    [alert, canRunFlow, getFlowPath, robotSelected, setLoading]
+    [alert, canRunFlow, getFlowPath, robotSelected, setLoading, t]
   );
 
   /**
@@ -355,12 +332,19 @@ const FlowTopBar = props => {
       sendActionToRobot("START");
     } else {
       // Confirmation alert if Another flow is running!
-      const title = "Another flow is running!";
-      const message = `"${robotList[robotSelected].RobotName}" is running flow "${robotStatus.activeFlow}".\nAre you sure you want to run the flow "${id}"?`;
+      const title = t("Another flow is running!");
+      const message = t(
+        "'{{robotName}}' is running flow '{{activeFlow}}'.\nAre you sure you want to run the flow '{{id}}'?",
+        {
+          robotName: robotList[robotSelected].RobotName,
+          activeFlow: robotStatus.activeFlow,
+          id: id
+        }
+      );
       confirmationAlert({
         title,
         message,
-        submitText: "Run",
+        submitText: t("Run"),
         onSubmit: () => sendActionToRobot("START")
       });
     }
@@ -370,7 +354,8 @@ const FlowTopBar = props => {
     robotList,
     robotSelected,
     confirmationAlert,
-    sendActionToRobot
+    sendActionToRobot,
+    t
   ]);
 
   /**

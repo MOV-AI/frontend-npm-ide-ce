@@ -11,7 +11,11 @@ import {
   RadioGroup
 } from "@material-ui/core";
 import { withTheme } from "../../../../../decorators/withTheme";
-import { DATA_TYPES, DISABLED_VALUE } from "../../../../../utils/Constants";
+import {
+  DATA_TYPES,
+  DISABLED_VALUE,
+  ALERT_SEVERITIES
+} from "../../../../../utils/Constants";
 import withAlerts from "../../../../../decorators/withAlerts";
 import KeyValueEditorDialog from "../KeyValueTable/KeyValueEditorDialog";
 import useDataTypes from "../hooks/useDataTypes";
@@ -31,8 +35,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
     customValidation,
     preventRenderType,
     showValueOptions,
-    alert,
-    alertSeverities
+    alert
   } = props;
 
   // Hooks
@@ -155,7 +158,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
           return { ...res, data: dataToSubmit };
         })
         .catch(err => {
-          alert({ message: err.message, severity: alertSeverities.ERROR });
+          alert({ message: err.message, severity: ALERT_SEVERITIES.ERROR });
           return err;
         });
     },
@@ -163,7 +166,6 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
       showValueOptions,
       valueOption,
       data,
-      alertSeverities.ERROR,
       alert,
       validate,
       valueToSave,
@@ -374,8 +376,7 @@ ParameterEditorDialog.propTypes = {
   disableType: PropTypes.bool,
   customValidation: PropTypes.func,
   preventRenderType: PropTypes.bool,
-  alert: PropTypes.func,
-  alertSeverities: PropTypes.object
+  alert: PropTypes.func
 };
 
 export default withAlerts(withTheme(ParameterEditorDialog));

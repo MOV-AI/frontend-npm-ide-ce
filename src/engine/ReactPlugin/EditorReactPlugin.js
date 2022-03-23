@@ -43,72 +43,19 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       id,
       on,
       off,
-      name,
       call,
       scope,
       addKeyBind,
       removeKeyBind,
       save,
-      instance,
       activateKeyBind,
       initRightMenu,
       updateRightMenu
     } = props;
 
     /**
-     * Handle submit action on save outdated document
-     * @param {string} action : One of options ("cancel", "updateDoc", "overwriteDoc")
-     */
-    const _handleOutdatedSave = React.useCallback(
-      action => {
-        const getSaveByAction = {
-          updateDoc: () =>
-            call(
-              PLUGINS.DOC_MANAGER.NAME,
-              PLUGINS.DOC_MANAGER.CALL.RELOAD_DOC,
-              { scope, name }
-            ),
-          overwriteDoc: save
-        };
-        return action in getSaveByAction ? getSaveByAction[action]() : false;
-      },
-      [call, save, scope, name]
-    );
-
-    /**
-     * Save document :
-     *  if document is outdated => prompt alert to the user before saving
-     *  else => Proceed with saving document
-     *    if doc is new => Create document in DB
-     *    else => Update document in DB
-     */
-    const saveDocument = React.useCallback(() => {
-      // If document is outdated
-
-      if (!instance.current.isDirty) return;
-
-      if (instance.current.getOutdated()) {
-        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.SAVE_OUTDATED_DOC, {
-          name,
-          scope,
-          onSubmit: _handleOutdatedSave
-        });
-      } else {
-        instance.current.getIsNew()
-          ? call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
-              scope,
-              onSubmit: newName => save(newName)
-            })
-          : save();
-      }
-    }, [call, instance, save, _handleOutdatedSave, scope, name]);
-
-    /**
-     * Save document :
-     *  if document is outdated => prompt alert to the user before saving
-     *  else => Proceed with saving document
-     *    if doc is new => Create document in DB
-     *    else => Update document in DB
+     * Save all documents :
+     *  Saves all documents that are dirty
      */
     const saveAllDocuments = React.useCallback(() => {
       call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.SAVE_DIRTIES);
@@ -127,7 +74,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
      */
     useEffect(() => {
       initRightMenu();
-      addKeyBind(KEYBINDINGS.SAVE, saveDocument);
+      addKeyBind(KEYBINDINGS.SAVE, save);
       addKeyBind(KEYBINDINGS.SAVE_ALL, saveAllDocuments);
       on(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE, data => {
         if (data.id === id) {
@@ -138,6 +85,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       // Remove key bind on component unmount
       return () => {
         removeKeyBind(KEYBINDINGS.SAVE);
+        removeKeyBind(KEYBINDINGS.SAVE_ALL);
         off(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE);
       };
     }, [
@@ -148,7 +96,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       initRightMenu,
       on,
       off,
-      saveDocument,
+      save,
       saveAllDocuments
     ]);
 
@@ -157,7 +105,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
         <RefComponent
           {...props}
           activateEditor={activateEditor}
-          saveDocument={saveDocument}
+          saveDocument={save}
           ref={ref}
         />
       </div>

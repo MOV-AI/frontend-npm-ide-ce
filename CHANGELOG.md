@@ -10,6 +10,7 @@
 - [FP-1538 - Color between tabs now, more clearer](https://movai.atlassian.net/browse/FP-1538)
 - [FP-1509 - Saving a new document will now reload the doc](https://movai.atlassian.net/browse/FP-1509)
 - [FP-1595 - Removed unused function that contained vulnerabilities](https://movai.atlassian.net/browse/FP-1595)
+- [FP-1560 - Saving an untitled file will now always prompt for a name](https://movai.atlassian.net/browse/FP-1560)
 
 **Callback Editor**
 
