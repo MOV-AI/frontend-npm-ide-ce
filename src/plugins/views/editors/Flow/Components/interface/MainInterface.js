@@ -178,6 +178,7 @@ export default class MainInterface {
   deleteLink = linkId => {
     this.modelView.current.deleteLink(linkId);
     this.graph.deleteLinks([linkId]);
+    this.graph.validateFlow();
   };
 
   addNode = name => {

@@ -10,6 +10,7 @@ import {
   HOMETAB_PROFILE,
   DEFAULT_LAYOUT,
   DOCK_POSITIONS,
+  DOCK_MODES,
   PLUGINS
 } from "../../../utils/Constants";
 import { getIconByScope, getHomeTab, buildDocPath } from "../../../utils/Utils";
@@ -234,43 +235,42 @@ const useLayout = (props, dockRef) => {
   );
 
   /**
-   * Delete tab from layout
-   * @param {LayoutData} prevLayout : Previous layout (including tab to be removed)
-   * @param {string} tabId : Tab id
-   * @param {String} location : Layout data location (one of: "dockbox", "floatbox", "maxbox", "windowbox")
-   * @returns {BoxData} Return found box data or null if not found in location
-   */
-  const _deleteTabFromLayout = useCallback(
-    (prevLayout, tabId, location) => {
-      const newLayout = { ...prevLayout };
-      const box = _getTabContainer(newLayout[location], tabId);
-      if (box) {
-        box.tabs = box.tabs.filter(_el => _el.id !== tabId);
-        _onLayoutRemoveTab(newLayout, tabId);
-      }
-      return box;
-    },
-    [_getTabContainer, _onLayoutRemoveTab]
-  );
-
-  /**
    * Close tab : Remove from layout
    * @param {string} tabId : Tab ID (document URL)
    * @returns {LayoutData} : Layout without tab
    */
   const _closeTab = useCallback(
-    tabId => {
+    async tabId => {
       const tabData = dockRef.current.find(tabId);
       if (!tabData) return;
       const currentLayout = dockRef.current.saveLayout();
       const locations = Object.values(DOCK_POSITIONS);
       // look for tab in layout locations
       for (const location of locations) {
-        const found = _deleteTabFromLayout(currentLayout, tabId, location);
-        if (found) return;
+        const box = _getTabContainer(currentLayout[location], tabId);
+
+        if (box) {
+          // If it's in a maximized tab, let's minimize it and then call _closeTab again
+          if (location === DOCK_POSITIONS.MAX && box.tabs.length === 1) {
+            const maxboxMainTab =
+              dockRef.current.state.layout.maxbox.children[0];
+            await dockRef.current.dockMove(
+              maxboxMainTab,
+              null,
+              DOCK_MODES.MAXIMIZE
+            );
+            return _closeTab(tabId);
+          }
+
+          // Let's remove the tab
+          box.tabs = box.tabs.filter(_el => _el.id !== tabId);
+
+          // And update the Layout
+          return _onLayoutRemoveTab(currentLayout, tabId);
+        }
       }
     },
-    [dockRef, _deleteTabFromLayout]
+    [dockRef, _getTabContainer, _onLayoutRemoveTab]
   );
 
   /**
@@ -345,8 +345,8 @@ const useLayout = (props, dockRef) => {
    * @returns {Enumerable} DOCK_POSITIONS: based on if the maxbox has children
    */
   const getDefaultTabPosition = useCallback(() => {
-    if (dockRef.current.state.layout.maxbox.children.length)
-      return DOCK_POSITIONS.MAX;
+    const maximizedTabs = dockRef.current.state.layout.maxbox.children;
+    if (maximizedTabs.length) return DOCK_POSITIONS.MAX;
 
     return DOCK_POSITIONS.DOCK;
   }, [dockRef]);
@@ -358,15 +358,15 @@ const useLayout = (props, dockRef) => {
    * @param {string} tabId : The tab id to be focused
    */
   const focusExistingTab = useCallback(
-    tabId => {
+    (tabData, preventFocus) => {
       const maxboxChildren = dockRef.current.state.layout.maxbox.children;
-      dockRef.current.updateTab(tabId, null);
+      dockRef.current.updateTab(tabData.id, tabData, !preventFocus);
 
       if (
         maxboxChildren.length &&
-        !maxboxChildren[0].tabs.find(t => t.id === tabId)
+        !maxboxChildren[0].tabs.find(t => t.id === tabData.id)
       ) {
-        dockRef.current.dockMove(maxboxChildren[0], null, "maximize");
+        dockRef.current.dockMove(maxboxChildren[0], null, DOCK_MODES.MAXIMIZE);
       }
     },
     [dockRef]
@@ -383,7 +383,7 @@ const useLayout = (props, dockRef) => {
    * @param {TabData} tabData : Set Tab data in Layout
    */
   const open = useCallback(
-    tabData => {
+    (tabData, preventFocus) => {
       const tabPosition = tabData.dockPosition ?? getDefaultTabPosition();
       const position = tabData.position ?? {
         h: 500,
@@ -397,7 +397,7 @@ const useLayout = (props, dockRef) => {
 
       const existingTab = findTab(tabData.id);
       if (existingTab) {
-        focusExistingTab(tabData.id);
+        focusExistingTab(tabData, preventFocus);
         return;
       }
 
@@ -507,10 +507,10 @@ const useLayout = (props, dockRef) => {
     (newLayout, tabId, direction) => {
       const firstContainer = _getFirstContainer(newLayout.dockbox);
       const newActiveTab =
-        direction !== "remove" ? tabId : firstContainer.activeId;
+        direction !== DOCK_MODES.REMOVE ? tabId : firstContainer.activeId;
 
       // Attempt to close tab
-      if (direction === "remove") {
+      if (direction === DOCK_MODES.REMOVE) {
         _closeTab(tabId);
       } else {
         // Update layout
@@ -626,10 +626,9 @@ const useLayout = (props, dockRef) => {
     lastTabs.forEach(tab => {
       const { id, name, scope } = tab;
 
-      if (id === HOMETAB_PROFILE.name) tabs.push(getHomeTab());
-      else tabs.push(_getTabData({ id, name, scope }));
+      tabs.push(_getTabData({ id, name, scope }));
     });
-    // after all plugins are installed
+    // After all plugins are installed
     Promise.allSettled(tabs).then(_tabs => {
       _tabs.forEach(tab => {
         tab.status === "fulfilled" &&
@@ -638,7 +637,11 @@ const useLayout = (props, dockRef) => {
         activeTabId.current = tab.value.id;
       });
       setLayout(lastLayout);
+
+      // Open Home Tab
+      if (lastTabs.has(HOMETAB_PROFILE.name)) open(getHomeTab(), true);
     });
+
     // Destroy local workspace manager instance on unmount
     return () => {
       workspaceManager.destroy();

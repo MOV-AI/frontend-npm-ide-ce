@@ -184,7 +184,7 @@ export function pythonToBool(value) {
 export const getHomeTab = () => {
   const viewPlugin = new HomeTab(HOMETAB_PROFILE);
 
-  return Promise.resolve({
+  return {
     ...HOMETAB_PROFILE,
     id: HOMETAB_PROFILE.name,
     name: HOMETAB_PROFILE.title,
@@ -192,7 +192,7 @@ export const getHomeTab = () => {
     scope: HOMETAB_PROFILE.name,
     extension: "",
     content: viewPlugin.render()
-  });
+  };
 };
 
 /**

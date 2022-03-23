@@ -213,6 +213,11 @@ export const DOCK_POSITIONS = {
   FLOAT: "floatbox"
 };
 
+export const DOCK_MODES = {
+  MAXIMIZE: "maximize",
+  REMOVE: "remove"
+};
+
 export const FLOW_EXPLORER_PROFILE = {
   name: "FlowExplorer",
   title: "Add Node / Sub-flow"
