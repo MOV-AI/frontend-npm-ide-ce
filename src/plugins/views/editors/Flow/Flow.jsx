@@ -204,18 +204,6 @@ const Flow = (props, ref) => {
   }, [contextMenuOptions]);
 
   /**
-   * Call broadcast method to emit event to all open flows
-   */
-  const setFlowsToDefault = useCallback(() => {
-    call(
-      PLUGINS.DOC_MANAGER.NAME,
-      PLUGINS.DOC_MANAGER.CALL.BROADCAST,
-      PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR,
-      { action: "setMode", value: EVT_NAMES.DEFAULT }
-    );
-  }, [call]);
-
-  /**
    * Open document in new tab
    * @param {*} docData
    */
@@ -685,6 +673,22 @@ const Flow = (props, ref) => {
   );
 
   /**
+   * Call broadcast method to emit event to all open flows
+   */
+  const setFlowsToDefault = useCallback(() => {
+    // Remove selected node and link
+    onNodeSelected(null);
+    onLinkSelected(null);
+    // broadcast event to other flows
+    call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.BROADCAST,
+      PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR,
+      { action: "setMode", value: EVT_NAMES.DEFAULT }
+    );
+  }, [call, onLinkSelected, onNodeSelected]);
+
+  /**
    * Subscribe to mainInterface and canvas events
    */
   const onReady = useCallback(
@@ -692,8 +696,6 @@ const Flow = (props, ref) => {
       // subscribe to on enter default mode
       // When enter default mode remove other node/sub-flow bookmarks
       mainInterface.mode.default.onEnter.subscribe(() => {
-        onNodeSelected(null);
-        onLinkSelected(null);
         setFlowsToDefault();
       });
 
