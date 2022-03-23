@@ -1,2 +1,4 @@
 Callback:*
 Configuration:app-ide-ce
+Message:*
+Ports:*
