@@ -790,14 +790,6 @@ const Flow = (props, ref) => {
         });
       });
 
-      // Subscribe to add link event
-      mainInterface.events.onAddLink.subscribe(evtData =>
-        alert({
-          location: "snackbar",
-          message: "Link created"
-        })
-      );
-
       // Subscribe to canvas context menu
       mainInterface.mode.canvasCtxMenu.onEnter.subscribe(evtData => {
         const anchorPosition = {
@@ -911,8 +903,7 @@ const Flow = (props, ref) => {
       openDoc,
       handleContextClose,
       t,
-      openDialog,
-      alert
+      openDialog
     ]
   );
 
