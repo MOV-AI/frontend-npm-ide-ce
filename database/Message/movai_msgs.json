@@ -1,0 +1,20 @@
+{
+    "Msg": [
+        "Any",
+        "Bag",
+        "Context",
+        "Exit",
+        "Http",
+        "Init",
+        "Parameter",
+        "Reconfigure",
+        "redis_sub",
+        "TF",
+        "Timer",
+        "Transition",
+        "Websocket",
+        "Widget"
+    ],
+    "Srv": [],
+    "Action": []
+}
