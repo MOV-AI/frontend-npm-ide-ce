@@ -646,7 +646,7 @@ const useLayout = (props, dockRef) => {
     return () => {
       workspaceManager.destroy();
     };
-  }, [workspaceManager, _getTabData]);
+  }, [workspaceManager, _getTabData, open]);
 
   //========================================================================================
   /*                                                                                      *
