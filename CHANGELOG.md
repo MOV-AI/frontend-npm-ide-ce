@@ -26,6 +26,7 @@
 **Node Editor**
 
 - [FP-1516 - Changed the IO/Config Port icons to be more coherent](https://movai.atlassian.net/browse/FP-1516)
+- [FP-1612 - Only reset ports when need](https://movai.atlassian.net/browse/FP-1612)
 
 **Home Tab**
 
