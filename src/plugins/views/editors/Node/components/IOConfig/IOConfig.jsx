@@ -158,18 +158,29 @@ const IOConfig = props => {
   );
 
   /**
-   * Set port data
+   * Set in port data
    */
-  const setPortData = React.useCallback(
+  const setPortDataIn = React.useCallback(
     rowData => {
       rowData.portIn = scopePorts[rowData.template]?.In;
-      rowData.portOut = scopePorts[rowData.template]?.Out;
-      // Update CallbackOptions and EffectiveMessage = (pkg/msg) of each ioport
+      // Update CallbackOptions and EffectiveMessage = (pkg/msg) of in ioport
       if (rowData.portIn !== undefined) {
         Object.keys(rowData.portIn).forEach(key => {
           rowData = formatPortData(rowData, "portIn", key);
         });
       }
+      return rowData;
+    },
+    [scopePorts, formatPortData]
+  );
+
+  /**
+   * Set out port data
+   */
+  const setPortDataOut = React.useCallback(
+    rowData => {
+      rowData.portOut = scopePorts[rowData.template]?.Out;
+      // Update CallbackOptions and EffectiveMessage = (pkg/msg) of out ioport
       if (rowData.portOut !== undefined) {
         Object.keys(rowData.portOut).forEach(key => {
           rowData = formatPortData(rowData, "portOut", key);
@@ -195,12 +206,13 @@ const IOConfig = props => {
     newData => {
       return new Promise((resolve, reject) => {
         // Set port in/out
-        newData = setPortData(newData);
+        newData = setPortDataIn(newData);
+        newData = setPortDataOut(newData);
         // Call method to set row
         onIOConfigRowSet(newData, resolve, reject);
       });
     },
-    [onIOConfigRowSet, setPortData]
+    [onIOConfigRowSet, setPortDataIn, setPortDataOut]
   );
 
   /**
@@ -213,12 +225,17 @@ const IOConfig = props => {
     (newData, oldData) => {
       return new Promise((resolve, reject) => {
         // Set port in/out
-        newData = setPortData(newData);
+        if (!oldData.portIn?.in) {
+          newData = setPortDataIn(newData);
+        }
+        if (!oldData.portIn?.out) {
+          newData = setPortDataOut(newData);
+        }
         // Call method to set row
         onIOConfigRowSet(newData, resolve, reject, oldData);
       });
     },
-    [onIOConfigRowSet, setPortData]
+    [onIOConfigRowSet, setPortDataIn, setPortDataOut]
   );
 
   /**
