@@ -84,10 +84,11 @@ const Node = (props, ref) => {
           throw new Error(t(ERROR_MESSAGES.INVALID_TYPE_NAME, { typeName }));
         }
 
+        const previousName = previousData?.name ?? previousData;
         // Validate against repeated names
-        const checkNewName = !previousData && data[type][newName];
+        const checkNewName = !previousName && data[type][newName];
         const checkNameChanged =
-          previousData && previousData !== newName && data[type][newName];
+          previousName && previousName !== newName && data[type][newName];
 
         if (checkNameChanged || checkNewName) {
           throw new Error(t(ERROR_MESSAGES.MULTIPLE_ENTRIES_WITH_SAME_NAME));

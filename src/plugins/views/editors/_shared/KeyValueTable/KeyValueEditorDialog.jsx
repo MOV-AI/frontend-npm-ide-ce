@@ -1,4 +1,4 @@
-import React, { useCallback, memo } from "react";
+import React, { useCallback, useEffect, useState, memo } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import _isEqual from "lodash/isEqual";
@@ -44,8 +44,8 @@ const KeyValueEditorDialog = props => {
     showDefault
   } = props;
   // State hook
-  const [data, setData] = React.useState({});
-  const [validation, setValidation] = React.useState({
+  const [data, setData] = useState({});
+  const [validation, setValidation] = useState({
     component: null,
     error: false,
     message: ""
@@ -56,11 +56,29 @@ const KeyValueEditorDialog = props => {
 
   //========================================================================================
   /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Simple extract method to lower cognitive complex
+   * @private function
+   * @param {String} component : component to check against
+   */
+  const getValidationComponent = useCallback(
+    component => {
+      return validation.component === component;
+    },
+    [validation.component]
+  );
+
+  //========================================================================================
+  /*                                                                                      *
    *                                    React lifecycle                                   *
    *                                                                                      */
   //========================================================================================
 
-  React.useEffect(() => {
+  useEffect(() => {
     setData(props.data);
   }, [props.data]);
 
@@ -151,9 +169,9 @@ const KeyValueEditorDialog = props => {
         <Typography component="div" className={classes.container}>
           <TextField
             label={`${t("Name")} *`}
-            error={validation.component === COMPONENTS.NAME && validation.error}
+            error={getValidationComponent(COMPONENTS.NAME) && validation.error}
             helperText={
-              validation.component === COMPONENTS.NAME && validation.message
+              getValidationComponent(COMPONENTS.NAME) && validation.message
             }
             value={data.name}
             autoFocus={isNew}
@@ -180,9 +198,9 @@ const KeyValueEditorDialog = props => {
               isNew,
               onChange: onChangeValue,
               error:
-                validation.component === COMPONENTS.VALUE && validation.error,
+                getValidationComponent(COMPONENTS.VALUE) && validation.error,
               helperText:
-                validation.component === COMPONENTS.VALUE && validation.message,
+                getValidationComponent(COMPONENTS.VALUE) && validation.message,
               disabled: disabled,
               defaultValue: data.defaultValue
             })}
@@ -211,7 +229,12 @@ const KeyValueEditorDialog = props => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t("Cancel")}</Button>
-        <Button color="primary" onClick={onSave} disabled={validation.error}>
+        <Button
+          color="primary"
+          onClick={onSave}
+          // Let's only disable the save button if we are doing a name validation (which is validated on change)
+          disabled={getValidationComponent(COMPONENTS.NAME) && validation.error}
+        >
           {t("Save")}
         </Button>
       </DialogActions>
