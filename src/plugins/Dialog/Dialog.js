@@ -272,7 +272,7 @@ class Dialog extends IDEPlugin {
    * @private Handle dialog open : Prepare element where the dialog will be rendered
    * @returns {DOMElement} Target element to render dialog
    */
-  _handleDialogOpen(customId) {
+  _handleDialogOpen() {
     document.body.classList.add(Dialog.BODY_CLASS_NAME);
     const containerElement = document.getElementById("alertPanel");
     const targetElement = document.createElement("div");
