@@ -1,10 +1,7 @@
 {
     "Msg": [
         "Any",
-        "Bag",
         "Context",
-        "Exit",
-        "Http",
         "Init",
         "Parameter",
         "Reconfigure",
@@ -12,8 +9,7 @@
         "TF",
         "Timer",
         "Transition",
-        "Websocket",
-        "Widget"
+        "Websocket"
     ],
     "Srv": [],
     "Action": []
