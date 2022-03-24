@@ -90,22 +90,6 @@
                 }
             }
         },
-        "MovAI/Exit": {
-            "Data": {
-                "Message": "Exit",
-                "Package": "movai_msgs"
-            },
-            "In": {
-                "in": {
-                    "Callback": "place_holder",
-                    "LinkEnabled": false,
-                    "Message": "&",
-                    "Protocol": "Exit",
-                    "Transport": "MovAI"
-                }
-            },
-            "Label": "MovAI/Exit"
-        },
         "MovAI/Init": {
             "Data": {
                 "Message": "Init",
@@ -122,25 +106,6 @@
             },
             "Info": "Provides an initial callback when a GD_Node is launched.It runs after the outputs ports are launched and before the rest of the inputs.",
             "Label": "MovAI/Init"
-        },
-        "MovAI/StateMachine": {
-            "Data": {
-                "Message": "StateMachine",
-                "Package": "movai_msgs"
-            },
-            "In": {
-                "in": {
-                    "LinkEnabled": false,
-                    "Message": "&",
-                    "Parameter": {
-                        "Frequency": "10",
-                        "StateMachine": "random_id"
-                    },
-                    "Protocol": "StateMachine",
-                    "Transport": "MovAI"
-                }
-            },
-            "Label": "MovAI/StateMachine"
         },
         "MovAI/TransitionFor": {
             "Data": {
@@ -172,49 +137,6 @@
                 }
             },
             "Label": "MovAI/TransitionIn"
-        },
-        "MovAI/WidgetAio": {
-            "In": {
-                "data_in": {
-                    "LinkEnabled": false,
-                    "Protocol": "Websocket",
-                    "Transport": "AioHttp"
-                },
-                "sub": {
-                    "LinkEnabled": false,
-                    "Protocol": "Subscriber",
-                    "Transport": "Redis"
-                }
-            },
-            "Info": "Widget with aio_http websocket",
-            "Label": "MovAI/WidgetAio",
-            "Data": {}
-        },
-        "MovAI/Widget": {
-            "Data": {
-                "Message": "Widget",
-                "Package": "movai_msgs"
-            },
-            "In": {
-                "data_in": {
-                    "LinkEnabled": false,
-                    "Protocol": "Subscriber",
-                    "Transport": "SocketIOFlask"
-                },
-                "sub": {
-                    "LinkEnabled": false,
-                    "Protocol": "Subscriber",
-                    "Transport": "Redis"
-                }
-            },
-            "Label": "MovAI/Widget",
-            "Out": {
-                "data_out": {
-                    "LinkEnabled": false,
-                    "Protocol": "Publisher",
-                    "Transport": "SocketIOFlask"
-                }
-            }
         }
     }
 }

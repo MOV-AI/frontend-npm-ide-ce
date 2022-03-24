@@ -83,21 +83,6 @@
                 }
             }
         },
-        "ROS1/Bag": {
-            "Label": "ROS1/Bag",
-            "Out": {
-                "out": {
-                    "Transport": "ROS1",
-                    "Protocol": "Bag",
-                    "Message": "&",
-                    "Parameter": {
-                        "FileName": "rosbag"
-                    },
-                    "LinkEnabled": true
-                }
-            },
-            "Data": {}
-        },
         "ROS1/NodeletClient": {
             "Label": "ROS1/NodeletClient",
             "Data": {
