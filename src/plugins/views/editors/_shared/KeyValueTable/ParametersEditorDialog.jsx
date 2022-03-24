@@ -228,7 +228,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
   /*                                                                                      *
    *                                    React lifecycle                                   *
    *                                                                                      */
-  //========================================================f================================
+  //========================================================================================
 
   useEffect(() => {
     if (showValueOptions) setValueOption(getValueOption(props.data.value));
@@ -331,7 +331,10 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
                     : data.value
                 },
                 onChange: _value => {
-                  if (options.defaultValue !== _value) {
+                  if (
+                    valueOption !== VALUE_OPTIONS.CUSTOM &&
+                    renderValue(options.defaultValue) !== _value
+                  ) {
                     setValueOption(VALUE_OPTIONS.CUSTOM);
                   }
                   setData(prevState => {
