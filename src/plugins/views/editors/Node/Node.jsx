@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Typography } from "@material-ui/core";
@@ -14,6 +14,7 @@ import {
   DATA_TYPES,
   ROS_VALID_NAMES,
   PLUGINS,
+  SCOPES,
   ALERT_SEVERITIES
 } from "../../../../utils/Constants";
 import ParameterEditorDialog from "../_shared/KeyValueTable/ParametersEditorDialog";
@@ -42,6 +43,7 @@ const Node = (props, ref) => {
   } = props;
 
   // Hooks
+  const [protectedCallbacks, setProtectedCallbacks] = useState([]);
   const classes = nodeStyles();
   const { t } = useTranslation();
   const { getColumns } = useKeyValueMethods();
@@ -406,6 +408,22 @@ const Node = (props, ref) => {
 
   //========================================================================================
   /*                                                                                      *
+   *                                    React Lifecycle                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  useEffect(() => {
+    call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.GET_STORE,
+      SCOPES.CALLBACK
+    ).then(store => {
+      setProtectedCallbacks(store.protectedDocs);
+    });
+  }, [call]);
+
+  //========================================================================================
+  /*                                                                                      *
    *                                   Render Functions                                   *
    *                                                                                      */
   //========================================================================================
@@ -422,6 +440,7 @@ const Node = (props, ref) => {
         {...props}
         editable={editable}
         ioConfig={data.ports}
+        protectedCallbacks={protectedCallbacks}
         onIOConfigRowSet={setPort}
         onIOConfigRowDelete={deletePort}
         handleIOPortsInputs={updateIOPortInputs}

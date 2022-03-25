@@ -27,6 +27,7 @@ class BaseStore extends StorePluginManager {
     this.pattern = pattern || { Scope: this.scope, Name: "*", Label: "*" };
     this.observer = observer;
     this.docManager = docManager;
+    this.protectedDocs = [];
 
     this.enableSubscriber();
   }
@@ -173,8 +174,11 @@ class BaseStore extends StorePluginManager {
     Object.values(data.value[docType]).forEach(doc => {
       const name = doc.Label;
 
+      // Check if is doc protected
+      const isProtected = this.protectedDocs.includes(doc.Label);
+
       // create only if the instance does not exist yet
-      if (!this.getDoc(name)) {
+      if (!this.getDoc(name) && !isProtected) {
         const newDoc = this.newDoc(name);
         newDoc
           .enableObservables(false)

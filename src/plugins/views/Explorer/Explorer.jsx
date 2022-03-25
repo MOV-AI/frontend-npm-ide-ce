@@ -5,31 +5,17 @@ import _get from "lodash/get";
 import _set from "lodash/set";
 import { Maybe } from "monet";
 import { Typography } from "@material-ui/core";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { useTheme } from "@material-ui/core/styles";
+import { explorerStyles } from "./styles";
 import { PLUGINS } from "../../../utils/Constants";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
 import movaiFullLogo from "../editors/_shared/Branding/movai-full-logo.png";
 import movaiFullLogoWhite from "../editors/_shared/Branding/movai-full-logo-red-white.png";
 
-const useStyles = makeStyles(theme => ({
-  typography: {
-    overflowY: "auto",
-    overflowX: "hidden",
-    justifyContent: "center",
-    width: "100%"
-  },
-  header: {
-    marginBottom: 6,
-    "& img": {
-      maxWidth: "65%"
-    }
-  }
-}));
-
 const Explorer = props => {
   const { call, on, height } = props;
-  const classes = useStyles();
+  const classes = explorerStyles();
   const theme = useTheme();
   const [data, setData] = React.useState([]);
 
