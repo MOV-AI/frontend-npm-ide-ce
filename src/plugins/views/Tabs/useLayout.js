@@ -358,18 +358,19 @@ const useLayout = (props, dockRef) => {
    * @param {string} tabId : The tab id to be focused
    */
   const focusExistingTab = useCallback(
-    (tabData, preventFocus) => {
+    (tabId, preventFocus) => {
+      const tabData = findTab(tabId);
       const maxboxChildren = dockRef.current.state.layout.maxbox.children;
-      dockRef.current.updateTab(tabData.id, tabData, !preventFocus);
+      dockRef.current.updateTab(tabId, tabData, !preventFocus);
 
       if (
         maxboxChildren.length &&
-        !maxboxChildren[0].tabs.find(t => t.id === tabData.id)
+        !maxboxChildren[0].tabs.find(t => t.id === tabId)
       ) {
         dockRef.current.dockMove(maxboxChildren[0], null, DOCK_MODES.MAXIMIZE);
       }
     },
-    [dockRef]
+    [dockRef, findTab]
   );
 
   //========================================================================================
@@ -397,7 +398,7 @@ const useLayout = (props, dockRef) => {
 
       const existingTab = findTab(tabData.id);
       if (existingTab) {
-        focusExistingTab(tabData, preventFocus);
+        focusExistingTab(tabData.id, preventFocus);
         return;
       }
 
@@ -661,6 +662,7 @@ const useLayout = (props, dockRef) => {
     close,
     loadTab,
     onLayoutChange,
+    focusExistingTab,
     getActiveTab,
     updateTabId
   };

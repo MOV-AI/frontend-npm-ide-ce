@@ -20,6 +20,7 @@ const Tabs = (props, ref) => {
     openEditor,
     close,
     onLayoutChange,
+    focusExistingTab,
     getActiveTab,
     loadTab,
     updateTabId
@@ -33,8 +34,24 @@ const Tabs = (props, ref) => {
     close
   });
 
+  /**
+   * Searches active tab in clicked panel and focus that tab.
+   * @param {*} evt
+   */
+  const focusActivePanelTab = evt => {
+    const target = evt.target;
+    if (!target?.classList?.contains("dock-nav-wrap")) return;
+
+    const activeTabEl = target.querySelector(".dock-tab-active>.dock-tab-btn");
+    const panelActiveTab = activeTabEl.id.substring(
+      activeTabEl.id.indexOf("tab-") + 4
+    );
+
+    if (getActiveTab !== panelActiveTab) focusExistingTab(panelActiveTab);
+  };
+
   return (
-    <div className={classes.root}>
+    <div className={classes.root} onClick={focusActivePanelTab}>
       <DockLayout
         ref={dockRef}
         layout={layout}
