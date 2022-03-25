@@ -7,11 +7,11 @@
 
 **IDE**
 
-- [FP-1538 - Color between tabs now, more clearer](https://movai.atlassian.net/browse/FP-1538)
 - [FP-1509 - Saving a new document will now reload the doc](https://movai.atlassian.net/browse/FP-1509)
+- [FP-1538 - Color between tabs now, more clearer](https://movai.atlassian.net/browse/FP-1538)
+- [FP-1560 - Saving an untitled file will now always prompt for a name](https://movai.atlassian.net/browse/FP-1560)
 - [FP-1595 - Removed unused function that contained vulnerabilities](https://movai.atlassian.net/browse/FP-1595)
 - [FP-1610 - Remove editor keybinds when editor is blurred](https://movai.atlassian.net/browse/FP-1610)
-- [FP-1560 - Saving an untitled file will now always prompt for a name](https://movai.atlassian.net/browse/FP-1560)
 
 **Callback Editor**
 
@@ -27,6 +27,7 @@
 
 - [FP-1516 - Changed the IO/Config Port icons to be more coherent](https://movai.atlassian.net/browse/FP-1516)
 - [FP-1612 - Only reset ports when need](https://movai.atlassian.net/browse/FP-1612)
+- [FP-1613 - No longer duplicating ports when type changes](https://movai.atlassian.net/browse/FP-1613)
 - [FP-1625 - Fixed a few issues regarding Node Editor](https://movai.atlassian.net/browse/FP-1625)
 
 **Home Tab**

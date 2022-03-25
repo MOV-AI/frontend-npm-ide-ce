@@ -158,34 +158,32 @@ const IOConfig = props => {
   );
 
   /**
-   * Set in port data
+   * Set in port data from template
    */
   const setPortDataIn = React.useCallback(
     rowData => {
-      rowData.portIn = scopePorts[rowData.template]?.In;
+      rowData.portIn = scopePorts[rowData.template]?.In || {};
+
       // Update CallbackOptions and EffectiveMessage = (pkg/msg) of in ioport
-      if (rowData.portIn !== undefined) {
-        Object.keys(rowData.portIn).forEach(key => {
-          rowData = formatPortData(rowData, "portIn", key);
-        });
-      }
+      Object.keys(rowData.portIn).forEach(key => {
+        rowData = formatPortData(rowData, "portIn", key);
+      });
       return rowData;
     },
     [scopePorts, formatPortData]
   );
 
   /**
-   * Set out port data
+   * Set out port data from template
    */
   const setPortDataOut = React.useCallback(
     rowData => {
-      rowData.portOut = scopePorts[rowData.template]?.Out;
+      rowData.portOut = scopePorts[rowData.template]?.Out || {};
+
       // Update CallbackOptions and EffectiveMessage = (pkg/msg) of out ioport
-      if (rowData.portOut !== undefined) {
-        Object.keys(rowData.portOut).forEach(key => {
-          rowData = formatPortData(rowData, "portOut", key);
-        });
-      }
+      Object.keys(rowData.portOut).forEach(key => {
+        rowData = formatPortData(rowData, "portOut", key);
+      });
       return rowData;
     },
     [scopePorts, formatPortData]
@@ -224,11 +222,25 @@ const IOConfig = props => {
   const handleRowUpdate = useCallback(
     (newData, oldData) => {
       return new Promise((resolve, reject) => {
-        // Set port in/out
-        if (!oldData.portIn?.in) {
+        const templateChanged = newData.template !== oldData.template;
+
+        // Set templated port in
+        if (
+          // template changed
+          templateChanged ||
+          // or there's no previous data in the port IN
+          !newData.portIn?.in
+        ) {
           newData = setPortDataIn(newData);
         }
-        if (!oldData.portIn?.out) {
+
+        // Set templated port out
+        if (
+          // template changed
+          templateChanged ||
+          // or there's no previous data in the port OUT
+          !newData.portOut?.out
+        ) {
           newData = setPortDataOut(newData);
         }
         // Call method to set row

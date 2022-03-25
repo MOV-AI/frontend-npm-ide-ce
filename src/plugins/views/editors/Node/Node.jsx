@@ -138,16 +138,16 @@ const Node = (props, ref) => {
       else if (!value.message)
         throw new Error(ERROR_MESSAGES.NO_MESSAGE_CHOSEN);
 
-      if (previousData) {
-        // Update port
-        if (instance.current)
+      if (instance.current) {
+        if (previousData?.template === value.template) {
           instance.current.updatePort(previousData.name, value);
-      } else {
-        // Proceed with saving
+          return resolve();
+        } else instance.current.deletePort(value.id);
+
         const dataToSave = { [value.name]: value };
-        if (instance.current) instance.current.setPort(dataToSave);
+        instance.current.setPort(dataToSave);
+        resolve();
       }
-      resolve();
     } catch (err) {
       // Show alert
       alert({ message: err.message, severity: ALERT_SEVERITIES.ERROR });
