@@ -13,6 +13,7 @@ const IOPorts = props => {
   const {
     editable,
     handleOpenCallback,
+    protectedCallbacks,
     handleNewCallback,
     handleOpenSelectScopeModal
   } = props;
@@ -85,6 +86,7 @@ const IOPorts = props => {
                       message={message}
                       direction={direction}
                       portName={props.rowData.name}
+                      protectedCallbacks={protectedCallbacks}
                       handleNewCallback={handleNewCallback}
                       handleOpenCallback={handleOpenCallback}
                       handleOpenSelectScopeModal={handleOpenSelectScopeModal}

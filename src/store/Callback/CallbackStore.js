@@ -13,6 +13,9 @@ class CallbackStore extends Store {
       plugins: [DBSubscriber],
       observer
     });
+
+    // Set protectedDocs list
+    this.protectedDocs = ["place_holder"];
   }
 
   // Set helper object with cloudFunction

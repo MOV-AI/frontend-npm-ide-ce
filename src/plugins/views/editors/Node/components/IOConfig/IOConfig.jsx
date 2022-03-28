@@ -8,7 +8,6 @@ import { Typography } from "@material-ui/core";
 import { PLUGINS } from "../../../../../../utils/Constants";
 import MaterialTable from "../../../_shared/MaterialTable/MaterialTable";
 import CollapsibleHeader from "../_shared/CollapsibleHeader";
-import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
 import useIOConfigColumns from "./hooks/useIOConfigColumns";
 import useHelper from "./hooks/useHelper";
 import IOPorts from "./IOPorts/IOPorts";
@@ -51,6 +50,7 @@ const IOConfig = props => {
     ioConfig,
     call,
     scope,
+    protectedCallbacks,
     onIOConfigRowSet,
     onIOConfigRowDelete,
     handleIOPortsInputs,
@@ -307,6 +307,7 @@ const IOConfig = props => {
           classNames="child-row"
           editable={editable}
           rowData={panelData.rowData}
+          protectedCallbacks={protectedCallbacks}
           handleIOPortsInputs={handleIOPortsInputs}
           handleOpenCallback={handleOpenCallback}
           handleNewCallback={handleNewCallback}
@@ -316,6 +317,7 @@ const IOConfig = props => {
     },
     [
       editable,
+      protectedCallbacks,
       handleIOPortsInputs,
       handleOpenCallback,
       handleNewCallback,
@@ -359,49 +361,30 @@ const IOConfig = props => {
 };
 
 IOConfig.propTypes = {
-  ioConfig: PropTypes.object,
-  onIOConfigRowSet: PropTypes.func,
-  onIOConfigRowDelete: PropTypes.func,
-  handleIOPortsInputs: PropTypes.func,
-  handleOpenSelectScopeModal: PropTypes.func,
-  handleOpenCallback: PropTypes.func,
-  handleNewCallback: PropTypes.func,
+  ioConfig: PropTypes.object.isRequired,
+  onIOConfigRowSet: PropTypes.func.isRequired,
+  onIOConfigRowDelete: PropTypes.func.isRequired,
+  handleIOPortsInputs: PropTypes.func.isRequired,
+  handleOpenSelectScopeModal: PropTypes.func.isRequired,
+  handleOpenCallback: PropTypes.func.isRequired,
+  handleNewCallback: PropTypes.func.isRequired,
+  protectedCallbacks: PropTypes.array,
   editable: PropTypes.bool
 };
 
 IOConfig.defaultProps = {
   editable: true,
-  onIOConfigRowSet: () => DEFAULT_FUNCTION("onIOConfigRowSet"),
-  onIOConfigRowDelete: () => DEFAULT_FUNCTION("onIOConfigRowDelete"),
-  handleIOPortsInputs: () => DEFAULT_FUNCTION("IOInputs"),
-  handleOpenSelectScopeModal: () => DEFAULT_FUNCTION("openSelectScopeModal"),
-  handleOpenCallback: () => DEFAULT_FUNCTION("handleOpenCallback"),
-  handleNewCallback: () => DEFAULT_FUNCTION("handleNewCallback"),
-  ioConfig: [
-    {
-      name: "undefined",
-      template: "undefined",
-      msgPackage: "undefined",
-      message: "undefined",
-      portIn: [
-        {
-          name: "undefined",
-          message: "undefined",
-          type: "iport",
-          callback: "undefined",
-          parameters: [
-            { name: "undefined", value: "Check DB" },
-            { name: "undefined", value: "Check DB", options: ["Check DB"] }
-          ]
-        }
-      ]
-    }
-  ]
+  protectedCallbacks: []
 };
 
 //The function returns true when the compared props equal, preventing the component from re-rendering
 function arePropsEqual(prevProps, nextProps) {
-  return _isEqual(prevProps.ioConfig, nextProps.ioConfig);
+  const sameConfig = _isEqual(prevProps.ioConfig, nextProps.ioConfig);
+  const sameProtectedDocs = _isEqual(
+    prevProps.protectedCallbacks,
+    nextProps.protectedCallbacks
+  );
+  return sameConfig && sameProtectedDocs;
 }
 
 export default memo(IOConfig, arePropsEqual);
