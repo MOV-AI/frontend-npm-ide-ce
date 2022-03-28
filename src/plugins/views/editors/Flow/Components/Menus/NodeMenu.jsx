@@ -15,7 +15,8 @@ import {
   DATA_TYPES,
   TABLE_KEYS_NAMES,
   DIALOG_TITLE,
-  PLUGINS
+  PLUGINS,
+  SCOPES
 } from "../../../../../../utils/Constants";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
 import MenuDetails from "./sub-components/MenuDetails";
@@ -60,6 +61,7 @@ const NodeMenu = memo(
     const [templateData, setTemplateData] = useState({});
     const [activeItem, setActiveItem] = useState(0);
     const [nodeData, setNodeData] = useState({});
+    const [protectedDocs, setProtectedDocs] = useState([]);
     // Other hooks
     const classes = nodeMenuStyles();
     const { t } = useTranslation();
@@ -130,8 +132,17 @@ const NodeMenu = memo(
     //========================================================================================
 
     useEffect(() => {
+      // Get node data
       setNodeData(getNodeData());
-    }, [getNodeData]);
+      // Get protected callbacks
+      call(
+        PLUGINS.DOC_MANAGER.NAME,
+        PLUGINS.DOC_MANAGER.CALL.GET_STORE,
+        SCOPES.CALLBACK
+      ).then(store => {
+        setProtectedDocs(store.protectedDocs);
+      });
+    }, [getNodeData, call]);
 
     useEffect(() => {
       const name = data?.Template;
@@ -245,7 +256,11 @@ const NodeMenu = memo(
           type={templateData.type}
           openDoc={openDoc}
         />
-        <PortsDetails openDoc={openDoc} templateData={templateData.ports} />
+        <PortsDetails
+          openDoc={openDoc}
+          templateData={templateData.ports}
+          protectedDocs={protectedDocs}
+        />
         {/* =========================== PROPERTIES =========================== */}
         <ListItem
           button

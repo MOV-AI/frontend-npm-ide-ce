@@ -1,13 +1,13 @@
 import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { Divider, Link, Typography } from "@material-ui/core";
-import CallbackModel from "../../../../../../../models/Callback/Callback";
-import { DEFAULT_FUNCTION, useTranslation } from "../../../../_shared/mocks";
+import { useTranslation } from "react-i18next";
 import { portStyles } from "../styles";
+import { SCOPES } from "../../../../../../../utils/Constants";
 
 const PortsDetails = props => {
   // Props
-  const { openDoc, templateData } = props;
+  const { openDoc, templateData, protectedDocs } = props;
   // State Hooks
   const [inputPorts, setInputPorts] = useState([]);
   const [outputPorts, setOutputPorts] = useState([]);
@@ -50,6 +50,42 @@ const PortsDetails = props => {
   }, []);
 
   /**
+   * Check if callback is protected and return callback link (if possible)
+   * @param {string} callback : Callback name
+   * @param {number} index : iteration index
+   * @returns {Element} Callback element to be rendered
+   */
+  const getCallbackLink = useCallback(
+    (callback, index) => {
+      const isProtected = protectedDocs.includes(callback);
+      return isProtected ? (
+        <Typography
+          className={`${classes.portCallbackLink} ${classes.disabled}`}
+        >
+          {callback}
+        </Typography>
+      ) : (
+        <Link
+          key={`${callback}_${index}`}
+          className={classes.portCallbackLink}
+          disabled={true}
+          component="button"
+          onClick={event => {
+            openDoc({
+              scope: SCOPES.CALLBACK,
+              name: callback,
+              ctrlKey: event.ctrlKey
+            });
+          }}
+        >
+          {callback}
+        </Link>
+      );
+    },
+    [protectedDocs, classes, openDoc]
+  );
+
+  /**
    * @private Render ports data
    * @param {{name: string, value: array}} portsData
    * @returns {ReactElement} Ports data
@@ -66,30 +102,13 @@ const PortsDetails = props => {
             <Typography component="div" className={classes.portName}>
               {port.name}
             </Typography>
-            {port.value?.map((callback, valueIndex) => {
-              return (
-                <Link
-                  key={`${port.name}_${portIndex}_${valueIndex}`}
-                  className={classes.portCallbackLink}
-                  component="button"
-                  onClick={event => {
-                    openDoc({
-                      scope: CallbackModel.SCOPE,
-                      name: callback,
-                      ctrlKey: event.ctrlKey
-                    });
-                  }}
-                >
-                  {callback}
-                </Link>
-              );
-            })}
+            {port.value?.map(getCallbackLink)}
             <Divider />
           </Typography>
         );
       });
     },
-    [classes, openDoc]
+    [classes, getCallbackLink]
   );
 
   //========================================================================================
@@ -142,13 +161,14 @@ const PortsDetails = props => {
 };
 
 PortsDetails.propTypes = {
+  openDoc: PropTypes.func.isRequired,
   templateData: PropTypes.object,
-  openDoc: PropTypes.func
+  protectedDocs: PropTypes.array
 };
 
 PortsDetails.defaultProps = {
   templateData: {},
-  openDoc: () => DEFAULT_FUNCTION("openDoc")
+  protectedDocs: []
 };
 
 export default PortsDetails;
