@@ -458,7 +458,9 @@ const FlowTopBar = props => {
       <CircularProgress size={25} color="inherit" />
     ) : (
       <Tooltip title={t("Start Flow")}>
-        <PlayArrowIcon />
+        <>
+          <PlayArrowIcon /> {t("Save & Run")}
+        </>
       </Tooltip>
     );
   }, [loading, t]);
