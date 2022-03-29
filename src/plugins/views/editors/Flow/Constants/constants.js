@@ -1,7 +1,7 @@
-const maxMovingPixels = 15000;
-const canvasLimits = [
-  [10, maxMovingPixels - 75],
-  [25, maxMovingPixels - 75]
+const MAX_MOVING_PIXELS = 15000;
+const CANVAS_LIMITS = [
+  [10, MAX_MOVING_PIXELS - 75],
+  [25, MAX_MOVING_PIXELS - 75]
 ];
 const FLOW_VIEW_MODE = {
   default: "default",
@@ -22,8 +22,8 @@ const generateContainerId = flowId => {
 };
 
 export {
-  maxMovingPixels,
-  canvasLimits,
+  MAX_MOVING_PIXELS,
+  CANVAS_LIMITS,
   generateContainerId,
   FLOW_VIEW_MODE,
   TRANSITION_LINK,
