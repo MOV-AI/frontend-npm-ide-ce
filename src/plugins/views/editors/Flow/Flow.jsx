@@ -281,6 +281,7 @@ const Flow = (props, ref) => {
       args.onClose = () => {
         activateKeyBind();
         resolve && resolve();
+        args.onCancel && args.onCancel();
       };
       // Call dialog plugin with given method and args
       call(PLUGINS.DIALOG.NAME, method, args, dialogComponent);
@@ -752,6 +753,7 @@ const Flow = (props, ref) => {
               newName,
               t("Node")
             ),
+          onCancel: setFlowsToDefault,
           onSubmit: newName => getMainInterface().addNode(newName)
         };
         // Open form dialog
@@ -770,6 +772,7 @@ const Flow = (props, ref) => {
               newName,
               t("Sub-flow")
             ),
+          onCancel: setFlowsToDefault,
           onSubmit: newName => getMainInterface().addFlow(newName)
         };
         // Open form dialog
