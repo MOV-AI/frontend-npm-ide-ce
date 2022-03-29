@@ -43,6 +43,16 @@ export default class Model extends Observable {
   }
 
   /**
+   * Sets the new value of the property
+   * @param {string} value : The new value
+   * @returns {Model} : The instance
+   */
+  setId(value) {
+    this.id = value;
+    return this;
+  }
+
+  /**
    * Returns the workspace property
    * @returns {string}
    */

@@ -133,7 +133,6 @@ const IOConfig = props => {
     return Object.entries(_data).map(([key, item]) => {
       return {
         ...item,
-        id: key, // Just to have an id on the rows (to prevent error thrown)
         name: item.name
       };
     });

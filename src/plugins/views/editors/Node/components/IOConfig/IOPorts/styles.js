@@ -12,6 +12,7 @@ export const IOPortStyles = makeStyles(theme => ({
     boxShadow: "none",
     padding: "0px 50px 0px 50px"
   },
+  portBase: { fontSize: "1.5rem" },
   row: {
     display: "flex",
     flexDirection: "row",

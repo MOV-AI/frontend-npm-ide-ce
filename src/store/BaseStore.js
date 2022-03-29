@@ -118,8 +118,10 @@ class BaseStore extends StorePluginManager {
     // re add the document with the new name
     this.setDoc(newName, doc);
 
-    //rename the instance
+    // rename the instance
     doc.setName(newName);
+    // Since we are using the id as the name aswell, let's update it to avoid confusion
+    doc.setId(newName);
   }
 
   //========================================================================================
