@@ -91,7 +91,7 @@ export function getVersionFromUrl(url) {
 export function getNameFromURL(url) {
   if (!url) return "";
   const splittedUrl = url.split("/");
-  return splittedUrl[2];
+  return splittedUrl.length === 1 ? url : splittedUrl[2];
 }
 
 /**
