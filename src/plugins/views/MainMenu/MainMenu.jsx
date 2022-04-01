@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useContext
+} from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import {
@@ -12,17 +18,17 @@ import TextSnippetIcon from "@material-ui/icons/Description";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 import { Tooltip } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import { MainContext } from "../../../main-context";
-import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
-import movaiIconWhite from "../editors/_shared/Branding/movai-logo-white.png";
+import { getIconByScope, getHomeTab } from "../../../utils/Utils";
 import {
   HOMETAB_PROFILE,
   APP_INFORMATION,
   PLUGINS,
   HOSTS
 } from "../../../utils/Constants";
-import { getIconByScope, getHomeTab } from "../../../utils/Utils";
+import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
+import { MainContext } from "../../../main-context";
+import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
+import movaiIconWhite from "../editors/_shared/Branding/movai-logo-white.png";
 
 const useStyles = makeStyles(theme => ({
   icon: {
@@ -47,6 +53,8 @@ const MainMenu = props => {
   const classes = useStyles();
   const theme = useTheme();
   const { t } = useTranslation();
+  const { isDarkTheme, handleLogOut, handleToggleTheme } =
+    useContext(MainContext);
   // Refs
   const MENUS = useRef([
     {
@@ -91,9 +99,10 @@ const MainMenu = props => {
    *                                                                                      */
   //========================================================================================
 
-  const handleLogoutClick = useCallback((handleLogOut) => () => {
-    handleLogOut(window.location.href);
-  }, [])
+  const handleLogoutClick = useCallback(
+    () => handleLogOut(window.location.href),
+    [handleLogOut]
+  );
 
   //========================================================================================
   /*                                                                                      *
@@ -102,82 +111,70 @@ const MainMenu = props => {
   //========================================================================================
 
   return (
-    <MainContext.Consumer>
-      {({ isDarkTheme, handleLogOut, handleToggleTheme }) => (
-        <VerticalBar
-          useDividers={true}
-          unsetAccountAreaPadding={true}
-          backgroundColor={theme.palette.background.default}
-          upperElement={
-            <img
-              src={theme.label === "dark" ? movaiIconWhite : movaiIcon}
-              className={classes.movaiIcon}
-              alt="MOV.AI"
-            />
-          }
-          creatorElement={
-            <ContextMenu
-              element={
-                <Tooltip
-                  title={t("Create new document")}
-                  placement="right"
-                  arrow
-                >
-                  <AddBoxIcon
-                    id="mainMenuCreateNewDocument"
-                    className={classes.icon}
-                  ></AddBoxIcon>
-                </Tooltip>
-              }
-              menuList={docTypes.map(docType => ({
-                onClick: () =>
-                  call(
-                    PLUGINS.DOC_MANAGER.NAME,
-                    PLUGINS.DOC_MANAGER.CALL.CREATE,
-                    {
-                      scope: docType.scope
-                    }
-                  ).then(document => {
-                    call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, {
-                      id: document.getUrl(),
-                      name: document.getName(),
-                      scope: docType.scope,
-                      isNew: true
-                    });
-                  }),
-                element: docType.scope,
-                icon: getIconByScope(docType.scope),
-                onClose: true
-              }))}
-            ></ContextMenu>
-          }
-          navigationList={MENUS.current.map(menu => (
-            <Tooltip title={menu.title} placement="right" arrow>
-              {menu.icon({
-                className: classes.icon,
-                onClick: () => menu.getOnClick()
-              })}
+    <VerticalBar
+      useDividers={true}
+      unsetAccountAreaPadding={true}
+      backgroundColor={theme.palette.background.default}
+      upperElement={
+        <img
+          src={theme.label === "dark" ? movaiIconWhite : movaiIcon}
+          className={classes.movaiIcon}
+          alt="MOV.AI"
+        />
+      }
+      creatorElement={
+        <ContextMenu
+          element={
+            <Tooltip title={t("Create new document")} placement="right" arrow>
+              <AddBoxIcon
+                id="mainMenuCreateNewDocument"
+                className={classes.icon}
+              ></AddBoxIcon>
             </Tooltip>
-          ))}
-          lowerElement={
-            <ProfileMenu
-              version={APP_INFORMATION.VERSION}
-              userName={Authentication.getTokenData().message.name ?? ""}
-              isDarkTheme={isDarkTheme}
-              handleLogout={handleLogoutClick(handleLogOut)}
-              handleToggleTheme={handleToggleTheme}
-            />
           }
-        ></VerticalBar>
-      )}
-    </MainContext.Consumer>
+          menuList={docTypes.map(docType => ({
+            onClick: () =>
+              call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.CREATE, {
+                scope: docType.scope
+              }).then(document => {
+                call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, {
+                  id: document.getUrl(),
+                  name: document.getName(),
+                  scope: docType.scope,
+                  isNew: true
+                });
+              }),
+            element: docType.scope,
+            icon: getIconByScope(docType.scope),
+            onClose: true
+          }))}
+        ></ContextMenu>
+      }
+      navigationList={MENUS.current.map(menu => (
+        <Tooltip title={menu.title} placement="right" arrow>
+          {menu.icon({
+            className: classes.icon,
+            onClick: () => menu.getOnClick()
+          })}
+        </Tooltip>
+      ))}
+      lowerElement={
+        <ProfileMenu
+          version={APP_INFORMATION.VERSION}
+          userName={Authentication.getTokenData().message.name ?? ""}
+          isDarkTheme={isDarkTheme}
+          handleLogout={handleLogoutClick}
+          handleToggleTheme={handleToggleTheme}
+        />
+      }
+    ></VerticalBar>
   );
 };
-
-export default withViewPlugin(MainMenu);
 
 MainMenu.propTypes = {
   call: PropTypes.func.isRequired,
   emit: PropTypes.func.isRequired,
   profile: PropTypes.object.isRequired
 };
+
+export default withViewPlugin(MainMenu);
