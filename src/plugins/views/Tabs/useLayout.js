@@ -63,8 +63,6 @@ const useLayout = (props, dockRef) => {
    */
   const addTabToStack = useCallback(
     (tabId, dock = DOCK_POSITIONS.DOCK) => {
-      // We don't need to add hometab
-      // if (tabId === HOMETAB_PROFILE.name) return;
       const thisStack = tabStack.current[dock] || [];
 
       removeTabFromStack(tabId, dock);
@@ -155,6 +153,11 @@ const useLayout = (props, dockRef) => {
     ]
   );
 
+  /**
+   * Checks if the layout activeId is valid, if not will set the last tab from stack
+   * @private function
+   * @param {Object} _layout : The layout to search through
+   */
   const layoutActiveIdIsValid = useCallback(
     _layout => {
       // let's check if the lastTabId was in maxbox. If it isn't it's most likely in the dockbox.
