@@ -50,11 +50,7 @@ const Node = (props, ref) => {
   const { data } = useDataSubscriber({
     instance,
     propsData: props.data,
-    keysToDisconsider: [
-      Model.OBSERVABLE_KEYS.DESCRIPTION,
-      Model.OBSERVABLE_KEYS.NAME,
-      Model.OBSERVABLE_KEYS.PATH
-    ]
+    keysToDisconsider: Model.KEYS_TO_DISCONSIDER
   });
   const defaultColumns = getColumns();
 
@@ -471,9 +467,6 @@ const Node = (props, ref) => {
   );
 };
 
-export default withEditorPlugin(Node);
-export { Node as NodeComponent };
-
 Node.scope = "Node";
 
 Node.propTypes = {
@@ -482,3 +475,6 @@ Node.propTypes = {
   editable: PropTypes.bool,
   alert: PropTypes.func
 };
+
+export default withEditorPlugin(Node);
+export { Node as NodeComponent };

@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useRef } from "react";
+import React, { forwardRef, useEffect, useRef, memo } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import MaterialTableCore from "@material-table/core";
@@ -13,7 +13,7 @@ const MaterialTable = forwardRef((props, ref) => {
     data,
     editable,
     options,
-    title,
+    title = "",
     detailPanel,
     components
   } = props;
@@ -24,7 +24,7 @@ const MaterialTable = forwardRef((props, ref) => {
   // Refs
   const defaultTableRef = useRef();
   const openedPanels = useRef({});
-  const oldFunction = useRef();
+  const toggleDetailPanelHandler = useRef();
   const tableRef = ref || defaultTableRef;
 
   //========================================================================================
@@ -34,16 +34,28 @@ const MaterialTable = forwardRef((props, ref) => {
   //========================================================================================
 
   /**
-   * Simple extract method to get the table title
-   * @returns {String} to be used as table title
+   * Get a row style to apply to alternated rows
+   * @param {*} _
+   * @param {Int} rowIndex : the rowIndex
+   * @returns
    */
-  const getTitle = () => {
-    let tableTitle = "";
-
-    if (title) tableTitle = title;
-
-    return tableTitle;
+  const getRowStyle = (_, rowIndex) => {
+    return (
+      rowIndex % 2 !== 0 && {
+        backgroundColor: theme.nodeEditor.stripeColor
+      }
+    );
   };
+
+  // TODO Dependent on backend ticket: https://movai.atlassian.net/browse/BP-546
+  // const openOpenedDetails = useCallback(() => {
+  //   const tableData = tableRef.current?.state?.data;
+  //   if (!tableData) return;
+  //   tableData.forEach((row, i) => {
+  //     if (openedPanels.current[row.id])
+  //       toggleDetailPanelHandler.current([i], openedPanels.current[row.id]);
+  //   });
+  // }, [tableRef]);
 
   //========================================================================================
   /*                                                                                      *
@@ -52,23 +64,31 @@ const MaterialTable = forwardRef((props, ref) => {
   //========================================================================================
 
   useEffect(() => {
-    if (!oldFunction.current) {
-      oldFunction.current = tableRef.current?.onToggleDetailPanel;
+    if (!toggleDetailPanelHandler.current) {
+      toggleDetailPanelHandler.current = tableRef.current?.onToggleDetailPanel;
     }
 
-    if (oldFunction.current === tableRef.current?.onToggleDetailPanel) {
+    if (
+      toggleDetailPanelHandler.current === tableRef.current?.onToggleDetailPanel
+    ) {
       tableRef.current.onToggleDetailPanel = (path, render) => {
         const index = tableRef.current.state.data[path[0]]?.id || path[0];
         if (openedPanels.current[index]) {
           delete openedPanels.current[index];
         } else {
-          openedPanels.current[index] = true;
+          openedPanels.current[index] = render;
         }
 
-        oldFunction.current(path, render);
+        toggleDetailPanelHandler.current(path, render);
       };
     }
-  }, [ref, tableRef]);
+  }, [tableRef]);
+
+  // TODO while faking id's works in the meanwhile, deep stuff, like checking after new data comes
+  // for id, makes faking id's not work. This is dependent on backend ticket: https://movai.atlassian.net/browse/BP-546
+  // useEffect(() => {
+  //   openOpenedDetails(data);
+  // }, [data, openOpenedDetails]);
 
   //========================================================================================
   /*                                                                                      *
@@ -80,7 +100,7 @@ const MaterialTable = forwardRef((props, ref) => {
     <div className={classes.tableContainer}>
       <MaterialTableCore
         tableRef={tableRef}
-        title={getTitle()}
+        title={title}
         detailPanel={detailPanel}
         columns={columns}
         actions={actions}
@@ -89,13 +109,7 @@ const MaterialTable = forwardRef((props, ref) => {
         data={data}
         options={{
           ...options,
-          rowStyle: (rowData, index) => {
-            return (
-              index % 2 !== 0 && {
-                backgroundColor: theme.nodeEditor.stripeColor
-              }
-            );
-          },
+          rowStyle: getRowStyle,
           search: true,
           searchFieldAlignment: "left",
           actionsCellStyle: {
@@ -141,4 +155,4 @@ MaterialTable.defaultProps = {
   data: []
 };
 
-export default MaterialTable;
+export default memo(MaterialTable);

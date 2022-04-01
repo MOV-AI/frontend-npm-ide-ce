@@ -158,6 +158,8 @@ export default class Configuration extends Model {
     DETAILS: "details",
     EXTENSION: "extension"
   };
+
+  static KEYS_TO_DISCONSIDER = [this.OBSERVABLE_KEYS.CODE];
 }
 
 // Default model values

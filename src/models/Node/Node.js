@@ -549,6 +549,12 @@ class Node extends Model {
     REMAPPABLE: "remappable",
     PACKAGE_DEP: "packageDep"
   };
+
+  static KEYS_TO_DISCONSIDER = [
+    this.OBSERVABLE_KEYS.NAME,
+    this.OBSERVABLE_KEYS.DESCRIPTION,
+    this.OBSERVABLE_KEYS.PATH
+  ];
 }
 
 Node.defaults = {

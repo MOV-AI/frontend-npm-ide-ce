@@ -251,7 +251,7 @@ class Port extends Model {
     } = content;
 
     return {
-      id: id || randomId(),
+      id,
       name,
       description,
       template,

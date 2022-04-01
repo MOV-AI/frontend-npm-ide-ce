@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, memo } from "react";
+import React, { useCallback, useEffect, useState, useRef, memo } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import _isEqual from "lodash/isEqual";
@@ -62,8 +62,9 @@ const IOConfig = props => {
   } = props;
 
   // State hooks
-  const [scopePorts, setScopePorts] = React.useState({});
-  const [scopeSystemPortsData, setScopeSystemPortsData] = React.useState({});
+  const [scopePorts, setScopePorts] = useState({});
+  const [scopeSystemPortsData, setScopeSystemPortsData] = useState({});
+  const [ioData, setIOData] = useState([]);
 
   // Other hooks
   const classes = useStyles();
@@ -74,30 +75,6 @@ const IOConfig = props => {
     scopePorts,
     autoFocus
   });
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                    React Lifecycle                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  React.useEffect(() => {
-    // Initialize state
-    call(
-      PLUGINS.DOC_MANAGER.NAME,
-      PLUGINS.DOC_MANAGER.CALL.GET_STORE,
-      scope
-    ).then(store => {
-      // Get All transport / protocol to fill first selector
-      store.helper.getAllTransportProtocol().then(res => {
-        if (res) setScopePorts(res);
-      });
-      // Get All ports data to fill second selector
-      store.helper.getPortsData().then(res => {
-        if (res) setScopeSystemPortsData(res);
-      });
-    });
-  }, [call, scope]);
 
   //========================================================================================
   /*                                                                                      *
@@ -128,20 +105,25 @@ const IOConfig = props => {
    * @param {*} _data : Raw data (can be an object of objects)
    * @returns {array} Formatted data
    */
-  const formatData = _data => {
-    if (Array.isArray(_data)) return _data;
-    return Object.entries(_data).map(([key, item]) => {
-      return {
-        ...item,
-        name: item.name
-      };
-    });
-  };
+  const formatData = useCallback(
+    _data => {
+      const newData = Array.isArray(_data)
+        ? _data
+        : Object.values(_data).map(item => ({
+            ...item,
+            name: item.name
+          }));
+      setIOData(prevState =>
+        _isEqual(prevState, newData) ? prevState : newData
+      );
+    },
+    [setIOData]
+  );
 
   /**
    * Format port data
    */
-  const formatPortData = React.useCallback(
+  const formatPortData = useCallback(
     (rowData, direction, key) => {
       // Set port properties
       const effectiveMessage = getEffectiveMessage(rowData, direction, key);
@@ -159,7 +141,7 @@ const IOConfig = props => {
   /**
    * Set in port data from template
    */
-  const setPortDataIn = React.useCallback(
+  const setPortDataIn = useCallback(
     rowData => {
       rowData.portIn = scopePorts[rowData.template]?.In || {};
 
@@ -175,7 +157,7 @@ const IOConfig = props => {
   /**
    * Set out port data from template
    */
-  const setPortDataOut = React.useCallback(
+  const setPortDataOut = useCallback(
     rowData => {
       rowData.portOut = scopePorts[rowData.template]?.Out || {};
 
@@ -190,7 +172,7 @@ const IOConfig = props => {
 
   //========================================================================================
   /*                                                                                      *
-   *                                      Edit Events                                     *
+   *                                       Handlers                                       *
    *                                                                                      */
   //========================================================================================
 
@@ -262,6 +244,34 @@ const IOConfig = props => {
     },
     [onIOConfigRowDelete]
   );
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    React Lifecycle                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  useEffect(() => {
+    // Initialize state
+    call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.GET_STORE,
+      scope
+    ).then(store => {
+      // Get All transport / protocol to fill first selector
+      store.helper.getAllTransportProtocol().then(res => {
+        if (res) setScopePorts(res);
+      });
+      // Get All ports data to fill second selector
+      store.helper.getPortsData().then(res => {
+        if (res) setScopeSystemPortsData(res);
+      });
+    });
+  }, [call, scope]);
+
+  useEffect(() => {
+    formatData(ioConfig);
+  }, [ioConfig, formatData]);
 
   //========================================================================================
   /*                                                                                      *
@@ -352,7 +362,7 @@ const IOConfig = props => {
         <MaterialTable
           ref={tableRef}
           columns={getColumns()}
-          data={formatData(ioConfig)}
+          data={ioData}
           detailPanel={renderDetailPanel}
           editable={{
             isEditable: () => editable,
