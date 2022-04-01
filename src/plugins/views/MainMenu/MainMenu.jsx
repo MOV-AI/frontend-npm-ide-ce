@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import {
@@ -91,6 +91,10 @@ const MainMenu = props => {
    *                                                                                      */
   //========================================================================================
 
+  const handleLogoutClick = useCallback((handleLogOut) => () => {
+    handleLogOut(window.location.href);
+  }, [])
+
   //========================================================================================
   /*                                                                                      *
    *                                        Render                                        *
@@ -160,7 +164,7 @@ const MainMenu = props => {
               version={APP_INFORMATION.VERSION}
               userName={Authentication.getTokenData().message.name ?? ""}
               isDarkTheme={isDarkTheme}
-              handleLogout={handleLogOut}
+              handleLogout={handleLogoutClick(handleLogOut)}
               handleToggleTheme={handleToggleTheme}
             />
           }
