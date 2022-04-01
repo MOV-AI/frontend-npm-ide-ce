@@ -13,15 +13,23 @@ import {
   DOCK_MODES,
   PLUGINS
 } from "../../../utils/Constants";
-import { getIconByScope, getHomeTab, buildDocPath } from "../../../utils/Utils";
+import {
+  getIconByScope,
+  getHomeTab,
+  getNameFromURL,
+  getScopeFromURL,
+  buildDocPath
+} from "../../../utils/Utils";
 import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Workspace from "../../../utils/Workspace";
 
 const useLayout = (props, dockRef) => {
   const { emit, call, on, off } = props;
-  const activeTabId = useRef(null);
   const workspaceManager = useMemo(() => new Workspace(), []);
+  const activeTabId = useRef(null);
   const tabsById = useRef(new Map());
+  const tabStack = useRef({});
+  const firstLoad = useRef(true);
   const [layout, setLayout] = useState({ ...DEFAULT_LAYOUT });
 
   //========================================================================================
@@ -29,6 +37,52 @@ const useLayout = (props, dockRef) => {
    *                                    Private Methods                                   *
    *                                                                                      */
   //========================================================================================
+
+  /**
+   * Removes a tab from the stack for given dock
+   * @private function
+   * @param {String} dock : the dock to look for the tab, defaults to 'dockbox'
+   * @param {String} tabId : the tabId to remove from the stack
+   */
+  const removeTabFromStack = useCallback(
+    (tabId, dock = DOCK_POSITIONS.DOCK) => {
+      const thisStack = tabStack.current[dock] || [];
+      if (thisStack.includes(tabId)) {
+        thisStack.splice(thisStack.indexOf(tabId), 1);
+        workspaceManager.setTabStack(tabStack.current);
+      }
+    },
+    [workspaceManager]
+  );
+
+  /**
+   * Adds a tab to the stack of given dock
+   * @private function
+   * @param {String} dock : the dock to look for the tab, defaults to 'dockbox'
+   * @param {String} tabId : the tabId to add to the stack
+   */
+  const addTabToStack = useCallback(
+    (tabId, dock = DOCK_POSITIONS.DOCK) => {
+      // We don't need to add hometab
+      // if (tabId === HOMETAB_PROFILE.name) return;
+      const thisStack = tabStack.current[dock] || [];
+
+      removeTabFromStack(tabId, dock);
+
+      thisStack.push(tabId);
+      workspaceManager.setTabStack(tabStack.current);
+    },
+    [workspaceManager, removeTabFromStack]
+  );
+
+  /**
+   * Get next tab from stack
+   * @private function
+   */
+  const getNextTabFromStack = useCallback((dock = DOCK_POSITIONS.DOCK) => {
+    const thisStack = tabStack.current[dock] || [];
+    return thisStack[thisStack.length - 1];
+  }, []);
 
   /**
    * Helper function to find if a tab exists in the DockLayout
@@ -40,6 +94,82 @@ const useLayout = (props, dockRef) => {
       return dockRef.current.find(tabId);
     },
     [dockRef]
+  );
+
+  /**
+   * Focus on a tab by a given tabId
+   * - Will check if there's maximized tabs to properly focus the current tab
+   * @private function
+   * @param {string} tabId : The tab id to be focused
+   */
+  const focusExistingTab = useCallback(
+    (tabId, preventFocus) => {
+      const tabData = findTab(tabId);
+      const maxboxChildren = dockRef.current.state.layout.maxbox.children;
+      dockRef.current.updateTab(tabId, tabData, !preventFocus);
+
+      if (
+        maxboxChildren.length &&
+        !maxboxChildren[0].tabs.find(t => t.id === tabId)
+      ) {
+        dockRef.current.dockMove(maxboxChildren[0], null, DOCK_MODES.MAXIMIZE);
+      }
+    },
+    [dockRef, findTab]
+  );
+
+  /**
+   * Gets a dock name where a tab is
+   * @private function
+   * @param {String} tabId : the tab id to search for
+   * @returns {String} dock name
+   */
+  const getDockFromTabId = useCallback(
+    tabId => {
+      const dockLayout = dockRef.current.state.layout;
+      const tabData = findTab(tabId);
+      const panelId = tabData.parent.parent.id;
+
+      const index = Object.values(dockLayout).findIndex(v => v.id === panelId);
+      return Object.keys(dockLayout)[index];
+    },
+    [dockRef, findTab]
+  );
+
+  /**
+   *
+   * @param {String} tabId : tab id to remove from stack
+   */
+  const removeTabAndFocusNew = useCallback(
+    (tabId, dock) => {
+      dock = dock ? dock : getDockFromTabId(tabId);
+      removeTabFromStack(tabId, dock);
+      const nextTabId = getNextTabFromStack(dock);
+      focusExistingTab(nextTabId);
+    },
+    [
+      getDockFromTabId,
+      removeTabFromStack,
+      getNextTabFromStack,
+      focusExistingTab
+    ]
+  );
+
+  const layoutActiveIdIsValid = useCallback(
+    _layout => {
+      // let's check if the lastTabId was in maxbox. If it isn't it's most likely in the dockbox.
+      const maxboxChildren = _layout.maxbox.children[0];
+      const layoutActiveId =
+        maxboxChildren?.activeId || _layout.dockbox.children[0]?.activeId;
+
+      const tabData = findTab(layoutActiveId);
+
+      if (!tabData && layoutActiveId) {
+        if (maxboxChildren) maxboxChildren.activeId = getNextTabFromStack();
+        else _layout.dockbox.children[0].activeId = getNextTabFromStack();
+      }
+    },
+    [findTab, getNextTabFromStack]
   );
 
   /**
@@ -94,17 +224,21 @@ const useLayout = (props, dockRef) => {
       const newLayout = { ...prevLayout };
       const box = _getTabContainer(newLayout[location], prevTabId);
       if (box) {
+        tabData.id = `${tabData.id.substring(0, tabData.id.lastIndexOf("/"))}/${
+          tabData.name
+        }`;
         const tabIndex = box.tabs.findIndex(_el => _el.id === prevTabId);
         box.tabs[tabIndex] = tabData;
         box.activeId = tabData.id;
         tabsById.current.delete(prevTabId);
         tabsById.current.set(tabData.id, tabData);
+        !tabData.isNew && addTabToStack(tabData.id, location);
         workspaceManager.setTabs(tabsById.current);
         workspaceManager.setLayout(newLayout);
       }
       return { newLayout, box };
     },
-    [_getTabContainer, workspaceManager]
+    [_getTabContainer, workspaceManager, addTabToStack]
   );
 
   /**
@@ -137,7 +271,7 @@ const useLayout = (props, dockRef) => {
    */
   const _saveDoc = useCallback(
     (docData, newLayout) => {
-      const { name, scope } = docData;
+      const { id, name, scope } = docData;
       call(
         PLUGINS.DOC_MANAGER.NAME,
         PLUGINS.DOC_MANAGER.CALL.SAVE,
@@ -147,12 +281,14 @@ const useLayout = (props, dockRef) => {
         },
         res => {
           if (res.success) {
+            const dock = getDockFromTabId(id);
             if (newLayout) _applyLayout(newLayout);
+            removeTabAndFocusNew(id, dock);
           }
         }
       );
     },
-    [call, _applyLayout]
+    [call, _applyLayout, getDockFromTabId, removeTabAndFocusNew]
   );
 
   /**
@@ -162,16 +298,18 @@ const useLayout = (props, dockRef) => {
    */
   const _discardChanges = useCallback(
     (docData, newLayout) => {
-      const { name, scope } = docData;
+      const { id, name, scope } = docData;
       call(
         PLUGINS.DOC_MANAGER.NAME,
         PLUGINS.DOC_MANAGER.CALL.DISCARD_DOC_CHANGES,
         { name, scope }
       ).then(() => {
+        const dock = getDockFromTabId(id);
         if (newLayout) _applyLayout(newLayout);
+        removeTabAndFocusNew(id, dock);
       });
     },
-    [call, _applyLayout]
+    [call, _applyLayout, getDockFromTabId, removeTabAndFocusNew]
   );
 
   /**
@@ -210,7 +348,7 @@ const useLayout = (props, dockRef) => {
     (newLayout, tabId) => {
       const { name, scope, isNew, isDirty } = tabsById.current.get(tabId);
       if (isDirty) {
-        const document = { name, scope, isNew };
+        const document = { id: tabId, name, scope, isNew };
         _closeDirtyTab(document, newLayout);
       } else {
         // Remove doc locally if is new and not dirty
@@ -220,6 +358,7 @@ const useLayout = (props, dockRef) => {
             PLUGINS.DOC_MANAGER.CALL.DISCARD_DOC_CHANGES,
             { name, scope }
           );
+
         // Remove tab and apply new layout
         tabsById.current.delete(tabId);
         workspaceManager.setTabs(tabsById.current);
@@ -229,9 +368,10 @@ const useLayout = (props, dockRef) => {
           PLUGINS.RIGHT_DRAWER.NAME,
           PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS
         );
+        removeTabAndFocusNew(tabId);
       }
     },
-    [call, workspaceManager, _applyLayout, _closeDirtyTab]
+    [call, workspaceManager, _applyLayout, _closeDirtyTab, removeTabAndFocusNew]
   );
 
   /**
@@ -351,28 +491,6 @@ const useLayout = (props, dockRef) => {
     return DOCK_POSITIONS.DOCK;
   }, [dockRef]);
 
-  /**
-   * Focus on a tab by a given tabId
-   * - Will check if there's maximized tabs to properly focus the current tab
-   * @private function
-   * @param {string} tabId : The tab id to be focused
-   */
-  const focusExistingTab = useCallback(
-    (tabId, preventFocus) => {
-      const tabData = findTab(tabId);
-      const maxboxChildren = dockRef.current.state.layout.maxbox.children;
-      dockRef.current.updateTab(tabId, tabData, !preventFocus);
-
-      if (
-        maxboxChildren.length &&
-        !maxboxChildren[0].tabs.find(t => t.id === tabId)
-      ) {
-        dockRef.current.dockMove(maxboxChildren[0], null, DOCK_MODES.MAXIMIZE);
-      }
-    },
-    [dockRef, findTab]
-  );
-
   //========================================================================================
   /*                                                                                      *
    *                                    Exposed Methods                                   *
@@ -393,6 +511,7 @@ const useLayout = (props, dockRef) => {
         y: 100,
         z: 1
       };
+      !preventFocus && !tabData.isNew && addTabToStack(tabData.id, tabPosition);
       tabsById.current.set(tabData.id, tabData);
       workspaceManager.setTabs(tabsById.current);
 
@@ -431,6 +550,7 @@ const useLayout = (props, dockRef) => {
       _getFirstContainer,
       getDefaultTabPosition,
       focusExistingTab,
+      addTabToStack,
       findTab
     ]
   );
@@ -505,23 +625,39 @@ const useLayout = (props, dockRef) => {
    * @param {String} direction : (one of: "left" | "right" | "bottom" | "top" | "middle" | "remove" | "before-tab" | "after-tab" | "float" | "front" | "maximize" | "new-window")
    */
   const onLayoutChange = useCallback(
-    (newLayout, tabId, direction) => {
-      const firstContainer = _getFirstContainer(newLayout.dockbox);
-      const newActiveTab =
-        direction !== DOCK_MODES.REMOVE ? tabId : firstContainer.activeId;
+    async (newLayout, tabId, direction) => {
+      const dock = getDockFromTabId(tabId);
+      let newActiveTabId = tabId;
 
       // Attempt to close tab
       if (direction === DOCK_MODES.REMOVE) {
         _closeTab(tabId);
+        newActiveTabId =
+          getNextTabFromStack(dock) ||
+          _getFirstContainer(newLayout.dockbox).activeId;
       } else {
         // Update layout
         _applyLayout(newLayout);
+        const doc =
+          tabId === HOMETAB_PROFILE.name
+            ? {}
+            : await call(
+                PLUGINS.DOC_MANAGER.NAME,
+                PLUGINS.DOC_MANAGER.CALL.READ,
+                {
+                  name: getNameFromURL(tabId),
+                  scope: getScopeFromURL(tabId)
+                }
+              );
+        !firstLoad.current && !doc?.isNew && addTabToStack(tabId, dock);
+
+        firstLoad.current = false;
       }
       // Emit new active tab id
       if (!tabId) return;
-      if (newActiveTab) {
-        activeTabId.current = newActiveTab;
-        emit(PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE, { id: newActiveTab });
+      if (newActiveTabId) {
+        activeTabId.current = newActiveTabId;
+        emit(PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE, { id: newActiveTabId });
       } else {
         call(
           PLUGINS.RIGHT_DRAWER.NAME,
@@ -529,7 +665,16 @@ const useLayout = (props, dockRef) => {
         );
       }
     },
-    [emit, call, _getFirstContainer, _closeTab, _applyLayout]
+    [
+      emit,
+      call,
+      _getFirstContainer,
+      _closeTab,
+      _applyLayout,
+      getDockFromTabId,
+      addTabToStack,
+      getNextTabFromStack
+    ]
   );
 
   /**
@@ -620,7 +765,10 @@ const useLayout = (props, dockRef) => {
    */
   useEffect(() => {
     const [lastLayout, lastTabs] = workspaceManager.getLayoutAndTabs();
+    tabStack.current = workspaceManager.getTabStack();
     const tabs = [];
+
+    layoutActiveIdIsValid(lastLayout);
 
     tabsById.current = lastTabs;
     // Install current tabs plugins
@@ -647,7 +795,7 @@ const useLayout = (props, dockRef) => {
     return () => {
       workspaceManager.destroy();
     };
-  }, [workspaceManager, _getTabData, open]);
+  }, [workspaceManager, _getTabData, open, layoutActiveIdIsValid]);
 
   //========================================================================================
   /*                                                                                      *
