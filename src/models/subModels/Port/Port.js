@@ -1,3 +1,4 @@
+import { randomId } from "../../../utils/Utils";
 import Model from "../../Model";
 import Manager from "../../Manager";
 import schema from "./schema";
@@ -25,6 +26,7 @@ class Port extends Model {
    *                                                                                      */
   //========================================================================================
 
+  id = randomId();
   description = "";
   template = "";
   msgPackage = "";
@@ -39,6 +41,14 @@ class Port extends Model {
    *                                     Data Handlers                                    *
    *                                                                                      */
   //========================================================================================
+
+  /**
+   * Returns the id property
+   * @returns {string}
+   */
+  getId() {
+    return this.id;
+  }
 
   /**
    * Returns the description property
@@ -190,6 +200,7 @@ class Port extends Model {
    */
   serialize() {
     return {
+      id: this.getId(),
       name: this.getName(),
       description: this.getDescription(),
       template: this.getTemplate(),
@@ -230,6 +241,7 @@ class Port extends Model {
     const content = Object.values(json)[0];
 
     const {
+      Id: id,
       Info: description,
       Template: template,
       Message: message,
@@ -239,6 +251,7 @@ class Port extends Model {
     } = content;
 
     return {
+      id,
       name,
       description,
       template,

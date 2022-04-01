@@ -50,11 +50,7 @@ const Node = (props, ref) => {
   const { data } = useDataSubscriber({
     instance,
     propsData: props.data,
-    keysToDisconsider: [
-      Model.OBSERVABLE_KEYS.DESCRIPTION,
-      Model.OBSERVABLE_KEYS.NAME,
-      Model.OBSERVABLE_KEYS.PATH
-    ]
+    keysToDisconsider: Model.KEYS_TO_DISCONSIDER
   });
   const defaultColumns = getColumns();
 
@@ -319,44 +315,29 @@ const Node = (props, ref) => {
   const handleNewCallback = useCallback(
     (defaultMsg, ioConfigName, portName) => {
       const scope = CallbackModel.SCOPE;
-      call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
-        scope,
-        onSubmit: newName => {
-          // Create callback in DB
-          call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.CREATE, {
-            scope,
-            name: newName
-          }).then(doc => {
-            doc.setMessage(defaultMsg);
-
-            // Save callback in DB
-            call(
-              PLUGINS.DOC_MANAGER.NAME,
-              PLUGINS.DOC_MANAGER.CALL.SAVE,
-              {
-                scope,
-                name: newName
-              },
-              res => {
-                if (res.success) {
-                  const newTabData = {
-                    id: doc.getUrl(),
-                    name: newName,
-                    scope
-                  };
-                  call(
-                    PLUGINS.TABS.NAME,
-                    PLUGINS.TABS.CALL.OPEN_EDITOR,
-                    newTabData
-                  );
-                  // Set new callback in Node Port
-                  updatePortCallback(ioConfigName, portName, newName);
-                }
-              }
-            );
-          });
+      call(
+        PLUGINS.DOC_MANAGER.NAME,
+        PLUGINS.DOC_MANAGER.CALL.SAVE,
+        {
+          scope,
+          name: " new_callback ",
+          data: {
+            message: defaultMsg
+          }
+        },
+        res => {
+          if (res.success) {
+            const newTabData = {
+              id: `${res.model.workspace}/${scope}/${res.name}`,
+              name: res.name,
+              scope
+            };
+            call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, newTabData);
+            // Set new callback in Node Port
+            updatePortCallback(ioConfigName, portName, res.name);
+          }
         }
-      });
+      );
     },
     [call, updatePortCallback]
   );
@@ -486,9 +467,6 @@ const Node = (props, ref) => {
   );
 };
 
-export default withEditorPlugin(Node);
-export { Node as NodeComponent };
-
 Node.scope = "Node";
 
 Node.propTypes = {
@@ -497,3 +475,6 @@ Node.propTypes = {
   editable: PropTypes.bool,
   alert: PropTypes.func
 };
+
+export default withEditorPlugin(Node);
+export { Node as NodeComponent };

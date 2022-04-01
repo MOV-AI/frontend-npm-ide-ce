@@ -42,7 +42,7 @@ const Menu = props => {
   const { data } = useDataSubscriber({
     instance,
     propsData: props.data,
-    keysToDisconsider: [Model.OBSERVABLE_KEYS.CODE]
+    keysToDisconsider: Model.KEYS_TO_DISCONSIDER
   });
 
   //========================================================================================
@@ -142,10 +142,10 @@ const Menu = props => {
    * @param {*} evt
    */
   const handleExpandClick = useCallback(evt => {
-    const activeItem = parseInt(evt.currentTarget.dataset.activeItem);
+    const currentActiveItem = parseInt(evt.currentTarget.dataset.activeItem);
     setActiveItem(prevState => {
-      if (prevState === activeItem) return 0;
-      else return activeItem;
+      if (prevState === currentActiveItem) return 0;
+      else return currentActiveItem;
     });
   }, []);
 

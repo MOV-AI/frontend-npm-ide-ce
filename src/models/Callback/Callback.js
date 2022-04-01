@@ -232,4 +232,6 @@ export default class Callback extends Model {
     DETAILS: "details",
     MESSAGE: "message"
   };
+
+  static KEYS_TO_DISCONSIDER = [this.OBSERVABLE_KEYS.CODE];
 }

@@ -45,7 +45,7 @@ const Configuration = (props, ref) => {
   const { data } = useDataSubscriber({
     instance,
     propsData: props.data,
-    keysToDisconsider: [Model.OBSERVABLE_KEYS.CODE]
+    keysToDisconsider: Model.KEYS_TO_DISCONSIDER
   });
   // Style Hooks
   const classes = useStyles();

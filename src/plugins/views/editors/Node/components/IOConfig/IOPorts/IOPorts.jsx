@@ -31,9 +31,7 @@ const IOPorts = props => {
       portOut: "icon-out"
     };
 
-    return (
-      <i className={iconClass[direction]} style={{ fontSize: "1.5rem" }}></i>
-    );
+    return <i className={`${classes.portBase} ${iconClass[direction]}`}></i>;
   };
 
   /**

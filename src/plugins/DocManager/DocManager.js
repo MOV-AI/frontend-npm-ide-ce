@@ -167,10 +167,13 @@ class DocManager extends IDEPlugin {
    * @returns {Promise<Model>}
    */
   async save(modelKey, callback) {
-    const { name, scope } = modelKey;
+    const { name, scope, data } = modelKey;
 
     const thisDoc = await this.read(modelKey);
     const { isNew, isDirty, isOutdated } = thisDoc;
+
+    // let's replace some data locally before saving if it was passed in
+    if (data) thisDoc.setData(data);
 
     if (!isDirty) return;
     if (!isNew && !isOutdated) return this.doSave(modelKey, callback);
