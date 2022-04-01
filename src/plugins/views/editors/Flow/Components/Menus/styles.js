@@ -55,7 +55,8 @@ export const nodeGroupStyles = makeStyles(theme => ({
 
 export const propertiesStyles = makeStyles(theme => ({
   gridAlign: {
-    textAlign: "left"
+    textAlign: "left",
+    marginBottom: "15px"
   }
 }));
 

@@ -5,18 +5,15 @@ import _get from "lodash/get";
 import _set from "lodash/set";
 import { Maybe } from "monet";
 import { Typography } from "@material-ui/core";
-import { useTheme } from "@material-ui/core/styles";
-import { explorerStyles } from "./styles";
-import { PLUGINS } from "../../../utils/Constants";
+import { PLUGINS, LABEL } from "../../../utils/Constants";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
+import movaiLogo from "../editors/_shared/Branding/movai-flow-logo-red.png";
 import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
-import movaiFullLogo from "../editors/_shared/Branding/movai-full-logo.png";
-import movaiFullLogoWhite from "../editors/_shared/Branding/movai-full-logo-red-white.png";
+import { explorerStyles } from "./styles";
 
 const Explorer = props => {
   const { call, on, height } = props;
   const classes = explorerStyles();
-  const theme = useTheme();
   const [data, setData] = React.useState([]);
 
   const { t } = useTranslation();
@@ -292,10 +289,7 @@ const Explorer = props => {
   return (
     <Typography component="div">
       <h1 className={classes.header}>
-        <img
-          src={theme.label === "dark" ? movaiFullLogoWhite : movaiFullLogo}
-          alt={t("Mov.AI Logo")}
-        />
+        <img src={movaiLogo} alt={LABEL} />
       </h1>
       <Typography component="div" className={classes.typography}>
         <VirtualizedTree

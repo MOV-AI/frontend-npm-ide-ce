@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import {
@@ -11,40 +11,25 @@ import HomeIcon from "@material-ui/icons/Home";
 import TextSnippetIcon from "@material-ui/icons/Description";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 import { Tooltip } from "@material-ui/core";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { useTheme } from "@material-ui/core/styles";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import { MainContext } from "../../../main-context";
-import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
-import movaiIconWhite from "../editors/_shared/Branding/movai-logo-white.png";
 import {
   HOMETAB_PROFILE,
   APP_INFORMATION,
   PLUGINS,
   HOSTS
 } from "../../../utils/Constants";
+import movaiIcon from "../editors/_shared/Branding/movai-logo-transparent.png";
 import { getIconByScope, getHomeTab } from "../../../utils/Utils";
-
-const useStyles = makeStyles(theme => ({
-  icon: {
-    color: theme.palette.primary.main,
-    cursor: "pointer",
-    "& svg": {
-      color: theme.palette.primary.main
-    }
-  },
-  movaiIcon: {
-    padding: 0,
-    width: 35,
-    height: 35
-  }
-}));
+import { mainMenuStyles } from "./styles";
 
 const MainMenu = props => {
   const { call } = props;
   // State hooks
   const [docTypes, setDocTypes] = useState([]);
   // Other hooks
-  const classes = useStyles();
+  const classes = mainMenuStyles();
   const theme = useTheme();
   const { t } = useTranslation();
   // Refs
@@ -91,6 +76,15 @@ const MainMenu = props => {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Open Welcome Tab
+   */
+  const openHomeTab = useCallback(() => {
+    getHomeTab().then(homeTab => {
+      call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN, homeTab);
+    });
+  }, [call]);
+
   //========================================================================================
   /*                                                                                      *
    *                                        Render                                        *
@@ -101,17 +95,25 @@ const MainMenu = props => {
     <MainContext.Consumer>
       {({ isDarkTheme, handleLogOut, handleToggleTheme }) => (
         <VerticalBar
-          useDividers={true}
           unsetAccountAreaPadding={true}
           backgroundColor={theme.palette.background.default}
           upperElement={
-            <img
-              src={theme.label === "dark" ? movaiIconWhite : movaiIcon}
-              className={classes.movaiIcon}
-              alt="MOV.AI"
-            />
+            <Tooltip title={t("Open Welcome Tab")} placement="right" arrow>
+              <HomeIcon
+                className={classes.icon}
+                onClick={openHomeTab}
+              ></HomeIcon>
+            </Tooltip>
           }
-          creatorElement={
+          navigationList={[
+            ...MENUS.current.map(menu => (
+              <Tooltip title={menu.title} placement="right" arrow>
+                {menu.icon({
+                  className: classes.icon,
+                  onClick: menu.getOnClick
+                })}
+              </Tooltip>
+            )),
             <ContextMenu
               element={
                 <Tooltip
@@ -146,24 +148,16 @@ const MainMenu = props => {
                 onClose: true
               }))}
             ></ContextMenu>
-          }
-          navigationList={MENUS.current.map(menu => (
-            <Tooltip title={menu.title} placement="right" arrow>
-              {menu.icon({
-                className: classes.icon,
-                onClick: () => menu.getOnClick()
-              })}
-            </Tooltip>
-          ))}
-          lowerElement={
+          ]}
+          lowerElement={[
             <ProfileMenu
               version={APP_INFORMATION.VERSION}
               userName={Authentication.getTokenData().message.name ?? ""}
               isDarkTheme={isDarkTheme}
               handleLogout={handleLogOut}
-              handleToggleTheme={handleToggleTheme}
-            />
-          }
+            />,
+            <img src={movaiIcon} className={classes.movaiIcon} alt="MOV.AI" />
+          ]}
         ></VerticalBar>
       )}
     </MainContext.Consumer>

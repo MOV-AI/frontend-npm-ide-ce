@@ -1,8 +1,8 @@
 import React, { memo } from "react";
 import PropTypes from "prop-types";
-import { useTranslation } from "../../../_shared/mocks";
+import { useTranslation } from "react-i18next";
 import { HtmlTooltip } from "../_shared/HtmlTooltip";
-import { makeStyles } from "@material-ui/core/styles";
+import { executionParamStyles } from "./styles";
 import Typography from "@material-ui/core/Typography";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -12,64 +12,6 @@ import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import TextField from "@material-ui/core/TextField";
 import _isEqual from "lodash/isEqual";
 import CollapsibleHeader from "../_shared/CollapsibleHeader";
-
-const useStyles = makeStyles(theme => ({
-  root: {
-    padding: "5px 0px 5px 0px",
-    width: "100%"
-  },
-  heading: {
-    fontSize: "1.5rem"
-  },
-  details: {
-    display: "flex",
-    flexDirection: "column"
-  },
-  column: {
-    flexBasis: "90%"
-  },
-  input: {
-    margin: theme.spacing(1),
-    fontFamily: "inherit",
-    width: "80%",
-    fontWeight: "bold"
-  },
-  text: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center"
-  },
-  row: {
-    display: "flex",
-    flexDirection: "row"
-  },
-  center: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap"
-  },
-  centerCheckboxTooltip: {
-    justifyContent: "center",
-    display: "flex",
-    flexDirection: "row",
-    flexGrow: 1
-  },
-  logo: {
-    margin: "12px 12px 12px 12px",
-    padding: "0px"
-  },
-  formControlLabel: {
-    margin: "0%"
-  },
-  textField: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1)
-  },
-  noMargin: {
-    margin: 0
-  }
-}));
 
 const TOOLTIP = {
   close: 0,
@@ -91,7 +33,7 @@ const ExecutionParameters = props => {
   // Handle tooltip open state
   const [openTooltip, setOpenTooltip] = React.useState(TOOLTIP.close);
   // Hooks
-  const classes = useStyles();
+  const classes = executionParamStyles();
   const { t } = useTranslation();
 
   //========================================================================================

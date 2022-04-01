@@ -49,7 +49,7 @@ class Flow extends Model {
   subFlows = new Manager("subFlows", SubFlow, this.propEvents);
 
   // Define observable properties
-  observables = Object.values(Flow.OBSERVABLE_KEYS);
+  observables = Object.values(this.constructor.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
