@@ -140,6 +140,7 @@ const ContainerMenu = props => {
         id={data.id}
         model={data.model}
         template={data.ContainerFlow}
+        label={"Template Name:"}
         type={"Sub-Flow"}
         openDoc={openDoc}
       />

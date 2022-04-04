@@ -14,6 +14,14 @@ import { Callback, Configuration, Flow, Node } from "../views/editors";
 
 const factory = (workspace, observer, docManager) => {
   return {
+    [FlowStore.SCOPE]: {
+      store: new FlowStore(workspace, observer, docManager),
+      plugin: Flow
+    },
+    [NodeStore.SCOPE]: {
+      store: new NodeStore(workspace, observer, docManager),
+      plugin: Node
+    },
     [CallbackStore.SCOPE]: {
       store: new CallbackStore(workspace, observer, docManager),
       plugin: Callback
@@ -21,14 +29,6 @@ const factory = (workspace, observer, docManager) => {
     [ConfigurationStore.SCOPE]: {
       store: new ConfigurationStore(workspace, observer, docManager),
       plugin: Configuration
-    },
-    [NodeStore.SCOPE]: {
-      store: new NodeStore(workspace, observer, docManager),
-      plugin: Node
-    },
-    [FlowStore.SCOPE]: {
-      store: new FlowStore(workspace, observer, docManager),
-      plugin: Flow
     }
   };
 };

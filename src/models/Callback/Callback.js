@@ -7,29 +7,29 @@ export default class Callback extends Model {
   constructor() {
     // inject imported schema and forward constructor arguments
     super({ schema, ...arguments[0] });
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                        Events                                        *
+     *                                                                                      */
+    //========================================================================================
+
+    this.pyLibs = new Manager("pyLibs", PyLib, {
+      onAny: (event, name, value) => this.propsUpdate(event, name, value)
+    });
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                   Model Properties                                   *
+     *                                                                                      */
+    //========================================================================================
+
+    this.code = "";
+    this.message = "";
+
+    // Define observable properties
+    this.observables = Object.values(Callback.OBSERVABLE_KEYS);
   }
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                        Events                                        *
-   *                                                                                      */
-  //========================================================================================
-
-  pyLibs = new Manager("pyLibs", PyLib, {
-    onAny: (event, name, value) => this.propsUpdate(event, name, value)
-  });
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                   Model Properties                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  code = "";
-  message = "";
-
-  // Define observable properties
-  observables = Object.values(Callback.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *

@@ -1,8 +1,6 @@
-import React, { forwardRef, useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
-import { useTheme } from "@material-ui/core/styles";
-import Tooltip from "@material-ui/core/Tooltip";
 import withAlerts from "../../../decorators/withAlerts";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import Workspace from "../../../utils/Workspace";
@@ -13,20 +11,17 @@ import {
   ALERT_SEVERITIES
 } from "../../../utils/Constants";
 import { ERROR_MESSAGES } from "../../../utils/Messages";
-import movaiFullLogoWhite from "../editors/_shared/Branding/movai-full-logo-red-white.png";
-import movaiFullLogo from "../editors/_shared/Branding/movai-full-logo.png";
 import QuickAccessComponent from "./components/QuickAccess";
 import RecentDocumentsComponent from "./components/RecentDocuments";
 import ExamplesComponent from "./components/Examples";
 
 import { homeTabStyles } from "./styles";
 
-const HomeTab = forwardRef((props, ref) => {
+const HomeTab = props => {
   const { call, on, off, alert } = props;
   const workspaceManager = useMemo(() => new Workspace(), []);
   const classes = homeTabStyles();
   const { t } = useTranslation();
-  const theme = useTheme();
 
   //========================================================================================
   /*                                                                                      *
@@ -99,25 +94,9 @@ const HomeTab = forwardRef((props, ref) => {
           <ExamplesComponent openExistingDocument={openExistingDocument} />
         </div>
       </div>
-      <div className={classes.footer}>
-        <Tooltip title={t("MOV.AI")}>
-          {/* <IconButton
-            href="https://mov.ai"
-            target="_blank"
-            rel="noreferrer"
-            className={classes.socialIconBadge}
-          > */}
-          <img
-            src={theme.label === "dark" ? movaiFullLogoWhite : movaiFullLogo}
-            alt="MOV.AI Logo"
-            className={classes.movaiIcon}
-          />
-          {/* </IconButton> */}
-        </Tooltip>
-      </div>
     </div>
   );
-});
+}
 
 export default withViewPlugin(withAlerts(HomeTab));
 
