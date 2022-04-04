@@ -6,19 +6,20 @@ class Parameter extends Model {
   constructor() {
     // inject imported schema and forward constructor arguments
     super({ schema, ...arguments[0] });
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                   Model Properties                                   *
+     *                                                                                      */
+    //========================================================================================
+
+    this.value = "";
+    this.type = Parameter.defaults.type;
+    this.description = "";
+
+    // Define observable properties
+    this.observables = Object.values(Parameter.OBSERVABLE_KEYS);
   }
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                   Model Properties                                   *
-   *                                                                                      */
-  //========================================================================================
-  value = "";
-  type = this.constructor.defaults.type;
-  description = "";
-
-  // Define observable properties
-  observables = Object.values(this.constructor.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -149,7 +150,7 @@ class Parameter extends Model {
    */
   static defaults = {
     type: DATA_TYPES.ANY
-  }
+  };
 }
 
 export default Parameter;

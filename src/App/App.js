@@ -12,6 +12,7 @@ import CentralPanel from "../plugins/hosts/CentralPanel/CentralPanel";
 import DrawerPanel from "../plugins/hosts/DrawerPanel/DrawerPanel";
 import SidePanel from "../plugins/hosts/SidePanel/SidePanel";
 import TopBar from "../plugins/hosts/TopBar/TopBar";
+import SystemBar from "../plugins/views/SystemBar/SystemBar";
 import AlertPanel from "../plugins/hosts/AlertPanel/AlertPanel";
 import Explorer from "../plugins/views/Explorer/Explorer";
 import MainMenu from "../plugins/views/MainMenu/MainMenu";
@@ -23,7 +24,8 @@ import { withTheme } from "../decorators/withTheme";
 import {
   HOMETAB_PROFILE,
   FLOW_EXPLORER_PROFILE,
-  PLUGINS
+  PLUGINS,
+  HOSTS
 } from "../utils/Constants";
 import { MainContext } from "../main-context";
 
@@ -33,7 +35,6 @@ const DEBUG_MODE = false;
 
 const useStyles = debugMode =>
   makeStyles(theme => ({
-    topBar: { border: debugMode ? "solid 5px purple" : "", width: "100%" },
     leftPanel: {
       border: debugMode ? "solid 5px red" : "",
       borderRight: debugMode ? "" : `1px solid ${theme.background}`,
@@ -76,15 +77,15 @@ function App(props) {
 function installAppPlugins() {
   const plugins = [
     {
-      profile: { name: "docManager" },
+      profile: { name: PLUGINS.DOC_MANAGER.NAME },
       factory: profile => new DocManager(profile)
     },
     {
-      profile: { name: "dialog" },
+      profile: { name: PLUGINS.DIALOG.NAME },
       factory: profile => new Dialog(profile)
     },
     {
-      profile: { name: "alert" },
+      profile: { name: PLUGINS.ALERT.NAME },
       factory: profile => new Alerts(profile)
     },
     {
@@ -101,24 +102,37 @@ function installAppPlugins() {
 function installViewPlugins() {
   const plugins = [
     {
-      profile: { name: "mainMenu", location: "leftPanel" },
+      profile: {
+        name: PLUGINS.MAIN_MENU.NAME,
+        location: HOSTS.LEFT_PANEL.NAME
+      },
       factory: profile => new MainMenu(profile)
+    },
+    {
+      profile: {
+        name: PLUGINS.EXPLORER.NAME,
+        location: HOSTS.LEFT_DRAWER.NAME
+      },
+      factory: profile => new Explorer(profile)
+    },
+    {
+      profile: { name: PLUGINS.TABS.NAME, location: HOSTS.MAIN_PANEL.NAME },
+      factory: profile => new Tabs(profile)
     },
     {
       profile: HOMETAB_PROFILE,
       factory: profile => new HomeTab(profile)
     },
     {
-      profile: { name: "explorer", location: "leftDrawer" },
-      factory: profile => new Explorer(profile)
-    },
-    {
-      profile: { name: "tabs", location: "mainPanel" },
-      factory: profile => new Tabs(profile)
-    },
-    {
-      profile: { name: "placeholder", location: PLUGINS.RIGHT_DRAWER.NAME },
+      profile: {
+        name: PLUGINS.PLACEHOLDER.NAME,
+        location: PLUGINS.RIGHT_DRAWER.NAME
+      },
       factory: profile => new Placeholder(profile)
+    },
+    {
+      profile: { name: PLUGINS.SYSTEM_BAR.NAME, location: HOSTS.TOP_BAR.NAME },
+      factory: profile => new SystemBar(profile)
     }
   ];
   plugins.forEach(pluginDescription => {
@@ -131,23 +145,23 @@ function getHostedPlugins(classes) {
   return (
     <Grid container direction="column">
       <Grid container alignItems="flex-start">
-        <TopBar hostName="topBar" className={classes.topBar}></TopBar>
+        <TopBar hostName={HOSTS.TOP_BAR.NAME} debugMode={DEBUG_MODE}></TopBar>
       </Grid>
       <Grid container alignItems="stretch" style={{ flexGrow: 1 }}>
         <Typography component="div" className={classes.leftPanel}>
           <SidePanel
-            hostName="leftPanel"
+            hostName={HOSTS.LEFT_PANEL.NAME}
             style={{ height: "100%" }}
           ></SidePanel>
           <DrawerPanel
-            hostName="leftDrawer"
+            hostName={HOSTS.LEFT_DRAWER.NAME}
             anchor="left"
             initialOpenState
           ></DrawerPanel>
         </Typography>
         <CentralPanel
           className={classes.centralPanel}
-          hostName="mainPanel"
+          hostName={HOSTS.MAIN_PANEL.NAME}
         ></CentralPanel>
         <DrawerPanel
           className={classes.rightDrawer}
@@ -157,7 +171,7 @@ function getHostedPlugins(classes) {
       </Grid>
       <Grid container alignItems="flex-end">
         <BottomBar
-          hostName="bottomBar"
+          hostName={HOSTS.BOTTOM_BAR.NAME}
           className={classes.bottomBar}
         ></BottomBar>
       </Grid>

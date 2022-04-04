@@ -65,16 +65,6 @@ export const getIconByScope = (scope, style) => {
 };
 
 /**
- * Document scopes
- */
-export const SCOPES = {
-  CALLBACK: "Callback",
-  CONFIGURATION: "Configuration",
-  NODE: "Node",
-  FLOW: "Flow"
-};
-
-/**
  * Simple Event to Stop Propagation
  * @param e: event to stop the propagation
  */
@@ -83,12 +73,47 @@ export const stopPropagation = e => {
 };
 
 /**
+ * Returns the document version from an URL
+ * @param {String} url
+ * @returns {String}
+ */
+export function getVersionFromUrl(url) {
+  if (!url) return "";
+  const splittedUrl = url.split("/");
+  return splittedUrl[3];
+}
+
+/**
  * Returns the document name from an URL
  * @param {String} url
  * @returns {String}
  */
 export function getNameFromURL(url) {
-  return url?.substring(url.lastIndexOf("/") + 1);
+  if (!url) return "";
+  const splittedUrl = url.split("/");
+  return splittedUrl.length === 1 ? url : splittedUrl[2];
+}
+
+/**
+ * Returns the document scope from an URL
+ * @param {String} url
+ * @returns {String}
+ */
+export function getScopeFromURL(url) {
+  if (!url) return "";
+  const splittedUrl = url.split("/");
+  return splittedUrl[1];
+}
+
+/**
+ * Returns the document workspace from an URL
+ * @param {String} url
+ * @returns {String}
+ */
+export function getWorkspaceFromUrl(url) {
+  if (!url) return "";
+  const splittedUrl = url.split("/");
+  return splittedUrl[0];
 }
 
 /**
@@ -102,6 +127,16 @@ export function validateDocumentName(name) {
   } else {
     return true;
   }
+}
+
+/**
+ * Build a document path from a doc
+ * @param {Document} doc
+ * @returns
+ */
+export function buildDocPath(doc) {
+  const { workspace, scope, name } = doc;
+  return `${workspace}/${scope}/${name}`;
 }
 
 const boolToPythonOptions = {
@@ -149,7 +184,7 @@ export function pythonToBool(value) {
 export const getHomeTab = () => {
   const viewPlugin = new HomeTab(HOMETAB_PROFILE);
 
-  return Promise.resolve({
+  return {
     ...HOMETAB_PROFILE,
     id: HOMETAB_PROFILE.name,
     name: HOMETAB_PROFILE.title,
@@ -157,5 +192,22 @@ export const getHomeTab = () => {
     scope: HOMETAB_PROFILE.name,
     extension: "",
     content: viewPlugin.render()
-  });
+  };
 };
+
+/**
+ * Trigger a simulated mouse click (react element)
+ * @param {*} element
+ */
+export function simulateMouseClick(element) {
+  ["mousedown", "click", "mouseup"].forEach(mouseEventType =>
+    element.dispatchEvent(
+      new MouseEvent(mouseEventType, {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+        buttons: 1
+      })
+    )
+  );
+}

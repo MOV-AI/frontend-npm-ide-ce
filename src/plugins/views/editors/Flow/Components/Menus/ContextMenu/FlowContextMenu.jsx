@@ -59,7 +59,7 @@ const FlowContextMenu = props => {
 
   const getPortOptions = [
     {
-      label: t("Toggle"),
+      label: t("Toggle Exposed"),
       icon: <ToggleOnIcon />,
       onClick: () => handleOptionsClick(onPortToggle)
     }

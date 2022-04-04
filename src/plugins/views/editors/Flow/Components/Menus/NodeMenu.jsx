@@ -11,9 +11,14 @@ import {
 } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import { DATA_TYPES } from "../../../../../../utils/Constants";
+import {
+  DATA_TYPES,
+  TABLE_KEYS_NAMES,
+  DIALOG_TITLE,
+  PLUGINS,
+  SCOPES
+} from "../../../../../../utils/Constants";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
-import { TABLE_KEYS_NAMES, DIALOG_TITLE } from "../../Constants/constants";
 import MenuDetails from "./sub-components/MenuDetails";
 import PortsDetails from "./sub-components/PortsDetails";
 import PropertiesSection from "./sub-components/collapsibleSections/PropertiesSection";
@@ -56,6 +61,7 @@ const NodeMenu = memo(
     const [templateData, setTemplateData] = useState({});
     const [activeItem, setActiveItem] = useState(0);
     const [nodeData, setNodeData] = useState({});
+    const [protectedDocs, setProtectedDocs] = useState([]);
     // Other hooks
     const classes = nodeMenuStyles();
     const { t } = useTranslation();
@@ -126,14 +132,26 @@ const NodeMenu = memo(
     //========================================================================================
 
     useEffect(() => {
+      // Get node data
       setNodeData(getNodeData());
-    }, [getNodeData]);
+      // Get protected callbacks
+      call(
+        PLUGINS.DOC_MANAGER.NAME,
+        PLUGINS.DOC_MANAGER.CALL.GET_STORE,
+        SCOPES.CALLBACK
+      ).then(store => {
+        setProtectedDocs(store.protectedDocs);
+      });
+    }, [getNodeData, call]);
 
     useEffect(() => {
       const name = data?.Template;
       if (!data?.Template) return;
       // Read node template
-      call("docManager", "read", { name, scope: data.model }).then(doc => {
+      call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.READ, {
+        name,
+        scope: data.model
+      }).then(doc => {
         setTemplateData(doc.serialize());
       });
     }, [data, call]);
@@ -176,7 +194,7 @@ const NodeMenu = memo(
           paramType
         };
 
-        const method = "customDialog";
+        const method = PLUGINS.DIALOG.CALL.CUSTOM_DIALOG;
         const args = {
           onSubmit: handleSubmitParameter,
           title: t("Edit {{paramType}}", { paramType }),
@@ -239,7 +257,11 @@ const NodeMenu = memo(
           type={templateData.type}
           openDoc={openDoc}
         />
-        <PortsDetails openDoc={openDoc} templateData={templateData.ports} />
+        <PortsDetails
+          openDoc={openDoc}
+          templateData={templateData.ports}
+          protectedDocs={protectedDocs}
+        />
         {/* =========================== PROPERTIES =========================== */}
         <ListItem
           button

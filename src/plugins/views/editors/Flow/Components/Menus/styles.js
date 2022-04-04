@@ -85,6 +85,7 @@ export const linkMenuStyles = makeStyles(theme => ({
 }));
 
 export const portStyles = makeStyles(theme => ({
+  ...common,
   portIcon: {
     paddingLeft: "30px"
   },

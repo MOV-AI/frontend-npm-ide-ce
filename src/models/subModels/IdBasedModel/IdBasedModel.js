@@ -5,18 +5,18 @@ class IdBased extends Model {
   constructor() {
     // inject imported schema and forward constructor arguments
     super({ schema, ...arguments[0] });
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                   Model Properties                                   *
+     *                                                                                      */
+    //========================================================================================
+
+    this.id = "";
+
+    // Define observable properties
+    this.observables = Object.values(IdBased.OBSERVABLE_KEYS);
   }
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                   Model Properties                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  id = "";
-
-  // Define observable properties
-  observables = Object.values(this.constructor.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -55,7 +55,7 @@ class IdBased extends Model {
   serialize() {
     return {
       id: this.getId(),
-      name: this.getName(),
+      name: this.getName()
     };
   }
 
@@ -68,7 +68,7 @@ class IdBased extends Model {
     const { name } = this.serialize();
 
     return {
-      name,
+      name
     };
   }
 
@@ -92,7 +92,7 @@ class IdBased extends Model {
   }
 
   static OBSERVABLE_KEYS = {
-    NAME: "name",
+    NAME: "name"
   };
 }
 

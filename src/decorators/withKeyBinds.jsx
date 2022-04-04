@@ -1,5 +1,6 @@
 import React from "react";
 import hotkeys from "hotkeys-js";
+import { KEYBINDINGS } from "../utils/Keybindings";
 
 /**
  * By default hotkeys are not enabled for INPUT SELECT TEXTAREA elements.
@@ -9,7 +10,7 @@ hotkeys.filter = function (event) {
   return true;
 };
 
-hotkeys("ctrl+s", event => {
+hotkeys(KEYBINDINGS.SAVE, event => {
   event.preventDefault();
 });
 

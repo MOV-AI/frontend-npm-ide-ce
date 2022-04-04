@@ -5,19 +5,19 @@ class ExposedPorts extends Model {
   constructor() {
     // inject imported schema and forward constructor arguments
     super({ schema, ...arguments[0] });
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                   Model Properties                                   *
+     *                                                                                      */
+    //========================================================================================
+
+    // Extend Model properties (name, details, ...)
+    this.ports = [];
+
+    // Define observable properties
+    this.observables = Object.values(ExposedPorts.OBSERVABLE_KEYS);
   }
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                   Model Properties                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  // Extend Model properties (name, details, ...)
-  ports = [];
-
-  // Define observable properties
-  observables = Object.values(this.constructor.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *

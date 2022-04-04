@@ -4,8 +4,16 @@ import useNewDocument from "./hooks/useNewDocument";
 import FormDialog from "./FormDialog";
 
 const NewDocumentDialog = props => {
-  const { call, title, submitText, scope, onSubmit, onClose, loadingMessage } =
-    props;
+  const {
+    call,
+    title,
+    submitText,
+    placeholder,
+    scope,
+    onSubmit,
+    onClose,
+    loadingMessage
+  } = props;
   const { onValidation, onPostValidation } = useNewDocument({ scope, call });
 
   return (
@@ -14,6 +22,7 @@ const NewDocumentDialog = props => {
       scope={scope}
       loadingMessage={loadingMessage}
       submitText={submitText}
+      placeholder={placeholder}
       onSubmit={onSubmit}
       onClose={onClose}
       onValidation={onValidation}
@@ -29,6 +38,7 @@ NewDocumentDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   loadingMessage: PropTypes.string,
   submitText: PropTypes.string,
+  placeholder: PropTypes.string,
   title: PropTypes.string
 };
 

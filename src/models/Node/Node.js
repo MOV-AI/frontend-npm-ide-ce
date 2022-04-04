@@ -7,37 +7,37 @@ class Node extends Model {
   constructor() {
     // inject imported schema and forward constructor arguments
     super({ schema, ...arguments[0] });
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                        Events                                        *
+     *                                                                                      */
+    //========================================================================================
+    this.events = {
+      onAny: (event, name, value) => this.propsUpdate(event, name, value)
+    };
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                   Model Properties                                   *
+     *                                                                                      */
+    //========================================================================================
+
+    this.description = "";
+    this.path = "";
+    this.type = "";
+    this.persistent = false;
+    this.launch = true;
+    this.remappable = true;
+    this.packageDep = "";
+    this.parameters = new Manager("parameters", Parameter, this.events);
+    this.envVars = new Manager("envVars", EnvVar, this.events);
+    this.commands = new Manager("commands", Command, this.events);
+    this.ports = new Manager("ports", Port, this.events);
+
+    // Define observable properties
+    this.observables = Object.values(Node.OBSERVABLE_KEYS);
   }
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                        Events                                        *
-   *                                                                                      */
-  //========================================================================================
-  events = {
-    onAny: (event, name, value) => this.propsUpdate(event, name, value)
-  };
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                   Model Properties                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  description = "";
-  path = "";
-  type = "";
-  persistent = false;
-  launch = true;
-  remappable = true;
-  packageDep = "";
-  parameters = new Manager("parameters", Parameter, this.events);
-  envVars = new Manager("envVars", EnvVar, this.events);
-  commands = new Manager("commands", Command, this.events);
-  ports = new Manager("ports", Port, this.events);
-
-  // Define observable properties
-  observables = Object.values(this.constructor.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -549,6 +549,12 @@ class Node extends Model {
     REMAPPABLE: "remappable",
     PACKAGE_DEP: "packageDep"
   };
+
+  static KEYS_TO_DISCONSIDER = [
+    this.OBSERVABLE_KEYS.NAME,
+    this.OBSERVABLE_KEYS.DESCRIPTION,
+    this.OBSERVABLE_KEYS.PATH
+  ];
 }
 
 Node.defaults = {

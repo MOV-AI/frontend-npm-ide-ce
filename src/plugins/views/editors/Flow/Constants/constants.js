@@ -1,7 +1,7 @@
-const maxMovingPixels = 15000;
-const canvasLimits = [
-  [10, maxMovingPixels - 75],
-  [25, maxMovingPixels - 75]
+const MAX_MOVING_PIXELS = 15000;
+const CANVAS_LIMITS = [
+  [10, MAX_MOVING_PIXELS - 75],
+  [25, MAX_MOVING_PIXELS - 75]
 ];
 const FLOW_VIEW_MODE = {
   default: "default",
@@ -11,24 +11,6 @@ const FLOW_VIEW_MODE = {
 const ROBOT_BLACKLIST = window.SERVER_DATA?.RobotBlackList ?? [];
 
 const TRANSITION_LINK = "movai_msgs/Transition";
-
-const TABLE_KEYS_NAMES = {
-  PARAMETERS: "parameters",
-  ENVVARS: "envVars",
-  CMDLINE: "commands"
-};
-
-const EMPTY_MESSAGE = {
-  PARAMETERS: "No Parameters",
-  ENVVARS: "No Environment Variables",
-  COMMANDS: "No Command Lines"
-};
-
-const DIALOG_TITLE = {
-  PARAMETERS: "Parameter",
-  ENVVARS: "Environment Variable",
-  COMMANDS: "Command Line"
-};
 
 const NODE_TYPES = {
   NODE: "NODE",
@@ -40,14 +22,11 @@ const generateContainerId = flowId => {
 };
 
 export {
-  maxMovingPixels,
-  canvasLimits,
+  MAX_MOVING_PIXELS,
+  CANVAS_LIMITS,
   generateContainerId,
   FLOW_VIEW_MODE,
   TRANSITION_LINK,
-  TABLE_KEYS_NAMES,
-  EMPTY_MESSAGE,
-  DIALOG_TITLE,
   ROBOT_BLACKLIST,
   NODE_TYPES
 };

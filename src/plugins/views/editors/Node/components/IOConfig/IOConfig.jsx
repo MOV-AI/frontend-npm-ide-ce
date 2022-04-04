@@ -1,15 +1,16 @@
-import React, { useCallback, useRef, memo } from "react";
+import React, { useCallback, useEffect, useState, useRef, memo } from "react";
+import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
-import { MTableToolbar, MTableEditRow } from "material-table";
-import MaterialTable from "../../../_shared/MaterialTable/MaterialTable";
-import IOPorts from "./IOPorts/IOPorts";
-import CollapsibleHeader from "../_shared/CollapsibleHeader";
-import { Typography } from "@material-ui/core";
 import _isEqual from "lodash/isEqual";
-import { useTranslation, DEFAULT_FUNCTION } from "../../../_shared/mocks";
+import { MTableToolbar, MTableEditRow } from "material-table";
+import { makeStyles } from "@material-ui/core/styles";
+import { Typography } from "@material-ui/core";
+import { PLUGINS } from "../../../../../../utils/Constants";
+import MaterialTable from "../../../_shared/MaterialTable/MaterialTable";
+import CollapsibleHeader from "../_shared/CollapsibleHeader";
 import useIOConfigColumns from "./hooks/useIOConfigColumns";
 import useHelper from "./hooks/useHelper";
+import IOPorts from "./IOPorts/IOPorts";
 
 const useStyles = makeStyles(theme => ({
   details: {
@@ -49,6 +50,7 @@ const IOConfig = props => {
     ioConfig,
     call,
     scope,
+    protectedCallbacks,
     onIOConfigRowSet,
     onIOConfigRowDelete,
     handleIOPortsInputs,
@@ -60,8 +62,9 @@ const IOConfig = props => {
   } = props;
 
   // State hooks
-  const [scopePorts, setScopePorts] = React.useState({});
-  const [scopeSystemPortsData, setScopeSystemPortsData] = React.useState({});
+  const [scopePorts, setScopePorts] = useState({});
+  const [scopeSystemPortsData, setScopeSystemPortsData] = useState({});
+  const [ioData, setIOData] = useState([]);
 
   // Other hooks
   const classes = useStyles();
@@ -72,26 +75,6 @@ const IOConfig = props => {
     scopePorts,
     autoFocus
   });
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                    React Lifecycle                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  React.useEffect(() => {
-    // Initialize state
-    call("docManager", "getStore", scope).then(store => {
-      // Get All transport / protocol to fill first selector
-      store.helper.getAllTransportProtocol().then(res => {
-        if (res) setScopePorts(res);
-      });
-      // Get All ports data to fill second selector
-      store.helper.getPortsData().then(res => {
-        if (res) setScopeSystemPortsData(res);
-      });
-    });
-  }, [call, scope]);
 
   //========================================================================================
   /*                                                                                      *
@@ -122,21 +105,25 @@ const IOConfig = props => {
    * @param {*} _data : Raw data (can be an object of objects)
    * @returns {array} Formatted data
    */
-  const formatData = _data => {
-    if (Array.isArray(_data)) return _data;
-    return Object.entries(_data).map(([key, item]) => {
-      return {
-        ...item,
-        id: key, // Just to have an id on the rows (to prevent error thrown)
-        name: item.name
-      };
-    });
-  };
+  const formatData = useCallback(
+    _data => {
+      const newData = Array.isArray(_data)
+        ? _data
+        : Object.values(_data).map(item => ({
+            ...item,
+            name: item.name
+          }));
+      setIOData(prevState =>
+        _isEqual(prevState, newData) ? prevState : newData
+      );
+    },
+    [setIOData]
+  );
 
   /**
    * Format port data
    */
-  const formatPortData = React.useCallback(
+  const formatPortData = useCallback(
     (rowData, direction, key) => {
       // Set port properties
       const effectiveMessage = getEffectiveMessage(rowData, direction, key);
@@ -152,23 +139,32 @@ const IOConfig = props => {
   );
 
   /**
-   * Set port data
+   * Set in port data from template
    */
-  const setPortData = React.useCallback(
+  const setPortDataIn = useCallback(
     rowData => {
-      rowData.portIn = scopePorts[rowData.template]?.In;
-      rowData.portOut = scopePorts[rowData.template]?.Out;
-      // Update CallbackOptions and EffectiveMessage = (pkg/msg) of each ioport
-      if (rowData.portIn !== undefined) {
-        Object.keys(rowData.portIn).forEach(key => {
-          rowData = formatPortData(rowData, "portIn", key);
-        });
-      }
-      if (rowData.portOut !== undefined) {
-        Object.keys(rowData.portOut).forEach(key => {
-          rowData = formatPortData(rowData, "portOut", key);
-        });
-      }
+      rowData.portIn = scopePorts[rowData.template]?.In || {};
+
+      // Update CallbackOptions and EffectiveMessage = (pkg/msg) of in ioport
+      Object.keys(rowData.portIn).forEach(key => {
+        rowData = formatPortData(rowData, "portIn", key);
+      });
+      return rowData;
+    },
+    [scopePorts, formatPortData]
+  );
+
+  /**
+   * Set out port data from template
+   */
+  const setPortDataOut = useCallback(
+    rowData => {
+      rowData.portOut = scopePorts[rowData.template]?.Out || {};
+
+      // Update CallbackOptions and EffectiveMessage = (pkg/msg) of out ioport
+      Object.keys(rowData.portOut).forEach(key => {
+        rowData = formatPortData(rowData, "portOut", key);
+      });
       return rowData;
     },
     [scopePorts, formatPortData]
@@ -176,7 +172,7 @@ const IOConfig = props => {
 
   //========================================================================================
   /*                                                                                      *
-   *                                      Edit Events                                     *
+   *                                       Handlers                                       *
    *                                                                                      */
   //========================================================================================
 
@@ -189,12 +185,13 @@ const IOConfig = props => {
     newData => {
       return new Promise((resolve, reject) => {
         // Set port in/out
-        newData = setPortData(newData);
+        newData = setPortDataIn(newData);
+        newData = setPortDataOut(newData);
         // Call method to set row
         onIOConfigRowSet(newData, resolve, reject);
       });
     },
-    [onIOConfigRowSet, setPortData]
+    [onIOConfigRowSet, setPortDataIn, setPortDataOut]
   );
 
   /**
@@ -206,13 +203,32 @@ const IOConfig = props => {
   const handleRowUpdate = useCallback(
     (newData, oldData) => {
       return new Promise((resolve, reject) => {
-        // Set port in/out
-        newData = setPortData(newData);
+        const templateChanged = newData.template !== oldData.template;
+
+        // Set templated port in
+        if (
+          // template changed
+          templateChanged ||
+          // or there's no previous data in the port IN
+          !newData.portIn?.in
+        ) {
+          newData = setPortDataIn(newData);
+        }
+
+        // Set templated port out
+        if (
+          // template changed
+          templateChanged ||
+          // or there's no previous data in the port OUT
+          !newData.portOut?.out
+        ) {
+          newData = setPortDataOut(newData);
+        }
         // Call method to set row
         onIOConfigRowSet(newData, resolve, reject, oldData);
       });
     },
-    [onIOConfigRowSet, setPortData]
+    [onIOConfigRowSet, setPortDataIn, setPortDataOut]
   );
 
   /**
@@ -228,6 +244,34 @@ const IOConfig = props => {
     },
     [onIOConfigRowDelete]
   );
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    React Lifecycle                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  useEffect(() => {
+    // Initialize state
+    call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.GET_STORE,
+      scope
+    ).then(store => {
+      // Get All transport / protocol to fill first selector
+      store.helper.getAllTransportProtocol().then(res => {
+        if (res) setScopePorts(res);
+      });
+      // Get All ports data to fill second selector
+      store.helper.getPortsData().then(res => {
+        if (res) setScopeSystemPortsData(res);
+      });
+    });
+  }, [call, scope]);
+
+  useEffect(() => {
+    formatData(ioConfig);
+  }, [ioConfig, formatData]);
 
   //========================================================================================
   /*                                                                                      *
@@ -284,6 +328,7 @@ const IOConfig = props => {
           classNames="child-row"
           editable={editable}
           rowData={panelData.rowData}
+          protectedCallbacks={protectedCallbacks}
           handleIOPortsInputs={handleIOPortsInputs}
           handleOpenCallback={handleOpenCallback}
           handleNewCallback={handleNewCallback}
@@ -293,6 +338,7 @@ const IOConfig = props => {
     },
     [
       editable,
+      protectedCallbacks,
       handleIOPortsInputs,
       handleOpenCallback,
       handleNewCallback,
@@ -316,7 +362,7 @@ const IOConfig = props => {
         <MaterialTable
           ref={tableRef}
           columns={getColumns()}
-          data={formatData(ioConfig)}
+          data={ioData}
           detailPanel={renderDetailPanel}
           editable={{
             isEditable: () => editable,
@@ -336,49 +382,30 @@ const IOConfig = props => {
 };
 
 IOConfig.propTypes = {
-  ioConfig: PropTypes.object,
-  onIOConfigRowSet: PropTypes.func,
-  onIOConfigRowDelete: PropTypes.func,
-  handleIOPortsInputs: PropTypes.func,
-  handleOpenSelectScopeModal: PropTypes.func,
-  handleOpenCallback: PropTypes.func,
-  handleNewCallback: PropTypes.func,
+  ioConfig: PropTypes.object.isRequired,
+  onIOConfigRowSet: PropTypes.func.isRequired,
+  onIOConfigRowDelete: PropTypes.func.isRequired,
+  handleIOPortsInputs: PropTypes.func.isRequired,
+  handleOpenSelectScopeModal: PropTypes.func.isRequired,
+  handleOpenCallback: PropTypes.func.isRequired,
+  handleNewCallback: PropTypes.func.isRequired,
+  protectedCallbacks: PropTypes.array,
   editable: PropTypes.bool
 };
 
 IOConfig.defaultProps = {
   editable: true,
-  onIOConfigRowSet: () => DEFAULT_FUNCTION("onIOConfigRowSet"),
-  onIOConfigRowDelete: () => DEFAULT_FUNCTION("onIOConfigRowDelete"),
-  handleIOPortsInputs: () => DEFAULT_FUNCTION("IOInputs"),
-  handleOpenSelectScopeModal: () => DEFAULT_FUNCTION("openSelectScopeModal"),
-  handleOpenCallback: () => DEFAULT_FUNCTION("handleOpenCallback"),
-  handleNewCallback: () => DEFAULT_FUNCTION("handleNewCallback"),
-  ioConfig: [
-    {
-      name: "undefined",
-      template: "undefined",
-      msgPackage: "undefined",
-      message: "undefined",
-      portIn: [
-        {
-          name: "undefined",
-          message: "undefined",
-          type: "iport",
-          callback: "undefined",
-          parameters: [
-            { name: "undefined", value: "Check DB" },
-            { name: "undefined", value: "Check DB", options: ["Check DB"] }
-          ]
-        }
-      ]
-    }
-  ]
+  protectedCallbacks: []
 };
 
 //The function returns true when the compared props equal, preventing the component from re-rendering
 function arePropsEqual(prevProps, nextProps) {
-  return _isEqual(prevProps.ioConfig, nextProps.ioConfig);
+  const sameConfig = _isEqual(prevProps.ioConfig, nextProps.ioConfig);
+  const sameProtectedDocs = _isEqual(
+    prevProps.protectedCallbacks,
+    nextProps.protectedCallbacks
+  );
+  return sameConfig && sameProtectedDocs;
 }
 
 export default memo(IOConfig, arePropsEqual);

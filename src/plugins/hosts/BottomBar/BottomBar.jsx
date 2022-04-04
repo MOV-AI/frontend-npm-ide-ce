@@ -16,7 +16,3 @@ export default withHostReactPlugin(BottomBar);
 BottomBar.propTypes = {
   hostName: PropTypes.string.isRequired
 };
-
-BottomBar.defaultProps = {
-  hostName: "bottomBar"
-};

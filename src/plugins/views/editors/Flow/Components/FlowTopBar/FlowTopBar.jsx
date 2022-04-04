@@ -1,6 +1,12 @@
-import React, { useCallback } from "react";
+import React, {
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+  useEffect
+} from "react";
 import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
+import { useTranslation } from "react-i18next";
 import {
   Typography,
   Tooltip,
@@ -16,47 +22,20 @@ import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import StopIcon from "@material-ui/icons/Stop";
 import { RobotManager } from "@mov-ai/mov-fe-lib-core";
 import Workspace from "../../../../../../utils/Workspace";
-import { DEFAULT_FUNCTION, useTranslation } from "../../../_shared/mocks";
+import { PLUGINS, ALERT_SEVERITIES } from "../../../../../../utils/Constants";
+import { ERROR_MESSAGES } from "../../../../../../utils/Messages";
+import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
 import { ROBOT_BLACKLIST } from "../../Constants/constants";
 import useNodeStatusUpdate from "./hooks/useNodeStatusUpdate";
 
-const useStyles = makeStyles(theme => ({
-  flowLink: {
-    textDecoration: "underline",
-    cursor: "pointer"
-  },
-  buttonPill: {
-    borderRadius: "99px"
-  },
-  defaultRobot: {
-    fontWeight: "bold"
-  },
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 170,
-    maxWidth: 350,
-    "& i": {
-      marginRight: 15
-    }
-  },
-  whichFlowText: {
-    marginLeft: theme.spacing(5),
-    fontSize: "15px",
-    flexGrow: 1
-  },
-  visualizationToggle: {
-    marginRight: "10px"
-  },
-  grow: {
-    flexGrow: 1
-  }
-}));
+import { buttonStyles, flowTopBarStyles } from "./styles";
 
+const BACKEND_CALLBACK_NAME = "backend.FlowTopBar";
 const FEEDBACK_TIMEOUT = 10000;
 
 const ButtonTopBar = React.forwardRef((props, ref) => {
   const { disabled, onClick, children } = props;
-  const classes = useStyles();
+  const classes = buttonStyles();
   return (
     <Button
       ref={ref}
@@ -80,28 +59,31 @@ const FlowTopBar = props => {
     scope,
     mainInterface,
     id,
+    name,
     onRobotChange,
     defaultViewMode,
-    confirmationAlert,
+    confirmationAlert
     // onViewModeChange
   } = props;
   // State hooks
-  const [loading, setLoading] = React.useState(false);
-  const [robotSelected, setRobotSelected] = React.useState("");
-  const [robotList, setRobotList] = React.useState({});
-  const [viewMode, setViewMode] = React.useState(defaultViewMode);
+  const [loading, setLoading] = useState(false);
+  const [robotSelected, setRobotSelected] = useState("");
+  const [robotList, setRobotList] = useState({});
+  const [viewMode, setViewMode] = useState(defaultViewMode);
   // Other hooks
-  const classes = useStyles();
+  const classes = flowTopBarStyles();
   const { t } = useTranslation();
   const { robotSubscribe, robotUnsubscribe, getFlowPath, robotStatus } =
     useNodeStatusUpdate(props, robotSelected, viewMode);
   // Refs
-  const buttonDOMRef = React.useRef();
-  const helperRef = React.useRef();
-  const commandRobotTimeoutRef = React.useRef();
+  const buttonDOMRef = useRef();
+  const helperRef = useRef();
+  const commandRobotTimeoutRef = useRef();
+  const isMounted = useRef();
+  const flowInstanceRef = useRef();
   // Managers Memos
-  const robotManager = React.useMemo(() => new RobotManager(), []);
-  const workspaceManager = React.useMemo(() => new Workspace(), []);
+  const robotManager = useMemo(() => new RobotManager(), []);
+  const workspaceManager = useMemo(() => new Workspace(), []);
 
   //========================================================================================
   /*                                                                                      *
@@ -125,11 +107,28 @@ const FlowTopBar = props => {
    * @private Get store helper to use cloud functions
    */
   const initStoreHelper = useCallback(() => {
-    return call("docManager", "getStore", scope).then(store => {
+    return call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.GET_STORE,
+      scope
+    ).then(store => {
       helperRef.current = store.helper;
       return store.helper;
     });
   }, [call, scope]);
+
+  /**
+   * @private Get store helper to use cloud functions
+   */
+  const initFlowInstance = useCallback(() => {
+    return call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.READ, {
+      scope,
+      name
+    }).then(document => {
+      flowInstanceRef.current = document;
+      return document;
+    });
+  }, [call, scope, name]);
 
   /**
    * @private Init selected robot
@@ -173,14 +172,16 @@ const FlowTopBar = props => {
           }
         })
         .catch(err => {
-          console.log("getRunningRobot error", err);
+          console.warn("getRunningRobot error", err);
           alert({
-            message: "Error running backend.FlowTopBar callback",
-            severity: "error"
+            message: t(ERROR_MESSAGES.ERROR_RUNNING_SPECIFIC_CALLBACK, {
+              callbackName: BACKEND_CALLBACK_NAME
+            }),
+            severity: ALERT_SEVERITIES.ERROR
           });
         });
     },
-    [initSelectedRobot, workspaceManager, alert]
+    [initSelectedRobot, workspaceManager, alert, t]
   );
 
   //========================================================================================
@@ -213,30 +214,39 @@ const FlowTopBar = props => {
   /**
    * On component mount
    */
-  React.useEffect(() => {
+  useEffect(() => {
     // Load store loader and robot list
     initStoreHelper().then(() => {
       robotManager.getAll(onLoadRobotList);
     });
-  }, [robotManager, onLoadRobotList, initStoreHelper]);
+    // Load flow instance
+    initFlowInstance();
+    // Set isMounted
+    isMounted.current = true;
 
-  /**
-   * On component unmount
-   */
-  React.useEffect(() => {
-    // On unmount
+    /**
+     * On component unmount
+     */
     return () => {
       // TEMPORARY HACK: Added log to remove warning of unused
       // Once that handleViewModeChange method is uncommented, this should be removed
       console.log(setViewMode);
       robotUnsubscribe();
+      // Unmount
+      isMounted.current = false;
     };
-  }, [robotUnsubscribe]);
+  }, [
+    initFlowInstance,
+    initStoreHelper,
+    onLoadRobotList,
+    robotManager,
+    robotUnsubscribe
+  ]);
 
   /**
    * Finish loading when there's an update on activeFlow
    */
-  React.useEffect(() => {
+  useEffect(() => {
     setLoading(false);
     clearTimeout(commandRobotTimeoutRef.current);
   }, [robotStatus.activeFlow, setLoading]);
@@ -255,6 +265,9 @@ const FlowTopBar = props => {
   const canRunFlow = useCallback(
     action => {
       const graph = mainInterface.current?.current?.graph;
+      // let's validate flow before continuing
+      graph?.validateFlow();
+
       const warnings = graph?.warnings || [];
       const warningsVisibility = graph.warningsVisibility;
       const runtimeWarnings = warnings.filter(wn => wn.isRuntime);
@@ -305,7 +318,7 @@ const FlowTopBar = props => {
    * @returns To avoid starting flow if flow is not eligible to start
    */
   const sendActionToRobot = useCallback(
-    action => {
+    (action, flowPath) => {
       const canStart = canRunFlow(action);
       if (!canStart) return;
       setLoading(true);
@@ -313,56 +326,75 @@ const FlowTopBar = props => {
       helperRef.current
         .sendToRobot({
           action,
-          flowPath: getFlowPath(),
+          flowPath: flowPath || getFlowPath(),
           robotId: robotSelected
         })
         .then(res => {
           if (!res) return;
           commandRobotTimeoutRef.current = setTimeout(() => {
+            // If flow reloads (creation of a new) the old is unmounted
+            if (!isMounted.current) return;
+            // Set loading false and show error message
             setLoading(false);
             alert({
-              message: `Failed to ${action.toLowerCase()} flow`,
-              severity: "error"
+              message: t("Failed to {{action}} flow", {
+                action: t(action.toLowerCase())
+              }),
+              severity: ALERT_SEVERITIES.ERROR
             });
           }, FEEDBACK_TIMEOUT);
         })
         .catch(err => {
           alert({
-            message: "Error running backend.FlowTopBar callback",
-            severity: "error"
+            message: t(ERROR_MESSAGES.ERROR_RUNNING_SPECIFIC_CALLBACK, {
+              callbackName: BACKEND_CALLBACK_NAME
+            }),
+            severity: ALERT_SEVERITIES.ERROR
           });
         });
       if (buttonDOMRef.current) buttonDOMRef.current.blur();
     },
-    [alert, canRunFlow, getFlowPath, robotSelected, setLoading]
+    [alert, canRunFlow, getFlowPath, robotSelected, setLoading, t]
   );
 
   /**
    * Handle Start flow button click
    */
-  const handleStartFlow = useCallback(() => {
-    // Start Flow if there's no active flow
-    if (robotStatus.activeFlow === "") {
-      sendActionToRobot("START");
-    } else {
-      // Confirmation alert if Another flow is running!
-      const title = "Another flow is running!";
-      const message = `"${robotList[robotSelected].RobotName}" is running flow "${robotStatus.activeFlow}".\nAre you sure you want to run the flow "${id}"?`;
-      confirmationAlert({
-        title,
-        message,
-        submitText: "Run",
-        onSubmit: () => sendActionToRobot("START")
-      });
-    }
-  }, [
-    id,
-    robotStatus.activeFlow,
-    robotList,
-    robotSelected,
-    confirmationAlert,
-    sendActionToRobot
-  ]);
+  const handleStartFlow = useCallback(
+    saveResponse => {
+      // Start Flow if there's no active flow
+      const flowUrl = saveResponse?.model?.getUrl();
+      if (robotStatus.activeFlow === "") {
+        sendActionToRobot("START", flowUrl);
+      } else {
+        // Confirmation alert if Another flow is running!
+        const title = t("Another flow is running!");
+        const message = t(
+          "'{{robotName}}' is running flow '{{activeFlow}}'.\nAre you sure you want to run the flow '{{id}}'?",
+          {
+            robotName: robotList[robotSelected].RobotName,
+            activeFlow: robotStatus.activeFlow,
+            id: id
+          }
+        );
+        confirmationAlert({
+          title,
+          message,
+          submitText: t("Run"),
+          onSubmit: () => sendActionToRobot("START", flowUrl)
+        });
+      }
+    },
+    [
+      robotStatus.activeFlow,
+      sendActionToRobot,
+      t,
+      robotList,
+      robotSelected,
+      id,
+      confirmationAlert
+    ]
+  );
 
   /**
    * Handle Stop flow button click
@@ -372,12 +404,32 @@ const FlowTopBar = props => {
   }, [sendActionToRobot]);
 
   /**
+   * Handle Save before starting a flow
+   */
+  const handleSaveBeforeStart = useCallback(() => {
+    const isDirty = flowInstanceRef.current?.getDirty();
+    if (isDirty) {
+      call(
+        PLUGINS.DOC_MANAGER.NAME,
+        PLUGINS.DOC_MANAGER.CALL.SAVE,
+        {
+          scope,
+          name
+        },
+        handleStartFlow
+      );
+    } else {
+      handleStartFlow();
+    }
+  }, [call, handleStartFlow, name, scope]);
+
+  /**
    * Handle view mode change : default view to tree view
    * @param {Event} _ : Event change
    * @param {string} newViewMode : New value
    * @returns
    */
-  // Commented out for posterity 
+  // Commented out for posterity
   // const handleViewModeChange = useCallback(
   //   (_, newViewMode) => {
   //     if (!newViewMode) return;
@@ -406,7 +458,9 @@ const FlowTopBar = props => {
       <CircularProgress size={25} color="inherit" />
     ) : (
       <Tooltip title={t("Start Flow")}>
-        <PlayArrowIcon />
+        <>
+          <PlayArrowIcon /> {t("Save & Run")}
+        </>
       </Tooltip>
     );
   }, [loading, t]);
@@ -463,7 +517,7 @@ const FlowTopBar = props => {
             <ButtonTopBar
               ref={buttonDOMRef}
               disabled={!robotStatus.isOnline || loading}
-              onClick={handleStartFlow}
+              onClick={handleSaveBeforeStart}
             >
               {renderStartButton()}
             </ButtonTopBar>

@@ -1,6 +1,7 @@
 import { useState, useRef, useMemo, useEffect, useCallback } from "react";
-import { FLOW_VIEW_MODE } from "../../../Constants/constants";
 import { RobotManager } from "@mov-ai/mov-fe-lib-core";
+import { FLOW_VIEW_MODE } from "../../../Constants/constants";
+import { compareDocumentPaths } from "../../../Utils/utils";
 import _get from "lodash/get";
 import _isEqual from "lodash/isEqual";
 
@@ -304,8 +305,9 @@ const useNodeStatusUpdate = (props, robotSelected, viewMode) => {
    * Reset node status when flow stop running
    */
   useEffect(() => {
-    if (!robotStatus.activeFlow) resetNodeStatus();
-  }, [robotStatus.activeFlow, resetNodeStatus]);
+    const isSameFlow = compareDocumentPaths(robotStatus.activeFlow, id)
+    if (!isSameFlow) resetNodeStatus();
+  }, [robotStatus.activeFlow, id, resetNodeStatus]);
 
   return {
     robotSubscribe,

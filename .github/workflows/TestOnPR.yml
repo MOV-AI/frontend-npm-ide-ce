@@ -5,6 +5,7 @@ on:
     branches:
       - dev
       - main
+      - 'develop/**'
       - 'releases/**'
     paths-ignore:
       - 'package.json'

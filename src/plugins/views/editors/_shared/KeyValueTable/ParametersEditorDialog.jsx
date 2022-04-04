@@ -11,7 +11,11 @@ import {
   RadioGroup
 } from "@material-ui/core";
 import { withTheme } from "../../../../../decorators/withTheme";
-import { DATA_TYPES, DISABLED_VALUE } from "../../../../../utils/Constants";
+import {
+  DATA_TYPES,
+  DISABLED_VALUE,
+  ALERT_SEVERITIES
+} from "../../../../../utils/Constants";
 import withAlerts from "../../../../../decorators/withAlerts";
 import KeyValueEditorDialog from "../KeyValueTable/KeyValueEditorDialog";
 import useDataTypes from "../hooks/useDataTypes";
@@ -31,8 +35,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
     customValidation,
     preventRenderType,
     showValueOptions,
-    alert,
-    alertSeverities
+    alert
   } = props;
 
   // Hooks
@@ -103,18 +106,20 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
     formData => {
       const type = formData.type;
 
-      if (valueOption === VALUE_OPTIONS.DEFAULT) {
-        return "";
-      }
-      if (valueOption === VALUE_OPTIONS.DISABLED) {
-        return DISABLED_VALUE;
+      if (showValueOptions) {
+        if (valueOption === VALUE_OPTIONS.DEFAULT) {
+          return "";
+        }
+        if (valueOption === VALUE_OPTIONS.DISABLED) {
+          return DISABLED_VALUE;
+        }
       }
 
       return type === DATA_TYPES.STRING
         ? JSON.parse(formData.value)
         : formData.value;
     },
-    [valueOption]
+    [showValueOptions, valueOption]
   );
 
   //========================================================================================
@@ -131,7 +136,10 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
     formData => {
       const dataToValidate = {
         ...formData,
-        value: valueOption === VALUE_OPTIONS.DEFAULT ? "" : data.value,
+        value:
+          showValueOptions && valueOption === VALUE_OPTIONS.DEFAULT
+            ? ""
+            : data.value,
         type: data.type
       };
 
@@ -150,14 +158,14 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
           return { ...res, data: dataToSubmit };
         })
         .catch(err => {
-          alert({ message: err.message, severity: alertSeverities.ERROR });
+          alert({ message: err.message, severity: ALERT_SEVERITIES.ERROR });
           return err;
         });
     },
     [
+      showValueOptions,
       valueOption,
       data,
-      alertSeverities.ERROR,
       alert,
       validate,
       valueToSave,
@@ -220,7 +228,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
   /*                                                                                      *
    *                                    React lifecycle                                   *
    *                                                                                      */
-  //========================================================f================================
+  //========================================================================================
 
   useEffect(() => {
     if (showValueOptions) setValueOption(getValueOption(props.data.value));
@@ -241,8 +249,8 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
   const renderTypeSelector = useCallback(() => {
     if (preventRenderType) return null;
     return (
-      <FormControl style={{ marginTop: 15 }}>
-        <InputLabel>Type *</InputLabel>
+      <FormControl className={classes.marginTop}>
+        <InputLabel>{`${t("Type")} *`}</InputLabel>
         <Select
           fullWidth
           value={data.type || DATA_TYPES.ANY}
@@ -258,12 +266,14 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
       </FormControl>
     );
   }, [
+    classes,
     data,
     preventRenderType,
     disableType,
     getDataTypes,
     getLabel,
-    handleTypeChange
+    handleTypeChange,
+    t
   ]);
 
   const renderValueOptions = useCallback(() => {
@@ -321,7 +331,10 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
                     : data.value
                 },
                 onChange: _value => {
-                  if (options.defaultValue !== _value) {
+                  if (
+                    valueOption !== VALUE_OPTIONS.CUSTOM &&
+                    renderValue(options.defaultValue) !== _value
+                  ) {
                     setValueOption(VALUE_OPTIONS.CUSTOM);
                   }
                   setData(prevState => {
@@ -366,8 +379,7 @@ ParameterEditorDialog.propTypes = {
   disableType: PropTypes.bool,
   customValidation: PropTypes.func,
   preventRenderType: PropTypes.bool,
-  alert: PropTypes.func,
-  alertSeverities: PropTypes.object
+  alert: PropTypes.func
 };
 
 export default withAlerts(withTheme(ParameterEditorDialog));

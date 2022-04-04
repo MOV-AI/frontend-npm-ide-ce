@@ -217,6 +217,9 @@ export default class GraphValidator {
       nodes
     );
 
+    // Check if it still has source/target ports
+    if(!sourcePortPos || !targetPortPos) return;
+
     // Check if link is invalid to define error
     const error = !isLinkeable(sourcePortPos.data, targetPortPos.data)
       ? new MisMatchMessageLink(

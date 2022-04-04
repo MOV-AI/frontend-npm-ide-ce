@@ -1,15 +1,15 @@
 import React, { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import _get from "lodash/get";
 import _set from "lodash/set";
 import { Maybe } from "monet";
 import { Typography } from "@material-ui/core";
-import { explorerStyles } from "./styles";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import { useTranslation } from "react-i18next";
-import { LABEL } from "../../../utils/Constants";
-import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
+import { PLUGINS, APP_INFORMATION } from "../../../utils/Constants";
 import movaiLogo from "../editors/_shared/Branding/movai-flow-logo-red.png";
+import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
+import { explorerStyles } from "./styles";
 
 const Explorer = props => {
   const { call, on, height } = props;
@@ -77,7 +77,7 @@ const Explorer = props => {
    * @param {{documentName: String, documentType: String}} docData
    */
   const _addDocument = useCallback(
-    (docManager, docData) => {
+    (_, docData) => {
       const { documentName, documentType, document } = docData;
       setData(prevState => {
         // TODO: optimize time
@@ -142,7 +142,7 @@ const Explorer = props => {
           });
         },
         1: () => {
-          call("tabs", "openEditor", {
+          call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, {
             id: node.url,
             name: node.name,
             scope: node.scope
@@ -163,23 +163,26 @@ const Explorer = props => {
   const handleCopy = useCallback(
     node => {
       const { name, scope } = node;
-      call("dialog", "copyDocument", {
+      call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.COPY_DOC, {
         scope,
         name,
         onSubmit: newName =>
-          new Promise((resolve, reject) => {
-            call("docManager", "copy", { name, scope }, newName).then(
-              copiedDoc => {
-                resolve();
-                // Open copied document
-                requestScopeVersions({
-                  scope,
-                  deepness: 1,
-                  name: copiedDoc.getName(),
-                  url: copiedDoc.getUrl()
-                });
-              }
-            );
+          new Promise(resolve => {
+            call(
+              PLUGINS.DOC_MANAGER.NAME,
+              PLUGINS.DOC_MANAGER.CALL.COPY,
+              { name, scope },
+              newName
+            ).then(copiedDoc => {
+              resolve();
+              // Open copied document
+              requestScopeVersions({
+                scope,
+                deepness: 1,
+                name: copiedDoc.getName(),
+                url: copiedDoc.getUrl()
+              });
+            });
           })
       });
     },
@@ -193,11 +196,14 @@ const Explorer = props => {
   const handleDelete = useCallback(
     node => {
       const { name, scope } = node;
-      call("dialog", "confirmation", {
+      call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
         submitText: t("Delete"),
         title: t("Confirm to delete"),
         onSubmit: () =>
-          call("docManager", "delete", { name, scope }).catch(error =>
+          call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.DELETE, {
+            name,
+            scope
+          }).catch(error =>
             console.log(
               `Could not delete ${name} \n ${error.statusText ?? error}`
             )
@@ -266,8 +272,12 @@ const Explorer = props => {
   //========================================================================================
 
   React.useEffect(() => {
-    on("docManager", "loadDocs", loadDocs);
-    on("docManager", "updateDocs", updateDocs);
+    on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.LOAD_DOCS, loadDocs);
+    on(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.ON.UPDATE_DOCS,
+      updateDocs
+    );
   }, [on, loadDocs, updateDocs]);
 
   //========================================================================================
@@ -279,7 +289,7 @@ const Explorer = props => {
   return (
     <Typography component="div">
       <h1 className={classes.header}>
-        <img src={movaiLogo} alt={LABEL} />
+        <img src={movaiLogo} alt={APP_INFORMATION.LABEL} />
       </h1>
       <Typography component="div" className={classes.typography}>
         <VirtualizedTree
