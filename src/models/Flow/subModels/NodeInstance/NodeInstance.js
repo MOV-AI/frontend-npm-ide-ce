@@ -37,7 +37,7 @@ class NodeInstance extends Model {
   commands = new Manager("commands", Command, this.propEvents);
 
   // Define observable properties
-  observables = Object.values(NodeInstance.OBSERVABLE_KEYS);
+  observables = Object.values(this.constructor.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *

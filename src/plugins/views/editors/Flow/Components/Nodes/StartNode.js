@@ -1,19 +1,21 @@
 import BaseNode from "./BaseNode/BaseNode";
 
+const START_NAME = "start";
+
 class StartNode extends BaseNode {
   constructor(args) {
     const node = {
-      id: "start",
-      NodeLabel: "start",
+      id: START_NAME,
+      NodeLabel: START_NAME,
       Paramater: {},
-      Template: "start",
+      Template: START_NAME,
       Visualization: {
         x: { Value: 20 },
         y: { Value: 20 }
       }
     };
     const template = {
-      Label: "start",
+      Label: START_NAME,
       PortsInst: {
         start: {
           Out: {
@@ -28,6 +30,9 @@ class StartNode extends BaseNode {
     };
 
     super({ ...args, node, template });
+
+    // Set start node model
+    this.data.model = START_NAME;
 
     this.init();
   }
@@ -67,6 +72,8 @@ class StartNode extends BaseNode {
       y: this.height + 15
     };
   }
+
+  static model = START_NAME
 }
 
 export default StartNode;

@@ -17,7 +17,7 @@ export default class Configuration extends Model {
   extension = "yaml";
 
   // Define observable properties
-  observables = Object.values(Configuration.OBSERVABLE_KEYS);
+  observables = Object.values(this.constructor.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *

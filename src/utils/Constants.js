@@ -20,6 +20,8 @@ export const BRANDING = {
   NAME: "Mov.ai Flow™"
 };
 
+export const LABEL = window.SERVER_DATA?.Application?.Label || "MOV.AI";
+
 export const DISABLED_VALUE = "None";
 
 export const DATA_TYPES = {

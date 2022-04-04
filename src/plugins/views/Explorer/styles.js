@@ -10,7 +10,8 @@ export const explorerStyles = makeStyles(theme => ({
   header: {
     marginBottom: "6px",
     "& img": {
-      maxWidth: "65%"
+      maxWidth: "65%",
+      marginRight: "10px"
     }
   }
 }));
