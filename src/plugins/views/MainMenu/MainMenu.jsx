@@ -14,7 +14,6 @@ import { Tooltip } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import { MainContext } from "../../../main-context";
-import movaiIcon from "../editors/_shared/Loader/movai_red.svg";
 import movaiIconWhite from "../editors/_shared/Branding/movai-logo-white.png";
 import {
   HOMETAB_PROFILE,
@@ -87,12 +86,6 @@ const MainMenu = props => {
 
   //========================================================================================
   /*                                                                                      *
-   *                                     Handle Events                                    *
-   *                                                                                      */
-  //========================================================================================
-
-  //========================================================================================
-  /*                                                                                      *
    *                                        Render                                        *
    *                                                                                      */
   //========================================================================================
@@ -106,7 +99,7 @@ const MainMenu = props => {
           backgroundColor={theme.palette.background.default}
           upperElement={
             <img
-              src={theme.label === "dark" ? movaiIconWhite : movaiIcon}
+              src={movaiIconWhite}
               className={classes.movaiIcon}
               alt="MOV.AI"
             />

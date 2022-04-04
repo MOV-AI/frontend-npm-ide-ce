@@ -29,7 +29,7 @@ export default class Callback extends Model {
   message = "";
 
   // Define observable properties
-  observables = Object.values(Callback.OBSERVABLE_KEYS);
+  observables = Object.values(this.constructor.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *

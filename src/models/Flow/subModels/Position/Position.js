@@ -17,7 +17,7 @@ class Position extends Model {
   y = 0;
 
   // Define observable properties
-  observables = Object.values(Position.OBSERVABLE_KEYS);
+  observables = Object.values(this.constructor.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *

@@ -17,7 +17,7 @@ class ExposedPorts extends Model {
   ports = [];
 
   // Define observable properties
-  observables = Object.values(ExposedPorts.OBSERVABLE_KEYS);
+  observables = Object.values(this.constructor.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *

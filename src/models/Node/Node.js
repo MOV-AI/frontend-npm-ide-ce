@@ -37,7 +37,7 @@ class Node extends Model {
   ports = new Manager("ports", Port, this.events);
 
   // Define observable properties
-  observables = Object.values(Node.OBSERVABLE_KEYS);
+  observables = Object.values(this.constructor.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *

@@ -17,7 +17,7 @@ class Group extends IdBasedModel {
   enabled = true;
 
   // Define observable properties
-  observables = Object.values(Group.OBSERVABLE_KEYS);
+  observables = Object.values(this.constructor.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *

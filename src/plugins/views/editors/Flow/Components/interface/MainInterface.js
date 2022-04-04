@@ -371,7 +371,7 @@ export default class MainInterface {
     const { nodes, shiftKey } = data;
     const { selectedNodes } = this;
     const filterNodes = nodes.filter(
-      n => n.constructor.name !== StartNode.name
+      n => n.data.model !== StartNode.model
     );
 
     this.selectedLink = null;

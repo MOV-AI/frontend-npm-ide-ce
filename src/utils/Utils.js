@@ -4,7 +4,7 @@ import CodeIcon from "@material-ui/icons/Code";
 import DescriptionIcon from "@material-ui/icons/Description";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import { Utils } from "@mov-ai/mov-fe-lib-core";
-import movaiIcon from "../plugins/views/editors/_shared/Loader/movai_red.svg";
+import movaiIcon from "../plugins/views/editors/_shared/Branding/movai-logo-white.png";
 import { HOMETAB_PROFILE } from "./Constants";
 import HomeTab from "../plugins/views/HomeTab/HomeTab";
 
@@ -47,7 +47,7 @@ export const getIconByScope = (scope, style) => {
   scope = scope || "Default";
   const color = getTabIconColor(scope);
   const homeTabIcon = (
-    <img src={movaiIcon} alt="MOV.AI Logo" style={{ maxWidth: 12, ...style }} />
+    <img src={movaiIcon} alt="MOV.AI Logo" style={{ maxWidth: 13, ...style }} />
   );
   const icon = {
     Callback: <CodeIcon style={{ color, ...style }} />,

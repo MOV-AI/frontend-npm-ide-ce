@@ -5,18 +5,16 @@ import _get from "lodash/get";
 import _set from "lodash/set";
 import { Maybe } from "monet";
 import { Typography } from "@material-ui/core";
-import { useTheme } from "@material-ui/core/styles";
-import { explorerStyles } from "./styles";
-import { PLUGINS } from "../../../utils/Constants";
+import { PLUGINS, LABEL } from "../../../utils/Constants";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
+import movaiLogo from "../editors/_shared/Branding/movai-flow-logo-red.png";
 import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
-import movaiFullLogo from "../editors/_shared/Branding/movai-full-logo.png";
-import movaiFullLogoWhite from "../editors/_shared/Branding/movai-full-logo-red-white.png";
+
+import { explorerStyles } from "./styles";
 
 const Explorer = props => {
   const { call, on, height } = props;
   const classes = explorerStyles();
-  const theme = useTheme();
   const [data, setData] = React.useState([]);
 
   const { t } = useTranslation();
@@ -80,7 +78,7 @@ const Explorer = props => {
    * @param {{documentName: String, documentType: String}} docData
    */
   const _addDocument = useCallback(
-    (docManager, docData) => {
+    (_, docData) => {
       const { documentName, documentType, document } = docData;
       setData(prevState => {
         // TODO: optimize time
@@ -170,7 +168,7 @@ const Explorer = props => {
         scope,
         name,
         onSubmit: newName =>
-          new Promise((resolve, reject) => {
+          new Promise(resolve => {
             call(
               PLUGINS.DOC_MANAGER.NAME,
               PLUGINS.DOC_MANAGER.CALL.COPY,
@@ -292,10 +290,7 @@ const Explorer = props => {
   return (
     <Typography component="div">
       <h1 className={classes.header}>
-        <img
-          src={theme.label === "dark" ? movaiFullLogoWhite : movaiFullLogo}
-          alt={t("Mov.AI Logo")}
-        />
+        <img src={movaiLogo} alt={LABEL} />
       </h1>
       <Typography component="div" className={classes.typography}>
         <VirtualizedTree
