@@ -17,39 +17,42 @@ class Flow extends Model {
   constructor() {
     // inject imported schema and forward constructor arguments
     super({ schema, ...arguments[0] });
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                        Events                                        *
+     *                                                                                      */
+    //========================================================================================
+
+    this.propEvents = {
+      onAny: (event, name, value) => this.propsUpdate(event, name, value)
+    };
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                   Model Properties                                   *
+     *                                                                                      */
+    //========================================================================================
+
+    this.description = "";
+    this.exposedPorts = new ExposedPortsManager(
+      "exposedPorts",
+      ExposedPorts,
+      this.propEvents
+    );
+    this.groups = new IdBasedManager("groups", Group, this.propEvents);
+    this.links = new Manager("links", Link, this.propEvents);
+    this.nodeInstances = new Manager(
+      "nodeInstances",
+      NodeInstance,
+      this.propEvents
+    );
+    this.parameters = new Manager("parameters", Parameter, this.propEvents);
+    this.subFlows = new Manager("subFlows", SubFlow, this.propEvents);
+
+    // Define observable properties
+    this.observables = Object.values(Flow.OBSERVABLE_KEYS);
   }
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                        Events                                        *
-   *                                                                                      */
-  //========================================================================================
-
-  propEvents = {
-    onAny: (event, name, value) => this.propsUpdate(event, name, value)
-  };
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                   Model Properties                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  description = "";
-
-  exposedPorts = new ExposedPortsManager(
-    "exposedPorts",
-    ExposedPorts,
-    this.propEvents
-  );
-  groups = new IdBasedManager("groups", Group, this.propEvents);
-  links = new Manager("links", Link, this.propEvents);
-  nodeInstances = new Manager("nodeInstances", NodeInstance, this.propEvents);
-  parameters = new Manager("parameters", Parameter, this.propEvents);
-  subFlows = new Manager("subFlows", SubFlow, this.propEvents);
-
-  // Define observable properties
-  observables = Object.values(this.constructor.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *

@@ -257,7 +257,7 @@ class Canvas {
       .attr("height", this.maxMovingPixels)
       .attr("stroke", "black")
       .style("pointer-events", "all")
-      .on("click", d => DEFAULT_FUNCTION());
+      .on("click", _ => DEFAULT_FUNCTION());
     return this;
   };
 
@@ -272,7 +272,7 @@ class Canvas {
       .attr("height", this.maxMovingPixels)
       .attr("stroke", "black")
       .style("pointer-events", "all")
-      .on("click", d => DEFAULT_FUNCTION());
+      .on("click", _ => DEFAULT_FUNCTION());
 
     return this;
   };
@@ -370,7 +370,7 @@ class Canvas {
   /**
    * get mouse position
    */
-  get mouse() {
+  get mousePos() {
     return this._mouse;
   }
 
@@ -385,7 +385,7 @@ class Canvas {
    * set mouse position
    * @param {array} value [x,y] position in canvas
    */
-  set mouse(value) {
+  set mousePos(value) {
     this._mouse = value;
   }
 
@@ -481,7 +481,7 @@ class Canvas {
     d3.event.stopPropagation();
 
     const transform = d3.zoomTransform(this.svg.node());
-    let newPosition = [...this.mouse];
+    let newPosition = [...this.mousePos];
 
     if (transform.k !== 1) {
       newPosition = transform.invert(newPosition);
@@ -523,7 +523,7 @@ class Canvas {
    * @private
    */
   onMouseMove = () => {
-    this.mouse = d3.mouse(this.svg.node());
+    this.mousePos = d3.mouse(this.svg.node());
     const fn = [
       { id: "addNode", fn: () => this.onAddNodeMouseMove() },
       { id: "addFlow", fn: () => this.onAddNodeMouseMove() },
@@ -621,7 +621,7 @@ class Canvas {
 
     // apply offset to prevent mouse from being positioned on top of the name
     const offset = { x: 0, y: -5 };
-    let newPosition = [...this.mouse];
+    let newPosition = [...this.mousePos];
 
     // apply transform on the newPosition
     if (transform.k !== 1 || transform.x !== 0 || transform.y !== 0) {
