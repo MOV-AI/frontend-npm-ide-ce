@@ -8,7 +8,8 @@ export const APP_INFORMATION = {
   LAST_UPDATE: window.SERVER_DATA?.Application?.LastUpdate || "-",
   CONFIGURATION_FILE: window.SERVER_DATA?.Application?.Configuration || "-",
   CUSTOM_CONFIGURATION_FILE: window.SERVER_DATA?.CustomConfiguration || "-",
-  DESCRIPTION: window.SERVER_DATA?.Application?.Description || "-"
+  DESCRIPTION: window.SERVER_DATA?.Application?.Description || "-",
+  LABEL: window.SERVER_DATA?.Application?.Label || "MOV.AI"
 };
 
 export const APP_LINKS = {
@@ -19,8 +20,6 @@ export const APP_LINKS = {
 export const BRANDING = {
   NAME: "Mov.ai Flow™"
 };
-
-export const LABEL = window.SERVER_DATA?.Application?.Label || "MOV.AI";
 
 export const DISABLED_VALUE = "None";
 

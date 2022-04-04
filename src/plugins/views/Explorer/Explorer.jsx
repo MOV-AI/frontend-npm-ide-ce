@@ -6,7 +6,7 @@ import _set from "lodash/set";
 import { Maybe } from "monet";
 import { Typography } from "@material-ui/core";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import { PLUGINS, LABEL } from "../../../utils/Constants";
+import { PLUGINS, APP_INFORMATION } from "../../../utils/Constants";
 import movaiLogo from "../editors/_shared/Branding/movai-flow-logo-red.png";
 import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
 import { explorerStyles } from "./styles";
@@ -289,7 +289,7 @@ const Explorer = props => {
   return (
     <Typography component="div">
       <h1 className={classes.header}>
-        <img src={movaiLogo} alt={LABEL} />
+        <img src={movaiLogo} alt={APP_INFORMATION.LABEL} />
       </h1>
       <Typography component="div" className={classes.typography}>
         <VirtualizedTree
