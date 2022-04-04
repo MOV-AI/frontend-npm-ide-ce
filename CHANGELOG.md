@@ -7,6 +7,7 @@
 
 **IDE**
 
+- [FP-1297 - Stay in app on logout](https://movai.atlassian.net/browse/FP-1297)
 - [FP-1509 - Saving a new document will now reload the doc](https://movai.atlassian.net/browse/FP-1509)
 - [FP-1538 - Color between tabs now, more clearer](https://movai.atlassian.net/browse/FP-1538)
 - [FP-1560 - Saving an untitled file will now always prompt for a name](https://movai.atlassian.net/browse/FP-1560)
