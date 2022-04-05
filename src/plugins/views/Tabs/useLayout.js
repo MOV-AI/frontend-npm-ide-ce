@@ -101,10 +101,9 @@ const useLayout = (props, dockRef) => {
    * @param {string} tabId : The tab id to be focused
    */
   const focusExistingTab = useCallback(
-    (tabId, preventFocus) => {
-      const tabData = findTab(tabId);
+    tabId => {
       const maxboxChildren = dockRef.current.state.layout.maxbox.children;
-      dockRef.current.updateTab(tabId, tabData, !preventFocus);
+      dockRef.current.updateTab(tabId, null);
 
       if (
         maxboxChildren.length &&
@@ -113,7 +112,7 @@ const useLayout = (props, dockRef) => {
         dockRef.current.dockMove(maxboxChildren[0], null, DOCK_MODES.MAXIMIZE);
       }
     },
-    [dockRef, findTab]
+    [dockRef]
   );
 
   /**
@@ -135,25 +134,6 @@ const useLayout = (props, dockRef) => {
   );
 
   /**
-   *
-   * @param {String} tabId : tab id to remove from stack
-   */
-  const removeTabAndFocusNew = useCallback(
-    (tabId, dock) => {
-      dock = dock ? dock : getDockFromTabId(tabId);
-      removeTabFromStack(tabId, dock);
-      const nextTabId = getNextTabFromStack(dock);
-      focusExistingTab(nextTabId);
-    },
-    [
-      getDockFromTabId,
-      removeTabFromStack,
-      getNextTabFromStack,
-      focusExistingTab
-    ]
-  );
-
-  /**
    * Checks if the layout activeId is valid, if not will set the last tab from stack
    * @private function
    * @param {Object} _layout : The layout to search through
@@ -164,15 +144,20 @@ const useLayout = (props, dockRef) => {
       const maxboxChildren = _layout.maxbox.children[0];
       const layoutActiveId =
         maxboxChildren?.activeId || _layout.dockbox.children[0]?.activeId;
+      let tabExists = maxboxChildren?.tabs.find(t => t.id === layoutActiveId);
 
-      const tabData = findTab(layoutActiveId);
+      if (!tabExists) {
+        tabExists = _layout.dockbox.children[0].tabs.find(
+          t => t.id === layoutActiveId
+        );
+      }
 
-      if (!tabData && layoutActiveId) {
+      if (!tabExists && layoutActiveId) {
         if (maxboxChildren) maxboxChildren.activeId = getNextTabFromStack();
         else _layout.dockbox.children[0].activeId = getNextTabFromStack();
       }
     },
-    [findTab, getNextTabFromStack]
+    [getNextTabFromStack]
   );
 
   /**
@@ -181,10 +166,11 @@ const useLayout = (props, dockRef) => {
    */
   const _applyLayout = useCallback(
     _layout => {
+      layoutActiveIdIsValid(_layout);
       setLayout(_layout);
       workspaceManager.setLayout(_layout);
     },
-    [workspaceManager]
+    [workspaceManager, layoutActiveIdIsValid]
   );
 
   /**
@@ -285,13 +271,13 @@ const useLayout = (props, dockRef) => {
         res => {
           if (res.success) {
             const dock = getDockFromTabId(id);
+            removeTabFromStack(id, dock);
             if (newLayout) _applyLayout(newLayout);
-            removeTabAndFocusNew(id, dock);
           }
         }
       );
     },
-    [call, _applyLayout, getDockFromTabId, removeTabAndFocusNew]
+    [call, _applyLayout, getDockFromTabId, removeTabFromStack]
   );
 
   /**
@@ -308,11 +294,11 @@ const useLayout = (props, dockRef) => {
         { name, scope }
       ).then(() => {
         const dock = getDockFromTabId(id);
+        removeTabFromStack(id, dock);
         if (newLayout) _applyLayout(newLayout);
-        removeTabAndFocusNew(id, dock);
       });
     },
-    [call, _applyLayout, getDockFromTabId, removeTabAndFocusNew]
+    [call, _applyLayout, getDockFromTabId, removeTabFromStack]
   );
 
   /**
@@ -365,16 +351,24 @@ const useLayout = (props, dockRef) => {
         // Remove tab and apply new layout
         tabsById.current.delete(tabId);
         workspaceManager.setTabs(tabsById.current);
+        const dock = getDockFromTabId(tabId);
+        removeTabFromStack(tabId, dock);
         _applyLayout(newLayout);
         // Reset bookmarks
         call(
           PLUGINS.RIGHT_DRAWER.NAME,
           PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS
         );
-        removeTabAndFocusNew(tabId);
       }
     },
-    [call, workspaceManager, _applyLayout, _closeDirtyTab, removeTabAndFocusNew]
+    [
+      call,
+      workspaceManager,
+      _applyLayout,
+      _closeDirtyTab,
+      getDockFromTabId,
+      removeTabFromStack
+    ]
   );
 
   /**
@@ -454,6 +448,10 @@ const useLayout = (props, dockRef) => {
         )
         .then(docFactory => {
           try {
+            const doc = docFactory.store.data.get(docData.name);
+            docData.isNew = docData.isNew ?? doc.isNew;
+            docData.isDirty = docData.isDirty ?? doc.isDirty;
+
             const Plugin = docFactory.plugin;
             const viewPlugin = new Plugin(
               { name: docData.id },
@@ -467,7 +465,8 @@ const useLayout = (props, dockRef) => {
                 id: docData.id,
                 name: docData.name,
                 isNew: docData.isNew,
-                title: _getCustomTab(docData, _closeTab),
+                isDirty: docData.isDirty,
+                title: _getCustomTab(docData, _closeTab, docData.isDirty),
                 extension: extension,
                 scope: docData.scope,
                 content: viewPlugin.render()
@@ -514,6 +513,7 @@ const useLayout = (props, dockRef) => {
         y: 100,
         z: 1
       };
+
       !preventFocus && !tabData.isNew && addTabToStack(tabData.id, tabPosition);
       tabsById.current.set(tabData.id, tabData);
       workspaceManager.setTabs(tabsById.current);
@@ -652,6 +652,7 @@ const useLayout = (props, dockRef) => {
                   scope: getScopeFromURL(tabId)
                 }
               );
+
         !firstLoad.current && !doc?.isNew && addTabToStack(tabId, dock);
 
         firstLoad.current = false;
@@ -791,14 +792,19 @@ const useLayout = (props, dockRef) => {
       setLayout(lastLayout);
 
       // Open Home Tab
-      if (lastTabs.has(HOMETAB_PROFILE.name)) open(getHomeTab(), true);
+      if (lastTabs.has(HOMETAB_PROFILE.name)) {
+        const tabData = getHomeTab();
+        tabsById.current.set(tabData.id, tabData);
+        workspaceManager.setTabs(tabsById.current);
+        dockRef.current.updateTab(HOMETAB_PROFILE.name, tabData, false);
+      }
     });
 
     // Destroy local workspace manager instance on unmount
     return () => {
       workspaceManager.destroy();
     };
-  }, [workspaceManager, _getTabData, open, layoutActiveIdIsValid]);
+  }, [dockRef, workspaceManager, _getTabData, layoutActiveIdIsValid]);
 
   //========================================================================================
   /*                                                                                      *
