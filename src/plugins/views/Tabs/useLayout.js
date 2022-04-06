@@ -444,17 +444,8 @@ const useLayout = (props, dockRef) => {
         PLUGINS.DOC_MANAGER.NAME,
         PLUGINS.DOC_MANAGER.CALL.GET_DOC_FACTORY,
         docData.scope
-      ).then(async docFactory => {
+      ).then(docFactory => {
         try {
-          const doc = await call(
-            PLUGINS.DOC_MANAGER.NAME,
-            PLUGINS.DOC_MANAGER.CALL.READ,
-            { name: docData.name, scope: docData.scope }
-          );
-
-          docData.isNew = docData.isNew ?? doc.isNew;
-          docData.isDirty = docData.isDirty ?? doc.isDirty;
-
           const Plugin = docFactory.plugin;
           const viewPlugin = new Plugin(
             { name: docData.id },
@@ -566,13 +557,22 @@ const useLayout = (props, dockRef) => {
    * @param {{id: String, title: String, name: String, scope: String}} docData : document basic data
    */
   const openEditor = useCallback(
-    docData => {
+    async docData => {
+      const doc = await call(
+        PLUGINS.DOC_MANAGER.NAME,
+        PLUGINS.DOC_MANAGER.CALL.READ,
+        { name: docData.name, scope: docData.scope }
+      );
+
+      docData.isNew = docData.isNew ?? doc.isNew;
+      docData.isDirty = docData.isDirty ?? doc.isDirty;
+
       _getTabData(docData).then(tabData => {
         emit(PLUGINS.TABS.ON.OPEN_EDITOR, tabData);
         open(tabData);
       });
     },
-    [emit, _getTabData, open]
+    [call, emit, _getTabData, open]
   );
 
   /**
