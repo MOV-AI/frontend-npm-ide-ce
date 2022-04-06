@@ -439,46 +439,49 @@ const useLayout = (props, dockRef) => {
    * @returns {TabData} Tab data to be set in Layout
    */
   const _getTabData = useCallback(
-    async docData => {
-      return props
-        .call(
-          PLUGINS.DOC_MANAGER.NAME,
-          PLUGINS.DOC_MANAGER.CALL.GET_DOC_FACTORY,
-          docData.scope
-        )
-        .then(docFactory => {
-          try {
-            const doc = docFactory.store.data.get(docData.name);
-            docData.isNew = docData.isNew ?? doc.isNew;
-            docData.isDirty = docData.isDirty ?? doc.isDirty;
+    docData => {
+      return call(
+        PLUGINS.DOC_MANAGER.NAME,
+        PLUGINS.DOC_MANAGER.CALL.GET_DOC_FACTORY,
+        docData.scope
+      ).then(async docFactory => {
+        try {
+          const doc = await call(
+            PLUGINS.DOC_MANAGER.NAME,
+            PLUGINS.DOC_MANAGER.CALL.READ,
+            { name: docData.name, scope: docData.scope }
+          );
 
-            const Plugin = docFactory.plugin;
-            const viewPlugin = new Plugin(
-              { name: docData.id },
-              { id: docData.id, name: docData.name, scope: docData.scope }
-            );
-            return PluginManagerIDE.install(docData.id, viewPlugin).then(() => {
-              // Create and return tab data
-              const extension = docFactory.store.model.EXTENSION ?? "";
-              // Return TabData
-              return {
-                id: docData.id,
-                name: docData.name,
-                isNew: docData.isNew,
-                isDirty: docData.isDirty,
-                title: _getCustomTab(docData, _closeTab, docData.isDirty),
-                extension: extension,
-                scope: docData.scope,
-                content: viewPlugin.render()
-              };
-            });
-          } catch (err) {
-            console.warn("debug can't open tab", err);
-            return docData;
-          }
-        });
+          docData.isNew = docData.isNew ?? doc.isNew;
+          docData.isDirty = docData.isDirty ?? doc.isDirty;
+
+          const Plugin = docFactory.plugin;
+          const viewPlugin = new Plugin(
+            { name: docData.id },
+            { id: docData.id, name: docData.name, scope: docData.scope }
+          );
+          return PluginManagerIDE.install(docData.id, viewPlugin).then(() => {
+            // Create and return tab data
+            const extension = docFactory.store.model.EXTENSION ?? "";
+            // Return TabData
+            return {
+              id: docData.id,
+              name: docData.name,
+              isNew: docData.isNew,
+              isDirty: docData.isDirty,
+              title: _getCustomTab(docData, _closeTab, docData.isDirty),
+              extension: extension,
+              scope: docData.scope,
+              content: viewPlugin.render()
+            };
+          });
+        } catch (err) {
+          console.warn("debug can't open tab", err);
+          return docData;
+        }
+      });
     },
-    [props, _getCustomTab, _closeTab]
+    [call, _getCustomTab, _closeTab]
   );
 
   /**
