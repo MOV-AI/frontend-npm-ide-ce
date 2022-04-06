@@ -89,6 +89,7 @@ const Callback = (props, ref) => {
         onLoad={editor => {
           if (!id) editor.focus();
         }}
+        useLanguageServer
       />
     </div>
   );
