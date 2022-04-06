@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useRef } from "react";
 import PropTypes from "prop-types";
 import DockLayout from "rc-dock";
-import "rc-dock/dist/rc-dock.css";
 import { PLUGINS } from "../../../utils/Constants";
 import {
   withViewPlugin,
@@ -9,11 +8,12 @@ import {
 } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import useLayout from "./useLayout";
 
-import tabsStyles from "./styles";
+import "rc-dock/dist/rc-dock.css";
+import { tabsStyles } from "./styles";
 
 const Tabs = (props, ref) => {
   const classes = tabsStyles();
-  const dockRef = React.useRef();
+  const dockRef = useRef();
   const {
     layout,
     open,

@@ -197,7 +197,7 @@ class BaseStore extends StorePluginManager {
     }
   }
 
-  onDocumentUpdate(instance, prop, value) {
+  onDocumentUpdate(instance, _prop, _value) {
     if (typeof this.observer.onDocumentDirty === "function") {
       this.observer.onDocumentDirty(this.name, instance, instance.getDirty());
     }

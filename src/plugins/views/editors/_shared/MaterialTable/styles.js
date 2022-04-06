@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core/styles";
 
-const materialTableStyles = makeStyles(theme => ({
+export const materialTableStyles = makeStyles(_ => ({
   tableContainer: {
     "& .MuiPaper-root": {
       boxShadow: "none",
@@ -8,5 +8,3 @@ const materialTableStyles = makeStyles(theme => ({
     }
   }
 }));
-
-export default materialTableStyles;

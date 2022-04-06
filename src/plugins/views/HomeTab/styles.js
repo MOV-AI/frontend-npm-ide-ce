@@ -104,7 +104,7 @@ export const recentDocumentsStyles = makeStyles(theme => ({
   }
 }));
 
-export const examplesDocumentsStyles = makeStyles(theme => ({
+export const examplesDocumentsStyles = makeStyles(_ => ({
   ...sharedStyles,
   examplePaper: {
     maxHeight: "calc(100% - 20px)"

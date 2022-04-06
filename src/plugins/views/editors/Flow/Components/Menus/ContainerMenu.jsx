@@ -16,7 +16,7 @@ import MenuDetails from "./sub-components/MenuDetails";
 
 const ContainerMenu = props => {
   // Props
-  const { nodeInst, call, openDoc, flowModel, editable, openDialog } = props;
+  const { nodeInst, call, openDoc, flowModel, editable } = props;
   // State hooks
   const [templateData, setTemplateData] = useState({});
   const [flowData, setFlowData] = useState({});
@@ -86,7 +86,6 @@ const ContainerMenu = props => {
         paramType
       };
 
-      const method = PLUGINS.DIALOG.CALL.CUSTOM_DIALOG;
       const args = {
         onSubmit: handleSubmitParameter,
         title: t("Edit {{paramType}}", { paramType }),
@@ -100,9 +99,14 @@ const ContainerMenu = props => {
         call
       };
 
-      openDialog({ method, args }, ParameterEditorDialog);
+      call(
+        PLUGINS.DIALOG.NAME,
+        PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
+        args,
+        ParameterEditorDialog
+      );
     },
-    [openDialog, call, handleSubmitParameter, t]
+    [call, handleSubmitParameter, t]
   );
 
   //========================================================================================

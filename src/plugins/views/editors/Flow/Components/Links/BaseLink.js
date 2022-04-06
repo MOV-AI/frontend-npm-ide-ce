@@ -1,8 +1,9 @@
 import * as d3 from "d3";
-import { baseLinkStyles } from "./styles";
-import { generatePathPoints } from "./generatePathPoints";
+import { DEFAULT_FUNCTION } from "../../../../../../utils/Utils";
 import { isLinkeable } from "../Nodes/BaseNode/PortValidator";
-import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
+import { generatePathPoints } from "./generatePathPoints";
+
+import { baseLinkStyles } from "./styles";
 
 const SUBFLOW_TYPE = "MovAI/Flow";
 const SEPARATOR = {

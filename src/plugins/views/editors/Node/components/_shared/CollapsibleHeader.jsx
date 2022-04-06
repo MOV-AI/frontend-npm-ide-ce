@@ -6,28 +6,12 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Divider from "@material-ui/core/Divider";
-import { makeStyles } from "@material-ui/core/styles";
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    padding: "5px 0px 5px 0px",
-    width: "100%"
-  },
-  heading: {
-    fontSize: "1.5rem"
-  },
-  details: {
-    display: "flex",
-    flexDirection: "column"
-  },
-  column: {
-    flexBasis: "90%"
-  }
-}));
+import { collapsibleHeaderStyles } from "./styles";
 
 const CollapsibleHeader = props => {
   const { title, children, defaultExpanded } = props;
-  const classes = useStyles();
+  const classes = collapsibleHeaderStyles();
 
   return (
     <Typography component="div" className={classes.root}>

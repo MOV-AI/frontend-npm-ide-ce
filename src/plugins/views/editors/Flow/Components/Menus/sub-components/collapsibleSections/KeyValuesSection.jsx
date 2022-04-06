@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { Typography } from "@material-ui/core";
@@ -16,7 +16,7 @@ const KeyValuesSection = props => {
     varName
   } = props;
   // State hooks
-  const [keyValues, setKeyValues] = React.useState([]);
+  const [keyValues, setKeyValues] = useState([]);
   // Other hooks
   const classes = keyValueSectionStyles();
   const { t } = useTranslation();
@@ -57,7 +57,7 @@ const KeyValuesSection = props => {
    *                                                                                      */
   //========================================================================================
 
-  React.useEffect(() => {
+  useEffect(() => {
     getTableValues();
   }, [getTableValues]);
 

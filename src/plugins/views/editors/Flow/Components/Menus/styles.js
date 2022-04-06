@@ -35,7 +35,7 @@ const parameters = {
   }
 };
 
-const menuStyles = makeStyles(theme => ({
+const menuStyles = makeStyles(_ => ({
   ...common,
   ...parameters,
   description: {
@@ -47,26 +47,26 @@ const menuStyles = makeStyles(theme => ({
   }
 }));
 
-export const groupItemStyles = makeStyles(theme => groupItem);
-export const nodeGroupStyles = makeStyles(theme => ({
+export const groupItemStyles = makeStyles(_ => groupItem);
+export const nodeGroupStyles = makeStyles(_ => ({
   ...groupItem,
   ...parameters
 }));
 
-export const propertiesStyles = makeStyles(theme => ({
+export const propertiesStyles = makeStyles(_ => ({
   gridAlign: {
     textAlign: "left",
     marginBottom: "15px"
   }
 }));
 
-export const menuDetailsStyles = makeStyles(theme => ({
+export const menuDetailsStyles = makeStyles(_ => ({
   header: {
     textAlign: "center"
   }
 }));
 
-export const nodeMenuStyles = makeStyles(theme => ({
+export const nodeMenuStyles = makeStyles(_ => ({
   root: {
     width: "100%"
   },
@@ -75,7 +75,7 @@ export const nodeMenuStyles = makeStyles(theme => ({
   }
 }));
 
-export const linkMenuStyles = makeStyles(theme => ({
+export const linkMenuStyles = makeStyles(_ => ({
   dependencyContainer: {
     padding: "5px 25px"
   },
@@ -84,7 +84,7 @@ export const linkMenuStyles = makeStyles(theme => ({
   }
 }));
 
-export const portStyles = makeStyles(theme => ({
+export const portStyles = makeStyles(_ => ({
   ...common,
   portIcon: {
     paddingLeft: "30px"
@@ -125,12 +125,12 @@ export const portStyles = makeStyles(theme => ({
   }
 }));
 
-export const keyValueSectionStyles = makeStyles(theme => ({
+export const keyValueSectionStyles = makeStyles(_ => ({
   ...common,
   ...parameters
 }));
 
-export const tableKeyValueStyles = makeStyles(theme => ({
+export const tableKeyValueStyles = makeStyles(_ => ({
   root: {
     height: "100%",
     display: "flex",
@@ -141,7 +141,7 @@ export const tableKeyValueStyles = makeStyles(theme => ({
   }
 }));
 
-export const rowKeyValueStyles = makeStyles(theme => ({
+export const rowKeyValueStyles = makeStyles(_ => ({
   rowContainer: {
     display: "flex",
     flexDirection: "row",

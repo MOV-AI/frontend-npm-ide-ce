@@ -1,8 +1,8 @@
-import React from "react";
-import { Typography, Divider, ListItem } from "@material-ui/core";
+import React, { Children } from "react";
 import PropTypes from "prop-types";
+import { Typography, Divider, ListItem } from "@material-ui/core";
 import Search from "../Search/Search";
-import ListItemsTree from "./ListItemTree";
+import ListItemsTree from "./ListItemsTree";
 
 /* 
   TODO: think about how to generalize the search
@@ -20,7 +20,7 @@ const ListItemsTreeWithSearch = props => {
       </ListItem>
       <Divider />
       <Typography style={props.style} component="div">
-        {React.Children.map(props.children, x => {
+        {Children.map(props.children, x => {
           return x;
         })}
       </Typography>

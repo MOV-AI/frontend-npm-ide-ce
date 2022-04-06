@@ -47,15 +47,7 @@ const ACTIVE_ITEM = {
  * @returns {ReaactElement} Node Menu
  */
 const NodeMenu = memo(
-  ({
-    nodeInst,
-    openDialog,
-    call,
-    openDoc,
-    editable,
-    flowModel,
-    groupsVisibilities
-  }) => {
+  ({ nodeInst, call, openDoc, editable, flowModel, groupsVisibilities }) => {
     const data = nodeInst.data;
     // State hooks
     const [templateData, setTemplateData] = useState({});
@@ -194,7 +186,6 @@ const NodeMenu = memo(
           paramType
         };
 
-        const method = PLUGINS.DIALOG.CALL.CUSTOM_DIALOG;
         const args = {
           onSubmit: handleSubmitParameter,
           title: t("Edit {{paramType}}", { paramType }),
@@ -208,9 +199,14 @@ const NodeMenu = memo(
           call
         };
 
-        openDialog({ method, args }, ParameterEditorDialog);
+        call(
+          PLUGINS.DIALOG.NAME,
+          PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
+          args,
+          ParameterEditorDialog
+        );
       },
-      [openDialog, call, handleSubmitParameter, t]
+      [call, handleSubmitParameter, t]
     );
 
     /**

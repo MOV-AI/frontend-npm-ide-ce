@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import _debounce from "lodash/debounce";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -15,7 +15,7 @@ import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
 import Search from "../../_shared/Search/Search";
 import { searchImports } from "./utils";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(_ => ({
   paper: {
     minWidth: "40%"
   }
@@ -25,10 +25,10 @@ const AddImportDialog = props => {
   // Props
   const { call, scope, onClose, onSubmit } = props;
   // State hooks
-  const [loading, setLoading] = React.useState(false);
-  const [pyLibs, setPyLibs] = React.useState();
-  const [filteredLibs, setFilteredLibs] = React.useState();
-  const [selectedLibs, setSelectedLibs] = React.useState();
+  const [loading, setLoading] = useState(false);
+  const [pyLibs, setPyLibs] = useState();
+  const [filteredLibs, setFilteredLibs] = useState();
+  const [selectedLibs, setSelectedLibs] = useState();
   // Style hook
   const classes = useStyles();
 
@@ -38,7 +38,7 @@ const AddImportDialog = props => {
    *                                                                                      */
   //========================================================================================
 
-  React.useEffect(() => {
+  useEffect(() => {
     setLoading(true);
     call(
       PLUGINS.DOC_MANAGER.NAME,

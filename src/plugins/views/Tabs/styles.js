@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core/styles";
 
-const tabsStyles = makeStyles(theme => ({
+export const tabsStyles = makeStyles(theme => ({
   "@global": {
     ".dock-dropdown-menu": {
       background: theme.palette.background.default
@@ -31,8 +31,8 @@ const tabsStyles = makeStyles(theme => ({
             color: theme.palette.text.primary
           },
           "& .dock-tab": {
-            borderTopLeftRadius: 5,
-            borderTopRightRadius: 5,
+            borderTopLeftRadius: "5px",
+            borderTopRightRadius: "5px",
             background: theme.backdrop.background,
             color: theme.backdrop.color,
             padding: "0 10px",
@@ -63,11 +63,9 @@ const tabsStyles = makeStyles(theme => ({
   },
   dockLayout: {
     position: "absolute",
-    left: 10,
-    top: 10,
-    right: 10,
-    bottom: 10
+    left: "10px",
+    top: "10px",
+    right: "10px",
+    bottom: "10px"
   }
 }));
-
-export default tabsStyles;

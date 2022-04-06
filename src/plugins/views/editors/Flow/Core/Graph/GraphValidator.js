@@ -8,7 +8,7 @@
 
 import i18n from "../../../../../../i18n/i18n";
 import { ROS_VALID_NAMES } from "../../../../../../utils/Constants";
-import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
+import { DEFAULT_FUNCTION } from "../../../../../../utils/Utils";
 import { MisMatchMessageLink } from "../../Components/Links/Errors";
 import { isLinkeable } from "../../Components/Nodes/BaseNode/PortValidator";
 
@@ -218,7 +218,7 @@ export default class GraphValidator {
     );
 
     // Check if it still has source/target ports
-    if(!sourcePortPos || !targetPortPos) return;
+    if (!sourcePortPos || !targetPortPos) return;
 
     // Check if link is invalid to define error
     const error = !isLinkeable(sourcePortPos.data, targetPortPos.data)

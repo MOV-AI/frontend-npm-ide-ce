@@ -1,13 +1,13 @@
 import * as d3 from "d3";
 import { Subject } from "rxjs";
+import { DEFAULT_FUNCTION } from "../../../../../../utils/Utils";
 import Factory from "../../Components/Nodes/Factory";
-import TemporaryLink from "../Links/TemporaryLink";
 import {
   FLOW_VIEW_MODE,
   CANVAS_LIMITS,
   MAX_MOVING_PIXELS
 } from "../../Constants/constants";
-import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
+import TemporaryLink from "../Links/TemporaryLink";
 
 class Canvas {
   constructor({ classes, containerId, docManager, height, mInterface, width }) {
@@ -654,7 +654,7 @@ class Canvas {
 
   onLinkingMouseMove = () => {
     const transform = d3.zoomTransform(this.svg.node());
-    let newPosition = [...this.mouse];
+    let newPosition = [...this.mousePos];
     newPosition = transform.invert(newPosition);
     const trg = {
       x: newPosition[0],

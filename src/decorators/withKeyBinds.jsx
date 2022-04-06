@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef, useEffect, useRef } from "react";
 import hotkeys from "hotkeys-js";
 import { KEYBINDINGS } from "../utils/Keybindings";
 
@@ -6,7 +6,7 @@ import { KEYBINDINGS } from "../utils/Keybindings";
  * By default hotkeys are not enabled for INPUT SELECT TEXTAREA elements.
  * Hotkeys.filter to return to the true shortcut keys set to play a role, false shortcut keys set up failure.
  */
-hotkeys.filter = function (event) {
+hotkeys.filter = function () {
   return true;
 };
 
@@ -20,11 +20,16 @@ hotkeys(KEYBINDINGS.SAVE, event => {
  * @returns
  */
 const withKeyBinds = Component => {
+  const RefComponent =
+    typeof Component === "function"
+      ? forwardRef((props, ref) => Component(props, ref))
+      : Component;
+
   return (props, ref) => {
     // Props
     const { name } = props;
     // Refs
-    const scopeRef = React.useRef();
+    const scopeRef = useRef();
 
     /**
      * Activate scope shortcuts.
@@ -66,7 +71,7 @@ const withKeyBinds = Component => {
     /**
      * Component initialization : set scope id
      */
-    React.useEffect(() => {
+    useEffect(() => {
       scopeRef.current = `${name}-${Math.random()}`;
       // Delete scope to unbind keys when component is unmounted
       return () => {
@@ -75,7 +80,7 @@ const withKeyBinds = Component => {
     }, [name]);
 
     return (
-      <Component
+      <RefComponent
         {...props}
         ref={ref}
         addKeyBind={addKeyBind}

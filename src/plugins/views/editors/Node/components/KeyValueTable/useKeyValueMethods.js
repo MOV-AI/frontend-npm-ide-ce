@@ -4,25 +4,16 @@ import _toString from "lodash/toString";
 import InfoLogo from "@material-ui/icons/Info";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { useTheme } from "@material-ui/core/styles";
 import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
 import { DATA_TYPES } from "../../../../../../utils/Constants";
 import { HtmlTooltip } from "../_shared/HtmlTooltip";
 
-const useStyles = makeStyles(theme => ({
-  logo: {
-    margin: "2px",
-    padding: "0px"
-  },
-  codeContainer: {
-    height: "100px",
-    width: "100%"
-  }
-}));
+import { keyValueHookStyles } from "./styles";
 
 const useKeyValueMethods = () => {
   // Hooks
-  const classes = useStyles();
+  const classes = keyValueHookStyles();
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -36,12 +27,12 @@ const useKeyValueMethods = () => {
     return (
       <HtmlTooltip
         title={
-          <React.Fragment>
+          <>
             <Typography color="inherit" component="h3">
               <b>{rowData.name}</b>
             </Typography>
             <p>{rowData.description}</p>
-          </React.Fragment>
+          </>
         }
       >
         <IconButton className={classes.logo}>

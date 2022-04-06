@@ -1,11 +1,12 @@
 import React, { memo } from "react";
 import PropTypes from "prop-types";
-import { useTranslation, DEFAULT_FUNCTION } from "../../../_shared/mocks";
+import { useTranslation } from "react-i18next";
+import _isEqual from "lodash/isEqual";
 import AddBox from "@material-ui/icons/AddBox";
 import Edit from "@material-ui/icons/Edit";
-import _isEqual from "lodash/isEqual";
-import CollapsibleHeader from "../_shared/CollapsibleHeader";
+import { DEFAULT_FUNCTION } from "../../../../../../utils/Utils";
 import MaterialTable from "../../../_shared/MaterialTable/MaterialTable";
+import CollapsibleHeader from "../_shared/CollapsibleHeader";
 
 const KeyValueTable = props => {
   // Props

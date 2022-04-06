@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, forwardRef } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import {
@@ -28,7 +28,7 @@ const VALUE_OPTIONS = {
   DISABLED: "disabled"
 };
 
-const ParameterEditorDialog = forwardRef((props, ref) => {
+const ParameterEditorDialog = props => {
   const {
     isNew,
     disableType,
@@ -371,14 +371,15 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
       renderCustomContent={renderTypeSelector}
     />
   );
-});
+};
 
 ParameterEditorDialog.propTypes = {
   data: PropTypes.object.isRequired,
   isNew: PropTypes.bool,
   disableType: PropTypes.bool,
-  customValidation: PropTypes.func,
   preventRenderType: PropTypes.bool,
+  showValueOptions: PropTypes.bool,
+  customValidation: PropTypes.func,
   alert: PropTypes.func
 };
 

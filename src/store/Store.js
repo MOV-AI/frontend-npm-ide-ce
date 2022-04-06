@@ -55,7 +55,7 @@ class Store extends BaseStore {
       type: this.scope,
       body: {}
     })
-      .then(a => {
+      .then(_ => {
         // delete only if successfully deleted from the database
         return this.deleteDocFromStore(name);
       })

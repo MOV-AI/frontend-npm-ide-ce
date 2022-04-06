@@ -1,4 +1,4 @@
-import IdBasedModel from "../../../subModels/IdBasedModel/IdBasedModel";
+import IdBasedModel from "../../../subModels/IdBasedModel/IdBased";
 import schema from "./schema";
 
 class Group extends IdBasedModel {

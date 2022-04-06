@@ -158,7 +158,7 @@ class SubFlow extends Model {
    *                                                                                      */
   //========================================================================================
 
-  propsUpdate(event, prop, value) {
+  propsUpdate(_, prop, value) {
     // force dispatch
     this.dispatch(prop, value);
   }

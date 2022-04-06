@@ -44,8 +44,8 @@ class PreviewNode extends BaseNode {
       this.headerPos.y,
       this.name || this.templateName,
       this.templateName,
-      this._type,
-      this.template.Type
+      this.template.Type,
+      this._type
     );
 
     // append to the svg element

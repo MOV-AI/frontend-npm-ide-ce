@@ -9,6 +9,13 @@ import { HOMETAB_PROFILE } from "./Constants";
 import HomeTab from "../plugins/views/HomeTab/HomeTab";
 
 /**
+ * Export a non implemented empty function
+ * @param {String} name : function name
+ * @returns console.warn call with the function name
+ */
+export const DEFAULT_FUNCTION = name => console.warn(`${name} not implemented`);
+
+/**
  * Generate random ID
  * @returns {String} Random ID in format : "1c76107c-146e-40bc-93fb-8148750cf50a"
  */

@@ -91,7 +91,7 @@ const MaterialTree = props => {
    * @returns {ReactElement} Rendered Tree
    */
   const recursiveArrayTree = (array, id) => {
-    return array.map((elem, elemIndex) => {
+    return array.map(elem => {
       const elementId = id ? `${id}/${elem.text}` : elem.text;
 
       return elem.children === undefined ? (
@@ -135,7 +135,7 @@ const MaterialTree = props => {
                   label={innerKey}
                   onClick={() => onSelectItem(key, id || key)}
                 >
-                  {obj[key][innerKey].map((elem, elemIndex) => {
+                  {obj[key][innerKey].map(elem => {
                     return (
                       <StyledTreeItem
                         key={elementId + "." + innerKey + "." + elem}

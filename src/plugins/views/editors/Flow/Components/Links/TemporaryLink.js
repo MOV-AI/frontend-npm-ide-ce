@@ -1,7 +1,7 @@
 import BaseLink from "./BaseLink";
 
 export default class TemporaryLink extends BaseLink {
-  constructor(canvas, src, trg, data) {
+  constructor(canvas, src, trg, _) {
     const _data = {
       id: "",
       sourceNode: "",

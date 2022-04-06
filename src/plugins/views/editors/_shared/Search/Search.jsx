@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import SearchIcon from "@material-ui/icons/Search";
 import { TextField, InputAdornment } from "@material-ui/core";
 import { DATA_TYPES } from "../../../../../utils/Constants";
@@ -43,22 +44,19 @@ const filter = (searchQuery, subject) => {
       // Is array
       if (Array.isArray(subject)) {
         subject = subject.filter(e => {
-          var value = filter(searchQuery, e);
-          if (typeof value !== DATA_TYPES.BOOLEAN) {
-            if (value !== undefined) {
-              value = value.length === 0 ? false : true;
-            }
-          }
-          return value;
+          const value = filter(searchQuery, e);
+
+          if (typeof value === DATA_TYPES.BOOLEAN) return value;
+
+          return Boolean(value.length);
         });
         return subject;
       }
+
       // Is an object
-      else {
-        let values = Object.values(subject || {});
-        let list = filter(searchQuery, values);
-        return list.length > 0 ? subject : false;
-      }
+      const values = Object.values(subject || {});
+      const list = filter(searchQuery, values);
+      return list.length > 0 ? subject : false;
 
     case DATA_TYPES.NUMBER:
       return searchNonStrings();
@@ -73,15 +71,29 @@ const filter = (searchQuery, subject) => {
 const Search = props => {
   const { onSearch } = props;
 
+  const { t } = useTranslation();
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                       Handlers                                       *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Handle on change search input event
+   * @param {*} event
+   */
+  const onChangeSearch = event => {
+    const value = event.target.value;
+    onSearch(value);
+  };
+
   return (
     <TextField
       fullWidth
-      placeholder="Search"
+      placeholder={t("Search")}
       defaultValue={""}
-      onChange={event => {
-        const value = event.target.value;
-        onSearch(value);
-      }}
+      onChange={onChangeSearch}
       InputProps={{
         endAdornment: (
           <InputAdornment position="end">

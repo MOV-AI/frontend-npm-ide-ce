@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { forwardRef, useCallback, useEffect } from "react";
 import withAlerts from "../../decorators/withAlerts";
 import withKeyBinds from "../../decorators/withKeyBinds";
 import withMenuHandler from "../../decorators/withMenuHandler";
@@ -16,7 +16,7 @@ import { ViewPlugin } from "./ViewReactPlugin";
  */
 const composeDecorators = (Component, decorators) => {
   const [withFirstDecorator, ...otherDecorators] = decorators;
-  const composed = React.forwardRef((props, ref) =>
+  const composed = forwardRef((props, ref) =>
     withFirstDecorator(Component)(props, ref)
   );
   if (otherDecorators.length)
@@ -31,14 +31,12 @@ const composeDecorators = (Component, decorators) => {
  * @returns
  */
 export function withEditorPlugin(ReactComponent, methods = []) {
-  const RefComponent = React.forwardRef((props, ref) =>
-    ReactComponent(props, ref)
-  );
+  const RefComponent = forwardRef((props, ref) => ReactComponent(props, ref));
 
   /**
    * Component responsible to handle common editor lifecycle
    */
-  const EditorComponent = React.forwardRef((props, ref) => {
+  const EditorComponent = forwardRef((props, ref) => {
     const {
       id,
       on,
@@ -58,7 +56,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
      * Save all documents :
      *  Saves all documents that are dirty
      */
-    const saveAllDocuments = React.useCallback(() => {
+    const saveAllDocuments = useCallback(() => {
       call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.SAVE_DIRTIES);
     }, [call]);
 

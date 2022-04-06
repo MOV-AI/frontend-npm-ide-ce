@@ -21,7 +21,7 @@ const useDataSubscriber = props => {
 
     setData(modelRef.serialize());
     setDetails(modelRef.getDetails());
-    subscriberId = modelRef.subscribe((model, key, value) => {
+    subscriberId = modelRef.subscribe((_, key, value) => {
       if (!keysToDisconsider) return;
       if (keysToDisconsider.includes(key)) return;
       // Update doc data to be used locally

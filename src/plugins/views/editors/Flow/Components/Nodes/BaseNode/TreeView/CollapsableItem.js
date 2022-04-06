@@ -6,7 +6,9 @@ class CollapsableItem {
     text,
     isExpanded = true,
     parent = null,
-    onToggleCollapsePorts = () => {}
+    onToggleCollapsePorts = () => {
+      /* empty on purpose */
+    }
   }) {
     this.text = text;
     this.parent = parent;

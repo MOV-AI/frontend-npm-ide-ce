@@ -1,6 +1,7 @@
 import { Subject } from "rxjs";
 import _isEqual from "lodash/isEqual";
 import _debounce from "lodash/debounce";
+import i18n from "../../../../../../i18n/i18n";
 import { PLUGINS } from "../../../../../../utils/Constants";
 import StartNode from "../../Components/Nodes/StartNode";
 import BaseLink from "../../Components/Links/BaseLink";
@@ -21,10 +22,7 @@ const NODE_DATA = {
   }
 };
 
-// to remove
-const t = v => v;
-
-export default class Graph {
+export default class GraphBase {
   constructor({ mInterface, canvas, id, docManager }) {
     this.mInterface = mInterface;
     this.canvas = canvas;
@@ -181,7 +179,7 @@ export default class Graph {
       node
         ? node.obj.setExposedPort(obj.port, obj.value)
         : console.error(
-            `${t("Exposed port: node")} ${obj.node} ${t("not found")}`
+            `${i18n.t("Exposed port: node")} ${obj.node} ${i18n.t("not found")}`
           );
     });
     this.exposedPorts = exposedPorts;

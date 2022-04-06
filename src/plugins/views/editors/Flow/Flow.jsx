@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useRef
 } from "react";
+import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { filter } from "rxjs/operators";
 import { makeStyles } from "@material-ui/core/styles";
@@ -33,7 +34,7 @@ import { FLOW_VIEW_MODE } from "./Constants/constants";
 
 import "./Resources/css/Flow.css";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(_ => ({
   root: {
     width: "100%",
     height: "100%",
@@ -55,8 +56,6 @@ const Flow = (props, ref) => {
     alert,
     addKeyBind,
     removeKeyBind,
-    activateKeyBind,
-    deactivateKeyBind,
     confirmationAlert,
     saveDocument,
     on
@@ -98,12 +97,12 @@ const Flow = (props, ref) => {
   const { t } = useTranslation();
   const clipboard = useMemo(() => new Clipboard(), []);
   // Refs
-  const baseFlowRef = React.useRef();
-  const mainInterfaceRef = React.useRef();
-  const debounceSelection = React.useRef();
-  const selectedNodeRef = React.useRef();
-  const selectedLinkRef = React.useRef();
-  const isEditableComponentRef = React.useRef(true);
+  const baseFlowRef = useRef();
+  const mainInterfaceRef = useRef();
+  const debounceSelection = useRef();
+  const selectedNodeRef = useRef();
+  const selectedLinkRef = useRef();
+  const isEditableComponentRef = useRef(true);
 
   //========================================================================================
   /*                                                                                      *
@@ -268,28 +267,6 @@ const Flow = (props, ref) => {
   );
 
   /**
-   * Handle dialog opening
-   * @param {*} method
-   * @param {*} args
-   * @param {*} resolve
-   */
-  const openDialog = useCallback(
-    ({ method, args, resolve }, dialogComponent) => {
-      // Deactivate key bind before opening dialog
-      deactivateKeyBind();
-      // On close dialog reactivate keybind and resolve promise
-      args.onClose = () => {
-        activateKeyBind();
-        resolve && resolve();
-        args.onCancel && args.onCancel();
-      };
-      // Call dialog plugin with given method and args
-      call(PLUGINS.DIALOG.NAME, method, args, dialogComponent);
-    },
-    [activateKeyBind, call, deactivateKeyBind]
-  );
-
-  /**
    * Open Dialog to Enter Paste Node name
    * @param {*} position : x and y position in canvas
    * @param {*} nodeToCopy : Node data
@@ -299,10 +276,10 @@ const Flow = (props, ref) => {
     (position, nodeToCopy) => {
       const node = nodeToCopy.node;
       return new Promise(resolve => {
-        const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
         const args = {
           title: `${t("Paste")} ${node.model}`,
           value: `${node.id}_copy`,
+          onClose: resolve,
           onValidation: newName =>
             getMainInterface().graph.validator.validateNodeName(
               newName,
@@ -312,10 +289,10 @@ const Flow = (props, ref) => {
             getMainInterface().pasteNode(newName, node, position)
         };
         // Open Dialog
-        openDialog({ method, args, resolve });
+        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, args);
       });
     },
-    [t, openDialog]
+    [call, t]
   );
 
   //========================================================================================
@@ -357,7 +334,6 @@ const Flow = (props, ref) => {
             openDoc={openDoc}
             editable={isEditableComponentRef.current}
             groupsVisibilities={groupsVisibilities}
-            openDialog={openDialog}
           />
         )
       };
@@ -368,7 +344,6 @@ const Flow = (props, ref) => {
       id,
       instance,
       openDoc,
-      openDialog,
       getMenuComponent,
       groupsVisibilities,
       t
@@ -412,12 +387,11 @@ const Flow = (props, ref) => {
             link={link.data}
             flowModel={instance}
             sourceMessage={link?.src?.data?.message}
-            openDialog={openDialog}
           />
         )
       };
     },
-    [MENUS, openDialog, call, id, instance, t]
+    [MENUS, call, id, instance, t]
   );
 
   /**
@@ -456,7 +430,6 @@ const Flow = (props, ref) => {
             model={instance}
             handleGroupVisibility={handleGroupVisibility}
             editable={isEditableComponentRef.current}
-            openDialog={openDialog}
           ></Menu>
         )
       },
@@ -499,7 +472,6 @@ const Flow = (props, ref) => {
     instance,
     props.data,
     call,
-    openDialog,
     getNodeMenuToAdd,
     getLinkMenuToAdd,
     handleGroupVisibility,
@@ -743,7 +715,6 @@ const Flow = (props, ref) => {
 
       mainInterface.mode.addNode.onClick.subscribe(() => {
         const nodeName = getMainInterface().mode.current.props.node.data.name;
-        const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
         const args = {
           title: t("Add Node"),
           submitText: t("Add"),
@@ -753,16 +724,15 @@ const Flow = (props, ref) => {
               newName,
               t("Node")
             ),
-          onCancel: setFlowsToDefault,
+          onClose: setFlowsToDefault,
           onSubmit: newName => getMainInterface().addNode(newName)
         };
         // Open form dialog
-        openDialog({ method, args });
+        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, args);
       });
 
       mainInterface.mode.addFlow.onClick.subscribe(() => {
         const flowName = getMainInterface().mode.current.props.node.data.name;
-        const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
         const args = {
           title: t("Add Sub-flow"),
           submitText: t("Add"),
@@ -772,11 +742,11 @@ const Flow = (props, ref) => {
               newName,
               t("Sub-flow")
             ),
-          onCancel: setFlowsToDefault,
+          onClose: setFlowsToDefault,
           onSubmit: newName => getMainInterface().addFlow(newName)
         };
         // Open form dialog
-        openDialog({ method, args });
+        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, args);
       });
 
       // Subscribe to link context menu events
@@ -905,8 +875,8 @@ const Flow = (props, ref) => {
       invalidContainersParamAlert,
       openDoc,
       handleContextClose,
-      t,
-      openDialog
+      call,
+      t
     ]
   );
 
@@ -1108,8 +1078,20 @@ const Flow = (props, ref) => {
   );
 };
 
-Flow.defaultProps = {
-  name: ""
+Flow.propTypes = {
+  id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  scope: PropTypes.string.isRequired,
+  call: PropTypes.func.isRequired,
+  on: PropTypes.func.isRequired,
+  data: PropTypes.object,
+  instance: PropTypes.object,
+  editable: PropTypes.bool,
+  alert: PropTypes.func,
+  addKeyBind: PropTypes.func,
+  removeKeyBind: PropTypes.func,
+  confirmationAlert: PropTypes.func,
+  saveDocument: PropTypes.func
 };
 
 export default withEditorPlugin(Flow);

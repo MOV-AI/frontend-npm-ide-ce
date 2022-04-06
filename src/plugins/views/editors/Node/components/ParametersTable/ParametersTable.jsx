@@ -1,10 +1,11 @@
 import React, { memo } from "react";
 import PropTypes from "prop-types";
 import _isEqual from "lodash/isEqual";
-import { useTranslation, DEFAULT_FUNCTION } from "../../../_shared/mocks";
+import { useTranslation } from "react-i18next";
+import { DEFAULT_FUNCTION } from "../../../../../../utils/Utils";
+import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
 import useDataTypes from "../../../_shared/hooks/useDataTypes";
 import KeyValueTable from "../KeyValueTable/KeyValueTable";
-import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
 
 const ParametersTable = props => {
   // Props

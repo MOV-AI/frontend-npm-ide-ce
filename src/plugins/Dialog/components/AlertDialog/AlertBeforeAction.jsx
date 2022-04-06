@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import AppDialog from "../AppDialog/AppDialog";
 import WarningIcon from "@material-ui/icons/Warning";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -7,11 +8,7 @@ import Button from "@material-ui/core/Button";
 import { DialogContentText } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-function useTranslation() {
-  return { t: s => s };
-}
-
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(_ => ({
   icon: {
     float: "left",
     marginRight: 20

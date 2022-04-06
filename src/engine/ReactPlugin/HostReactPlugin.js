@@ -3,6 +3,24 @@ import PropTypes from "prop-types";
 import PluginManagerIDE from "../PluginManagerIDE/PluginManagerIDE";
 import IDEPlugin from "../IDEPlugin/IDEPlugin";
 
+const DEFAULT_PLUGIN = {
+  call: () => {
+    /* empty on purpose */
+  },
+  emit: () => {
+    /* empty on purpose */
+  },
+  on: () => {
+    /* empty on purpose */
+  },
+  off: () => {
+    /* empty on purpose */
+  },
+  onTopic: () => {
+    /* empty on purpose */
+  }
+};
+
 export class HostReactPlugin extends IDEPlugin {
   constructor(profile) {
     // Remove duplicated if needed
@@ -14,26 +32,26 @@ export class HostReactPlugin extends IDEPlugin {
 
   /**
    *
-   * @param {Object} profile
-   * @param {React Component} view
+   * @param {Object} _profile
+   * @param {React Component} _view
    */
-  addView(profile, view) {
+  addView(_profile, _view) {
     // Abstract method to implement in subclasses
   }
   /**
    *
-   * @param {Object} profile
+   * @param {Object} _profile
    */
-  removeView(profile) {
+  removeView(_profile) {
     // Abstract method to implement in subclasses
   }
 
   /**
    *
-   * @param {String} viewName
-   * @param {Object} viewPluginProps
+   * @param {String} _viewName
+   * @param {Object} _viewPluginProps
    */
-  update(viewName, viewPluginProps) {
+  update(_viewName, _viewPluginProps) {
     // Abstract method to implement in subclasses
   }
 }
@@ -124,12 +142,4 @@ export const useHostReactPlugin = ({ name, methods }, componentRef) => {
 
 useHostReactPlugin.propTypes = {
   profile: PropTypes.object.isRequired
-};
-
-const DEFAULT_PLUGIN = {
-  call: () => {},
-  emit: () => {},
-  on: () => {},
-  off: () => {},
-  onTopic: () => {}
 };

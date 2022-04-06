@@ -1,9 +1,10 @@
 import React, {
-  useState,
+  forwardRef,
   useCallback,
-  useRef,
+  useEffect,
+  useState,
   useMemo,
-  useEffect
+  useRef
 } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
@@ -24,7 +25,7 @@ import { RobotManager } from "@mov-ai/mov-fe-lib-core";
 import Workspace from "../../../../../../utils/Workspace";
 import { PLUGINS, ALERT_SEVERITIES } from "../../../../../../utils/Constants";
 import { ERROR_MESSAGES } from "../../../../../../utils/Messages";
-import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
+import { DEFAULT_FUNCTION } from "../../../../../../utils/Utils";
 import { ROBOT_BLACKLIST } from "../../Constants/constants";
 import useNodeStatusUpdate from "./hooks/useNodeStatusUpdate";
 
@@ -33,7 +34,7 @@ import { buttonStyles, flowTopBarStyles } from "./styles";
 const BACKEND_CALLBACK_NAME = "backend.FlowTopBar";
 const FEEDBACK_TIMEOUT = 10000;
 
-const ButtonTopBar = React.forwardRef((props, ref) => {
+const ButtonTopBar = forwardRef((props, ref) => {
   const { disabled, onClick, children } = props;
   const classes = buttonStyles();
   return (
@@ -345,6 +346,7 @@ const FlowTopBar = props => {
           }, FEEDBACK_TIMEOUT);
         })
         .catch(err => {
+          console.warn("Error sending action to robot", err);
           alert({
             message: t(ERROR_MESSAGES.ERROR_RUNNING_SPECIFIC_CALLBACK, {
               callbackName: BACKEND_CALLBACK_NAME

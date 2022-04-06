@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
@@ -8,19 +9,8 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { CircularProgress } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import { withTheme } from "../../../../decorators/withTheme";
-import { useTranslation } from "react-i18next";
 
-const useStyles = makeStyles(theme => ({
-  loadingContainer: {
-    height: "100px",
-    width: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
-  }
-}));
+import { appDialogStyles } from "./styles";
 
 const FormDialog = props => {
   // Props
@@ -49,7 +39,7 @@ const FormDialog = props => {
     message: ""
   });
   // Style hook
-  const classes = useStyles();
+  const classes = appDialogStyles();
   // Translation hook
   const { t } = useTranslation();
   // Ref
@@ -175,7 +165,7 @@ const FormDialog = props => {
       <DialogTitle>
         {loadingMessage && isLoading ? loadingMessage : title}
       </DialogTitle>
-      <DialogContent style={{ minWidth: 450 }}>
+      <DialogContent className={classes.dialogContent}>
         {message && <DialogContentText>{message}</DialogContentText>}
         {isLoading ? (
           <div className={classes.loadingContainer}>
@@ -187,7 +177,7 @@ const FormDialog = props => {
             autoFocus={true}
             error={validation.error}
             helperText={validation.message}
-            style={{ width: "100%" }}
+            className={classes.textfield}
             label={t(inputLabel)}
             InputLabelProps={{ shrink: true }}
             defaultValue={value}
@@ -217,8 +207,6 @@ const FormDialog = props => {
   );
 };
 
-export default withTheme(FormDialog);
-
 FormDialog.propTypes = {
   onValidation: PropTypes.func,
   onPostValidation: PropTypes.func,
@@ -239,3 +227,5 @@ FormDialog.defaultProps = {
   multiline: false,
   maxLength: 40
 };
+
+export default FormDialog;

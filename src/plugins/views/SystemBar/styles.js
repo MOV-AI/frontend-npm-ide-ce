@@ -96,7 +96,7 @@ export const systemMenuItemStyles = makeStyles(theme => ({
   }
 }));
 
-export const helpDialogStyles = makeStyles(theme => ({
+export const helpDialogStyles = makeStyles(_ => ({
   movaiIcon: {
     height: "24px",
     verticalAlign: "sub",

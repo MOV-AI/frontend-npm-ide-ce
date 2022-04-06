@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core/styles";
 
-export const IOPortStyles = makeStyles(theme => ({
+export const IOPortStyles = makeStyles(_ => ({
   root: {
     padding: "0 12px",
     width: "calc(100% - 24px)"

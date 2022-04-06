@@ -1,7 +1,7 @@
 import { MasterDB } from "@mov-ai/mov-fe-lib-core";
 
 class Subscriber {
-  constructor({ pattern, onLoad, onUpdate }) {
+  constructor({ pattern, _onLoad, _onUpdate }) {
     this.pattern = pattern;
   }
 

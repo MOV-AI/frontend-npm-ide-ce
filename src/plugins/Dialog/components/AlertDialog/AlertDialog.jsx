@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import AppDialog from "../AppDialog/AppDialog";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(_ => ({
   container: {
     whiteSpace: "pre-wrap"
   }

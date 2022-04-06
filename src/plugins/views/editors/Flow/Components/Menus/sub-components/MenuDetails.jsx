@@ -1,8 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import { ListItem, ListItemText, Typography } from "@material-ui/core";
+import { DEFAULT_FUNCTION } from "../../../../../../../utils/Utils";
 import NodeLink from "./NodeLink";
-import { DEFAULT_FUNCTION, useTranslation } from "../../../../_shared/mocks";
 
 import { menuDetailsStyles } from "../styles";
 
