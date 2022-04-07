@@ -335,6 +335,7 @@ const Flow = (props, ref) => {
             call={call}
             nodeInst={node}
             flowModel={instance}
+            activateEditor={activateEditor}
             openDoc={openDoc}
             editable={isEditableComponentRef.current}
             groupsVisibilities={groupsVisibilities}
@@ -350,6 +351,7 @@ const Flow = (props, ref) => {
       openDoc,
       getMenuComponent,
       groupsVisibilities,
+      activateEditor,
       t
     ]
   );
@@ -390,12 +392,13 @@ const Flow = (props, ref) => {
             call={call}
             link={link.data}
             flowModel={instance}
+            activateEditor={activateEditor}
             sourceMessage={link?.src?.data?.message}
           />
         )
       };
     },
-    [MENUS, call, id, instance, t]
+    [MENUS, call, id, instance, activateEditor, t]
   );
 
   /**
@@ -431,6 +434,7 @@ const Flow = (props, ref) => {
             call={call}
             name={name}
             details={details}
+            activateEditor={activateEditor}
             model={instance}
             handleGroupVisibility={handleGroupVisibility}
             editable={isEditableComponentRef.current}
@@ -479,6 +483,7 @@ const Flow = (props, ref) => {
     getNodeMenuToAdd,
     getLinkMenuToAdd,
     handleGroupVisibility,
+    activateEditor,
     t
   ]);
 

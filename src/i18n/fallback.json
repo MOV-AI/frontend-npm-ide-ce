@@ -179,6 +179,7 @@
   "Only From": "Only From",
   "Only To": "Only To",
   "Open": "Open",
+  "Open {{callbackName}}": "Open {{callbackName}}",
   "Package": "Package",
   "Parameter name can't be empty": "Parameter name can't be empty",
   "Parameter": "Parameter",

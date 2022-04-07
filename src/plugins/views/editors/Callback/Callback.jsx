@@ -28,6 +28,7 @@ const Callback = (props, ref) => {
     instance,
     data,
     saveDocument,
+    activateEditor,
     editable = true
   } = props;
 
@@ -51,10 +52,18 @@ const Callback = (props, ref) => {
         icon: <InfoIcon></InfoIcon>,
         name: menuName,
         title: menuTitle,
-        view: <Menu id={id} call={call} name={name} scope={scope} />
+        view: (
+          <Menu
+            id={id}
+            call={call}
+            name={name}
+            scope={scope}
+            activateEditor={activateEditor}
+          />
+        )
       }
     });
-  }, [call, id, name, scope, t]);
+  }, [call, id, name, scope, activateEditor, t]);
 
   usePluginMethods(ref, {
     renderRightMenu

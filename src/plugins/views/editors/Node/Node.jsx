@@ -31,7 +31,15 @@ import { nodeStyles } from "./styles";
 import { ERROR_MESSAGES } from "../../../../utils/Messages";
 
 const Node = (props, ref) => {
-  const { id, name, call, alert, instance, editable = true } = props;
+  const {
+    id,
+    name,
+    call,
+    alert,
+    instance,
+    activateEditor,
+    editable = true
+  } = props;
 
   // Hooks
   const [protectedCallbacks, setProtectedCallbacks] = useState([]);
@@ -259,6 +267,7 @@ const Node = (props, ref) => {
         paramType
       };
       const args = {
+        onClose: activateEditor,
         onSubmit: formData => {
           return updateKeyValue(param, formData, obj, isNew);
         },
@@ -277,7 +286,7 @@ const Node = (props, ref) => {
         ParameterEditorDialog
       );
     },
-    [data, validateName, updateKeyValue, call, t]
+    [data, validateName, updateKeyValue, call, activateEditor, t]
   );
 
   /**
@@ -350,6 +359,7 @@ const Node = (props, ref) => {
     (modalData, ioConfigName, portName) => {
       call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.SELECT_SCOPE_MODAL, {
         ...modalData,
+        onClose: activateEditor,
         onSubmit: selectedCallback => {
           const splitURL = selectedCallback.split("/");
           const callback = splitURL.length > 1 ? splitURL[2] : selectedCallback;
@@ -358,7 +368,7 @@ const Node = (props, ref) => {
         }
       });
     },
-    [call, updatePortCallback]
+    [call, updatePortCallback, activateEditor]
   );
 
   //========================================================================================

@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { Divider, Link, Typography } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
-import { portStyles } from "../styles";
+import { Divider, Link, Tooltip, Typography } from "@material-ui/core";
 import { SCOPES } from "../../../../../../../utils/Constants";
+import { portStyles } from "../styles";
 
 const PortsDetails = props => {
   // Props
@@ -66,24 +66,31 @@ const PortsDetails = props => {
           {callback}
         </Typography>
       ) : (
-        <Link
+        <Tooltip
           key={`${callback}_${index}`}
+          placement={"bottom-start"}
           className={classes.portCallbackLink}
-          disabled={true}
-          component="button"
-          onClick={event => {
-            openDoc({
-              scope: SCOPES.CALLBACK,
-              name: callback,
-              ctrlKey: event.ctrlKey
-            });
-          }}
+          title={t("Open {{callbackName}}", { callbackName: callback })}
         >
-          {callback}
-        </Link>
+          <span>
+            <Link
+              disabled={true}
+              component="button"
+              onClick={event => {
+                openDoc({
+                  scope: SCOPES.CALLBACK,
+                  name: callback,
+                  ctrlKey: event.ctrlKey
+                });
+              }}
+            >
+              {callback}
+            </Link>
+          </span>
+        </Tooltip>
       );
     },
-    [protectedDocs, classes, openDoc]
+    [protectedDocs, classes, openDoc, t]
   );
 
   /**

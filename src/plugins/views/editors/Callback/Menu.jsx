@@ -33,7 +33,14 @@ const ACTIVE_ITEM = {
 
 const Menu = props => {
   // Props
-  const { call, scope, name, instance, editable = true } = props;
+  const {
+    call,
+    scope,
+    name,
+    instance,
+    activateEditor,
+    editable = true
+  } = props;
   // State hook
   const [activeItem, setActiveItem] = useState(0);
   // Other hooks
@@ -103,6 +110,7 @@ const Menu = props => {
         PLUGINS.DIALOG.NAME,
         PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
         {
+          onClose: activateEditor,
           onSubmit: setMessage,
           selectedMessage: data.message,
           scope: scope,
@@ -111,7 +119,7 @@ const Menu = props => {
         EditMessageDialog
       );
     },
-    [scope, data.message, call, setMessage]
+    [scope, data.message, call, setMessage, activateEditor]
   );
 
   /**
@@ -125,6 +133,7 @@ const Menu = props => {
         PLUGINS.DIALOG.NAME,
         PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
         {
+          onClose: activateEditor,
           onSubmit: addImports,
           scope: scope,
           call: call
@@ -132,7 +141,7 @@ const Menu = props => {
         AddImportDialog
       );
     },
-    [scope, addImports, call]
+    [scope, addImports, call, activateEditor]
   );
 
   /**
