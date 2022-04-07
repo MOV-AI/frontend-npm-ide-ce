@@ -2,24 +2,20 @@ import * as d3 from "d3";
 import { Subject } from "rxjs";
 import Factory from "../../Components/Nodes/Factory";
 import TemporaryLink from "../Links/TemporaryLink";
-import { FLOW_VIEW_MODE, canvasLimits } from "../../Constants/constants";
+import {
+  FLOW_VIEW_MODE,
+  CANVAS_LIMITS,
+  MAX_MOVING_PIXELS
+} from "../../Constants/constants";
 import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
 
 class Canvas {
-  constructor({
-    classes,
-    containerId,
-    docManager,
-    height,
-    maxMovingPixels,
-    mInterface,
-    width
-  }) {
+  constructor({ classes, containerId, docManager, height, mInterface, width }) {
     this.classes = classes;
     this.containerId = containerId;
     this.docManager = docManager;
     this.height = height;
-    this.maxMovingPixels = maxMovingPixels;
+    this.maxMovingPixels = MAX_MOVING_PIXELS;
     this.mInterface = mInterface;
     this.width = width;
 
@@ -261,7 +257,7 @@ class Canvas {
       .attr("height", this.maxMovingPixels)
       .attr("stroke", "black")
       .style("pointer-events", "all")
-      .on("click", d => DEFAULT_FUNCTION());
+      .on("click", _ => DEFAULT_FUNCTION());
     return this;
   };
 
@@ -276,7 +272,7 @@ class Canvas {
       .attr("height", this.maxMovingPixels)
       .attr("stroke", "black")
       .style("pointer-events", "all")
-      .on("click", d => DEFAULT_FUNCTION());
+      .on("click", _ => DEFAULT_FUNCTION());
 
     return this;
   };
@@ -374,7 +370,7 @@ class Canvas {
   /**
    * get mouse position
    */
-  get mouse() {
+  get mousePos() {
     return this._mouse;
   }
 
@@ -389,7 +385,7 @@ class Canvas {
    * set mouse position
    * @param {array} value [x,y] position in canvas
    */
-  set mouse(value) {
+  set mousePos(value) {
     this._mouse = value;
   }
 
@@ -423,14 +419,43 @@ class Canvas {
     this.mInterface.setPreviousMode();
   };
 
+  /**
+   * Check if node position is in canvas boundaries
+   * @param {number} x : Position in X axis
+   * @param {number} y : Position in Y axis
+   * @returns {boolean} False if x or y is not in boundaries and True otherwise
+   */
   inBoundaries = (x, y) => {
+    // Returns true if invalid
     const fn = (val, min, max) => {
       return val < min || val > max;
     };
+    // Returns false if x or y is not in boundaries
     return ![
-      [x, ...canvasLimits[0]],
-      [y, ...canvasLimits[1]]
+      [x, ...CANVAS_LIMITS[0]],
+      [y, ...CANVAS_LIMITS[1]]
     ].some(values => fn(...values));
+  };
+
+  /**
+   * Check if node is in canvas boundaries
+   *  Returns always valid positions in canvas
+   * @param {number} x : Position in X axis
+   * @param {number} y : Position in Y axis
+   * @returns {array<posX, posY>} Valid position
+   */
+  getPositionInBoundaries = (x, y) => {
+    const [minX, maxX] = CANVAS_LIMITS[0];
+    const [minY, maxY] = CANVAS_LIMITS[1];
+    // Returns at least min value
+    // And at most max value
+    const fn = (val, min, max) => {
+      if (val < min) return min;
+      if (val > max) return max;
+      return val;
+    };
+    // Returns parsed position
+    return [fn(x, minX, maxX), fn(y, minY, maxY)];
   };
 
   append = (element, type = "canvas") => {
@@ -456,7 +481,7 @@ class Canvas {
     d3.event.stopPropagation();
 
     const transform = d3.zoomTransform(this.svg.node());
-    let newPosition = [...this.mouse];
+    let newPosition = [...this.mousePos];
 
     if (transform.k !== 1) {
       newPosition = transform.invert(newPosition);
@@ -498,7 +523,7 @@ class Canvas {
    * @private
    */
   onMouseMove = () => {
-    this.mouse = d3.mouse(this.svg.node());
+    this.mousePos = d3.mouse(this.svg.node());
     const fn = [
       { id: "addNode", fn: () => this.onAddNodeMouseMove() },
       { id: "addFlow", fn: () => this.onAddNodeMouseMove() },
@@ -596,7 +621,7 @@ class Canvas {
 
     // apply offset to prevent mouse from being positioned on top of the name
     const offset = { x: 0, y: -5 };
-    let newPosition = [...this.mouse];
+    let newPosition = [...this.mousePos];
 
     // apply transform on the newPosition
     if (transform.k !== 1 || transform.x !== 0 || transform.y !== 0) {

@@ -8,7 +8,7 @@ import { menuDetailsStyles } from "../styles";
 
 const MenuDetails = props => {
   // Props
-  const { id, template, model, type, openDoc } = props;
+  const { id, template, model, type, openDoc, label } = props;
   // Other hooks
   const classes = menuDetailsStyles();
   const { t } = useTranslation();
@@ -23,7 +23,7 @@ const MenuDetails = props => {
     <>
       <h2 className={classes.header}>{id}</h2>
       <ListItem divider>
-        <ListItemText primary={t("Name:")} />
+        <ListItemText primary={t(label)} />
         <NodeLink name={template} scope={model} openDoc={openDoc}>
           {template}
         </NodeLink>
@@ -43,6 +43,7 @@ const MenuDetails = props => {
 MenuDetails.propTypes = {
   id: PropTypes.string,
   template: PropTypes.string,
+  label: PropTypes.string,
   model: PropTypes.string,
   type: PropTypes.string,
   openDoc: PropTypes.func
@@ -53,6 +54,7 @@ MenuDetails.defaultProps = {
   template: "-",
   model: "-",
   type: "-",
+  label: "Name:",
   openDoc: () => DEFAULT_FUNCTION("openDoc")
 };
 

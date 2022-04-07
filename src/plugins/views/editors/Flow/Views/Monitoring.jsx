@@ -1,13 +1,14 @@
 import React, { Component } from "react";
+import ReactResizeDetector from "react-resize-detector";
 import PropTypes from "prop-types";
+import { Rest } from "@mov-ai/mov-fe-lib-core";
+import { Backdrop, CircularProgress } from "@material-ui/core";
+import { randomId } from "../../../../../utils/Utils";
+import { DEFAULT_FUNCTION } from "../../_shared/mocks";
 import MainInterface from "../Components/interface/MainInterface";
 import GraphTreeView from "../Core/Graph/GraphTreeView";
-import { Backdrop, CircularProgress } from "@material-ui/core";
-import ReactResizeDetector from "react-resize-detector";
 import Warnings from "../Components/Warnings/Warnings";
 import Tooltip from "../Components/Tooltips/Tooltip";
-import { Rest } from "@mov-ai/mov-fe-lib-core";
-import { DEFAULT_FUNCTION } from "../../_shared/mocks";
 
 class Monitoring extends Component {
   state = {
@@ -24,7 +25,7 @@ class Monitoring extends Component {
   warnings = React.createRef();
   tooltip = React.createRef();
 
-  containerId = `baseTree-${Math.floor(Math.random() * 9999)}`;
+  containerId = `baseTree-${randomId()}`;
 
   //========================================================================================
   /*                                                                                      *

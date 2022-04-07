@@ -32,7 +32,7 @@ ContextMenu.propTypes = {
   anchorPosition: PropTypes.object,
   menuList: PropTypes.arrayOf(
     PropTypes.shape({
-      icon: PropTypes.elemet,
+      icon: PropTypes.element,
       element: PropTypes.element,
       label: PropTypes.string,
       onClick: PropTypes.func

@@ -104,6 +104,7 @@ class Store extends BaseStore {
       if (res.success) {
         doc.setIsNew(false).setDirty(false);
         this.observer.onDocumentDirty(this.name, doc, doc.getDirty());
+        res.model = doc;
       }
       return res;
     });

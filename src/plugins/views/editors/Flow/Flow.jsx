@@ -14,6 +14,7 @@ import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { FLOW_EXPLORER_PROFILE, PLUGINS } from "../../../../utils/Constants";
+import { KEYBINDINGS } from "../../../../utils/Keybindings";
 import Clipboard, { KEYS } from "./Utils/Clipboard";
 import Vec2 from "./Utils/Vec2";
 import BaseFlow from "./Views/BaseFlow";
@@ -203,18 +204,6 @@ const Flow = (props, ref) => {
   }, [contextMenuOptions]);
 
   /**
-   * Call broadcast method to emit event to all open flows
-   */
-  const setFlowsToDefault = useCallback(() => {
-    call(
-      PLUGINS.DOC_MANAGER.NAME,
-      PLUGINS.DOC_MANAGER.CALL.BROADCAST,
-      PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR,
-      { action: "setMode", value: EVT_NAMES.DEFAULT }
-    );
-  }, [call]);
-
-  /**
    * Open document in new tab
    * @param {*} docData
    */
@@ -292,6 +281,7 @@ const Flow = (props, ref) => {
       args.onClose = () => {
         activateKeyBind();
         resolve && resolve();
+        args.onCancel && args.onCancel();
       };
       // Call dialog plugin with given method and args
       call(PLUGINS.DIALOG.NAME, method, args, dialogComponent);
@@ -684,6 +674,22 @@ const Flow = (props, ref) => {
   );
 
   /**
+   * Call broadcast method to emit event to all open flows
+   */
+  const setFlowsToDefault = useCallback(() => {
+    // Remove selected node and link
+    onNodeSelected(null);
+    onLinkSelected(null);
+    // broadcast event to other flows
+    call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.BROADCAST,
+      PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR,
+      { action: "setMode", value: EVT_NAMES.DEFAULT }
+    );
+  }, [call, onLinkSelected, onNodeSelected]);
+
+  /**
    * Subscribe to mainInterface and canvas events
    */
   const onReady = useCallback(
@@ -691,8 +697,6 @@ const Flow = (props, ref) => {
       // subscribe to on enter default mode
       // When enter default mode remove other node/sub-flow bookmarks
       mainInterface.mode.default.onEnter.subscribe(() => {
-        onNodeSelected(null);
-        onLinkSelected(null);
         setFlowsToDefault();
       });
 
@@ -749,6 +753,7 @@ const Flow = (props, ref) => {
               newName,
               t("Node")
             ),
+          onCancel: setFlowsToDefault,
           onSubmit: newName => getMainInterface().addNode(newName)
         };
         // Open form dialog
@@ -767,6 +772,7 @@ const Flow = (props, ref) => {
               newName,
               t("Sub-flow")
             ),
+          onCancel: setFlowsToDefault,
           onSubmit: newName => getMainInterface().addFlow(newName)
         };
         // Open form dialog
@@ -786,14 +792,6 @@ const Flow = (props, ref) => {
           onClose: handleContextClose
         });
       });
-
-      // Subscribe to add link event
-      mainInterface.events.onAddLink.subscribe(evtData =>
-        alert({
-          location: "snackbar",
-          message: "Link created"
-        })
-      );
 
       // Subscribe to canvas context menu
       mainInterface.mode.canvasCtxMenu.onEnter.subscribe(evtData => {
@@ -908,8 +906,7 @@ const Flow = (props, ref) => {
       openDoc,
       handleContextClose,
       t,
-      openDialog,
-      alert
+      openDialog
     ]
   );
 
@@ -1031,14 +1028,14 @@ const Flow = (props, ref) => {
   //========================================================================================
 
   useEffect(() => {
-    addKeyBind("ctrl+c", handleCopyNode);
-    addKeyBind("ctrl+v", handlePasteNodes);
+    addKeyBind(KEYBINDINGS.COPY, handleCopyNode);
+    addKeyBind(KEYBINDINGS.PASTE, handlePasteNodes);
     addKeyBind("esc", setFlowsToDefault);
     addKeyBind(["del", "backspace"], handleDeleteNode);
     // remove keyBind on unmount
     return () => {
-      removeKeyBind("ctrl+c");
-      removeKeyBind("ctrl+v");
+      removeKeyBind(KEYBINDINGS.COPY);
+      removeKeyBind(KEYBINDINGS.PASTE);
       removeKeyBind("esc");
       removeKeyBind(["del", "backspace"]);
     };
@@ -1063,6 +1060,7 @@ const Flow = (props, ref) => {
         <FlowTopBar
           id={id}
           call={call}
+          name={name}
           alert={alert}
           confirmationAlert={confirmationAlert}
           scope={scope}
@@ -1095,13 +1093,14 @@ const Flow = (props, ref) => {
       />
       {contextMenuOptions && (
         <FlowContextMenu
-          {...contextMenuOptions}
+          onClose={handleContextClose}
           onNodeCopy={handleCopyNode}
           onCanvasPaste={handlePasteNodes}
           onLinkDelete={handleDeleteLink}
           onNodeDelete={handleDeleteNode}
           onSubFlowDelete={handleDeleteNode}
           onPortToggle={handleToggleExposedPort}
+          {...contextMenuOptions}
         />
       )}
       {tooltipConfig && <PortTooltip {...tooltipConfig} />}

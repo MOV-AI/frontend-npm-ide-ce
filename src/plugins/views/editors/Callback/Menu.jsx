@@ -1,10 +1,5 @@
-import React from "react";
-import DetailsMenu from "../_shared/DetailsMenu/DetailsMenu";
-import AddImportDialog from "./dialogs/AddImport";
-import EditMessageDialog from "./dialogs/EditMessage";
-import Model from "../../../../models/Callback/Callback";
-import { useTranslation } from "../_shared/mocks";
-import { withDataHandler } from "../../../DocManager/DataHandler";
+import React, { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Collapse,
   List,
@@ -16,47 +11,38 @@ import {
   Tooltip,
   Divider
 } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import AddIcon from "@material-ui/icons/Add";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
+import Model from "../../../../models/Callback/Callback";
+import { PLUGINS } from "../../../../utils/Constants";
+import { withDataHandler } from "../../../DocManager/DataHandler";
 import useDataSubscriber from "../../../DocManager/useDataSubscriber";
+import DetailsMenu from "../_shared/DetailsMenu/DetailsMenu";
+import AddImportDialog from "./dialogs/AddImport";
+import EditMessageDialog from "./dialogs/EditMessage";
 
-const useStyles = makeStyles(theme => ({
-  itemValue: {
-    padding: "15px 15px 15px 25px",
-    fontSize: 14
-  },
-  itemLibValue: {
-    paddingLeft: 10,
-    "& span": {
-      fontSize: 14
-    }
-  },
-  disabled: {
-    color: "gray"
-  }
-}));
+import { menuStyles } from "./styles";
 
 const ACTIVE_ITEM = {
-  imports: 1,
-  message: 2
+  IMPORTS: 1,
+  MESSAGE: 2
 };
 
 const Menu = props => {
   // Props
   const { call, scope, name, instance, editable = true } = props;
   // State hook
-  const [activeItem, setActiveItem] = React.useState(0);
+  const [activeItem, setActiveItem] = useState(0);
   // Other hooks
-  const classes = useStyles();
+  const classes = menuStyles();
   const { t } = useTranslation();
   const { data } = useDataSubscriber({
     instance,
     propsData: props.data,
-    keysToDisconsider: [Model.OBSERVABLE_KEYS.CODE]
+    keysToDisconsider: Model.KEYS_TO_DISCONSIDER
   });
 
   //========================================================================================
@@ -69,27 +55,36 @@ const Menu = props => {
    * Delete import from model
    * @param {*} pyLib
    */
-  const deleteImport = pyLib => {
-    if (instance.current) instance.current.getPyLibs().deleteItem(pyLib.key);
-  };
+  const deleteImport = useCallback(
+    pyLib => {
+      if (instance.current) instance.current.getPyLibs().deleteItem(pyLib.key);
+    },
+    [instance]
+  );
 
   /**
    * Add Imports
    * @param {*} pyLibs
    */
-  const addImports = pyLibs => {
-    if (instance.current) instance.current.getPyLibs().setData(pyLibs);
-    setActiveItem(ACTIVE_ITEM.imports);
-  };
+  const addImports = useCallback(
+    pyLibs => {
+      if (instance.current) instance.current.getPyLibs().setData(pyLibs);
+      setActiveItem(ACTIVE_ITEM.IMPORTS);
+    },
+    [instance]
+  );
 
   /**
    * Set message
    * @param {string} msg
    */
-  const setMessage = msg => {
-    if (instance.current) instance.current.setMessage(msg);
-    setActiveItem(ACTIVE_ITEM.message);
-  };
+  const setMessage = useCallback(
+    msg => {
+      if (instance.current) instance.current.setMessage(msg);
+      setActiveItem(ACTIVE_ITEM.MESSAGE);
+    },
+    [instance]
+  );
 
   //========================================================================================
   /*                                                                                      *
@@ -100,48 +95,67 @@ const Menu = props => {
   /**
    * Open dialog to set callback message
    */
-  const handleEditMessageClick = () => {
-    call(
-      "dialog",
-      "customDialog",
-      {
-        onSubmit: setMessage,
-        selectedMessage: data.message,
-        scope: scope,
-        call: call
-      },
-      EditMessageDialog
-    );
-  };
+  const handleEditMessageClick = useCallback(
+    evt => {
+      evt.stopPropagation();
+
+      call(
+        PLUGINS.DIALOG.NAME,
+        PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
+        {
+          onSubmit: setMessage,
+          selectedMessage: data.message,
+          scope: scope,
+          call: call
+        },
+        EditMessageDialog
+      );
+    },
+    [scope, data.message, call, setMessage]
+  );
 
   /**
    * Open dialog to add imports
    */
-  const handleAddImportsClick = () => {
-    call(
-      "dialog",
-      "customDialog",
-      {
-        onSubmit: addImports,
-        scope: scope,
-        call: call
-      },
-      AddImportDialog
-    );
-  };
+  const handleAddImportsClick = useCallback(
+    evt => {
+      evt.stopPropagation();
+
+      call(
+        PLUGINS.DIALOG.NAME,
+        PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
+        {
+          onSubmit: addImports,
+          scope: scope,
+          call: call
+        },
+        AddImportDialog
+      );
+    },
+    [scope, addImports, call]
+  );
 
   /**
    * Handle expand/collapse action
    *  If item is collapsed : Expand item and collapse other
    *  If item is expanded  : Collapse item and let all others collapsed as well
-   * @param {*} _activeItem
+   * @param {*} evt
    */
-  const handleExpandClick = _activeItem => {
+  const handleExpandClick = useCallback(evt => {
+    const currentActiveItem = parseInt(evt.currentTarget.dataset.activeItem);
     setActiveItem(prevState => {
-      if (prevState === _activeItem) return 0;
-      else return _activeItem;
+      if (prevState === currentActiveItem) return 0;
+      else return currentActiveItem;
     });
-  };
+  }, []);
+
+  /**
+   * Handler to remove the message
+   */
+  const handleRemoveMessage = useCallback(() => {
+    if (instance.current) instance.current.setMessage("");
+    setActiveItem(ACTIVE_ITEM.MESSAGE);
+  }, [instance]);
 
   //========================================================================================
   /*                                                                                      *
@@ -151,21 +165,26 @@ const Menu = props => {
 
   /**
    * Check if collapse item is expanded
+   * @private function
    * @param {integer} _item : Collapse item id
    * @returns {boolean} True if collapse item is expanded, False otherwise
    */
-  const _isActive = _item => {
-    return activeItem === _item;
-  };
+  const isActive = useCallback(
+    _item => {
+      return activeItem === _item;
+    },
+    [activeItem]
+  );
 
   /**
    * Get name to be rendered in import row
+   * @private function
    * @param {string} key
    * @param {string} libClass
    * @param {string} libModule
    * @returns {string} Lib title to be rendered in import row
    */
-  const _getComposedName = (key, libClass, libModule) => {
+  const getComposedName = useCallback((key, libClass, libModule) => {
     if (libClass === undefined) {
       return key === libModule
         ? "import " + libModule
@@ -175,12 +194,13 @@ const Menu = props => {
         ? "from " + libModule + " import " + libClass
         : "from " + libModule + " import " + libClass + " as " + key;
     }
-  };
+  }, []);
 
   /**
    * Get the list of imports
+   * @private function
    */
-  const _getImportsList = () => {
+  const getImportsList = useCallback(() => {
     const pyLibs = data.pyLibs || {};
     const importList = [];
 
@@ -188,13 +208,13 @@ const Menu = props => {
       const lib = pyLibs[key];
       const libModule = lib.module ? lib.module : undefined;
       const libClass = lib.libClass ? lib.libClass : undefined;
-      const name_composed = _getComposedName(key, libClass, libModule);
+      const name_composed = getComposedName(key, libClass, libModule);
       const obj = { name: name_composed, key: key };
       if (libModule) importList.push(obj);
     });
 
     return importList;
-  };
+  }, [data.pyLibs, getComposedName]);
 
   //========================================================================================
   /*                                                                                      *
@@ -206,8 +226,8 @@ const Menu = props => {
    * Get Imports
    * @returns {ReactElement} React element to be rendered in Imports collapse item
    */
-  const getImports = () => {
-    const pyLibs = _getImportsList();
+  const getImports = useCallback(() => {
+    const pyLibs = getImportsList();
     return pyLibs.length > 0 ? (
       pyLibs.map((pyLib, index) => {
         return (
@@ -231,62 +251,73 @@ const Menu = props => {
       })
     ) : (
       <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-        No imports
+        {t("No imports")}
       </Typography>
     );
-  };
+  }, [classes, getImportsList, deleteImport, t]);
 
   /**
    * Get Callback message
    * @returns {ReactElement} React element to be rendered in Message collapse item
    */
-  const getMessage = () => {
+  const getMessage = useCallback(() => {
     return data.message ? (
-      <Typography className={classes.itemValue}>{data.message}</Typography>
+      <Typography>
+        <Divider />
+        <ListItem>
+          <ListItemText
+            className={classes.itemLibValue}
+            primary={data.message}
+          />
+          <ListItemSecondaryAction>
+            <Tooltip title={t("Remove message")}>
+              <IconButton edge="end" onClick={handleRemoveMessage}>
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </ListItemSecondaryAction>
+        </ListItem>
+      </Typography>
     ) : (
       <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-        No message defined
+        {t("No message defined")}
       </Typography>
     );
-  };
+  }, [classes, data.message, handleRemoveMessage, t]);
 
   return (
     <div>
       <DetailsMenu name={name} details={data.details || {}}></DetailsMenu>
       <List>
         {/* ============ IMPORTS ============ */}
-        <ListItem button onClick={() => handleExpandClick(ACTIVE_ITEM.imports)}>
-          <ListItemText primary="Imports" />
-          <IconButton
-            disabled={!editable}
-            onClick={e => {
-              e.stopPropagation();
-              handleAddImportsClick();
-            }}
-          >
+        <ListItem
+          button
+          data-active-item={ACTIVE_ITEM.IMPORTS}
+          onClick={handleExpandClick}
+        >
+          <ListItemText primary={t("Imports")} />
+          <IconButton disabled={!editable} onClick={handleAddImportsClick}>
             <AddIcon />
           </IconButton>
-          {_isActive(ACTIVE_ITEM.imports) ? <ExpandLess /> : <ExpandMore />}
+          {isActive(ACTIVE_ITEM.IMPORTS) ? <ExpandLess /> : <ExpandMore />}
         </ListItem>
-        <Collapse in={_isActive(ACTIVE_ITEM.imports)} unmountOnExit>
+        <Collapse in={isActive(ACTIVE_ITEM.IMPORTS)} unmountOnExit>
           {getImports()}
           <Divider />
         </Collapse>
         {/* ============ MESSAGE ============ */}
-        <ListItem button onClick={() => handleExpandClick(ACTIVE_ITEM.message)}>
-          <ListItemText primary="Message" />
-          <IconButton
-            disabled={!editable}
-            onClick={e => {
-              e.stopPropagation();
-              handleEditMessageClick();
-            }}
-          >
+        <ListItem
+          button
+          data-active-item={ACTIVE_ITEM.MESSAGE}
+          onClick={handleExpandClick}
+        >
+          <ListItemText primary={t("Message")} />
+          <IconButton disabled={!editable} onClick={handleEditMessageClick}>
             <EditIcon />
           </IconButton>
-          {_isActive(ACTIVE_ITEM.message) ? <ExpandLess /> : <ExpandMore />}
+          {isActive(ACTIVE_ITEM.MESSAGE) ? <ExpandLess /> : <ExpandMore />}
         </ListItem>
-        <Collapse in={_isActive(ACTIVE_ITEM.message)} unmountOnExit>
+        <Collapse in={isActive(ACTIVE_ITEM.MESSAGE)} unmountOnExit>
           {getMessage()}
           <Divider />
         </Collapse>

@@ -5,19 +5,19 @@ export default class Configuration extends Model {
   constructor() {
     // inject imported schema and forward constructor arguments
     super({ schema, ...arguments[0] });
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                   Model Properties                                   *
+     *                                                                                      */
+    //========================================================================================
+
+    this.code = "";
+    this.extension = "yaml";
+
+    // Define observable properties
+    this.observables = Object.values(Configuration.OBSERVABLE_KEYS);
   }
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                   Model Properties                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  code = "";
-  extension = "yaml";
-
-  // Define observable properties
-  observables = Object.values(Configuration.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -158,6 +158,8 @@ export default class Configuration extends Model {
     DETAILS: "details",
     EXTENSION: "extension"
   };
+
+  static KEYS_TO_DISCONSIDER = [this.OBSERVABLE_KEYS.CODE];
 }
 
 // Default model values

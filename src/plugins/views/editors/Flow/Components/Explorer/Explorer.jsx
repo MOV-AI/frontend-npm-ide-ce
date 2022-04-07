@@ -71,7 +71,7 @@ const Explorer = props => {
         }
       };
       _get(deepnessToAction, node.deepness, () => {
-        console.log("action not implemented");
+        console.warn("action not implemented");
       })();
     },
     [emit]
@@ -118,11 +118,12 @@ const Explorer = props => {
       [docManager.getStore("Node"), docManager.getStore("Flow")].map(
         (store, id) => {
           const { name, title } = store;
+          const filteredChildren = store.getDocs().filter(d => !d.isNew);
           return {
             id,
             name,
             title,
-            children: store.getDocs().map((doc, childId) => {
+            children: filteredChildren.map((doc, childId) => {
               return {
                 id: childId,
                 name: doc.getName(),
@@ -144,7 +145,7 @@ const Explorer = props => {
   //========================================================================================
 
   useEffect(() => {
-    on("docManager", "loadDocs", loadDocs);
+    on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.LOAD_DOCS, loadDocs);
   }, [on, loadDocs]);
 
   //========================================================================================

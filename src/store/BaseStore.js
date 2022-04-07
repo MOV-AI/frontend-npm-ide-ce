@@ -27,6 +27,7 @@ class BaseStore extends StorePluginManager {
     this.pattern = pattern || { Scope: this.scope, Name: "*", Label: "*" };
     this.observer = observer;
     this.docManager = docManager;
+    this.protectedDocs = [];
 
     this.enableSubscriber();
   }
@@ -98,7 +99,7 @@ class BaseStore extends StorePluginManager {
 
   deleteDocFromStore(name) {
     this.getDoc(name)?.destroy();
-    return this.data.delete(name);
+    return this.delDoc(name);
   }
 
   generateName(next = 1) {
@@ -117,8 +118,10 @@ class BaseStore extends StorePluginManager {
     // re add the document with the new name
     this.setDoc(newName, doc);
 
-    //rename the instance
+    // rename the instance
     doc.setName(newName);
+    // Since we are using the id as the name aswell, let's update it to avoid confusion
+    doc.setId(newName);
   }
 
   //========================================================================================
@@ -173,8 +176,11 @@ class BaseStore extends StorePluginManager {
     Object.values(data.value[docType]).forEach(doc => {
       const name = doc.Label;
 
+      // Check if is doc protected
+      const isProtected = this.protectedDocs.includes(doc.Label);
+
       // create only if the instance does not exist yet
-      if (!this.getDoc(name)) {
+      if (!this.getDoc(name) && !isProtected) {
         const newDoc = this.newDoc(name);
         newDoc
           .enableObservables(false)

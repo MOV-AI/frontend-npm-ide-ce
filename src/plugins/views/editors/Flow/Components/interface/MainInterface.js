@@ -1,7 +1,7 @@
 import lodash from "lodash";
 import { BehaviorSubject } from "rxjs";
 import { filter } from "rxjs/operators";
-import { maxMovingPixels, NODE_TYPES } from "../../Constants/constants";
+import { NODE_TYPES } from "../../Constants/constants";
 import Graph from "../../Core/Graph/GraphBase";
 import { EVT_NAMES } from "../../events";
 import StartNode from "../Nodes/StartNode";
@@ -84,7 +84,6 @@ export default class MainInterface {
       containerId,
       width,
       height,
-      maxMovingPixels,
       classes,
       docManager
     });
@@ -178,6 +177,7 @@ export default class MainInterface {
   deleteLink = linkId => {
     this.modelView.current.deleteLink(linkId);
     this.graph.deleteLinks([linkId]);
+    this.graph.validateFlow();
   };
 
   addNode = name => {
@@ -222,10 +222,12 @@ export default class MainInterface {
   pasteNode = (name, nodeData, position) => {
     // Gather information from model
     const NODE_PROP_DATA = NODE_PROPS[nodeData.model];
+    // Set node in canvas boundaries
+    const nodePos = this.canvas.getPositionInBoundaries(position.x, position.y);
     // Build node data
     const node = {
       ...nodeData,
-      Visualization: [position.x, position.y],
+      Visualization: nodePos,
       [NODE_PROP_DATA.LABEL]: name,
       Label: name,
       name: name,
@@ -369,7 +371,7 @@ export default class MainInterface {
     const { nodes, shiftKey } = data;
     const { selectedNodes } = this;
     const filterNodes = nodes.filter(
-      n => n.constructor.name !== StartNode.name
+      n => n.data.model !== StartNode.model
     );
 
     this.selectedLink = null;

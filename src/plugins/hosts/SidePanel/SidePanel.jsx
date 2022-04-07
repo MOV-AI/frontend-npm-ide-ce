@@ -16,7 +16,3 @@ export default withHostReactPlugin(SidePanel);
 SidePanel.propTypes = {
   hostName: PropTypes.string.isRequired
 };
-
-SidePanel.defaultProps = {
-  hostName: "topBar"
-};

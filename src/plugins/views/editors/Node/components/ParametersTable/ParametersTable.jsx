@@ -4,7 +4,7 @@ import _isEqual from "lodash/isEqual";
 import { useTranslation, DEFAULT_FUNCTION } from "../../../_shared/mocks";
 import useDataTypes from "../../../_shared/hooks/useDataTypes";
 import KeyValueTable from "../KeyValueTable/KeyValueTable";
-import ParameterEditorDialog from "./ParametersEditorDialog";
+import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
 
 const ParametersTable = props => {
   // Props

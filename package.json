@@ -19,7 +19,7 @@
     "@material-ui/styles": "^4.11.4",
     "@mov-ai/mov-fe-lib-code-editor": "^0.0.3-0",
     "@mov-ai/mov-fe-lib-core": "^1.0.36",
-    "@mov-ai/mov-fe-lib-react": "^1.0.34",
+    "@mov-ai/mov-fe-lib-react": "^1.0.40",
     "@remixproject/engine": "^0.3.19",
     "@remixproject/engine-web": "^0.3.19",
     "@testing-library/jest-dom": "^5.14.1",
@@ -70,10 +70,10 @@
   "devDependencies": {
     "@codingame/monaco-languageclient": "^0.17.4",
     "customize-cra": "^1.0.0",
-    "http-proxy-middleware": "^2.0.1",
     "monaco-editor-core": "^0.33.0",
     "react-app-rewired": "^2.2.1",
-    "webpack-node-externals": "^3.0.0"
+    "webpack-node-externals": "^3.0.0",
+    "http-proxy-middleware": "^2.0.4"
   },
   "jest": {
     "transformIgnorePatterns": [
@@ -93,7 +93,7 @@
   ],
   "movai": {
     "name": "mov-fe-app-ide-ce",
-    "Label": "MOV.AI - IDE-CE",
+    "Label": "MOV.AI Flow™",
     "Type": "application",
     "Package": "mov-fe-app-ide-ce",
     "EntryPoint": "index.html",

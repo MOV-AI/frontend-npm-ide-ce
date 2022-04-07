@@ -16,7 +16,3 @@ export default withHostReactPlugin(CentralPanel);
 CentralPanel.propTypes = {
   hostName: PropTypes.string.isRequired
 };
-
-CentralPanel.defaultProps = {
-  hostName: "topBar"
-};

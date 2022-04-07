@@ -4,7 +4,7 @@ import CodeIcon from "@material-ui/icons/Code";
 import DescriptionIcon from "@material-ui/icons/Description";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import { Utils } from "@mov-ai/mov-fe-lib-core";
-import movaiIcon from "../plugins/views/editors/_shared/Loader/movai_red.svg";
+import movaiIcon from "../plugins/views/editors/_shared/Branding/movai-logo-white.png";
 import { HOMETAB_PROFILE } from "./Constants";
 import HomeTab from "../plugins/views/HomeTab/HomeTab";
 
@@ -47,7 +47,7 @@ export const getIconByScope = (scope, style) => {
   scope = scope || "Default";
   const color = getTabIconColor(scope);
   const homeTabIcon = (
-    <img src={movaiIcon} alt="MOV.AI Logo" style={{ maxWidth: 12, ...style }} />
+    <img src={movaiIcon} alt="MOV.AI Logo" style={{ maxWidth: 13, ...style }} />
   );
   const icon = {
     Callback: <CodeIcon style={{ color, ...style }} />,
@@ -65,16 +65,6 @@ export const getIconByScope = (scope, style) => {
 };
 
 /**
- * Document scopes
- */
-export const SCOPES = {
-  CALLBACK: "Callback",
-  CONFIGURATION: "Configuration",
-  NODE: "Node",
-  FLOW: "Flow"
-};
-
-/**
  * Simple Event to Stop Propagation
  * @param e: event to stop the propagation
  */
@@ -83,12 +73,47 @@ export const stopPropagation = e => {
 };
 
 /**
+ * Returns the document version from an URL
+ * @param {String} url
+ * @returns {String}
+ */
+export function getVersionFromUrl(url) {
+  if (!url) return "";
+  const splittedUrl = url.split("/");
+  return splittedUrl[3];
+}
+
+/**
  * Returns the document name from an URL
  * @param {String} url
  * @returns {String}
  */
 export function getNameFromURL(url) {
-  return url?.substring(url.lastIndexOf("/") + 1);
+  if (!url) return "";
+  const splittedUrl = url.split("/");
+  return splittedUrl.length === 1 ? url : splittedUrl[2];
+}
+
+/**
+ * Returns the document scope from an URL
+ * @param {String} url
+ * @returns {String}
+ */
+export function getScopeFromURL(url) {
+  if (!url) return "";
+  const splittedUrl = url.split("/");
+  return splittedUrl[1];
+}
+
+/**
+ * Returns the document workspace from an URL
+ * @param {String} url
+ * @returns {String}
+ */
+export function getWorkspaceFromUrl(url) {
+  if (!url) return "";
+  const splittedUrl = url.split("/");
+  return splittedUrl[0];
 }
 
 /**
@@ -102,6 +127,16 @@ export function validateDocumentName(name) {
   } else {
     return true;
   }
+}
+
+/**
+ * Build a document path from a doc
+ * @param {Document} doc
+ * @returns
+ */
+export function buildDocPath(doc) {
+  const { workspace, scope, name } = doc;
+  return `${workspace}/${scope}/${name}`;
 }
 
 const boolToPythonOptions = {
@@ -149,7 +184,7 @@ export function pythonToBool(value) {
 export const getHomeTab = () => {
   const viewPlugin = new HomeTab(HOMETAB_PROFILE);
 
-  return Promise.resolve({
+  return {
     ...HOMETAB_PROFILE,
     id: HOMETAB_PROFILE.name,
     name: HOMETAB_PROFILE.title,
@@ -157,5 +192,22 @@ export const getHomeTab = () => {
     scope: HOMETAB_PROFILE.name,
     extension: "",
     content: viewPlugin.render()
-  });
+  };
 };
+
+/**
+ * Trigger a simulated mouse click (react element)
+ * @param {*} element
+ */
+export function simulateMouseClick(element) {
+  ["mousedown", "click", "mouseup"].forEach(mouseEventType =>
+    element.dispatchEvent(
+      new MouseEvent(mouseEventType, {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+        buttons: 1
+      })
+    )
+  );
+}

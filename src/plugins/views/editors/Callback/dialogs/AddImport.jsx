@@ -1,18 +1,19 @@
 import React from "react";
-import Loader from "../../_shared/Loader/Loader";
-import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
-import Search from "../../_shared/Search/Search";
 import _debounce from "lodash/debounce";
 import { makeStyles } from "@material-ui/core/styles";
-import { searchImports } from "./utils";
-import { withTheme } from "../../../../../decorators/withTheme";
-import { DialogTitle } from "../../../../Dialog/components/AppDialog/AppDialog";
 import {
   Dialog,
   DialogContent,
   Button,
   DialogActions
 } from "@material-ui/core";
+import { PLUGINS } from "../../../../../utils/Constants";
+import { withTheme } from "../../../../../decorators/withTheme";
+import { DialogTitle } from "../../../../Dialog/components/AppDialog/AppDialog";
+import Loader from "../../_shared/Loader/Loader";
+import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
+import Search from "../../_shared/Search/Search";
+import { searchImports } from "./utils";
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -39,7 +40,11 @@ const AddImportDialog = props => {
 
   React.useEffect(() => {
     setLoading(true);
-    call("docManager", "getStore", scope).then(store => {
+    call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.GET_STORE,
+      scope
+    ).then(store => {
       store.helper.getAllLibraries().then(libs => {
         if (libs) {
           setPyLibs(libs);

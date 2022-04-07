@@ -1,28 +1,27 @@
-import React, { forwardRef, useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
-import { useTheme } from "@material-ui/core/styles";
-import Tooltip from "@material-ui/core/Tooltip";
 import withAlerts from "../../../decorators/withAlerts";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import Workspace from "../../../utils/Workspace";
 import { getNameFromURL } from "../../../utils/Utils";
-import { HOMETAB_PROFILE, PLUGINS } from "../../../utils/Constants";
-import ERROR_MESSAGES from "../../../utils/ErrorMessages";
-import movaiFullLogoWhite from "../editors/_shared/Branding/movai-full-logo-red-white.png";
-import movaiFullLogo from "../editors/_shared/Branding/movai-full-logo.png";
+import {
+  HOMETAB_PROFILE,
+  PLUGINS,
+  ALERT_SEVERITIES
+} from "../../../utils/Constants";
+import { ERROR_MESSAGES } from "../../../utils/Messages";
 import QuickAccessComponent from "./components/QuickAccess";
 import RecentDocumentsComponent from "./components/RecentDocuments";
 import ExamplesComponent from "./components/Examples";
 
 import { homeTabStyles } from "./styles";
 
-const HomeTab = forwardRef((props, ref) => {
-  const { call, on, off, alert, alertSeverities } = props;
+const HomeTab = props => {
+  const { call, on, off, alert } = props;
   const workspaceManager = useMemo(() => new Workspace(), []);
   const classes = homeTabStyles();
   const { t } = useTranslation();
-  const theme = useTheme();
 
   //========================================================================================
   /*                                                                                      *
@@ -31,7 +30,7 @@ const HomeTab = forwardRef((props, ref) => {
   //========================================================================================
 
   /**
-   * Open Document
+   * Open an existing Document
    * @param {{name: string, scope: string, id: string, isDeleted: bool}} doc : Document data
    */
   const openExistingDocument = useCallback(
@@ -43,13 +42,13 @@ const HomeTab = forwardRef((props, ref) => {
           message: t(ERROR_MESSAGES.FILE_DOESNT_EXIST, {
             FILE_URL: doc.id
           }),
-          severity: alertSeverities.WARNING
+          severity: ALERT_SEVERITIES.WARNING
         });
       } else {
-        call("tabs", "openEditor", doc);
+        call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, doc);
       }
     },
-    [alertSeverities, alert, call, t]
+    [alert, call, t]
   );
 
   //========================================================================================
@@ -59,16 +58,17 @@ const HomeTab = forwardRef((props, ref) => {
   //========================================================================================
 
   useEffect(() => {
-    const HOMETAB_ID_TOPIC = `${HOMETAB_PROFILE.name}-active`;
     call(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS);
-    on("tabs", HOMETAB_ID_TOPIC, () => {
-      call(
-        PLUGINS.RIGHT_DRAWER.NAME,
-        PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS
-      );
+    on(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE, data => {
+      if (data.id === HOMETAB_PROFILE.name) {
+        call(
+          PLUGINS.RIGHT_DRAWER.NAME,
+          PLUGINS.RIGHT_DRAWER.CALL.RESET_BOOKMARKS
+        );
+      }
     });
     return () => {
-      off("tabs", HOMETAB_ID_TOPIC);
+      off(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE);
     };
   }, [call, on, off]);
 
@@ -87,31 +87,16 @@ const HomeTab = forwardRef((props, ref) => {
             workspaceManager={workspaceManager}
             openRecentDocument={openExistingDocument}
             on={on}
+            off={off}
           />
         </div>
         <div className={classes.column}>
           <ExamplesComponent openExistingDocument={openExistingDocument} />
         </div>
       </div>
-      <div className={classes.footer}>
-        <Tooltip title={t("MOV.AI")}>
-          {/* <IconButton
-            href="https://mov.ai"
-            target="_blank"
-            rel="noreferrer"
-            className={classes.socialIconBadge}
-          > */}
-          <img
-            src={theme.label === "dark" ? movaiFullLogoWhite : movaiFullLogo}
-            alt="MOV.AI Logo"
-            className={classes.movaiIcon}
-          />
-          {/* </IconButton> */}
-        </Tooltip>
-      </div>
     </div>
   );
-});
+}
 
 export default withViewPlugin(withAlerts(HomeTab));
 

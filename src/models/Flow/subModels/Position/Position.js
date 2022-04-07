@@ -5,19 +5,19 @@ class Position extends Model {
   constructor() {
     // inject imported schema and forward constructor arguments
     super({ schema, ...arguments[0] });
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                   Model Properties                                   *
+     *                                                                                      */
+    //========================================================================================
+
+    this.x = 0;
+    this.y = 0;
+
+    // Define observable properties
+    this.observables = Object.values(Position.OBSERVABLE_KEYS);
   }
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                   Model Properties                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  x = 0;
-  y = 0;
-
-  // Define observable properties
-  observables = Object.values(Position.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *

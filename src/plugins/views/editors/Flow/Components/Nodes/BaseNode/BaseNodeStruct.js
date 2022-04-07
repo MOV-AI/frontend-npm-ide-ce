@@ -1,5 +1,5 @@
 import { convertVisualization } from "../Utils";
-import { maxMovingPixels } from "../../../Constants/constants";
+import { MAX_MOVING_PIXELS } from "../../../Constants/constants";
 
 export default class BaseNodeStruct {
   constructor(data) {
@@ -42,12 +42,12 @@ export default class BaseNodeStruct {
 
   get posX() {
     const x = this.data.Visualization[0];
-    return x <= 1 ? x / (1 / maxMovingPixels) : x;
+    return x <= 1 ? x / (1 / MAX_MOVING_PIXELS) : x;
   }
 
   get posY() {
     const y = this.data.Visualization[1];
-    return y < 1 ? y / (1 / maxMovingPixels) : y;
+    return y < 1 ? y / (1 / MAX_MOVING_PIXELS) : y;
   }
 
   get width() {
