@@ -9,10 +9,13 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { CircularProgress } from "@material-ui/core";
+import { withTheme } from "../../../../decorators/withTheme";
 
 import { appDialogStyles } from "./styles";
 
 const FormDialog = props => {
+  // Translation hook
+  const { t } = useTranslation();
   // Props
   const {
     size,
@@ -22,13 +25,13 @@ const FormDialog = props => {
     onSubmit,
     onValidation,
     onPostValidation,
-    submitText,
     placeholder,
-    inputLabel,
     multiline,
     loadingMessage,
     defaultValue,
-    maxLength
+    maxLength,
+    inputLabel = t("Name"),
+    submitText = t("Submit")
   } = props;
   // State hook
   const [open, setOpen] = useState(true);
@@ -40,8 +43,6 @@ const FormDialog = props => {
   });
   // Style hook
   const classes = appDialogStyles();
-  // Translation hook
-  const { t } = useTranslation();
   // Ref
   const inputRef = useRef();
 
@@ -221,11 +222,9 @@ FormDialog.propTypes = {
 
 FormDialog.defaultProps = {
   onValidation: () => ({ result: true, error: "" }),
-  inputLabel: "Name",
-  submitText: "Submit",
   defaultValue: "",
   multiline: false,
   maxLength: 40
 };
 
-export default FormDialog;
+export default withTheme(FormDialog);

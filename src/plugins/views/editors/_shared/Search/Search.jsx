@@ -48,7 +48,7 @@ const filter = (searchQuery, subject) => {
 
           if (typeof value === DATA_TYPES.BOOLEAN) return value;
 
-          return Boolean(value.length);
+          return Boolean(value.length !== 0);
         });
         return subject;
       }
