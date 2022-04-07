@@ -43,5 +43,6 @@
 
 - [FP-1291 - Clicking on a panel, will now transfer focus to that panel active tab](https://movai.atlassian.net/browse/FP-1291)
 - [FP-1310 - Allow a tab to be opened on a max box tab](https://movai.atlassian.net/browse/FP-1310)
+- [FP-1582 - Opening an already opened tab with dirty will just focus](https://movai.atlassian.net/browse/FP-1582)
 - [FP-1597 - Implement a stack of opened files to jump through when closing tabs](https://movai.atlassian.net/browse/FP-1597)
 - [FP-1604 - Minimize tabs before removing them to prevent errors](https://movai.atlassian.net/browse/FP-1604)
