@@ -9,6 +9,7 @@ import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import CloseIcon from "@material-ui/icons/Close";
 import { IconButton, Typography } from "@material-ui/core";
 import { DEFAULT_FUNCTION } from "../../../../utils/Utils";
+import { withTheme } from "../../../../decorators/withTheme";
 
 import { appDialogTitleStyles, appDialogStyles } from "./styles";
 
@@ -42,10 +43,16 @@ export const DialogTitle = props => {
  * @returns {ReactComponent} AppDialog component wrapper
  */
 const AppDialog = props => {
-  const { title, actions, onSubmit, onClose, submitText, closeOnBackdrop } =
-    props;
-  const [open, setOpen] = useState(true);
   const { t } = useTranslation();
+  const {
+    actions,
+    onSubmit,
+    onClose,
+    closeOnBackdrop,
+    title = t("Are you sure?"),
+    submitText = t("Submit")
+  } = props;
+  const [open, setOpen] = useState(true);
   const classes = appDialogStyles();
 
   /**
@@ -108,11 +115,9 @@ AppDialog.propTypes = {
 };
 
 AppDialog.defaultProps = {
-  title: "Are you sure?",
-  submitText: "Submit",
   onClose: () => DEFAULT_FUNCTION("onClose"),
   hasCloseButton: true,
   closeOnBackdrop: false
 };
 
-export default AppDialog;
+export default withTheme(AppDialog);

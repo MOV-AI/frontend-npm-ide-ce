@@ -445,7 +445,7 @@ const useLayout = (props, dockRef) => {
    * @returns {TabData} Tab data to be set in Layout
    */
   const _getTabData = useCallback(
-    async docData => {
+    docData => {
       return props
         .call(
           PLUGINS.DOC_MANAGER.NAME,
@@ -454,6 +454,8 @@ const useLayout = (props, dockRef) => {
         )
         .then(docFactory => {
           try {
+            if (!docFactory) return docData;
+
             const Plugin = docFactory.plugin;
             const viewPlugin = new Plugin(
               { name: docData.id },

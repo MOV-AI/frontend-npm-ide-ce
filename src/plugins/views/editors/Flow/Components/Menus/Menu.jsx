@@ -311,7 +311,7 @@ const Menu = ({
     return params.length ? (
       <Typography component="div" className={classes.parametersContainer}>
         <TableKeyValue
-          list={getParameters()}
+          list={params}
           allowDelete={editable}
           allowEdit={editable}
           handleParameterDeleteModal={handleParamDelete}
@@ -322,10 +322,10 @@ const Menu = ({
       </Typography>
     ) : (
       <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-        No Parameters
+        {t("No Parameters")}
       </Typography>
     );
-  }, [classes, editable, getParameters, handleParamDelete, handleParamEdit]);
+  }, [classes, editable, getParameters, handleParamDelete, handleParamEdit, t]);
 
   /**
    * Render groups
@@ -346,7 +346,7 @@ const Menu = ({
       ))
     ) : (
       <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-        No Groups
+        {t("No Groups")}
       </Typography>
     );
   }, [
@@ -355,7 +355,8 @@ const Menu = ({
     model,
     editable,
     editGroupName,
-    handleGroupVisibility
+    handleGroupVisibility,
+    t
   ]);
 
   return (
