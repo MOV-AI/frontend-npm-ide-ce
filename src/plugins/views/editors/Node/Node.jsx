@@ -17,18 +17,18 @@ import {
   SCOPES,
   ALERT_SEVERITIES
 } from "../../../../utils/Constants";
+import { ERROR_MESSAGES } from "../../../../utils/Messages";
 import ParameterEditorDialog from "../_shared/KeyValueTable/ParametersEditorDialog";
+import KeyValueTable from "../_shared/KeyValueTable/KeyValueTable";
 import useDataSubscriber from "../../../DocManager/useDataSubscriber";
-import Menu from "./Menu";
 import Description from "./components/Description/Description";
 import ExecutionParameters from "./components/ExecutionParameters/ExecutionParameters";
 import ParametersTable from "./components/ParametersTable/ParametersTable";
-import KeyValueTable from "./components/KeyValueTable/KeyValueTable";
 import IOConfig from "./components/IOConfig/IOConfig";
-import useKeyValueMethods from "./components/KeyValueTable/useKeyValueMethods";
+import useKeyValueMethods from "./components/hooks/useKeyValueMethods";
+import Menu from "./Menu";
 
 import { nodeStyles } from "./styles";
-import { ERROR_MESSAGES } from "../../../../utils/Messages";
 
 const Node = (props, ref) => {
   const { id, name, call, alert, instance, editable = true } = props;

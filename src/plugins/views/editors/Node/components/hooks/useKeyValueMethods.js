@@ -1,20 +1,16 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import _toString from "lodash/toString";
 import InfoLogo from "@material-ui/icons/Info";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
-import { useTheme } from "@material-ui/core/styles";
-import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
 import { DATA_TYPES } from "../../../../../../utils/Constants";
-import { HtmlTooltip } from "../_shared/HtmlTooltip";
+import { HtmlTooltip } from "../../../_shared/HtmlTooltip/HtmlTooltip";
 
 import { keyValueHookStyles } from "./styles";
 
 const useKeyValueMethods = () => {
   // Hooks
   const classes = keyValueHookStyles();
-  const theme = useTheme();
   const { t } = useTranslation();
 
   //========================================================================================
@@ -102,32 +98,7 @@ const useKeyValueMethods = () => {
     ];
   };
 
-  /**
-   * Render default value editor in Monaco code editor
-   * @param {string} value : Value
-   * @param {{disabled: boolean, onChange: function, isNew: boolean}} props
-   * @returns
-   */
-  const renderValueEditor = (value, props) => {
-    const { disabled, onChange, isNew } = props;
-    return (
-      <Typography component="div" className={classes.codeContainer}>
-        <MonacoCodeEditor
-          value={_toString(value)}
-          onLoad={editor => {
-            if (!isNew) editor.focus();
-          }}
-          language="python"
-          disableMinimap={true}
-          theme={theme.codeEditor.theme}
-          options={{ readOnly: disabled }}
-          onChange={newValue => onChange(newValue)}
-        />
-      </Typography>
-    );
-  };
-
-  return { getColumns, renderValueEditor };
+  return { getColumns };
 };
 
 export default useKeyValueMethods;

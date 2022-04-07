@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core/styles";
 
-export const parametersDialogStyles = makeStyles(theme => ({
+export const parametersDialogStyles = makeStyles(_ => ({
   marginTop: { marginTop: "15px" },
   valueOptions: {
     flexDirection: "row"
@@ -11,7 +11,7 @@ export const parametersDialogStyles = makeStyles(theme => ({
   }
 }));
 
-export const keyValueEditorDialogStyles = makeStyles(theme => ({
+export const keyValueEditorDialogStyles = makeStyles(_ => ({
   input: { fontSize: "13px" },
   label: {
     marginTop: "20px",

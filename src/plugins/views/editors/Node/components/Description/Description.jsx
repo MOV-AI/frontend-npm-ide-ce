@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
-import CollapsibleHeader from "../_shared/CollapsibleHeader";
+import CollapsibleHeader from "../../../_shared/CollapsibleHeader/CollapsibleHeader";
 
 import { descriptionStyles } from "./styles";
 

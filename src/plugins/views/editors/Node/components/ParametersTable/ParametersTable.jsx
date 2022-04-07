@@ -4,8 +4,8 @@ import _isEqual from "lodash/isEqual";
 import { useTranslation } from "react-i18next";
 import { DEFAULT_FUNCTION } from "../../../../../../utils/Utils";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
+import KeyValueTable from "../../../_shared/KeyValueTable/KeyValueTable";
 import useDataTypes from "../../../_shared/hooks/useDataTypes";
-import KeyValueTable from "../KeyValueTable/KeyValueTable";
 
 const ParametersTable = props => {
   // Props

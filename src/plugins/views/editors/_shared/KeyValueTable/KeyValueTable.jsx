@@ -5,7 +5,7 @@ import _isEqual from "lodash/isEqual";
 import AddBox from "@material-ui/icons/AddBox";
 import Edit from "@material-ui/icons/Edit";
 import CollapsibleHeader from "../CollapsibleHeader/CollapsibleHeader";
-import MaterialTable from "../_shared/MaterialTable/MaterialTable";
+import MaterialTable from "../MaterialTable/MaterialTable";
 
 const KeyValueTable = props => {
   // Props
