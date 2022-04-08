@@ -1,20 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import AppDialog from "../AppDialog/AppDialog";
 
-const useStyles = makeStyles(_ => ({
-  container: {
-    whiteSpace: "pre-wrap"
-  }
-}));
+import { alertDialogStyles } from "./styles";
 
 const AlertDialog = props => {
   // Props
   const { title, message, onClose } = props;
   // Hooks
-  const classes = useStyles();
+  const classes = alertDialogStyles();
 
   return (
     <AppDialog title={title} onClose={onClose}>

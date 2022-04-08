@@ -1,24 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { DEFAULT_FUNCTION } from "../../utils/Utils";
 import PluginManagerIDE from "../PluginManagerIDE/PluginManagerIDE";
 import IDEPlugin from "../IDEPlugin/IDEPlugin";
 
 const DEFAULT_PLUGIN = {
-  call: () => {
-    /* empty on purpose */
-  },
-  emit: () => {
-    /* empty on purpose */
-  },
-  on: () => {
-    /* empty on purpose */
-  },
-  off: () => {
-    /* empty on purpose */
-  },
-  onTopic: () => {
-    /* empty on purpose */
-  }
+  call: () => DEFAULT_FUNCTION("call"),
+  emit: () => DEFAULT_FUNCTION("emit"),
+  on: () => DEFAULT_FUNCTION("on"),
+  off: () => DEFAULT_FUNCTION("off"),
+  onTopic: () => DEFAULT_FUNCTION("onTopic")
 };
 
 export class HostReactPlugin extends IDEPlugin {

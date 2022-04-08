@@ -12,75 +12,33 @@ import {
   DOCK_POSITIONS,
   DOCK_MODES,
   PLUGINS
-} from "../../../utils/Constants";
+} from "../../../../utils/Constants";
 import {
   getIconByScope,
   getHomeTab,
   getNameFromURL,
   getScopeFromURL,
   buildDocPath
-} from "../../../utils/Utils";
-import PluginManagerIDE from "../../../engine/PluginManagerIDE/PluginManagerIDE";
-import Workspace from "../../../utils/Workspace";
+} from "../../../../utils/Utils";
+import PluginManagerIDE from "../../../../engine/PluginManagerIDE/PluginManagerIDE";
+import Workspace from "../../../../utils/Workspace";
+import useTabStack from "./useTabStack";
 
-const useLayout = (props, dockRef) => {
+const useTabLayout = (props, dockRef) => {
   const { emit, call, on, off } = props;
   const workspaceManager = useMemo(() => new Workspace(), []);
   const activeTabId = useRef(null);
   const tabsById = useRef(new Map());
-  const tabStack = useRef({});
   const firstLoad = useRef(true);
   const [layout, setLayout] = useState({ ...DEFAULT_LAYOUT });
+  const { addTabToStack, removeTabFromStack, getNextTabFromStack } =
+    useTabStack(workspaceManager);
 
   //========================================================================================
   /*                                                                                      *
    *                                    Private Methods                                   *
    *                                                                                      */
   //========================================================================================
-
-  /**
-   * Removes a tab from the stack for given dock
-   * @private function
-   * @param {String} dock : the dock to look for the tab, defaults to 'dockbox'
-   * @param {String} tabId : the tabId to remove from the stack
-   */
-  const removeTabFromStack = useCallback(
-    (tabId, dock = DOCK_POSITIONS.DOCK) => {
-      const thisStack = tabStack.current[dock] || [];
-      if (thisStack.includes(tabId)) {
-        thisStack.splice(thisStack.indexOf(tabId), 1);
-        workspaceManager.setTabStack(tabStack.current);
-      }
-    },
-    [workspaceManager]
-  );
-
-  /**
-   * Adds a tab to the stack of given dock
-   * @private function
-   * @param {String} dock : the dock to look for the tab, defaults to 'dockbox'
-   * @param {String} tabId : the tabId to add to the stack
-   */
-  const addTabToStack = useCallback(
-    (tabId, dock = DOCK_POSITIONS.DOCK) => {
-      const thisStack = tabStack.current[dock] || [];
-
-      removeTabFromStack(tabId, dock);
-
-      thisStack.push(tabId);
-      workspaceManager.setTabStack(tabStack.current);
-    },
-    [workspaceManager, removeTabFromStack]
-  );
-
-  /**
-   * Get next tab from stack
-   * @private function
-   */
-  const getNextTabFromStack = useCallback((dock = DOCK_POSITIONS.DOCK) => {
-    const thisStack = tabStack.current[dock] || [];
-    return thisStack[thisStack.length - 1];
-  }, []);
 
   /**
    * Helper function to find if a tab exists in the DockLayout
@@ -164,7 +122,7 @@ const useLayout = (props, dockRef) => {
    * Apply layout and save changes
    * @param {LayoutData} layout
    */
-  const _applyLayout = useCallback(
+  const applyLayout = useCallback(
     _layout => {
       layoutActiveIdIsValid(_layout);
       setLayout(_layout);
@@ -272,12 +230,12 @@ const useLayout = (props, dockRef) => {
           if (res.success) {
             const dock = getDockFromTabId(id);
             removeTabFromStack(id, dock);
-            if (newLayout) _applyLayout(newLayout);
+            if (newLayout) applyLayout(newLayout);
           }
         }
       );
     },
-    [call, _applyLayout, getDockFromTabId, removeTabFromStack]
+    [call, applyLayout, getDockFromTabId, removeTabFromStack]
   );
 
   /**
@@ -295,10 +253,10 @@ const useLayout = (props, dockRef) => {
       ).then(() => {
         const dock = getDockFromTabId(id);
         removeTabFromStack(id, dock);
-        if (newLayout) _applyLayout(newLayout);
+        if (newLayout) applyLayout(newLayout);
       });
     },
-    [call, _applyLayout, getDockFromTabId, removeTabFromStack]
+    [call, applyLayout, getDockFromTabId, removeTabFromStack]
   );
 
   /**
@@ -353,7 +311,7 @@ const useLayout = (props, dockRef) => {
         workspaceManager.setTabs(tabsById.current);
         const dock = getDockFromTabId(tabId);
         removeTabFromStack(tabId, dock);
-        _applyLayout(newLayout);
+        applyLayout(newLayout);
         // Reset bookmarks
         call(
           PLUGINS.RIGHT_DRAWER.NAME,
@@ -364,7 +322,7 @@ const useLayout = (props, dockRef) => {
     [
       call,
       workspaceManager,
-      _applyLayout,
+      applyLayout,
       _closeDirtyTab,
       getDockFromTabId,
       removeTabFromStack
@@ -378,7 +336,7 @@ const useLayout = (props, dockRef) => {
    */
   const _closeTab = useCallback(
     async tabId => {
-      const tabData = dockRef.current.find(tabId);
+      const tabData = findTab(tabId);
       if (!tabData) return;
       const currentLayout = dockRef.current.saveLayout();
       const locations = Object.values(DOCK_POSITIONS);
@@ -407,7 +365,7 @@ const useLayout = (props, dockRef) => {
         }
       }
     },
-    [dockRef, _getTabContainer, _onLayoutRemoveTab]
+    [dockRef, _getTabContainer, _onLayoutRemoveTab, findTab]
   );
 
   /**
@@ -645,7 +603,7 @@ const useLayout = (props, dockRef) => {
           _getFirstContainer(newLayout.dockbox).activeId;
       } else {
         // Update layout
-        _applyLayout(newLayout);
+        applyLayout(newLayout);
         const doc =
           tabId === HOMETAB_PROFILE.name
             ? {}
@@ -679,7 +637,7 @@ const useLayout = (props, dockRef) => {
       call,
       _getFirstContainer,
       _closeTab,
-      _applyLayout,
+      applyLayout,
       getDockFromTabId,
       addTabToStack,
       getNextTabFromStack
@@ -774,7 +732,6 @@ const useLayout = (props, dockRef) => {
    */
   useEffect(() => {
     const [lastLayout, lastTabs] = workspaceManager.getLayoutAndTabs();
-    tabStack.current = workspaceManager.getTabStack();
     const tabs = [];
 
     layoutActiveIdIsValid(lastLayout);
@@ -830,4 +787,4 @@ const useLayout = (props, dockRef) => {
   };
 };
 
-export default useLayout;
+export default useTabLayout;

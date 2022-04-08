@@ -6,7 +6,7 @@ import {
   withViewPlugin,
   usePluginMethods
 } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import useLayout from "./useLayout";
+import useTabLayout from "./hooks/useTabLayout";
 
 import "rc-dock/dist/rc-dock.css";
 import { tabsStyles } from "./styles";
@@ -24,7 +24,7 @@ const Tabs = (props, ref) => {
     getActiveTab,
     loadTab,
     updateTabId
-  } = useLayout(props, dockRef);
+  } = useTabLayout(props, dockRef);
 
   usePluginMethods(ref, {
     open,
