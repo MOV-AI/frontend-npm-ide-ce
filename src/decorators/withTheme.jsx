@@ -1,12 +1,10 @@
-import React, { forwardRef, useEffect, useState } from "react";
-import { ApplicationTheme } from "../themes";
+import React, { useEffect, useState } from "react";
 import { ThemeProvider } from "@material-ui/core/styles";
+import { getRefComponent } from "../utils/Utils";
+import { ApplicationTheme } from "../themes";
 
 export function withTheme(Component) {
-  const RefComponent =
-    typeof Component === "function"
-      ? forwardRef((props, ref) => Component(props, ref))
-      : Component;
+  const RefComponent = getRefComponent(Component);
 
   return function (props) {
     const [theme, setTheme] = useState("dark");

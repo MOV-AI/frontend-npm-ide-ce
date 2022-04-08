@@ -51,7 +51,6 @@ class Workspace {
    */
   getLayout() {
     const tabs = this.getStoredTabs();
-    console.log("tabs", tabs);
 
     if (!tabs.size) {
       return DEFAULT_LAYOUT;
@@ -98,7 +97,6 @@ class Workspace {
    */
   getStoredTabs() {
     const storedTabs = this.storage.get(this.TABS_KEY) ?? {};
-    console.log("storedTabs", storedTabs);
     return new Map(Object.entries(storedTabs));
   }
 

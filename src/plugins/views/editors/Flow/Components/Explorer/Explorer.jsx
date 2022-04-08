@@ -97,7 +97,7 @@ const Explorer = props => {
    * Handle Mouse Leave on Node
    * @param {NodeObject} node
    */
-  const handleMouseLeaveNode = useCallback(_ => {
+  const handleMouseLeaveNode = useCallback(_node => {
     if (shouldUpdatePreview.current) {
       setSelectedNode({});
     }
@@ -114,7 +114,7 @@ const Explorer = props => {
    * @param {DocManager} docManager
    */
   const loadDocs = useCallback(docManager => {
-    return setData(_ =>
+    return setData(_node =>
       [docManager.getStore("Node"), docManager.getStore("Flow")].map(
         (store, id) => {
           const { name, title } = store;

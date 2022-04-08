@@ -9,7 +9,7 @@ import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin
 import InfoIcon from "@material-ui/icons/Info";
 import Menu from "./Menu";
 
-const useStyles = makeStyles(_ => ({
+const useStyles = makeStyles(_theme => ({
   container: {
     display: "flex",
     flexDirection: "column",

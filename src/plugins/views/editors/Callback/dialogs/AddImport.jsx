@@ -15,7 +15,7 @@ import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
 import Search from "../../_shared/Search/Search";
 import { searchImports } from "./utils";
 
-const useStyles = makeStyles(_ => ({
+const useStyles = makeStyles(_theme => ({
   paper: {
     minWidth: "40%"
   }

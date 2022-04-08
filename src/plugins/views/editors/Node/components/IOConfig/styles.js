@@ -28,7 +28,7 @@ export const ioConfigStyles = makeStyles(theme => ({
   }
 }));
 
-export const IOPortStyles = makeStyles(_ => ({
+export const IOPortStyles = makeStyles(_theme => ({
   root: {
     padding: "0 12px",
     width: "calc(100% - 24px)"

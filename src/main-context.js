@@ -1,8 +1,8 @@
 import React from "react";
-import { DEFAULT_FUNCTION } from "./utils/Utils";
+import { defaultFunction } from "./utils/Utils";
 
 export const MainContext = React.createContext({
   selectedTheme: "dark",
-  handleToggleTheme: () => DEFAULT_FUNCTION("handleToggleTheme"),
-  handleLogOut: () => DEFAULT_FUNCTION("handleLogOut")
+  handleToggleTheme: () => defaultFunction("handleToggleTheme"),
+  handleLogOut: () => defaultFunction("handleLogOut")
 });

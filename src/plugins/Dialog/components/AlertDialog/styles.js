@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core/styles";
 
-export const alertBeforeActionStyles = makeStyles(_ => ({
+export const alertBeforeActionStyles = makeStyles(_theme => ({
   icon: {
     float: "left",
     marginRight: 20
@@ -10,7 +10,7 @@ export const alertBeforeActionStyles = makeStyles(_ => ({
   }
 }));
 
-export const alertDialogStyles = makeStyles(_ => ({
+export const alertDialogStyles = makeStyles(_theme => ({
   container: {
     whiteSpace: "pre-wrap"
   }

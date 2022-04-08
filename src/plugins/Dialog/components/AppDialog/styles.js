@@ -12,6 +12,6 @@ export const appDialogTitleStyles = makeStyles(theme => ({
     color: theme.palette.grey[500]
   }
 }));
-export const appDialogStyles = makeStyles(_ => ({
+export const appDialogStyles = makeStyles(_theme => ({
   dialogContent: { minWidth: 450 }
 }));

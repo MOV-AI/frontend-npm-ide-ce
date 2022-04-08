@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import { Subject } from "rxjs";
-import { DEFAULT_FUNCTION } from "../../../../../../utils/Utils";
+import { defaultFunction } from "../../../../../../utils/Utils";
 import Factory from "../../Components/Nodes/Factory";
 import {
   FLOW_VIEW_MODE,
@@ -257,7 +257,7 @@ class Canvas {
       .attr("height", this.maxMovingPixels)
       .attr("stroke", "black")
       .style("pointer-events", "all")
-      .on("click", _ => DEFAULT_FUNCTION());
+      .on("click", _ => defaultFunction());
     return this;
   };
 
@@ -272,7 +272,7 @@ class Canvas {
       .attr("height", this.maxMovingPixels)
       .attr("stroke", "black")
       .style("pointer-events", "all")
-      .on("click", _ => DEFAULT_FUNCTION());
+      .on("click", _ => defaultFunction());
 
     return this;
   };

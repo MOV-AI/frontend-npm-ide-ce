@@ -15,13 +15,13 @@ import {
 } from "../../../../utils/Constants";
 import {
   getIconByScope,
-  getHomeTab,
   getNameFromURL,
   getScopeFromURL,
   buildDocPath
 } from "../../../../utils/Utils";
 import PluginManagerIDE from "../../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Workspace from "../../../../utils/Workspace";
+import HomeTab from "../../HomeTab/HomeTab";
 import useTabStack from "./useTabStack";
 
 const useTabLayout = (props, dockRef) => {
@@ -39,6 +39,25 @@ const useTabLayout = (props, dockRef) => {
    *                                    Private Methods                                   *
    *                                                                                      */
   //========================================================================================
+
+  /**
+   * Gets the HomeTab Plugin
+   * @private function
+   * @returns {Promise} the HomeTab
+   */
+  const getHomeTab = () => {
+    const viewPlugin = new HomeTab(HOMETAB_PROFILE);
+
+    return {
+      ...HOMETAB_PROFILE,
+      id: HOMETAB_PROFILE.name,
+      name: HOMETAB_PROFILE.title,
+      tabTitle: HOMETAB_PROFILE.title,
+      scope: HOMETAB_PROFILE.name,
+      extension: "",
+      content: viewPlugin.render()
+    };
+  };
 
   /**
    * Helper function to find if a tab exists in the DockLayout

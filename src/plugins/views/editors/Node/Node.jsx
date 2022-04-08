@@ -448,7 +448,7 @@ Node.propTypes = {
   name: PropTypes.string.isRequired,
   call: PropTypes.func.isRequired,
   data: PropTypes.object,
-  dainstanceta: PropTypes.object,
+  instance: PropTypes.object,
   editable: PropTypes.bool
 };
 

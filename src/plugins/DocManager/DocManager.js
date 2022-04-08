@@ -385,7 +385,7 @@ class DocManager extends IDEPlugin {
    *  Remove subscribers
    * @param {Event} event
    */
-  onUnload = _ => {
+  onUnload = _event => {
     this.getStores().forEach(store => {
       const dirtyDocs = store.getDirties();
 

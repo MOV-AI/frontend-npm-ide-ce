@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { DEFAULT_FUNCTION } from "../../../../../../utils/Utils";
+import { defaultFunction } from "../../../../../../utils/Utils";
 import { isLinkeable } from "../Nodes/BaseNode/PortValidator";
 import { generatePathPoints } from "./generatePathPoints";
 
@@ -89,7 +89,7 @@ export default class BaseLink extends BaseLinkStruct {
     super(canvas, src, trg, data);
     this.object = null;
     this.onLinkErrorMouseOver =
-      onLinkErrorMouseOver || (() => DEFAULT_FUNCTION("onLinkErrorMouseOver"));
+      onLinkErrorMouseOver || (() => defaultFunction("onLinkErrorMouseOver"));
 
     this.initialize();
   }

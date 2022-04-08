@@ -1,6 +1,5 @@
 import React, { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { makeStyles } from "@material-ui/core/styles";
 import {
   FormControl,
   NativeSelect,
@@ -9,20 +8,12 @@ import {
 } from "@material-ui/core";
 import useSelectOptions from "./useSelectOptions";
 
-const useStyles = makeStyles(theme => ({
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 120
-  },
-  control: {
-    fontSize: "0.875rem"
-  }
-}));
+import { configColumnsStyles } from "./styles";
 
 const useIOConfigColumns = data => {
   const { autoFocus, scopePorts, scopeSystemPortsData } = data;
   // Hooks
-  const classes = useStyles();
+  const classes = configColumnsStyles();
   const { t } = useTranslation();
   const { getGroupOptions, getPackageOptions, getMessageOptions } =
     useSelectOptions({ scopeSystemPortsData, scopePorts });
@@ -119,14 +110,12 @@ const useIOConfigColumns = data => {
         const packageOptions = getPackageOptions(newData);
         // If only one package
         if (packageOptions.length === 1) {
+          newData.message = "";
           newData.msgPackage = packageOptions[0].value;
           const messageOptions = getMessageOptions(newData);
           // If only one message
-          if (messageOptions.length === 1) {
+          if (messageOptions.length === 1)
             newData.message = messageOptions[0].value;
-          } else {
-            newData.message = "";
-          }
         } else {
           newData.msgPackage = "";
           newData.message = "";
@@ -137,7 +126,7 @@ const useIOConfigColumns = data => {
       // When you click edit, second column should be a selector with the Transport/Protocol
       const options = getGroupOptions(scopePorts);
       return (
-        <div style={{ width: "100%" }}>
+        <div className={classes.formHolder}>
           <FormControl className={classes.formControl}>
             <NativeSelect
               className={classes.control}
@@ -197,7 +186,7 @@ const useIOConfigColumns = data => {
       // When you click edit, third column should be a selector with the Packages
       const options = getPackageOptions(props.rowData);
       return (
-        <div style={{ width: "100%" }}>
+        <div className={classes.formHolder}>
           <FormControl className={classes.formControl}>
             <NativeSelect
               className={classes.control}
@@ -233,7 +222,7 @@ const useIOConfigColumns = data => {
       // When you click edit, fourth column should be a selector with the Message
       const options = getMessageOptions(props.rowData);
       return (
-        <div style={{ width: "100%" }}>
+        <div className={classes.formHolder}>
           <FormControl className={classes.formControl}>
             <NativeSelect
               className={classes.control}
@@ -247,7 +236,7 @@ const useIOConfigColumns = data => {
         </div>
       );
     },
-    [classes.control, classes.formControl, getMessageOptions]
+    [classes, getMessageOptions]
   );
 
   //========================================================================================

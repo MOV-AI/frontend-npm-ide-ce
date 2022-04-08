@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core/styles";
 
-export const explorerStyles = makeStyles(_ => ({
+export const explorerStyles = makeStyles(_theme => ({
   typography: {
     overflowY: "auto",
     overflowX: "hidden",
