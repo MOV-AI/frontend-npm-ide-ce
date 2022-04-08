@@ -3,7 +3,7 @@ import ReactResizeDetector from "react-resize-detector";
 import PropTypes from "prop-types";
 import { Rest } from "@mov-ai/mov-fe-lib-core";
 import { Backdrop, CircularProgress } from "@material-ui/core";
-import { randomId, DEFAULT_FUNCTION } from "../../../../../utils/Utils";
+import { randomId, defaultFunction } from "../../../../../utils/Utils";
 import MainInterface from "../Components/interface/MainInterface";
 import GraphTreeView from "../Core/Graph/GraphTreeView";
 import Warnings from "../Components/Warnings/Warnings";
@@ -235,9 +235,9 @@ Monitoring.defaultProps = {
   type: "flow",
   robotSelected: "Default",
   nodeContextMenu: {},
-  onNodeSelected: () => DEFAULT_FUNCTION("onNodeSelected"),
-  onDblClick: () => DEFAULT_FUNCTION("onDblClick"),
-  updateRMainMenu: () => DEFAULT_FUNCTION("updateRMainMenu"),
+  onNodeSelected: () => defaultFunction("onNodeSelected"),
+  onDblClick: () => defaultFunction("onDblClick"),
+  updateRMainMenu: () => defaultFunction("updateRMainMenu"),
   masterComponent: { alert: window.alert, ALERTS: { error: 1 } },
   model: "Flow",
   readOnly: false,

@@ -1,11 +1,11 @@
 import React, {
   cloneElement,
-  forwardRef,
   Children,
   useEffect,
   useState,
   useRef
 } from "react";
+import { getRefComponent } from "../../utils/Utils";
 import { PLUGINS } from "../../utils/Constants";
 
 const DataHandler = props => {
@@ -45,10 +45,7 @@ const DataHandler = props => {
 };
 
 const withDataHandler = Component => {
-  const RefComponent =
-    typeof Component === "function"
-      ? forwardRef((props, ref) => Component(props, ref))
-      : Component;
+  const RefComponent = getRefComponent(Component);
 
   return (props, ref) => {
     return (

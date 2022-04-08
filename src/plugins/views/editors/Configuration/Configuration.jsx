@@ -7,7 +7,7 @@ import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { useTheme } from "@material-ui/core/styles";
 import InfoIcon from "@material-ui/icons/Info";
 import Model from "../../../../models/Configuration/Configuration";
-import { DEFAULT_FUNCTION } from "../../../../utils/Utils";
+import { defaultFunction } from "../../../../utils/Utils";
 import { PLUGINS } from "../../../../utils/Constants";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
@@ -22,8 +22,8 @@ const Configuration = (props, ref) => {
     name,
     call,
     instance,
-    activateEditor = () => DEFAULT_FUNCTION("activateEditor"),
-    saveDocument = () => DEFAULT_FUNCTION("saveDocument"),
+    activateEditor = () => defaultFunction("activateEditor"),
+    saveDocument = () => defaultFunction("saveDocument"),
     editable = true
   } = props;
   // Other Hooks

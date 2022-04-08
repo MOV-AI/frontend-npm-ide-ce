@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core/styles";
 
-export const appDialogStyles = makeStyles(_ => ({
+export const appDialogStyles = makeStyles(_theme => ({
   loadingContainer: {
     height: "100px",
     width: "100%",

@@ -138,13 +138,15 @@ const RecentDocuments = props => {
       <div className={`${classes.columnTitle} ${classes.flexTitle}`}>
         <span>{t("Recent")}</span>
         <Tooltip title={t("Remove all")}>
-          <IconButton
-            onClick={handleRemoveRecentDocuments}
-            className={classes.clearIcon}
-            disabled={recentDocs.length === 0}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
+          <span>
+            <IconButton
+              onClick={handleRemoveRecentDocuments}
+              className={classes.clearIcon}
+              disabled={recentDocs.length === 0}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </span>
         </Tooltip>
       </div>
       <Divider />

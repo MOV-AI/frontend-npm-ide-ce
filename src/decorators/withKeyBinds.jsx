@@ -1,5 +1,6 @@
-import React, { forwardRef, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import hotkeys from "hotkeys-js";
+import { getRefComponent } from "../utils/Utils";
 import { KEYBINDINGS } from "../utils/Keybindings";
 
 /**
@@ -20,10 +21,7 @@ hotkeys(KEYBINDINGS.SAVE, event => {
  * @returns
  */
 const withKeyBinds = Component => {
-  const RefComponent =
-    typeof Component === "function"
-      ? forwardRef((props, ref) => Component(props, ref))
-      : Component;
+  const RefComponent = getRefComponent(Component);
 
   return (props, ref) => {
     // Props

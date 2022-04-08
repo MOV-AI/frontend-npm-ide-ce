@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core/styles";
 
-export const buttonStyles = makeStyles(_ => ({
+export const buttonStyles = makeStyles(_theme => ({
   buttonPill: {
     borderRadius: "99px"
   }

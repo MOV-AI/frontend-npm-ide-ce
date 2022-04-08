@@ -34,7 +34,7 @@ import { FLOW_VIEW_MODE } from "./Constants/constants";
 
 import "./Resources/css/Flow.css";
 
-const useStyles = makeStyles(_ => ({
+const useStyles = makeStyles(_theme => ({
   root: {
     width: "100%",
     height: "100%",

@@ -24,3 +24,17 @@ export const bookmarkStyles = (side, oppositeSide) =>
       color: "white"
     }
   }));
+
+export const loaderStyles = makeStyles(_theme => ({
+  root: {
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+    "& > div[class^='container-']": {
+      height: "100%"
+    },
+    "& > div.container-Node": {
+      overflow: "auto"
+    }
+  }
+}));

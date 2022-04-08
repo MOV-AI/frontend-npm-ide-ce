@@ -92,11 +92,11 @@ const FormDialog = props => {
 
   /**
    * Handle dialog close
-   * @param {Event} _ : Close Event
+   * @param {Event} closeEvent : Close Event
    * @param {String} reason : close reason
    * @returns
    */
-  const handleClose = (_, reason) => {
+  const handleClose = (_closeEvent, reason) => {
     if (reason === "backdropClick") return;
     setOpen(false);
     if (onClose) onClose();

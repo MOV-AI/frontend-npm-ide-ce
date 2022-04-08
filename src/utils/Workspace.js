@@ -46,11 +46,25 @@ class Workspace {
   }
 
   /**
+   * Gets layout, if there are no tabs will return the DEFAULT_LAYOUT
+   * @returns {Object} layout
+   */
+  getLayout() {
+    const tabs = this.getStoredTabs();
+
+    if (!tabs.size) {
+      return DEFAULT_LAYOUT;
+    }
+
+    return this.storage.get(this.LAYOUT_KEY);
+  }
+
+  /**
    * Gets layout and tabs for the Layout
    * @returns {Array} with the layout and tabs
    */
   getLayoutAndTabs() {
-    const tabs = this.getTabs();
+    const tabs = this.getStoredTabs();
 
     if (!tabs.size) {
       return [DEFAULT_LAYOUT, DEFAULT_TABS];
@@ -70,10 +84,18 @@ class Workspace {
   }
 
   /**
-   * Get information about current open tab from local storage
+   * Get information about current tabs
    * @returns {Map<TabData>}
    */
   getTabs() {
+    return this.tabs;
+  }
+
+  /**
+   * Get information about current open tab from local storage
+   * @returns {Map<TabData>}
+   */
+  getStoredTabs() {
     const storedTabs = this.storage.get(this.TABS_KEY) ?? {};
     return new Map(Object.entries(storedTabs));
   }

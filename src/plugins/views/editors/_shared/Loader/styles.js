@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core/styles";
 
-export const loaderStyles = makeStyles(_ => ({
+export const loaderStyles = makeStyles(_theme => ({
   root: {
     display: "flex",
     flexDirection: "column",

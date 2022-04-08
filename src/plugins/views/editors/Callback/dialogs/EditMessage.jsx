@@ -16,7 +16,7 @@ import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
 import Search from "../../_shared/Search/Search";
 import { searchMessages } from "./utils";
 
-const useStyles = makeStyles(_ => ({
+const useStyles = makeStyles(_theme => ({
   treeRoot: {
     overflowY: "auto",
     overflowX: "hidden",

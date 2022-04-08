@@ -1,24 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { defaultFunction, getRefComponent } from "../../utils/Utils";
 import PluginManagerIDE from "../PluginManagerIDE/PluginManagerIDE";
 import IDEPlugin from "../IDEPlugin/IDEPlugin";
 
 const DEFAULT_PLUGIN = {
-  call: () => {
-    /* empty on purpose */
-  },
-  emit: () => {
-    /* empty on purpose */
-  },
-  on: () => {
-    /* empty on purpose */
-  },
-  off: () => {
-    /* empty on purpose */
-  },
-  onTopic: () => {
-    /* empty on purpose */
-  }
+  call: () => defaultFunction("call"),
+  emit: () => defaultFunction("emit"),
+  on: () => defaultFunction("on"),
+  off: () => defaultFunction("off"),
+  onTopic: () => defaultFunction("onTopic")
 };
 
 export class HostReactPlugin extends IDEPlugin {
@@ -64,9 +55,7 @@ export class HostReactPlugin extends IDEPlugin {
 export function withHostReactPlugin(ReactComponent, methods = []) {
   const InnerHost = props => {
     const ref = React.useRef();
-    const RefComponent = React.forwardRef((_props, _ref) =>
-      ReactComponent(_props, _ref)
-    );
+    const RefComponent = getRefComponent(ReactComponent);
     const { viewPlugins, plugin } = useHostReactPlugin(
       {
         name: props.hostName,

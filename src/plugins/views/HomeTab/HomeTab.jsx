@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
-import withAlerts from "../../../decorators/withAlerts";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import Workspace from "../../../utils/Workspace";
 import { getNameFromURL } from "../../../utils/Utils";
@@ -14,6 +13,7 @@ import { ERROR_MESSAGES } from "../../../utils/Messages";
 import QuickAccessComponent from "./components/QuickAccess";
 import RecentDocumentsComponent from "./components/RecentDocuments";
 import ExamplesComponent from "./components/Examples";
+import withAlerts from "../../../decorators/withAlerts";
 
 import { homeTabStyles } from "./styles";
 
@@ -96,7 +96,7 @@ const HomeTab = props => {
       </div>
     </div>
   );
-}
+};
 
 export default withViewPlugin(withAlerts(HomeTab));
 

@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { ListItem, ListItemText, Typography } from "@material-ui/core";
-import { DEFAULT_FUNCTION } from "../../../../../../../utils/Utils";
+import { defaultFunction } from "../../../../../../../utils/Utils";
 import NodeLink from "./NodeLink";
 
 import { menuDetailsStyles } from "../styles";
@@ -56,7 +56,7 @@ MenuDetails.defaultProps = {
   model: "-",
   type: "-",
   label: "Name:",
-  openDoc: () => DEFAULT_FUNCTION("openDoc")
+  openDoc: () => defaultFunction("openDoc")
 };
 
 export default MenuDetails;

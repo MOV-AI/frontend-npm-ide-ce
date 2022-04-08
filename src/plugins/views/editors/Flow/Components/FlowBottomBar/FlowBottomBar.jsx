@@ -4,7 +4,7 @@ import WarningIcon from "@material-ui/icons/Warning";
 import { makeStyles } from "@material-ui/styles";
 import { Typography, Tooltip } from "@material-ui/core";
 import { RobotManager, Document } from "@mov-ai/mov-fe-lib-core";
-import { DEFAULT_FUNCTION } from "../../../../../../utils/Utils";
+import { defaultFunction } from "../../../../../../utils/Utils";
 import styles from "./styles";
 
 const useStyles = makeStyles(styles);
@@ -148,7 +148,7 @@ FlowBottomBar.propTypes = {
 };
 
 FlowBottomBar.defaultProps = {
-  openFlow: () => DEFAULT_FUNCTION("openFlow"),
+  openFlow: () => defaultFunction("openFlow"),
   robotSelected: "",
   runningFlow: ""
 };

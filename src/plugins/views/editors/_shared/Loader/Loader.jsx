@@ -4,7 +4,7 @@ import loader from "../Branding/movai-logo-transparent.png";
 
 import { loaderStyles } from "./styles";
 
-const Loader = _ => {
+const Loader = _props => {
   // Style hook
   const classes = loaderStyles();
   // Render

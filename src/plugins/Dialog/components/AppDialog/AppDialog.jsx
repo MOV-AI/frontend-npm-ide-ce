@@ -8,7 +8,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import CloseIcon from "@material-ui/icons/Close";
 import { IconButton, Typography } from "@material-ui/core";
-import { DEFAULT_FUNCTION } from "../../../../utils/Utils";
+import { defaultFunction } from "../../../../utils/Utils";
 import { withTheme } from "../../../../decorators/withTheme";
 
 import { appDialogTitleStyles, appDialogStyles } from "./styles";
@@ -115,7 +115,7 @@ AppDialog.propTypes = {
 };
 
 AppDialog.defaultProps = {
-  onClose: () => DEFAULT_FUNCTION("onClose"),
+  onClose: () => defaultFunction("onClose"),
   hasCloseButton: true,
   closeOnBackdrop: false
 };

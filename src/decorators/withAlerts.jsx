@@ -1,4 +1,5 @@
-import React, { forwardRef } from "react";
+import React from "react";
+import { getRefComponent } from "../utils/Utils";
 import { PLUGINS } from "../utils/Constants";
 
 /**
@@ -7,10 +8,7 @@ import { PLUGINS } from "../utils/Constants";
  * @returns
  */
 const withAlerts = Component => {
-  const RefComponent =
-    typeof Component === "function"
-      ? forwardRef((props, ref) => Component(props, ref))
-      : Component;
+  const RefComponent = getRefComponent(Component);
 
   return (props, ref) => {
     // Props

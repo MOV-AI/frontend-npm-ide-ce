@@ -15,7 +15,7 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import { Tooltip, Typography } from "@material-ui/core";
-import { stopPropagation, DEFAULT_FUNCTION } from "../../../../../utils/Utils";
+import { stopPropagation, defaultFunction } from "../../../../../utils/Utils";
 import ListItemsTreeWithSearch from "../ListItemTree/ListItemsTreeWithSearch";
 
 import "react-virtualized/styles.css";
@@ -121,7 +121,7 @@ class VirtualizedTree extends Component {
               nodes={this.searchFilter(nodes, this.state.searchValue)}
               onChange={this.props.handleChange}
             >
-              {({ style, node, ..._ }) => {
+              {({ style, node, ..._rest }) => {
                 // Adjust tree indentation
                 style.paddingLeft = style.marginLeft / 1.5;
                 style.marginLeft = 0;
@@ -269,14 +269,14 @@ VirtualizedTree.propTypes = {
 VirtualizedTree.defaultProps = {
   data: [],
   showIcons: false,
-  onClickNode: () => DEFAULT_FUNCTION("onClickNode"),
-  onMouseEnter: () => DEFAULT_FUNCTION("onMouseEnter"),
-  onMouseLeave: () => DEFAULT_FUNCTION("onMouseLeave"),
-  onDoubleClickNode: () => DEFAULT_FUNCTION("onDoubleClickNode"),
-  handleChange: () => DEFAULT_FUNCTION("handleChange"),
-  handleCopyClick: () => DEFAULT_FUNCTION("handleCopyClick"),
-  handleDeleteClick: () => DEFAULT_FUNCTION("handleDeleteClick"),
-  handleCompareClick: () => DEFAULT_FUNCTION("handleCompareClick"),
+  onClickNode: () => defaultFunction("onClickNode"),
+  onMouseEnter: () => defaultFunction("onMouseEnter"),
+  onMouseLeave: () => defaultFunction("onMouseLeave"),
+  onDoubleClickNode: () => defaultFunction("onDoubleClickNode"),
+  handleChange: () => defaultFunction("handleChange"),
+  handleCopyClick: () => defaultFunction("handleCopyClick"),
+  handleDeleteClick: () => defaultFunction("handleDeleteClick"),
+  handleCompareClick: () => defaultFunction("handleCompareClick"),
   height: 700
 };
 

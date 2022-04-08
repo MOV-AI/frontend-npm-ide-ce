@@ -1,5 +1,6 @@
-import React, { forwardRef, useCallback, useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import { PLUGINS } from "../utils/Constants";
+import { getRefComponent } from "../utils/Utils";
 
 /**
  * Handle actions to update right menu of each editor
@@ -7,10 +8,7 @@ import { PLUGINS } from "../utils/Constants";
  * @returns {ReactComponent} React component that receives props to handle menu actions
  */
 const withMenuHandler = Component => {
-  const RefComponent =
-    typeof Component === "function"
-      ? forwardRef((props, ref) => Component(props, ref))
-      : Component;
+  const RefComponent = getRefComponent(Component);
 
   return (props, ref) => {
     const { call } = props;

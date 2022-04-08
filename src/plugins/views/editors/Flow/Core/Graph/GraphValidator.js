@@ -8,7 +8,7 @@
 
 import i18n from "../../../../../../i18n/i18n";
 import { ROS_VALID_NAMES } from "../../../../../../utils/Constants";
-import { DEFAULT_FUNCTION } from "../../../../../../utils/Utils";
+import { defaultFunction } from "../../../../../../utils/Utils";
 import { MisMatchMessageLink } from "../../Components/Links/Errors";
 import { isLinkeable } from "../../Components/Nodes/BaseNode/PortValidator";
 
@@ -225,7 +225,7 @@ export default class GraphValidator {
       ? new MisMatchMessageLink(
           link,
           { source: sourcePortPos, target: targetPortPos },
-          () => DEFAULT_FUNCTION("")
+          () => defaultFunction("")
         )
       : null;
 

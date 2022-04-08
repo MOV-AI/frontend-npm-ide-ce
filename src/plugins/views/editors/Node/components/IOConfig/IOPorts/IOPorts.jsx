@@ -4,9 +4,10 @@ import AccordionDetails from "@material-ui/core/AccordionDetails";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Divider from "@material-ui/core/Divider";
-import { IOPortStyles } from "./styles";
 import Callback from "./components/Callback";
 import Parameters from "./components/Parameters";
+
+import { IOPortStyles } from "../styles";
 
 const IOPorts = props => {
   // Props

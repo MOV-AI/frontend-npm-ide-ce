@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { defaultFunction } from "../../../../../../../../utils/Utils";
 import { Expanded, Collapsed } from "./PortIcons";
 
 class CollapsableItem {
@@ -6,9 +7,7 @@ class CollapsableItem {
     text,
     isExpanded = true,
     parent = null,
-    onToggleCollapsePorts = () => {
-      /* empty on purpose */
-    }
+    onToggleCollapsePorts = () => defaultFunction("onToggleCollapsePorts")
   }) {
     this.text = text;
     this.parent = parent;
