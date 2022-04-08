@@ -1,12 +1,12 @@
 import React, { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import FolderOpenIcon from "@material-ui/icons/FolderOpen";
 import Grid from "@material-ui/core/Grid";
 import Circle from "@material-ui/icons/FiberManualRecord";
 import { IconButton, Tooltip, Typography } from "@material-ui/core";
-import { callbackStyles } from "./styles";
-import { useTranslation } from "../../../../../_shared/mocks";
 import { Edit, AddBox } from "@material-ui/icons";
 import { SCOPES } from "../../../../../../../../utils/Constants";
+import { callbackStyles } from "./styles";
 
 const Callback = props => {
   // Props

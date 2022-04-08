@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { Typography } from "@material-ui/core";
 import Search, { filter } from "../../../../_shared/Search/Search";
@@ -12,7 +12,7 @@ import { tableKeyValueStyles } from "../styles";
  */
 const TableKeyValue = props => {
   const { list, allowSearch } = props;
-  const [searchValue, setSearchValue] = React.useState("");
+  const [searchValue, setSearchValue] = useState("");
   const classes = tableKeyValueStyles();
 
   return (

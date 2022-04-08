@@ -1,4 +1,6 @@
-const styles = theme => ({
+import { makeStyles } from "@material-ui/core/styles";
+
+export const baseFlowStyles = makeStyles(theme => ({
   backdrop: {
     zIndex: theme.zIndex.drawer + 1,
     color: theme.backdrop.color,
@@ -22,6 +24,4 @@ const styles = theme => ({
   flowEditor: {
     interfaceColor: theme.palette.background.primary
   }
-});
-
-export default styles;
+}));

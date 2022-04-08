@@ -1,6 +1,7 @@
 import React from "react";
 import IDEPlugin from "../IDEPlugin/IDEPlugin";
 import PluginManagerIDE from "../PluginManagerIDE/PluginManagerIDE";
+import { getRefComponent } from "../../utils/Utils";
 
 export class ViewReactPlugin extends IDEPlugin {
   /**
@@ -62,9 +63,7 @@ export class ViewPlugin extends ViewReactPlugin {
  * @returns {ViewReactPlugin}
  */
 export function withViewPlugin(ReactComponent, methods = []) {
-  const RefComponent = React.forwardRef((props, ref) =>
-    ReactComponent(props, ref)
-  );
+  const RefComponent = getRefComponent(ReactComponent);
   return class extends ViewPlugin {
     constructor(profile, props = {}) {
       super(profile, props, methods);

@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import AccountTreeIcon from "@material-ui/icons/AccountTree";
 import BuildIcon from "@material-ui/icons/Build";
 import CodeIcon from "@material-ui/icons/Code";
@@ -5,8 +6,26 @@ import DescriptionIcon from "@material-ui/icons/Description";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import { Utils } from "@mov-ai/mov-fe-lib-core";
 import movaiIcon from "../plugins/views/editors/_shared/Branding/movai-logo-white.png";
-import { HOMETAB_PROFILE } from "./Constants";
-import HomeTab from "../plugins/views/HomeTab/HomeTab";
+
+/**
+ * Export a non implemented empty function
+ * @param {String} name : function name
+ * @returns console.warn call with the function name
+ */
+export const defaultFunction = name => console.warn(`${name} not implemented`);
+
+/**
+ * Checks if it's a React Component or Functional Component to return it's ref
+ * @param {*} Component
+ * @returns {Component} RefComponent
+ */
+export const getRefComponent = Component => {
+  let RefComponent = Component;
+  if (typeof Component === "function")
+    RefComponent = forwardRef((props, ref) => Component(props, ref));
+
+  return RefComponent;
+};
 
 /**
  * Generate random ID
@@ -175,25 +194,6 @@ export function boolToPython(value) {
 export function pythonToBool(value) {
   return PythonToBoolOptions[value];
 }
-
-/**
- * Gets the HomeTab Plugin
- * @private
- * @returns {Promise} the HomeTab
- */
-export const getHomeTab = () => {
-  const viewPlugin = new HomeTab(HOMETAB_PROFILE);
-
-  return {
-    ...HOMETAB_PROFILE,
-    id: HOMETAB_PROFILE.name,
-    name: HOMETAB_PROFILE.title,
-    tabTitle: HOMETAB_PROFILE.title,
-    scope: HOMETAB_PROFILE.name,
-    extension: "",
-    content: viewPlugin.render()
-  };
-};
 
 /**
  * Trigger a simulated mouse click (react element)

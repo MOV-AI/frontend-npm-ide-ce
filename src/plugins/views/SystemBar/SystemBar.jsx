@@ -51,7 +51,7 @@ const SystemBar = props => {
    */
   const handleClickMenu = useCallback(
     evt => {
-      setMenuOpen(prevState => {
+      setMenuOpen(_prevState => {
         let newState = false;
         let newMenuId = null;
         let newAnchorEl = null;

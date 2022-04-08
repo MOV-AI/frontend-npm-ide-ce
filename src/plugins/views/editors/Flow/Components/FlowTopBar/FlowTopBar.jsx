@@ -1,9 +1,10 @@
 import React, {
-  useState,
+  forwardRef,
   useCallback,
-  useRef,
+  useEffect,
+  useState,
   useMemo,
-  useEffect
+  useRef
 } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
@@ -24,7 +25,7 @@ import { RobotManager } from "@mov-ai/mov-fe-lib-core";
 import Workspace from "../../../../../../utils/Workspace";
 import { PLUGINS, ALERT_SEVERITIES } from "../../../../../../utils/Constants";
 import { ERROR_MESSAGES } from "../../../../../../utils/Messages";
-import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
+import { defaultFunction } from "../../../../../../utils/Utils";
 import { ROBOT_BLACKLIST } from "../../Constants/constants";
 import useNodeStatusUpdate from "./hooks/useNodeStatusUpdate";
 
@@ -33,7 +34,7 @@ import { buttonStyles, flowTopBarStyles } from "./styles";
 const BACKEND_CALLBACK_NAME = "backend.FlowTopBar";
 const FEEDBACK_TIMEOUT = 10000;
 
-const ButtonTopBar = React.forwardRef((props, ref) => {
+const ButtonTopBar = forwardRef((props, ref) => {
   const { disabled, onClick, children } = props;
   const classes = buttonStyles();
   return (
@@ -345,6 +346,7 @@ const FlowTopBar = props => {
           }, FEEDBACK_TIMEOUT);
         })
         .catch(err => {
+          console.warn("Error sending action to robot", err);
           alert({
             message: t(ERROR_MESSAGES.ERROR_RUNNING_SPECIFIC_CALLBACK, {
               callbackName: BACKEND_CALLBACK_NAME
@@ -425,13 +427,13 @@ const FlowTopBar = props => {
 
   /**
    * Handle view mode change : default view to tree view
-   * @param {Event} _ : Event change
+   * @param {Event} event : Event change
    * @param {string} newViewMode : New value
    * @returns
    */
   // Commented out for posterity
   // const handleViewModeChange = useCallback(
-  //   (_, newViewMode) => {
+  //   (_event, newViewMode) => {
   //     if (!newViewMode) return;
   //     setViewMode(prevState => {
   //       if (prevState === newViewMode) return prevState;
@@ -561,12 +563,12 @@ FlowTopBar.propTypes = {
 };
 
 FlowTopBar.defaultProps = {
-  openFlow: () => DEFAULT_FUNCTION("openFlow"),
-  onRobotChange: () => DEFAULT_FUNCTION("onRobotChange"),
-  onViewModeChange: () => DEFAULT_FUNCTION("onViewModeChange"),
-  onStartStopFlow: () => DEFAULT_FUNCTION("onStartStopFlow"),
-  nodeStatusUpdated: () => DEFAULT_FUNCTION("nodeStatusUpdated"),
-  nodeCompleteStatusUpdated: () => DEFAULT_FUNCTION("completeStatusUpdated"),
+  openFlow: () => defaultFunction("openFlow"),
+  onRobotChange: () => defaultFunction("onRobotChange"),
+  onViewModeChange: () => defaultFunction("onViewModeChange"),
+  onStartStopFlow: () => defaultFunction("onStartStopFlow"),
+  nodeStatusUpdated: () => defaultFunction("nodeStatusUpdated"),
+  nodeCompleteStatusUpdated: () => defaultFunction("completeStatusUpdated"),
   workspace: "global",
   type: "Flow",
   version: "__UNVERSIONED__"

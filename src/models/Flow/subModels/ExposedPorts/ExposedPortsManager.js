@@ -211,7 +211,7 @@ class ExposedPortsManager extends Manager {
     for (const exposedPorts of this.data) {
       const [templateName, value] = exposedPorts;
 
-      Object.entries(value).forEach(([nodeInstanceName, nodeInstanceObj]) => {
+      Object.values(value).forEach(nodeInstanceObj => {
         output[templateName] = {
           ...output[templateName],
           ...nodeInstanceObj.serializeToDB()

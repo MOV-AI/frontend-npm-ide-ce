@@ -144,9 +144,9 @@ export const simplePotentialA = (src, trg) => {
 
 const relaxSpeed = (path, srcBox, trgBox) => {
   let speed = [...Array(path.length)];
-  const boxForce = (p, box) => {
-    const dist2Box = box.sdf(p);
-    const grad = box.grad(p);
+  const boxForce = (p, _box) => {
+    const dist2Box = _box.sdf(p);
+    const grad = _box.grad(p);
     return grad.scale(200 / dist2Box);
   };
   // assumes path length > 3

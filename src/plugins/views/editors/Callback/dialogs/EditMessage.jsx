@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Typography,
   TextField,
@@ -16,7 +16,7 @@ import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
 import Search from "../../_shared/Search/Search";
 import { searchMessages } from "./utils";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(_theme => ({
   treeRoot: {
     overflowY: "auto",
     overflowX: "hidden",
@@ -33,10 +33,10 @@ const EditMessageDialog = props => {
   // Props
   const { call, scope, selectedMessage, onClose, onSubmit } = props;
   // State hooks
-  const [loading, setLoading] = React.useState(false);
-  const [messages, setMessages] = React.useState();
-  const [filteredMsg, setFilteredMsg] = React.useState();
-  const [selectedMsg, setSelectedMsg] = React.useState(selectedMessage);
+  const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState();
+  const [filteredMsg, setFilteredMsg] = useState();
+  const [selectedMsg, setSelectedMsg] = useState(selectedMessage);
   // Style hook
   const classes = useStyles();
 
@@ -49,7 +49,7 @@ const EditMessageDialog = props => {
   /**
    * Format message list to tree structure
    */
-  const _updateMessages = React.useCallback(list => {
+  const _updateMessages = useCallback(list => {
     let messagesStruct = [];
     Object.keys(list)
       .sort()
@@ -91,7 +91,7 @@ const EditMessageDialog = props => {
   /**
    * On search tree
    */
-  const onSearch = React.useCallback(
+  const onSearch = useCallback(
     value => {
       const result = searchMessages(value, messages);
       setFilteredMsg(result);
@@ -108,7 +108,7 @@ const EditMessageDialog = props => {
   /**
    * Component mounted
    */
-  React.useEffect(() => {
+  useEffect(() => {
     setLoading(true);
     call(
       PLUGINS.DOC_MANAGER.NAME,

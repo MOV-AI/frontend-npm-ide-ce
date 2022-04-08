@@ -41,6 +41,8 @@ const useStyles = debugMode =>
       display: "flex",
       position: "relative"
     },
+    mainGrid: { flexGrow: 1 },
+    sidePanel: { height: "100%" },
     centralPanel: { flexGrow: 1, border: debugMode ? "solid 5px green" : "" },
     rightDrawer: {
       border: debugMode ? "solid 5px blue" : "",
@@ -147,11 +149,11 @@ function getHostedPlugins(classes) {
       <Grid container alignItems="flex-start">
         <TopBar hostName={HOSTS.TOP_BAR.NAME} debugMode={DEBUG_MODE}></TopBar>
       </Grid>
-      <Grid container alignItems="stretch" style={{ flexGrow: 1 }}>
+      <Grid container alignItems="stretch" className={classes.mainGrid}>
         <Typography component="div" className={classes.leftPanel}>
           <SidePanel
             hostName={HOSTS.LEFT_PANEL.NAME}
-            style={{ height: "100%" }}
+            className={classes.sidePanel}
           ></SidePanel>
           <DrawerPanel
             hostName={HOSTS.LEFT_DRAWER.NAME}

@@ -1,5 +1,5 @@
+import React from "react";
 import PropTypes from "prop-types";
-import * as React from "react";
 import { withHostReactPlugin } from "../../../engine/ReactPlugin/HostReactPlugin";
 
 const AlertPanel = props => {

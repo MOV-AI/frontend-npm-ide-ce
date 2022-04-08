@@ -1,11 +1,18 @@
-import React from "react";
+import React, {
+  cloneElement,
+  Children,
+  useEffect,
+  useState,
+  useRef
+} from "react";
+import { getRefComponent } from "../../utils/Utils";
 import { PLUGINS } from "../../utils/Constants";
 
 const DataHandler = props => {
   const { children, call, scope, name } = props;
-  const [data, setData] = React.useState();
-  const [loading, setLoading] = React.useState(true);
-  const modelRef = React.useRef();
+  const [data, setData] = useState();
+  const [loading, setLoading] = useState(true);
+  const modelRef = useRef();
 
   /**
    * Save document
@@ -21,7 +28,7 @@ const DataHandler = props => {
   /**
    * On Load : read data and set model in modelRef
    */
-  React.useEffect(() => {
+  useEffect(() => {
     call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.READ, {
       scope,
       name
@@ -32,16 +39,18 @@ const DataHandler = props => {
     });
   }, [call, scope, name]);
 
-  return React.Children.map(children, el =>
-    React.cloneElement(el, { data, save, instance: modelRef, loading })
+  return Children.map(children, el =>
+    cloneElement(el, { data, save, instance: modelRef, loading })
   );
 };
 
 const withDataHandler = Component => {
+  const RefComponent = getRefComponent(Component);
+
   return (props, ref) => {
     return (
       <DataHandler {...props}>
-        <Component {...props} ref={ref} />
+        <RefComponent {...props} ref={ref} />
       </DataHandler>
     );
   };

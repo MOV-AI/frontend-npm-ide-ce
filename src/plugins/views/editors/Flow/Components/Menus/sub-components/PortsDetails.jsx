@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Divider, Link, Typography } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
@@ -60,6 +60,7 @@ const PortsDetails = props => {
       const isProtected = protectedDocs.includes(callback);
       return isProtected ? (
         <Typography
+          key={`${callback}_${index}`}
           className={`${classes.portCallbackLink} ${classes.disabled}`}
         >
           {callback}
@@ -117,7 +118,7 @@ const PortsDetails = props => {
    *                                                                                      */
   //========================================================================================
 
-  React.useEffect(() => {
+  useEffect(() => {
     getPorts(templateData);
   }, [getPorts, templateData]);
 

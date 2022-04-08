@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import {
@@ -40,11 +40,10 @@ const Menu = ({
   details: detailsProp,
   editable,
   call,
-  handleGroupVisibility,
-  openDialog
+  handleGroupVisibility
 }) => {
   // State hook
-  const [activeItem, setActiveItem] = React.useState(0);
+  const [activeItem, setActiveItem] = useState(0);
   const { data } = useDataSubscriber({
     instance: model,
     propsData: detailsProp
@@ -98,7 +97,6 @@ const Menu = ({
    */
   const editGroupName = useCallback(
     (submitCallback, prevName = "") => {
-      const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
       const args = {
         size: "sm",
         title: prevName ? t("Edit Group") : t("Add Group"),
@@ -117,9 +115,10 @@ const Menu = ({
         },
         onSubmit: submitCallback
       };
-      openDialog({ method, args });
+
+      call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, args);
     },
-    [openDialog, t]
+    [call, t]
   );
 
   /**
@@ -179,7 +178,6 @@ const Menu = ({
   const handleParameterDialog = useCallback(
     dataId => {
       const obj = model.current.getParameter(dataId) || DEFAULT_KEY_VALUE_DATA;
-      const method = PLUGINS.DIALOG.CALL.CUSTOM_DIALOG;
 
       const args = {
         onSubmit: formData => handleSubmitParameter(obj.name, formData),
@@ -190,9 +188,14 @@ const Menu = ({
         call
       };
 
-      openDialog({ method, args }, ParameterEditorDialog);
+      call(
+        PLUGINS.DIALOG.NAME,
+        PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
+        args,
+        ParameterEditorDialog
+      );
     },
-    [model, openDialog, call, validateParamName, handleSubmitParameter, t]
+    [model, call, validateParamName, handleSubmitParameter, t]
   );
 
   //========================================================================================
@@ -219,7 +222,6 @@ const Menu = ({
    * Open dialog to edit flow description
    */
   const handleEditDescriptionClick = useCallback(() => {
-    const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
     const args = {
       size: "md",
       multiline: true,
@@ -228,8 +230,9 @@ const Menu = ({
       value: model.current.getDescription(),
       onSubmit: description => model.current.setDescription(description)
     };
-    openDialog({ method, args });
-  }, [openDialog, t, model]);
+
+    call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, args);
+  }, [call, t, model]);
 
   /**
    * Handle Add new Parameter
@@ -256,7 +259,6 @@ const Menu = ({
    */
   const handleParamDelete = useCallback(
     ({ key, value }) => {
-      const method = PLUGINS.DIALOG.CALL.CONFIRMATION;
       const args = {
         submitText: t("Delete"),
         title: t('Confirm to delete "{{paramName}}"', { paramName: key }),
@@ -266,9 +268,9 @@ const Menu = ({
           { paramName: key, value }
         )
       };
-      openDialog({ method, args });
+      call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, args);
     },
-    [model, openDialog, t]
+    [model, call, t]
   );
 
   /**
@@ -309,7 +311,7 @@ const Menu = ({
     return params.length ? (
       <Typography component="div" className={classes.parametersContainer}>
         <TableKeyValue
-          list={getParameters()}
+          list={params}
           allowDelete={editable}
           allowEdit={editable}
           handleParameterDeleteModal={handleParamDelete}
@@ -320,10 +322,10 @@ const Menu = ({
       </Typography>
     ) : (
       <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-        No Parameters
+        {t("No Parameters")}
       </Typography>
     );
-  }, [classes, editable, getParameters, handleParamDelete, handleParamEdit]);
+  }, [classes, editable, getParameters, handleParamDelete, handleParamEdit, t]);
 
   /**
    * Render groups
@@ -344,7 +346,7 @@ const Menu = ({
       ))
     ) : (
       <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-        No Groups
+        {t("No Groups")}
       </Typography>
     );
   }, [
@@ -353,7 +355,8 @@ const Menu = ({
     model,
     editable,
     editGroupName,
-    handleGroupVisibility
+    handleGroupVisibility,
+    t
   ]);
 
   return (

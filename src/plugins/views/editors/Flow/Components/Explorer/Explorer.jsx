@@ -3,10 +3,10 @@ import PropTypes from "prop-types";
 import _get from "lodash/get";
 import _set from "lodash/set";
 import { Typography } from "@material-ui/core";
-import { withViewPlugin } from "../../../../../../engine/ReactPlugin/ViewReactPlugin";
 import VirtualizedTree from "./../../../../Explorer/components/VirtualizedTree/VirtualizedTree";
-import Preview from "./Preview";
+import { withViewPlugin } from "../../../../../../engine/ReactPlugin/ViewReactPlugin";
 import { PLUGINS } from "../../../../../../utils/Constants";
+import Preview from "./Preview";
 
 import { explorerStyles } from "./styles";
 
@@ -97,7 +97,7 @@ const Explorer = props => {
    * Handle Mouse Leave on Node
    * @param {NodeObject} node
    */
-  const handleMouseLeaveNode = useCallback(node => {
+  const handleMouseLeaveNode = useCallback(_node => {
     if (shouldUpdatePreview.current) {
       setSelectedNode({});
     }
@@ -114,7 +114,7 @@ const Explorer = props => {
    * @param {DocManager} docManager
    */
   const loadDocs = useCallback(docManager => {
-    return setData(_ =>
+    return setData(_node =>
       [docManager.getStore("Node"), docManager.getStore("Flow")].map(
         (store, id) => {
           const { name, title } = store;

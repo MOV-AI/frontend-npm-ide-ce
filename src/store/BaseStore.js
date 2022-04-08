@@ -59,6 +59,11 @@ class BaseStore extends StorePluginManager {
     return this._title;
   }
 
+  /**
+   * Loads a document
+   * @param {String} name
+   * @returns {Object} Loaded Document
+   */
   loadDoc(name) {
     return this.fetchDoc(name)
       .then(file => {
@@ -80,28 +85,59 @@ class BaseStore extends StorePluginManager {
       });
   }
 
+  /**
+   * Fetches a document
+   * @param {String} name
+   * @returns {Object} Document
+   */
   fetchDoc(name) {
     const { scope } = this;
     return new Document(Document.parsePath(name, scope)).read();
   }
 
+  /**
+   * Gets a document from the store
+   * @param {String} name
+   * @returns {Object} Document
+   */
   getDoc(name) {
     return this.data.get(name);
   }
 
+  /**
+   * Sets a document in the store
+   * @param {String} name
+   * @param {Object} value
+   * @returns
+   */
   setDoc(name, value) {
     return this.data.set(name, value);
   }
 
+  /**
+   * Actual delete function
+   * @param {String} name
+   * @returns
+   */
   delDoc(name) {
     return this.data.delete(name);
   }
 
+  /**
+   * Deletes a valid document from the store
+   * @param {String} name : Name of the document to delete
+   * @returns
+   */
   deleteDocFromStore(name) {
     this.getDoc(name)?.destroy();
     return this.delDoc(name);
   }
 
+  /**
+   * Generates a new document name
+   * @param {Int} next
+   * @returns {String} Generated name
+   */
   generateName(next = 1) {
     const name = `untitled-${next}`;
     return this.data.has(name) ? this.generateName(next + 1) : name;
@@ -130,6 +166,10 @@ class BaseStore extends StorePluginManager {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Get updated document
+   * @returns {Object} data
+   */
   getUpdateDoc() {
     const docType = this.scope;
 
@@ -196,13 +236,21 @@ class BaseStore extends StorePluginManager {
       this.observer.onLoad(this.name);
     }
   }
-
-  onDocumentUpdate(instance, prop, value) {
+  /**
+   * Event to handle when document gets updated
+   * @param {Object} instance
+   * @param {String} _prop
+   * @param {String} _value
+   */
+  onDocumentUpdate(instance, _prop, _value) {
     if (typeof this.observer.onDocumentDirty === "function") {
       this.observer.onDocumentDirty(this.name, instance, instance.getDirty());
     }
   }
 
+  /**
+   * Method to enable subscriber
+   */
   enableSubscriber() {
     this.subscriber = new Subscriber({
       pattern: this.pattern

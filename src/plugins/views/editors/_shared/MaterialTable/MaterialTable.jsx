@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import MaterialTableCore from "@material-table/core";
 import { useTheme } from "@material-ui/core/styles";
 
-import materialTableStyles from "./styles";
+import { materialTableStyles } from "./styles";
 
 const MaterialTable = forwardRef((props, ref) => {
   const {

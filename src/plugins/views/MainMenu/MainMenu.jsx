@@ -114,7 +114,7 @@ const MainMenu = props => {
         ></ContextMenu>
       }
       navigationList={MENUS.current.map(menu => (
-        <Tooltip title={menu.title} placement="right" arrow>
+        <Tooltip key={menu.name} title={menu.title} placement="right" arrow>
           {menu.icon({
             className: classes.icon,
             onClick: () => menu.getOnClick()
@@ -123,13 +123,19 @@ const MainMenu = props => {
       ))}
       lowerElement={[
         <ProfileMenu
+          key={"profileMenu"}
           version={APP_INFORMATION.VERSION}
           userName={Authentication.getTokenData().message.name ?? ""}
           isDarkTheme={isDarkTheme}
           handleLogout={handleLogoutClick}
           handleToggleTheme={handleToggleTheme}
         />,
-        <img src={movaiIcon} className={classes.movaiIcon} alt="MOV.AI" />
+        <img
+          key={"movaiIcon"}
+          src={movaiIcon}
+          className={classes.movaiIcon}
+          alt="MOV.AI"
+        />
       ]}
     ></VerticalBar>
   );

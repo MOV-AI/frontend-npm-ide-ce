@@ -1,8 +1,6 @@
-import React, { memo } from "react";
+import React, { useCallback, useState, memo } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { HtmlTooltip } from "../_shared/HtmlTooltip";
-import { executionParamStyles } from "./styles";
 import Typography from "@material-ui/core/Typography";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -11,7 +9,10 @@ import InfoLogo from "@material-ui/icons/Info";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import TextField from "@material-ui/core/TextField";
 import _isEqual from "lodash/isEqual";
-import CollapsibleHeader from "../_shared/CollapsibleHeader";
+import CollapsibleHeader from "../../../_shared/CollapsibleHeader/CollapsibleHeader";
+import { HtmlTooltip } from "../../../_shared/HtmlTooltip/HtmlTooltip";
+
+import { executionParamStyles } from "./styles";
 
 const TOOLTIP = {
   close: 0,
@@ -31,7 +32,7 @@ const ExecutionParameters = props => {
     editable
   } = props;
   // Handle tooltip open state
-  const [openTooltip, setOpenTooltip] = React.useState(TOOLTIP.close);
+  const [openTooltip, setOpenTooltip] = useState(TOOLTIP.close);
   // Hooks
   const classes = executionParamStyles();
   const { t } = useTranslation();
@@ -45,7 +46,7 @@ const ExecutionParameters = props => {
   /**
    * Handle tooltip close
    */
-  const handleTooltipClose = React.useCallback(
+  const handleTooltipClose = useCallback(
     triggeredBy => {
       if (triggeredBy !== openTooltip) return;
       setOpenTooltip(TOOLTIP.close);
@@ -56,7 +57,7 @@ const ExecutionParameters = props => {
   /**
    * Handle tooltip toggle
    */
-  const handleTooltipToggle = React.useCallback(newState => {
+  const handleTooltipToggle = useCallback(newState => {
     setOpenTooltip(prevState => {
       if (prevState === newState) return TOOLTIP.close;
       else return newState;
@@ -100,10 +101,10 @@ const ExecutionParameters = props => {
             disableFocusListener
             disableHoverListener
             title={
-              <React.Fragment>
+              <>
                 <Typography color="inherit">{tooltip.title}</Typography>
                 {tooltip.description}
-              </React.Fragment>
+              </>
             }
           >
             <IconButton

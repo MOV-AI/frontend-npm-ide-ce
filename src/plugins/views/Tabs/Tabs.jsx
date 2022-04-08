@@ -1,19 +1,19 @@
-import React from "react";
+import React, { useRef } from "react";
 import PropTypes from "prop-types";
 import DockLayout from "rc-dock";
-import "rc-dock/dist/rc-dock.css";
 import { PLUGINS } from "../../../utils/Constants";
 import {
   withViewPlugin,
   usePluginMethods
 } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import useLayout from "./useLayout";
+import useTabLayout from "./hooks/useTabLayout";
 
-import tabsStyles from "./styles";
+import "rc-dock/dist/rc-dock.css";
+import { tabsStyles } from "./styles";
 
 const Tabs = (props, ref) => {
   const classes = tabsStyles();
-  const dockRef = React.useRef();
+  const dockRef = useRef();
   const {
     layout,
     open,
@@ -24,7 +24,7 @@ const Tabs = (props, ref) => {
     getActiveTab,
     loadTab,
     updateTabId
-  } = useLayout(props, dockRef);
+  } = useTabLayout(props, dockRef);
 
   usePluginMethods(ref, {
     open,

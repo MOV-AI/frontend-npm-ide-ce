@@ -1,7 +1,7 @@
 import React from "react";
+import _toString from "lodash/toString";
 import { TextField, Typography } from "@material-ui/core";
 import { MonacoCodeEditor } from "@mov-ai/mov-fe-lib-code-editor";
-import _toString from "lodash/toString";
 import { DATA_TYPES } from "../../../../../../utils/Constants";
 
 /**

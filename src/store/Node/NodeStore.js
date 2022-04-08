@@ -1,6 +1,6 @@
 import Model from "../../models/Node/Node";
 import DBSubscriber from "../DBSubscriber";
-import Helper from "./NodeHelper";
+import Helper from "./Helper";
 import Store from "../Store";
 
 class NodeStore extends Store {

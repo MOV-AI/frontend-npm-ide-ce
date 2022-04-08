@@ -1,10 +1,11 @@
 import React, { memo } from "react";
 import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
+import { useTranslation } from "react-i18next";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
-import { useTranslation } from "../../../_shared/mocks";
-import CollapsibleHeader from "../_shared/CollapsibleHeader";
+import CollapsibleHeader from "../../../_shared/CollapsibleHeader/CollapsibleHeader";
+
+import { descriptionStyles } from "./styles";
 
 // Node colors: Each node type has one specific correspondent color
 const NODE_COLORS = {
@@ -20,63 +21,12 @@ const NODE_COLORS = {
   "ROS2/LifecycleNode": "#a5907e"
 };
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    padding: "5px 0px 5px 0px",
-    width: "100%"
-  },
-  container: {
-    width: "100%",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center"
-  },
-  input: {
-    margin: theme.spacing(1),
-    fontFamily: "inherit",
-    width: "80%",
-    fontWeight: "bold"
-  },
-  text: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center"
-  },
-  center: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap"
-  },
-  nodeTypeMini: {
-    width: "12px",
-    height: "12px",
-    marginRight: "6px",
-    borderRadius: "3px"
-  },
-  textField: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1)
-  },
-  typeContainer: {
-    display: "flex",
-    alignItems: "center",
-    position: "absolute",
-    right: "100px",
-    top: "20px"
-  },
-  details: { display: "flex", flexDirection: "column" },
-  row: { display: "flex", flexDirection: "row" },
-  heading: { fontSize: "1.5rem" },
-  column: { flexBasis: "90%" }
-}));
-
 const Description = props => {
   // Props
   const { onChangeDescription, value, nodeType, editable } = props;
   // Hooks
   const { t } = useTranslation();
-  const classes = useStyles();
+  const classes = descriptionStyles();
 
   //========================================================================================
   /*                                                                                      *
@@ -117,7 +67,7 @@ const Description = props => {
         disabled={!editable}
         className={classes.textField}
         label={t("Description")}
-        rows="4"
+        minRows="4"
         multiline
         defaultValue={value}
         onChange={evt => onChangeDescription(evt.target.value)}

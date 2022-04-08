@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core/styles";
 
-export const nodeStyles = makeStyles(theme => ({
+export const nodeStyles = makeStyles(_theme => ({
   root: {
     height: "100%",
     display: "flex",

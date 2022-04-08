@@ -7,10 +7,14 @@ import {
   Typography
 } from "@material-ui/core";
 
+import { detailsMenuStyles } from "./styles";
+
 const DetailsMenu = ({ name, details }) => {
+  // Style hook
+  const classes = detailsMenuStyles();
   return (
     <div>
-      <h2 style={{ textAlign: "center" }}>{name}</h2>
+      <h2 className={classes.detailsName}>{name}</h2>
       <List sx={{ width: "100%", bgcolor: "background.paper" }} component="nav">
         <ListItem>
           <ListItemText primary={`Name:`} />

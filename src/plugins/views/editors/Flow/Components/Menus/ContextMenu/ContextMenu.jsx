@@ -4,7 +4,7 @@ import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import { DEFAULT_FUNCTION } from ".";
+import { defaultFunction } from "../../../../../../../utils/Utils";
 
 const ContextMenu = props => {
   const { anchorPosition, menuList, onClose, readOnly } = props;
@@ -44,7 +44,7 @@ ContextMenu.propTypes = {
 ContextMenu.defaultProps = {
   menuList: [],
   readOnly: false,
-  onClose: () => DEFAULT_FUNCTION("onClose")
+  onClose: () => defaultFunction("onClose")
 };
 
 export default ContextMenu;

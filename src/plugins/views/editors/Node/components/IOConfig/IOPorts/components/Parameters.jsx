@@ -1,8 +1,9 @@
-import React from "react";
-import { parametersStyles } from "./styles";
+import React, { useCallback } from "react";
 import Grid from "@material-ui/core/Grid";
 import Circle from "@material-ui/icons/FiberManualRecord";
 import Input from "@material-ui/core/Input";
+
+import { parametersStyles } from "./styles";
 
 const Parameters = props => {
   // Props
@@ -18,7 +19,7 @@ const Parameters = props => {
   // Hooks
   const classes = parametersStyles();
 
-  const handleOnChange = React.useCallback(
+  const handleOnChange = useCallback(
     evt => {
       handleIOPortsInputs(
         evt.target.value,

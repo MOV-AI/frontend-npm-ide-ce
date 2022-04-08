@@ -7,7 +7,7 @@ import {
 } from "../../utils/Constants";
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from "../../utils/Messages";
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
-import docsFactory from "./docs";
+import docsFactory from "./factory";
 
 /**
  * Document Manager plugin to handle requests, subscribers and more
@@ -331,7 +331,7 @@ class DocManager extends IDEPlugin {
    * Emits an event when a store fires an onLoad event
    * @param {string} store : The name of the store firing the event
    */
-  onStoreLoad(store) {
+  onStoreLoad() {
     this.emit(PLUGINS.DOC_MANAGER.ON.LOAD_DOCS, this);
   }
 
@@ -340,7 +340,7 @@ class DocManager extends IDEPlugin {
    * @param {string} store : The name of the store firing the event
    * @param {object<{documentName, documentType}>} doc
    */
-  onStoreUpdate(store, doc, action = "set") {
+  onStoreUpdate(_, doc, action = "set") {
     this.emit(PLUGINS.DOC_MANAGER.ON.UPDATE_DOCS, this, {
       action,
       ...doc
@@ -353,7 +353,7 @@ class DocManager extends IDEPlugin {
    * @param {model} instance : Document model instance
    * @param {boolean} value : Document Dirty state
    */
-  onDocumentDirty(store, instance, value) {
+  onDocumentDirty(_, instance, value) {
     this.emit(PLUGINS.DOC_MANAGER.ON.UPDATE_DOC_DIRTY, {
       instance,
       value
@@ -385,7 +385,7 @@ class DocManager extends IDEPlugin {
    *  Remove subscribers
    * @param {Event} event
    */
-  onUnload = event => {
+  onUnload = _event => {
     this.getStores().forEach(store => {
       const dirtyDocs = store.getDirties();
 

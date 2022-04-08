@@ -1,8 +1,11 @@
-import React, { useState } from "react";
-import { ApplicationTheme } from "../themes";
+import React, { useEffect, useState } from "react";
 import { ThemeProvider } from "@material-ui/core/styles";
+import { getRefComponent } from "../utils/Utils";
+import { ApplicationTheme } from "../themes";
 
 export function withTheme(Component) {
+  const RefComponent = getRefComponent(Component);
+
   return function (props) {
     const [theme, setTheme] = useState("dark");
 
@@ -19,7 +22,7 @@ export function withTheme(Component) {
     /**
      * Update current theme on app start
      */
-    React.useEffect(() => {
+    useEffect(() => {
       const currentTheme = ApplicationTheme.getTheme();
       setTheme(currentTheme);
       // Add new theme class in body
@@ -31,7 +34,7 @@ export function withTheme(Component) {
 
     return (
       <ThemeProvider theme={ApplicationTheme[theme]}>
-        <Component
+        <RefComponent
           handleToggleTheme={handleToggleTheme}
           theme={theme}
           {...props}

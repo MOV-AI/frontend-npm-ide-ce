@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
@@ -8,21 +9,13 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { CircularProgress } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
 import { withTheme } from "../../../../decorators/withTheme";
-import { useTranslation } from "react-i18next";
 
-const useStyles = makeStyles(theme => ({
-  loadingContainer: {
-    height: "100px",
-    width: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
-  }
-}));
+import { appDialogStyles } from "./styles";
 
 const FormDialog = props => {
+  // Translation hook
+  const { t } = useTranslation();
   // Props
   const {
     size,
@@ -32,13 +25,13 @@ const FormDialog = props => {
     onSubmit,
     onValidation,
     onPostValidation,
-    submitText,
     placeholder,
-    inputLabel,
     multiline,
     loadingMessage,
     defaultValue,
-    maxLength
+    maxLength,
+    inputLabel = t("Name"),
+    submitText = t("Submit")
   } = props;
   // State hook
   const [open, setOpen] = useState(true);
@@ -49,9 +42,7 @@ const FormDialog = props => {
     message: ""
   });
   // Style hook
-  const classes = useStyles();
-  // Translation hook
-  const { t } = useTranslation();
+  const classes = appDialogStyles();
   // Ref
   const inputRef = useRef();
 
@@ -101,11 +92,11 @@ const FormDialog = props => {
 
   /**
    * Handle dialog close
-   * @param {Event} _ : Close Event
+   * @param {Event} closeEvent : Close Event
    * @param {String} reason : close reason
    * @returns
    */
-  const handleClose = (_, reason) => {
+  const handleClose = (_closeEvent, reason) => {
     if (reason === "backdropClick") return;
     setOpen(false);
     if (onClose) onClose();
@@ -175,7 +166,7 @@ const FormDialog = props => {
       <DialogTitle>
         {loadingMessage && isLoading ? loadingMessage : title}
       </DialogTitle>
-      <DialogContent style={{ minWidth: 450 }}>
+      <DialogContent className={classes.dialogContent}>
         {message && <DialogContentText>{message}</DialogContentText>}
         {isLoading ? (
           <div className={classes.loadingContainer}>
@@ -187,7 +178,7 @@ const FormDialog = props => {
             autoFocus={true}
             error={validation.error}
             helperText={validation.message}
-            style={{ width: "100%" }}
+            className={classes.textfield}
             label={t(inputLabel)}
             InputLabelProps={{ shrink: true }}
             defaultValue={value}
@@ -217,8 +208,6 @@ const FormDialog = props => {
   );
 };
 
-export default withTheme(FormDialog);
-
 FormDialog.propTypes = {
   onValidation: PropTypes.func,
   onPostValidation: PropTypes.func,
@@ -233,9 +222,9 @@ FormDialog.propTypes = {
 
 FormDialog.defaultProps = {
   onValidation: () => ({ result: true, error: "" }),
-  inputLabel: "Name",
-  submitText: "Submit",
   defaultValue: "",
   multiline: false,
   maxLength: 40
 };
+
+export default withTheme(FormDialog);

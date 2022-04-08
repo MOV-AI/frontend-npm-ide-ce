@@ -1,21 +1,9 @@
 import React from "react";
 import { Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { getRefComponent } from "../utils/Utils";
 import Loader from "../plugins/views/editors/_shared/Loader/Loader";
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-    "& > div[class^='container-']": {
-      height: "100%"
-    },
-    "& > div.container-Node": {
-      overflow: "auto"
-    }
-  }
-}));
+import { loaderStyles } from "./styles";
 
 /**
  * Render loader before document is ready
@@ -23,13 +11,15 @@ const useStyles = makeStyles(theme => ({
  * @returns
  */
 const withLoader = Component => {
+  const RefComponent = getRefComponent(Component);
+
   return (props, ref) => {
     const { loading } = props;
-    const classes = useStyles();
+    const classes = loaderStyles();
 
     return (
       <Typography component="div" className={classes.root}>
-        {loading ? <Loader /> : <Component {...props} ref={ref} />}
+        {loading ? <Loader /> : <RefComponent {...props} ref={ref} />}
       </Typography>
     );
   };
