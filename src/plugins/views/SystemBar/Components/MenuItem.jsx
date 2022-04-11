@@ -27,13 +27,13 @@ const MenuItem = ({ item, closeMenu }) => {
   const renderSubMenu = useCallback(() => {
     return (
       <ul className={classes.subMenuHolder}>
-        {data.map(subItem => {
+        {data.map((subItem, index) => {
           if (subItem.id) {
             return (
               <MenuItem key={subItem.id} item={subItem} closeMenu={closeMenu} />
             );
           } else {
-            return <Divider className={classes.menuDivider} />;
+            return <Divider key={index} className={classes.menuDivider} />;
           }
         })}
       </ul>
