@@ -693,6 +693,13 @@ const useTabLayout = (props, dockRef) => {
     return tabsById.current.get(activeTabId.current);
   }, []);
 
+  /**
+   * Focus on active tab
+   */
+  const focusActiveTab = useCallback(() => {
+    focusExistingTab(activeTabId.current);
+  }, [focusExistingTab]);
+
   //========================================================================================
   /*                                                                                      *
    *                                   React lifecycles                                   *
@@ -802,6 +809,7 @@ const useTabLayout = (props, dockRef) => {
     onLayoutChange,
     focusExistingTab,
     getActiveTab,
+    focusActiveTab,
     updateTabId
   };
 };

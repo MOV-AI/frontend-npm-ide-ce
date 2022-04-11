@@ -100,6 +100,7 @@ export const PLUGINS = {
       CLOSE: "close",
       OPEN_EDITOR: "openEditor",
       UPDATE_TAB_ID: "updateTabId",
+      FOCUS_ACTIVE_TAB: "focusActiveTab",
       GET_ACTIVE_TAB: "getActiveTab"
     },
     ON: {
