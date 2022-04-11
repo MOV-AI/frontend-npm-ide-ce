@@ -56,7 +56,6 @@ const Flow = (props, ref) => {
     alert,
     addKeyBind,
     removeKeyBind,
-    activateEditor,
     confirmationAlert,
     saveDocument,
     on
@@ -280,10 +279,7 @@ const Flow = (props, ref) => {
         const args = {
           title: `${t("Paste")} ${node.model}`,
           value: `${node.id}_copy`,
-          onClose: () => {
-            activateEditor();
-            resolve();
-          },
+          onClose: resolve,
           onValidation: newName =>
             getMainInterface().graph.validator.validateNodeName(
               newName,
@@ -296,7 +292,7 @@ const Flow = (props, ref) => {
         call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, args);
       });
     },
-    [activateEditor, call, t]
+    [call, t]
   );
 
   //========================================================================================
@@ -335,7 +331,6 @@ const Flow = (props, ref) => {
             call={call}
             nodeInst={node}
             flowModel={instance}
-            activateEditor={activateEditor}
             openDoc={openDoc}
             editable={isEditableComponentRef.current}
             groupsVisibilities={groupsVisibilities}
@@ -351,7 +346,6 @@ const Flow = (props, ref) => {
       openDoc,
       getMenuComponent,
       groupsVisibilities,
-      activateEditor,
       t
     ]
   );
@@ -392,13 +386,12 @@ const Flow = (props, ref) => {
             call={call}
             link={link.data}
             flowModel={instance}
-            activateEditor={activateEditor}
             sourceMessage={link?.src?.data?.message}
           />
         )
       };
     },
-    [MENUS, call, id, instance, activateEditor, t]
+    [MENUS, call, id, instance, t]
   );
 
   /**
@@ -434,7 +427,6 @@ const Flow = (props, ref) => {
             call={call}
             name={name}
             details={details}
-            activateEditor={activateEditor}
             model={instance}
             handleGroupVisibility={handleGroupVisibility}
             editable={isEditableComponentRef.current}
@@ -483,7 +475,6 @@ const Flow = (props, ref) => {
     getNodeMenuToAdd,
     getLinkMenuToAdd,
     handleGroupVisibility,
-    activateEditor,
     t
   ]);
 
@@ -645,14 +636,13 @@ const Flow = (props, ref) => {
           submitText: t("Fix"),
           title: t("Invalid Links Found"),
           onSubmit: () => deleteInvalidLinks(invalidLinks, callback),
-          onClose: activateEditor,
           message: t(
             "Do you want to fix this? This will remove all invalid links and save the flow"
           )
         });
       }
     },
-    [call, t, deleteInvalidLinks, activateEditor]
+    [call, t, deleteInvalidLinks]
   );
 
   /**
@@ -734,10 +724,7 @@ const Flow = (props, ref) => {
               newName,
               t("Node")
             ),
-          onClose: () => {
-            activateEditor();
-            setFlowsToDefault();
-          },
+          onClose: setFlowsToDefault,
           onSubmit: newName => getMainInterface().addNode(newName)
         };
         // Open form dialog
@@ -755,10 +742,7 @@ const Flow = (props, ref) => {
               newName,
               t("Sub-flow")
             ),
-          onClose: () => {
-            activateEditor();
-            setFlowsToDefault();
-          },
+          onClose: setFlowsToDefault,
           onSubmit: newName => getMainInterface().addFlow(newName)
         };
         // Open form dialog
@@ -891,7 +875,6 @@ const Flow = (props, ref) => {
       invalidContainersParamAlert,
       openDoc,
       handleContextClose,
-      activateEditor,
       call,
       t
     ]
@@ -912,12 +895,11 @@ const Flow = (props, ref) => {
       call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
         submitText: t("Delete"),
         title: t("Confirm to delete"),
-        onClose: activateEditor,
         onSubmit: callback,
         message
       });
     },
-    [t, call, activateEditor]
+    [t, call]
   );
 
   /**

@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom";
 import { SelectScopeModal } from "@mov-ai/mov-fe-lib-react";
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
-import { randomId } from "../../utils/Utils";
+import { randomId, getNameFromURL } from "../../utils/Utils";
 import { PLUGINS, SAVE_OUTDATED_DOC_ACTIONS } from "../../utils/Constants";
 import { withTheme } from "../../decorators/withTheme";
 import ConfirmationDialog from "./components/ConfirmationDialog/ConfirmationDialog";
@@ -269,6 +269,35 @@ class Dialog extends IDEPlugin {
   //========================================================================================
 
   /**
+   * @private Attempts to get the active editor
+   * @returns {Node} active editor
+   */
+  getActiveEditor() {
+    // Let's get the opened menu file name
+    const activeDocumentName =
+      document.getElementById("details-menu-name")?.innerText;
+    // then get all possible editors (active tabs - there can be multiple)
+    const possibleEditors = document.querySelectorAll(".dock-tabpane-active");
+    let activeTab = possibleEditors[0];
+
+    // if we get more than 1 active tab we'll cycle them and compare
+    // it's extracted name (from the id) with the menu file name
+    if (possibleEditors.length > 1) {
+      for (let i = 0, n = possibleEditors.length; i < n; i++) {
+        const tab = possibleEditors[i];
+        const fileName = getNameFromURL(tab.id);
+        if (activeDocumentName === fileName) {
+          activeTab = tab;
+          break;
+        }
+      }
+    }
+
+    // return the editor-container insided activeTab
+    return activeTab?.querySelector(".editor-container");
+  }
+
+  /**
    * @private Handle dialog open : Prepare element where the dialog will be rendered
    * @returns {DOMElement} Target element to render dialog
    */
@@ -285,9 +314,11 @@ class Dialog extends IDEPlugin {
    * @private Handle dialog close : Unmount dialog component and remove target element
    */
   _handleDialogClose(targetElement, onClose) {
+    const editor = this.getActiveEditor();
     document.body.classList.remove(Dialog.BODY_CLASS_NAME);
     ReactDOM.unmountComponentAtNode(targetElement);
     targetElement.parentNode.removeChild(targetElement);
+    editor && editor.dispatchEvent(new Event("focus"));
     onClose && onClose();
   }
 

@@ -47,15 +47,7 @@ const ACTIVE_ITEM = {
  * @returns {ReaactElement} Node Menu
  */
 const NodeMenu = memo(
-  ({
-    nodeInst,
-    call,
-    openDoc,
-    editable,
-    flowModel,
-    activateEditor,
-    groupsVisibilities
-  }) => {
+  ({ nodeInst, call, openDoc, editable, flowModel, groupsVisibilities }) => {
     const data = nodeInst.data;
     // State hooks
     const [templateData, setTemplateData] = useState({});
@@ -195,7 +187,6 @@ const NodeMenu = memo(
         };
 
         const args = {
-          onClose: activateEditor,
           onSubmit: handleSubmitParameter,
           title: t("Edit {{paramType}}", { paramType }),
           data: obj,
@@ -215,7 +206,7 @@ const NodeMenu = memo(
           ParameterEditorDialog
         );
       },
-      [call, handleSubmitParameter, activateEditor, t]
+      [call, handleSubmitParameter, t]
     );
 
     /**

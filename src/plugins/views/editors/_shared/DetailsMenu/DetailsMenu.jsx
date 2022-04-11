@@ -14,7 +14,9 @@ const DetailsMenu = ({ name, details }) => {
   const classes = detailsMenuStyles();
   return (
     <div>
-      <h2 className={classes.detailsName}>{name}</h2>
+      <h2 id="details-menu-name" className={classes.detailsName}>
+        {name}
+      </h2>
       <List sx={{ width: "100%", bgcolor: "background.paper" }} component="nav">
         <ListItem>
           <ListItemText primary={`Name:`} />

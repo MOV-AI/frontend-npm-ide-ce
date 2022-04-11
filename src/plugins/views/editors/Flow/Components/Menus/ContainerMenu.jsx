@@ -16,8 +16,7 @@ import MenuDetails from "./sub-components/MenuDetails";
 
 const ContainerMenu = props => {
   // Props
-  const { nodeInst, call, openDoc, flowModel, editable, activateEditor } =
-    props;
+  const { nodeInst, call, openDoc, flowModel, editable } = props;
   // State hooks
   const [templateData, setTemplateData] = useState({});
   const [flowData, setFlowData] = useState({});
@@ -88,7 +87,6 @@ const ContainerMenu = props => {
       };
 
       const args = {
-        onClose: activateEditor,
         onSubmit: handleSubmitParameter,
         title: t("Edit {{paramType}}", { paramType }),
         data: obj,
@@ -108,7 +106,7 @@ const ContainerMenu = props => {
         ParameterEditorDialog
       );
     },
-    [call, handleSubmitParameter, activateEditor, t]
+    [call, handleSubmitParameter, t]
   );
 
   //========================================================================================

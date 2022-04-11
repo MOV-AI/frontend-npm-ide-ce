@@ -40,7 +40,6 @@ const Menu = ({
   details: detailsProp,
   editable,
   call,
-  activateEditor,
   handleGroupVisibility
 }) => {
   // State hook
@@ -103,7 +102,6 @@ const Menu = ({
         title: prevName ? t("Edit Group") : t("Add Group"),
         inputLabel: t("Group Name"),
         value: prevName,
-        onClose: activateEditor,
         onValidation: value => {
           try {
             const validation = validateDocumentName(value);
@@ -120,7 +118,7 @@ const Menu = ({
 
       call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, args);
     },
-    [call, activateEditor, t]
+    [call, t]
   );
 
   /**
@@ -182,7 +180,6 @@ const Menu = ({
       const obj = model.current.getParameter(dataId) || DEFAULT_KEY_VALUE_DATA;
 
       const args = {
-        onClose: activateEditor,
         onSubmit: formData => handleSubmitParameter(obj.name, formData),
         nameValidation: newData => validateParamName(obj.name, newData),
         renderType: true,
@@ -198,7 +195,7 @@ const Menu = ({
         ParameterEditorDialog
       );
     },
-    [model, call, validateParamName, handleSubmitParameter, activateEditor, t]
+    [model, call, validateParamName, handleSubmitParameter, t]
   );
 
   //========================================================================================
@@ -231,12 +228,11 @@ const Menu = ({
       title: t("Edit Description"),
       inputLabel: t("Description"),
       value: model.current.getDescription(),
-      onClose: activateEditor,
       onSubmit: description => model.current.setDescription(description)
     };
 
     call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, args);
-  }, [model, call, activateEditor, t]);
+  }, [model, call, t]);
 
   /**
    * Handle Add new Parameter
@@ -266,7 +262,6 @@ const Menu = ({
       const args = {
         submitText: t("Delete"),
         title: t('Confirm to delete "{{paramName}}"', { paramName: key }),
-        onClose: activateEditor,
         onSubmit: () => model.current.deleteParameter(key),
         message: t(
           'Are you sure you want to delete the param "{{paramName}}" with the value "{{value}}"?',
@@ -275,7 +270,7 @@ const Menu = ({
       };
       call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, args);
     },
-    [model, call, activateEditor, t]
+    [model, call, t]
   );
 
   /**
