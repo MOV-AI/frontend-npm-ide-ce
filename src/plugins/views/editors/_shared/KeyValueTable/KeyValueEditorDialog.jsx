@@ -99,7 +99,7 @@ const KeyValueEditorDialog = props => {
         setValidation({
           component: COMPONENTS.NAME,
           error: !res.result,
-          message: res.error
+          message: t(res.error)
         });
       });
     }
@@ -130,7 +130,7 @@ const KeyValueEditorDialog = props => {
         setValidation({
           component: COMPONENTS.VALUE,
           error: !res.result,
-          message: res.error
+          message: t(res.error)
         });
       });
     }
@@ -212,7 +212,7 @@ const KeyValueEditorDialog = props => {
                 expandIcon={<ExpandMoreIcon />}
               >
                 <Typography className={classes.label}>
-                  {t("Default Value")}
+                  {t("DefaultValue")}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails className={classes.noHorizontalPadding}>

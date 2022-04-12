@@ -188,7 +188,7 @@ const NodeMenu = memo(
 
         const args = {
           onSubmit: handleSubmitParameter,
-          title: t("Edit {{paramType}}", { paramType }),
+          title: t("EditParamType", { paramType }),
           data: obj,
           showDefault: true,
           showValueOptions: true,
@@ -249,7 +249,7 @@ const NodeMenu = memo(
           id={data.id}
           model={data.model}
           template={data.Template}
-          label={"Template Name:"}
+          label="TemplateName-Colon"
           type={templateData.type}
           openDoc={openDoc}
         />
@@ -303,7 +303,7 @@ const NodeMenu = memo(
           data-menu-id={ACTIVE_ITEM.ENVVARS}
           onClick={handleExpandClick}
         >
-          <ListItemText primary={t("Env. Variables")} />
+          <ListItemText primary={t("EnvVars")} />
           {renderExpandIcon(ACTIVE_ITEM.ENVVARS)}
         </ListItem>
         <Collapse in={activeItem === ACTIVE_ITEM.ENVVARS} unmountOnExit>
@@ -322,7 +322,7 @@ const NodeMenu = memo(
           data-menu-id={ACTIVE_ITEM.CMDLINE}
           onClick={handleExpandClick}
         >
-          <ListItemText primary={t("Command Line")} />
+          <ListItemText primary={t("CommandLine")} />
           {renderExpandIcon(ACTIVE_ITEM.CMDLINE)}
         </ListItem>
         <Collapse in={activeItem === ACTIVE_ITEM.CMDLINE} unmountOnExit>

@@ -54,7 +54,7 @@ const PropertyItem = ({
    * @returns {string} string to concatenate with label
    */
   const getDefaultText = useCallback(
-    isDefault => (isDefault ? `(${t("default")})` : ""),
+    isDefault => (isDefault ? `(${t("Default")})` : ""),
     [t]
   );
 

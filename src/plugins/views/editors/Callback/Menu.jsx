@@ -239,7 +239,7 @@ const Menu = props => {
                 primary={pyLib.name}
               />
               <ListItemSecondaryAction>
-                <Tooltip title={t("Remove import")}>
+                <Tooltip title={t("RemoveImport")}>
                   <IconButton edge="end" onClick={() => deleteImport(pyLib)}>
                     <DeleteIcon fontSize="small" />
                   </IconButton>
@@ -251,7 +251,7 @@ const Menu = props => {
       })
     ) : (
       <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-        {t("No imports")}
+        {t("NoImports")}
       </Typography>
     );
   }, [classes, getImportsList, deleteImport, t]);
@@ -270,7 +270,7 @@ const Menu = props => {
             primary={data.message}
           />
           <ListItemSecondaryAction>
-            <Tooltip title={t("Remove message")}>
+            <Tooltip title={t("RemoveMessage")}>
               <IconButton edge="end" onClick={handleRemoveMessage}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
@@ -280,7 +280,7 @@ const Menu = props => {
       </Typography>
     ) : (
       <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-        {t("No message defined")}
+        {t("NoMessageDefined")}
       </Typography>
     );
   }, [classes, data.message, handleRemoveMessage, t]);

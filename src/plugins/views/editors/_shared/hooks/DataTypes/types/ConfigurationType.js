@@ -20,7 +20,7 @@ class ConfigurationType extends DataType {
     })
       .then(res => {
         const isValid = res.success && res.result;
-        return { success: isValid, error: "Configuration/key not found" };
+        return { success: isValid, error: "ConfigurationNotFound" };
       })
       .catch(err => {
         console.log("Configuration validation err", err);

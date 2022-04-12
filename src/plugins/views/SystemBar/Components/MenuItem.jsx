@@ -26,17 +26,17 @@ const MenuItem = ({ item, closeMenu }) => {
    */
   const renderSubMenu = useCallback(() => {
     return (
-      <div className={classes.subMenuHolder}>
-        {data.map(subItem => {
+      <ul className={classes.subMenuHolder}>
+        {data.map((subItem, index) => {
           if (subItem.id) {
             return (
               <MenuItem key={subItem.id} item={subItem} closeMenu={closeMenu} />
             );
           } else {
-            return <Divider className={classes.menuDivider} />;
+            return <Divider key={index} className={classes.menuDivider} />;
           }
         })}
-      </div>
+      </ul>
     );
   }, [classes, data, closeMenu]);
 
@@ -60,20 +60,27 @@ const MenuItem = ({ item, closeMenu }) => {
 
   return (
     <ListItem className={classes.listItem} key={id}>
-      <Button className={classes.menuButton} onClick={handleOptionClick}>
-        <span>
-          {icon && <span className={classes.icon}>{icon}</span>}
-          {t(title)}
-        </span>
-        {keybind && <span className={classes.keybind}>{keybind}</span>}
-        {externalLink && <LinkIcon className={classes.keybind}></LinkIcon>}
-        {data && (
-          <>
-            <ArrowRightIcon></ArrowRightIcon>
-            {renderSubMenu()}
-          </>
-        )}
-      </Button>
+      {data ? (
+        <div className={classes.menuButton}>
+          <span className="MuiButton-label">
+            {icon && <span className={classes.icon}>{icon}</span>}
+            {t(title)}
+            <>
+              <ArrowRightIcon></ArrowRightIcon>
+              {renderSubMenu()}
+            </>
+          </span>
+        </div>
+      ) : (
+        <Button className={classes.menuButton} onClick={handleOptionClick}>
+          <span>
+            {icon && <span className={classes.icon}>{icon}</span>}
+            {t(title)}
+          </span>
+          {keybind && <span className={classes.keybind}>{keybind}</span>}
+          {externalLink && <LinkIcon className={classes.keybind}></LinkIcon>}
+        </Button>
+      )}
     </ListItem>
   );
 };
@@ -81,5 +88,5 @@ const MenuItem = ({ item, closeMenu }) => {
 export default MenuItem;
 
 MenuItem.propTypes = {
-  data: PropTypes.object.isRequired
+  item: PropTypes.object.isRequired
 };

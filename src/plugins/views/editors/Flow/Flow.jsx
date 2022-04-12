@@ -66,15 +66,15 @@ const Flow = (props, ref) => {
     Object.freeze({
       DETAIL: {
         NAME: "detail-menu",
-        TITLE: "Flow Details"
+        TITLE: "FlowDetailsMenuTitle"
       },
       NODE: {
         NAME: "node-menu",
-        TITLE: "Node Instance Menu"
+        TITLE: "NodeInstanceMenuTitle"
       },
       LINK: {
         NAME: "link-menu",
-        TITLE: "Link Instance Menu"
+        TITLE: "LinkInstanceMenuTitle"
       }
     })
   );
@@ -245,20 +245,10 @@ const Flow = (props, ref) => {
       // Don't show dialog if no invalid params found
       if (!invalidContainerParams || !invalidContainerParams.length) return;
       // Set title and message for alert
-      const title = t("Sub-flows with invalid parameters");
-      let message = `${t(
-        "The parameters of the sub-flow should come from the flow template."
-      )} ${t(
-        "The following sub-flows contains custom parameters that are not present on its template:"
-      )}\n`;
+      const title = t("InvalidContainersParamTitle");
       // Add containers name to message
-      invalidContainerParams.forEach(containerId => {
-        message += `\n ${containerId}`;
-      });
-      // Add how to fix information
-      message += `\n\n${t(
-        "To fix it, you can either remove the custom parameter on the sub-flow or add the parameter on the template."
-      )}`;
+      const invalidContainers = invalidContainerParams.join("\n ");
+      const message = t("InvalidContainersParamMessage", { invalidContainers });
 
       // Show alert dialog
       alert({ message, title, location: "modal" });
@@ -277,7 +267,7 @@ const Flow = (props, ref) => {
       const node = nodeToCopy.node;
       return new Promise(resolve => {
         const args = {
-          title: `${t("Paste")} ${node.model}`,
+          title: t("PasteNodeModel", { nodeModel: node.model }),
           value: `${node.id}_copy`,
           onClose: resolve,
           onValidation: newName =>
@@ -634,11 +624,9 @@ const Flow = (props, ref) => {
       if (invalidLinks.length) {
         call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
           submitText: t("Fix"),
-          title: t("Invalid Links Found"),
+          title: t("InvalidLinksFoundTitle"),
           onSubmit: () => deleteInvalidLinks(invalidLinks, callback),
-          message: t(
-            "Do you want to fix this? This will remove all invalid links and save the flow"
-          )
+          message: t("InvalidLinksFoundMessage")
         });
       }
     },
@@ -716,7 +704,7 @@ const Flow = (props, ref) => {
       mainInterface.mode.addNode.onClick.subscribe(() => {
         const nodeName = getMainInterface().mode.current.props.node.data.name;
         const args = {
-          title: t("Add Node"),
+          title: t("AddNode"),
           submitText: t("Add"),
           value: nodeName,
           onValidation: newName =>
@@ -734,13 +722,13 @@ const Flow = (props, ref) => {
       mainInterface.mode.addFlow.onClick.subscribe(() => {
         const flowName = getMainInterface().mode.current.props.node.data.name;
         const args = {
-          title: t("Add Sub-flow"),
+          title: t("AddSubFlow"),
           submitText: t("Add"),
           value: flowName,
           onValidation: newName =>
             getMainInterface().graph.validator.validateNodeName(
               newName,
-              t("Sub-flow")
+              t("SubFlow")
             ),
           onClose: setFlowsToDefault,
           onSubmit: newName => getMainInterface().addFlow(newName)
@@ -894,7 +882,7 @@ const Flow = (props, ref) => {
     ({ message, callback }) => {
       call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
         submitText: t("Delete"),
-        title: t("Confirm to delete"),
+        title: t("ConfirmDelete"),
         onSubmit: callback,
         message
       });
@@ -964,11 +952,12 @@ const Flow = (props, ref) => {
       unselectNode();
     };
     // Compose confirmation message
-    let message = t("Are you sure you want to delete");
-    message +=
-      selectedNodes.length === 1
-        ? ` "${selectedNodes[0].data.id}"?`
-        : ` ${t("the selected nodes")}?`;
+    const message = t("NodeDeleteConfirmation", {
+      nodes:
+        selectedNodes.length === 1
+          ? selectedNodes[0].data.id
+          : t("TheSelectedNodes")
+    });
     // Show confirmation before delete
     handleDelete({ message, callback });
 

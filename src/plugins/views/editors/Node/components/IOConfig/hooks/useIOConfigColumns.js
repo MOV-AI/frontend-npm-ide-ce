@@ -99,7 +99,7 @@ const useIOConfigColumns = data => {
   const getTransportEditComponent = useCallback(
     props => {
       /**
-       * On Changte Transport / Protocol
+       * On Change Transport / Protocol
        * @param {Event} event
        */
       const onChange = event => {
@@ -265,7 +265,7 @@ const useIOConfigColumns = data => {
         editComponent: getNameEditComponent
       },
       {
-        title: t("Transport / Protocol"),
+        title: t("TransportProtocol"),
         field: "template",
         render: rowData => <div>{scopePorts[rowData?.template]?.Label}</div>, // what you see (not in edit mode)
         editComponent: getTransportEditComponent

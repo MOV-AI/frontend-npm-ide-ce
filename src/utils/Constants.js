@@ -176,7 +176,7 @@ export const EMPTY_MESSAGE = {
 
 export const DIALOG_TITLE = {
   PARAMETERS: "Parameter",
-  ENVVARS: "Environment Variable",
+  ENVVARS: "EnvironmentVariable",
   COMMANDS: "Command Line"
 };
 
@@ -224,7 +224,7 @@ export const DOCK_MODES = {
 
 export const FLOW_EXPLORER_PROFILE = {
   name: "FlowExplorer",
-  title: "Add Node / Sub-flow"
+  title: "AddNodeOrSubFlow"
 };
 
 export const HOMETAB_PROFILE = {
