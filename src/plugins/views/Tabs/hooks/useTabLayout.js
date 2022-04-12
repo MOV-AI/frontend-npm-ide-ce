@@ -415,6 +415,28 @@ const useTabLayout = (props, dockRef) => {
   );
 
   /**
+   * Install tab plugin
+   * @param {*} docFactory : Document Factory
+   * @param {{id: string, name: string, scope: string}} docData : Document data
+   * @returns {Promise} Promise resolved on installation
+   */
+  const installTabPlugin = useCallback(async (docFactory, docData) => {
+    // If Plugin is already installed, doesn't install it again
+    const plugin = PluginManagerIDE.getPlugin(docData.id);
+    if (plugin) return Promise.resolve(plugin);
+    else {
+      const Plugin = docFactory.plugin;
+      const viewPlugin = new Plugin(
+        { name: docData.id },
+        { id: docData.id, name: docData.name, scope: docData.scope }
+      );
+      return PluginManagerIDE.install(docData.id, viewPlugin).then(
+        () => viewPlugin
+      );
+    }
+  }, []);
+
+  /**
    * Get tab data based in document data
    * @param {{id: String, title: String, name: String, scope: String}} docData : document basic data
    * @returns {TabData} Tab data to be set in Layout
@@ -429,12 +451,7 @@ const useTabLayout = (props, dockRef) => {
         try {
           if (!docFactory) return docData;
 
-          const Plugin = docFactory.plugin;
-          const viewPlugin = new Plugin(
-            { name: docData.id },
-            { id: docData.id, name: docData.name, scope: docData.scope }
-          );
-          return PluginManagerIDE.install(docData.id, viewPlugin).then(() => {
+          return installTabPlugin(docFactory, docData).then(viewPlugin => {
             // Create and return tab data
             const extension = docFactory.store.model.EXTENSION ?? "";
             // Return TabData
@@ -455,7 +472,7 @@ const useTabLayout = (props, dockRef) => {
         }
       });
     },
-    [call, _getCustomTab, _closeTab]
+    [call, _getCustomTab, _closeTab, installTabPlugin]
   );
 
   /**
