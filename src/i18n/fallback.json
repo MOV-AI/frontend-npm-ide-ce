@@ -188,6 +188,7 @@
   "Only To": "Only To",
   "Open": "Open",
   "Overwrite document": "Overwrite document",
+  "Open {{callbackName}}": "Open {{callbackName}}",
   "Package": "Package",
   "Parameter name can't be empty": "Parameter name can't be empty",
   "Parameter": "Parameter",

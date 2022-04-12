@@ -101,6 +101,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
 
     return (
       <div
+        tabIndex="-1"
         onFocus={activateEditor}
         onBlur={deactivateKeyBind}
         className={`container-${scope}`}
