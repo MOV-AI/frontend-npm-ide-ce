@@ -57,6 +57,7 @@ export const systemMenuItemStyles = makeStyles(theme => ({
   },
   menuButton: {
     ...menuButtonStyles,
+    fontFamily: "Open Sans",
     display: "inline-flex",
     fontSize: "0.875rem",
     width: "100%",

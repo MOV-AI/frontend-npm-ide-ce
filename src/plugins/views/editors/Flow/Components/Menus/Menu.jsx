@@ -27,6 +27,7 @@ import DetailsMenu from "../../../_shared/DetailsMenu/DetailsMenu";
 import TableKeyValue from "./sub-components/TableKeyValue";
 import GroupItem from "./sub-components/GroupItem";
 import menuStyles from "./styles";
+import { ERROR_MESSAGES } from "../../../../../../utils/Messages";
 
 const ACTIVE_ITEM = {
   description: 1,
@@ -99,8 +100,8 @@ const Menu = ({
     (submitCallback, prevName = "") => {
       const args = {
         size: "sm",
-        title: prevName ? t("Edit Group") : t("Add Group"),
-        inputLabel: t("Group Name"),
+        title: prevName ? t("EditGroup") : t("AddGroup"),
+        inputLabel: t("GroupName"),
         value: prevName,
         onValidation: value => {
           try {
@@ -133,13 +134,13 @@ const Menu = ({
       const { name: newName } = newData;
 
       try {
-        if (!newName) throw new Error(`Name is mandatory`);
+        if (!newName) throw new Error(ERROR_MESSAGES.NAME_IS_MANDATORY);
         else if (!Utils.validateEntityName(newName, []))
-          throw new Error(`Invalid Name`);
+          throw new Error(ERROR_MESSAGES.INVALID_NAME);
 
         // Validate against repeated names
         if (oldName !== newName && model.current.getParameter(newName)) {
-          throw new Error(`Cannot have 2 entries with the same name`);
+          throw new Error(ERROR_MESSAGES.MULTIPLE_ENTRIES_WITH_SAME_NAME);
         }
       } catch (error) {
         return Promise.resolve({ result: false, error: error.message });
@@ -225,7 +226,7 @@ const Menu = ({
     const args = {
       size: "md",
       multiline: true,
-      title: t("Edit Description"),
+      title: t("EditDescription"),
       inputLabel: t("Description"),
       value: model.current.getDescription(),
       onSubmit: description => model.current.setDescription(description)
@@ -261,12 +262,12 @@ const Menu = ({
     ({ key, value }) => {
       const args = {
         submitText: t("Delete"),
-        title: t('Confirm to delete "{{paramName}}"', { paramName: key }),
+        title: t("ConfirmDeleteParam", { paramName: key }),
         onSubmit: () => model.current.deleteParameter(key),
-        message: t(
-          'Are you sure you want to delete the param "{{paramName}}" with the value "{{value}}"?',
-          { paramName: key, value }
-        )
+        message: t("ParameterDeleteConfirmationMessage", {
+          paramName: key,
+          value
+        })
       };
       call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, args);
     },
@@ -322,7 +323,7 @@ const Menu = ({
       </Typography>
     ) : (
       <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-        {t("No Parameters")}
+        {t("NoParameters")}
       </Typography>
     );
   }, [classes, editable, getParameters, handleParamDelete, handleParamEdit, t]);
@@ -346,7 +347,7 @@ const Menu = ({
       ))
     ) : (
       <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-        {t("No Groups")}
+        {t("NoGroups")}
       </Typography>
     );
   }, [

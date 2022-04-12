@@ -130,7 +130,7 @@ const MaterialTable = forwardRef((props, ref) => {
             actions: t("Actions")
           },
           body: {
-            emptyDataSourceMessage: t("No records to display"),
+            emptyDataSourceMessage: t("NoRecordsMessage"),
             deleteTooltip: t("Delete"),
             editTooltip: t("Edit"),
             addTooltip: t("Add"),

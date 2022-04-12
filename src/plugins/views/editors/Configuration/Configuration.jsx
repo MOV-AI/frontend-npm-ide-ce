@@ -46,7 +46,7 @@ const Configuration = (props, ref) => {
   const renderRightMenu = useCallback(() => {
     const details = props.data?.details || {};
     const menuName = `${id}-detail-menu`;
-    const menuTitle = t("Configuration Details Menu");
+    const menuTitle = t("ConfigurationDetailsMenuTitle");
     // add bookmark
     call(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.CALL.SET_BOOKMARK, {
       [menuName]: {

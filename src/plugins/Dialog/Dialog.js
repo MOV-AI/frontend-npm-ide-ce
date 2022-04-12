@@ -73,7 +73,7 @@ class Dialog extends IDEPlugin {
     ReactDOM.render(
       <NewDocumentDialog
         call={this.call}
-        title={i18n.t("New {{scope}}", { scope: data.scope })}
+        title={i18n.t("NewDocTitle", { scope: data.scope })}
         submitText={i18n.t("Create")}
         placeholder={data.placeholder}
         scope={data.scope}
@@ -94,8 +94,8 @@ class Dialog extends IDEPlugin {
       <NewDocumentDialog
         call={this.call}
         scope={data.scope}
-        title={i18n.t("Copy '{{name}}' to", { name: data.name })}
-        loadingMessage={i18n.t("Copying document")}
+        title={i18n.t("CopyDocTo", { docName: data.name })}
+        loadingMessage={i18n.t("CopyingDoc")}
         submitText={i18n.t("Copy")}
         onSubmit={data.onSubmit}
         onClose={() => this._handleDialogClose(targetElement, data.onClose)}
@@ -147,13 +147,13 @@ class Dialog extends IDEPlugin {
    */
   closeDirtyDocument(data) {
     const targetElement = this._handleDialogOpen();
-    const title = i18n.t("Do you want to save the changes?");
-    const message = i18n.t(
-      "Your changes to the {{scope}} '{{name}}' will be lost if you don't save them.",
-      { scope: data.scope, name: data.name }
-    );
+    const title = i18n.t("SaveChangesConfirmationTitle");
+    const message = i18n.t("SaveChangesConfirmationMessage", {
+      scope: data.scope,
+      name: data.name
+    });
     const actions = {
-      dontSave: { label: i18n.t("Don't Save") },
+      dontSave: { label: i18n.t("DontSave") },
       cancel: { label: i18n.t("Cancel") },
       save: { label: i18n.t("Save") }
     };
@@ -172,17 +172,15 @@ class Dialog extends IDEPlugin {
   saveOutdatedDocument(data) {
     const targetElement = this._handleDialogOpen();
     // Set dialog message
-    const title = i18n.t("The document is outdated");
-    const message = i18n.t(
-      "This document has recent updates in the Database. The version you are working is outdated.\n\nIf you update document your changes will be lost."
-    );
+    const title = i18n.t("SaveOutdatedDocTitle");
+    const message = i18n.t("SaveOutdatedDocMessage");
     // Set dialog actions
     const actions = {
       [SAVE_OUTDATED_DOC_ACTIONS.UPDATE_DOC]: {
-        label: i18n.t("Update document")
+        label: i18n.t("UpdateDoc")
       },
       [SAVE_OUTDATED_DOC_ACTIONS.OVERWRITE_DOC]: {
-        label: i18n.t("Overwrite document")
+        label: i18n.t("OverwriteDoc")
       },
       [SAVE_OUTDATED_DOC_ACTIONS.CANCEL]: { label: i18n.t("Cancel") }
     };

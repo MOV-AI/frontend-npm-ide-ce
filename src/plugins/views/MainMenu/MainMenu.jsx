@@ -88,7 +88,7 @@ const MainMenu = props => {
       upperElement={
         <ContextMenu
           element={
-            <Tooltip title={t("Create new document")} placement="right" arrow>
+            <Tooltip title={t("CreateNewDoc")} placement="right" arrow>
               <AddBoxIcon
                 id="mainMenuCreateNewDocument"
                 className={classes.icon}

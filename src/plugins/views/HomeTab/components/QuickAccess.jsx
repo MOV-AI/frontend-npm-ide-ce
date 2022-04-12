@@ -79,14 +79,14 @@ const QuickAccess = props => {
 
   return (
     <Paper className={classes.paper}>
-      <div className={classes.columnTitle}>{t("Quick access")}</div>
+      <div className={classes.columnTitle}>{t("QuickAccess")}</div>
       <Divider />
       <div className={classes.columnBody}>
         <ContextMenu
           element={
             <div className={classes.link}>
               <AddIcon className={classes.linkIcon} />
-              {t("Create New")}
+              {t("CreateNewDoc")}
             </div>
           }
           menuList={docTypes.map(docType => ({

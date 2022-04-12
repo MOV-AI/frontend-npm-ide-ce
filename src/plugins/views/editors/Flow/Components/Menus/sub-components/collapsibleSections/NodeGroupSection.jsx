@@ -59,7 +59,7 @@ const NodeGroupSection = props => {
     </Typography>
   ) : (
     <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-      {t("No groups")}
+      {t("NoGroups")}
     </Typography>
   );
 };

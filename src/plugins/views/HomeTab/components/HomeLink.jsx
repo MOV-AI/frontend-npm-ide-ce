@@ -30,7 +30,7 @@ function HomeLink(props) {
   return (
     <Tooltip
       arrow
-      title={`${t("Open")} ${props.doc.url}`}
+      title={t("OpenDocUrl", { docUrl: props.doc.url })}
       disableFocusListener
       disableHoverListener
       disableTouchListener

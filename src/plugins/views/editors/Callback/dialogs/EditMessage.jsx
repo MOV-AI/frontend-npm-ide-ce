@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Typography,
   TextField,
@@ -9,6 +10,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { PLUGINS } from "../../../../../utils/Constants";
+import { ERROR_MESSAGES } from "../../../../../utils/Constants";
 import { withTheme } from "../../../../../decorators/withTheme";
 import { DialogTitle } from "../../../../Dialog/components/AppDialog/AppDialog";
 import Loader from "../../_shared/Loader/Loader";
@@ -39,6 +41,8 @@ const EditMessageDialog = props => {
   const [selectedMsg, setSelectedMsg] = useState(selectedMessage);
   // Style hook
   const classes = useStyles();
+  // Translation hook
+  const { t } = useTranslation();
 
   //========================================================================================
   /*                                                                                      *
@@ -143,8 +147,8 @@ const EditMessageDialog = props => {
       ></MaterialTree>
     ) : (
       <>
-        <h2>Something went wrong :(</h2>
-        <h3>Failed to load messages</h3>
+        <h2>{t(ERROR_MESSAGES.SOMETHING_WENT_WRONG)}</h2>
+        <h3>{t("FailedToLoadMessages")}</h3>
       </>
     );
   };
@@ -152,7 +156,7 @@ const EditMessageDialog = props => {
   return (
     <Dialog open={true} onClose={onClose} classes={{ paper: classes.paper }}>
       <DialogTitle onClose={onClose} hasCloseButton={true}>
-        Edit Message
+        {t("EditMessage")}
       </DialogTitle>
       <DialogContent>
         <Search onSearch={onSearch} />
@@ -161,7 +165,7 @@ const EditMessageDialog = props => {
         </Typography>
         <TextField
           fullWidth
-          label={"Message"}
+          label={t("Message")}
           value={selectedMsg}
           margin="normal"
           disabled
