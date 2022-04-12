@@ -129,13 +129,13 @@ const useTabLayout = (props, dockRef) => {
         );
       }
 
+      activeTabId.current = layoutActiveId;
+
       if (!tabExists && layoutActiveId) {
         const newActiveTabId = getNextTabFromStack();
         if (maxboxChildren) maxboxChildren.activeId = newActiveTabId;
         else _layout.dockbox.children[0].activeId = newActiveTabId;
         activeTabId.current = newActiveTabId;
-      } else {
-        activeTabId.current = layoutActiveId;
       }
     },
     [getNextTabFromStack]
