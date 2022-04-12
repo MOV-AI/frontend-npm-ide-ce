@@ -103,7 +103,8 @@ export const portStyles = makeStyles(_theme => ({
   portCallbackLink: {
     textAlign: "end",
     fontSize: "0.875rem",
-    padding: "6px"
+    padding: "6px",
+    alignSelf: "flex-end"
   },
   detailsSection: {
     paddingLeft: "20px",

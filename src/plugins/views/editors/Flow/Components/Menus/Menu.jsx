@@ -232,7 +232,7 @@ const Menu = ({
     };
 
     call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, args);
-  }, [call, t, model]);
+  }, [model, call, t]);
 
   /**
    * Handle Add new Parameter

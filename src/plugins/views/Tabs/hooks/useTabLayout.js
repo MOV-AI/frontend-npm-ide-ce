@@ -129,9 +129,13 @@ const useTabLayout = (props, dockRef) => {
         );
       }
 
+      activeTabId.current = layoutActiveId;
+
       if (!tabExists && layoutActiveId) {
-        if (maxboxChildren) maxboxChildren.activeId = getNextTabFromStack();
-        else _layout.dockbox.children[0].activeId = getNextTabFromStack();
+        const newActiveTabId = getNextTabFromStack();
+        if (maxboxChildren) maxboxChildren.activeId = newActiveTabId;
+        else _layout.dockbox.children[0].activeId = newActiveTabId;
+        activeTabId.current = newActiveTabId;
       }
     },
     [getNextTabFromStack]
@@ -693,6 +697,13 @@ const useTabLayout = (props, dockRef) => {
     return tabsById.current.get(activeTabId.current);
   }, []);
 
+  /**
+   * Focus on active tab
+   */
+  const focusActiveTab = useCallback(() => {
+    focusExistingTab(activeTabId.current);
+  }, [focusExistingTab]);
+
   //========================================================================================
   /*                                                                                      *
    *                                   React lifecycles                                   *
@@ -767,10 +778,11 @@ const useTabLayout = (props, dockRef) => {
       _tabs.forEach(tab => {
         tab.status === "fulfilled" &&
           tabsById.current.set(tab.value.id, tab.value);
-        // This is to get the last tab rendered (which is the one focused when we mount the component)
-        activeTabId.current = tab.value.id;
       });
       setLayout(lastLayout);
+
+      // Save current active tab id
+      const currentActiveTabId = activeTabId.current;
 
       // Open Home Tab
       if (lastTabs.has(HOMETAB_PROFILE.name)) {
@@ -778,6 +790,8 @@ const useTabLayout = (props, dockRef) => {
         tabsById.current.set(tabData.id, tabData);
         workspaceManager.setTabs(tabsById.current);
         dockRef.current.updateTab(HOMETAB_PROFILE.name, tabData, false);
+        // Set current active tab id after home tab update
+        activeTabId.current = currentActiveTabId;
       }
     });
 
@@ -802,6 +816,7 @@ const useTabLayout = (props, dockRef) => {
     onLayoutChange,
     focusExistingTab,
     getActiveTab,
+    focusActiveTab,
     updateTabId
   };
 };

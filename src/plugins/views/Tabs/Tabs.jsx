@@ -22,6 +22,7 @@ const Tabs = (props, ref) => {
     onLayoutChange,
     focusExistingTab,
     getActiveTab,
+    focusActiveTab,
     loadTab,
     updateTabId
   } = useTabLayout(props, dockRef);
@@ -31,6 +32,7 @@ const Tabs = (props, ref) => {
     openEditor,
     updateTabId,
     getActiveTab,
+    focusActiveTab,
     close
   });
 

@@ -288,6 +288,7 @@ class Dialog extends IDEPlugin {
     document.body.classList.remove(Dialog.BODY_CLASS_NAME);
     ReactDOM.unmountComponentAtNode(targetElement);
     targetElement.parentNode.removeChild(targetElement);
+    this.call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.FOCUS_ACTIVE_TAB);
     onClose && onClose();
   }
 
