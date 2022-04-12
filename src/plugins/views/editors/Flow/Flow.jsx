@@ -1025,7 +1025,7 @@ const Flow = (props, ref) => {
   //========================================================================================
 
   return (
-    <div className={classes.root}>
+    <div data-testid="section_flow-editor" className={classes.root}>
       <div id="flow-top-bar">
         <FlowTopBar
           id={id}

@@ -45,8 +45,10 @@ const useKeyValueMethods = () => {
    */
   const renderValue = rowData => {
     if (rowData.type === DATA_TYPES.STRING)
-      return JSON.stringify(rowData.value);
-    return rowData.value;
+      return (
+        <span data-testid="output_value">{JSON.stringify(rowData.value)}</span>
+      );
+    return <span data-testid="output_value">{rowData.value}</span>;
   };
 
   //========================================================================================
@@ -81,19 +83,20 @@ const useKeyValueMethods = () => {
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
           overflow: "hidden"
-        }
+        },
+        render: rowData => <span data-testid="output_name">{rowData.name}</span>
       },
       {
         title: t("Value"),
         field: "value",
-        render: renderValue,
         width: "45%",
         cellStyle: {
           maxWidth: 200,
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
           overflow: "hidden"
-        }
+        },
+        render: renderValue
       }
     ];
   };

@@ -25,7 +25,12 @@ const MenuDetails = props => {
       <h2 className={classes.header}>{id}</h2>
       <ListItem divider>
         <ListItemText primary={t(label)} />
-        <NodeLink name={template} scope={model} openDoc={openDoc}>
+        <NodeLink
+          data-testid="section_node-link"
+          name={template}
+          scope={model}
+          openDoc={openDoc}
+        >
           {template}
         </NodeLink>
       </ListItem>

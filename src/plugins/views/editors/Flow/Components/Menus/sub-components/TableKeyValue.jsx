@@ -25,7 +25,12 @@ const TableKeyValue = props => {
       {filter(searchValue, list)
         .sort((a, b) => a.key.localeCompare(b.key))
         .map((item, index) => (
-          <RowKeyValue {...props} key={index} item={item} />
+          <RowKeyValue
+            data-testid="section_key-value-row"
+            {...props}
+            key={index}
+            item={item}
+          />
         ))}
     </Typography>
   );

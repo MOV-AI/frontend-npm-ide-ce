@@ -110,6 +110,10 @@ const Configuration = (props, ref) => {
    */
   const onLoadEditor = editor => {
     if (!id) editor.focus();
+    // Add testid
+    editor._domElement
+      .querySelector("textarea")
+      .setAttribute("data-testid", "input_code");
   };
 
   //========================================================================================
@@ -135,9 +139,20 @@ const Configuration = (props, ref) => {
   };
 
   return (
-    <div className={classes.container}>
-      <AppBar position="static" className={classes.appBar}>
-        <Toolbar variant="dense" onClick={activateEditor}>
+    <div
+      data-testid="section_configuration-editor"
+      className={classes.container}
+    >
+      <AppBar
+        data-testid="section_app-bar"
+        position="static"
+        className={classes.appBar}
+      >
+        <Toolbar
+          data-testid="input-toolbar"
+          variant="dense"
+          onClick={activateEditor}
+        >
           <ToggleButtonGroup
             size="small"
             exclusive

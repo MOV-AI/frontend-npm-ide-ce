@@ -67,6 +67,7 @@ const PortsDetails = props => {
         </Typography>
       ) : (
         <Link
+          data-testid="input_open-callback"
           key={`${callback}_${index}`}
           className={classes.portCallbackLink}
           disabled={true}
@@ -96,6 +97,7 @@ const PortsDetails = props => {
       return portsData.map((port, portIndex) => {
         return (
           <Typography
+            data-testid="section_port"
             key={`${port.name}_${portIndex}`}
             component="div"
             className={classes.portRow}

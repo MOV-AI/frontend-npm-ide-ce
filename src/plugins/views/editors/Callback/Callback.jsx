@@ -48,7 +48,7 @@ const Callback = (props, ref) => {
     // add bookmark
     call(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.CALL.SET_BOOKMARK, {
       [menuName]: {
-        icon: <InfoIcon></InfoIcon>,
+        icon: <InfoIcon />,
         name: menuName,
         title: menuTitle,
         view: <Menu id={id} call={call} name={name} scope={scope} />
@@ -73,6 +73,10 @@ const Callback = (props, ref) => {
 
   const onEditorLoad = editor => {
     if (!id) editor.focus();
+    // Add testid
+    editor._domElement
+      .querySelector("textarea")
+      .setAttribute("data-testid", "input_code");
   };
 
   //========================================================================================
@@ -82,7 +86,7 @@ const Callback = (props, ref) => {
   //========================================================================================
 
   return (
-    <div className={classes.container}>
+    <div data-testid="section_callback-editor" className={classes.container}>
       <MonacoCodeEditor
         value={data?.code}
         language={"python"}

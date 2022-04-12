@@ -111,6 +111,7 @@ class AbstractDataType {
     const value = parsedValue !== undefined ? parsedValue : props.rowData.value;
     return (
       <TextField
+        inputProps={{ "data-testid": "input_value" }}
         fullWidth
         placeholder={placeholder}
         value={value || ""}
@@ -132,6 +133,10 @@ class AbstractDataType {
           onLoad={editor => {
             if (!props.isNew) editor.focus();
             props.onLoadEditor && props.onLoadEditor(editor);
+            // Add testid
+            editor._domElement
+              .querySelector("textarea")
+              .setAttribute("data-testid", "input_value");
           }}
           language="python"
           disableMinimap={true}

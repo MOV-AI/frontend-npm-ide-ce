@@ -280,6 +280,33 @@ const Menu = ({
     editGroupName(groupName => model.current.addGroup(groupName));
   }, [editGroupName, model]);
 
+  /**
+   * Handle Description Edit
+   * @param {*} e
+   */
+  const handleDescriptionClick = e => {
+    e.stopPropagation();
+    handleEditDescriptionClick();
+  };
+
+  /**
+   * Handle Add Parameter
+   * @param {*} e
+   */
+  const handleAddParameter = e => {
+    e.stopPropagation();
+    handleAddParameterClick();
+  };
+
+  /**
+   * Handle Add Group
+   * @param {*} e
+   */
+  const handleAddGroup = e => {
+    e.stopPropagation();
+    handleAddGroupClick();
+  };
+
   //========================================================================================
   /*                                                                                      *
    *                                        Render                                        *
@@ -336,6 +363,7 @@ const Menu = ({
     return groups.length ? (
       groups.map(group => (
         <GroupItem
+          data-testid="section_group-item"
           key={group.id}
           item={group}
           model={model}
@@ -360,22 +388,21 @@ const Menu = ({
   ]);
 
   return (
-    <Typography component="div">
+    <Typography data-testid="section_flow-details-menu" component="div">
       <DetailsMenu name={name} details={data.details || {}}></DetailsMenu>
       <List>
         {/* ============ DESCRIPTION ============ */}
         <ListItem
+          data-testid="input_description-expand"
           button
           data-menu-id={ACTIVE_ITEM.description}
           onClick={handleExpandClick}
         >
           <ListItemText primary={t("Description")} />
           <IconButton
+            data-testid="input_description-edit"
             disabled={!editable}
-            onClick={e => {
-              e.stopPropagation();
-              handleEditDescriptionClick();
-            }}
+            onClick={handleDescriptionClick}
           >
             <EditIcon />
           </IconButton>
@@ -391,17 +418,16 @@ const Menu = ({
         </Collapse>
         {/* ============ PARAMETERS ============ */}
         <ListItem
+          data-testid="input_parameters-expand"
           button
           data-menu-id={ACTIVE_ITEM.parameters}
           onClick={handleExpandClick}
         >
           <ListItemText primary={t("Parameters")} />
           <IconButton
+            data-testid="input_parameters-add"
             disabled={!editable}
-            onClick={e => {
-              e.stopPropagation();
-              handleAddParameterClick();
-            }}
+            onClick={handleAddParameter}
           >
             <Add />
           </IconButton>
@@ -411,29 +437,36 @@ const Menu = ({
             <ExpandMore />
           )}
         </ListItem>
-        <Collapse in={activeItem === ACTIVE_ITEM.parameters} unmountOnExit>
+        <Collapse
+          data-testid="section_parameters-table"
+          in={activeItem === ACTIVE_ITEM.parameters}
+          unmountOnExit
+        >
           {renderParameters()}
           <Divider />
         </Collapse>
         {/* ============ GROUPS ============ */}
         <ListItem
+          data-testid="input_groups-expand"
           button
           data-menu-id={ACTIVE_ITEM.groups}
           onClick={handleExpandClick}
         >
           <ListItemText primary={t("Groups")} />
           <IconButton
+            data-testid="input_groups-add"
             disabled={!editable}
-            onClick={e => {
-              e.stopPropagation();
-              handleAddGroupClick();
-            }}
+            onClick={handleAddGroup}
           >
             <Add />
           </IconButton>
           {activeItem === ACTIVE_ITEM.groups ? <ExpandLess /> : <ExpandMore />}
         </ListItem>
-        <Collapse in={activeItem === ACTIVE_ITEM.groups} unmountOnExit>
+        <Collapse
+          data-testid="section_groups-table"
+          in={activeItem === ACTIVE_ITEM.groups}
+          unmountOnExit
+        >
           {renderGroups()}
           <Divider />
         </Collapse>

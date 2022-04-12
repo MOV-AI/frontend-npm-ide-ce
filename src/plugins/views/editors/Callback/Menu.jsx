@@ -240,7 +240,11 @@ const Menu = props => {
               />
               <ListItemSecondaryAction>
                 <Tooltip title={t("Remove import")}>
-                  <IconButton edge="end" onClick={() => deleteImport(pyLib)}>
+                  <IconButton
+                    data-testid="input_delete-import"
+                    edge="end"
+                    onClick={() => deleteImport(pyLib)}
+                  >
                     <DeleteIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
@@ -271,7 +275,11 @@ const Menu = props => {
           />
           <ListItemSecondaryAction>
             <Tooltip title={t("Remove message")}>
-              <IconButton edge="end" onClick={handleRemoveMessage}>
+              <IconButton
+                data-testid="input_delete-message"
+                edge="end"
+                onClick={handleRemoveMessage}
+              >
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -287,16 +295,25 @@ const Menu = props => {
 
   return (
     <div>
-      <DetailsMenu name={name} details={data.details || {}}></DetailsMenu>
+      <DetailsMenu
+        data-testid="section_callback-details-menu"
+        name={name}
+        details={data.details || {}}
+      ></DetailsMenu>
       <List>
         {/* ============ IMPORTS ============ */}
         <ListItem
+          data-testid="input_imports-expand"
           button
           data-active-item={ACTIVE_ITEM.IMPORTS}
           onClick={handleExpandClick}
         >
           <ListItemText primary={t("Imports")} />
-          <IconButton disabled={!editable} onClick={handleAddImportsClick}>
+          <IconButton
+            data-testid="input_add-import"
+            disabled={!editable}
+            onClick={handleAddImportsClick}
+          >
             <AddIcon />
           </IconButton>
           {isActive(ACTIVE_ITEM.IMPORTS) ? <ExpandLess /> : <ExpandMore />}
@@ -307,12 +324,17 @@ const Menu = props => {
         </Collapse>
         {/* ============ MESSAGE ============ */}
         <ListItem
+          data-testid="input_message-expand"
           button
           data-active-item={ACTIVE_ITEM.MESSAGE}
           onClick={handleExpandClick}
         >
           <ListItemText primary={t("Message")} />
-          <IconButton disabled={!editable} onClick={handleEditMessageClick}>
+          <IconButton
+            data-testid="input_edit-message"
+            disabled={!editable}
+            onClick={handleEditMessageClick}
+          >
             <EditIcon />
           </IconButton>
           {isActive(ACTIVE_ITEM.MESSAGE) ? <ExpandLess /> : <ExpandMore />}

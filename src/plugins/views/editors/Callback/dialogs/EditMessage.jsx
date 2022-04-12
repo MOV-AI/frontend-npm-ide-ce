@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Typography,
   TextField,
@@ -39,6 +40,8 @@ const EditMessageDialog = props => {
   const [selectedMsg, setSelectedMsg] = useState(selectedMessage);
   // Style hook
   const classes = useStyles();
+  // Translation hook
+  const { t } = useTranslation();
 
   //========================================================================================
   /*                                                                                      *
@@ -143,16 +146,21 @@ const EditMessageDialog = props => {
       ></MaterialTree>
     ) : (
       <>
-        <h2>Something went wrong :(</h2>
-        <h3>Failed to load messages</h3>
+        <h2>{t("SomethingWentWrong")}</h2>
+        <h3>{t("FailedLoadMessages")}</h3>
       </>
     );
   };
 
   return (
-    <Dialog open={true} onClose={onClose} classes={{ paper: classes.paper }}>
+    <Dialog
+      data-testid="section_edit-message"
+      open={true}
+      onClose={onClose}
+      classes={{ paper: classes.paper }}
+    >
       <DialogTitle onClose={onClose} hasCloseButton={true}>
-        Edit Message
+        {t("Edit Message")}
       </DialogTitle>
       <DialogContent>
         <Search onSearch={onSearch} />
@@ -168,8 +176,11 @@ const EditMessageDialog = props => {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button data-testid="input_cancel" onClick={onClose}>
+          {t("Cancel")}
+        </Button>
         <Button
+          data-testid="input_confirm"
           color="primary"
           onClick={() => {
             onSubmit(selectedMsg);
@@ -177,7 +188,7 @@ const EditMessageDialog = props => {
           }}
           disabled={!selectedMsg}
         >
-          Submit
+          {t("Submit")}
         </Button>
       </DialogActions>
     </Dialog>

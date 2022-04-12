@@ -384,7 +384,11 @@ const Node = (props, ref) => {
   //========================================================================================
 
   return (
-    <Typography component="div" className={classes.container}>
+    <Typography
+      data-testid="section_node-editor"
+      component="div"
+      className={classes.container}
+    >
       <Description
         onChangeDescription={updateDescription}
         editable={editable}
@@ -420,6 +424,7 @@ const Node = (props, ref) => {
         onRowDelete={deleteKeyValue}
       ></ParametersTable>
       <KeyValueTable
+        testId="section_env-vars"
         title={t("Environment Variables")}
         editable={editable}
         data={data.envVars}
@@ -429,6 +434,7 @@ const Node = (props, ref) => {
         varName="envVars"
       ></KeyValueTable>
       <KeyValueTable
+        testId="section_command-line"
         title={t("Command Line")}
         editable={editable}
         data={data.commands}

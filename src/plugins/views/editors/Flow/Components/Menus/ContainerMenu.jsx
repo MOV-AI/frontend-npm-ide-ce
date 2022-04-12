@@ -139,7 +139,7 @@ const ContainerMenu = props => {
   //========================================================================================
 
   return (
-    <>
+    <div data-testid="section_flow-container-menu">
       <MenuDetails
         id={data.id}
         model={data.model}
@@ -149,7 +149,11 @@ const ContainerMenu = props => {
         openDoc={openDoc}
       />
       {/* =========================== PARAMETERS =========================== */}
-      <ListItem button onClick={toggleExpanded}>
+      <ListItem
+        data-testid="input_toggle-expanded-parameters"
+        button
+        onClick={toggleExpanded}
+      >
         <ListItemText primary={t("Parameters")} />
         {expanded ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
@@ -163,7 +167,7 @@ const ContainerMenu = props => {
         />
         <Divider />
       </Collapse>
-    </>
+    </div>
   );
 };
 

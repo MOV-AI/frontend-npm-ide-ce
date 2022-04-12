@@ -13,6 +13,7 @@
 - [FP-1560 - Saving an untitled file will now always prompt for a name](https://movai.atlassian.net/browse/FP-1560)
 - [FP-1595 - Removed unused function that contained vulnerabilities](https://movai.atlassian.net/browse/FP-1595)
 - [FP-1610 - Remove editor keybinds when editor is blurred](https://movai.atlassian.net/browse/FP-1610)
+- [FP-1548 - Added testids to help QA](https://movai.atlassian.net/browse/FP-1548)
 
 **Callback Editor**
 

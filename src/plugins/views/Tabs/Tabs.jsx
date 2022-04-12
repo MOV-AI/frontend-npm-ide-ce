@@ -51,7 +51,11 @@ const Tabs = (props, ref) => {
   };
 
   return (
-    <div className={classes.root} onClick={focusActivePanelTab}>
+    <div
+      data-testid="input_tab-panel"
+      className={classes.root}
+      onClick={focusActivePanelTab}
+    >
       <DockLayout
         ref={dockRef}
         layout={layout}

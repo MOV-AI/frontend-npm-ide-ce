@@ -163,47 +163,57 @@ const FormDialog = props => {
       fullWidth={!!size}
       maxWidth={size}
     >
-      <DialogTitle>
-        {loadingMessage && isLoading ? loadingMessage : title}
-      </DialogTitle>
-      <DialogContent className={classes.dialogContent}>
-        {message && <DialogContentText>{message}</DialogContentText>}
-        {isLoading ? (
-          <div className={classes.loadingContainer}>
-            <CircularProgress />
-          </div>
-        ) : (
-          <TextField
-            ref={inputRef}
-            autoFocus={true}
-            error={validation.error}
-            helperText={validation.message}
-            className={classes.textfield}
-            label={t(inputLabel)}
-            InputLabelProps={{ shrink: true }}
-            defaultValue={value}
-            placeholder={placeholder}
-            multiline={multiline}
-            onPaste={handlePaste}
-            onKeyPress={handleKeyPress}
-            onChange={handleOnChange}
-            inputProps={{ maxLength: multiline ? "" : maxLength }} // limit of characters here
-            margin="normal"
-          />
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} color="secondary">
-          {t("Cancel")}
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          disabled={validation.error}
-          color="primary"
-        >
-          {submitText}
-        </Button>
-      </DialogActions>
+      <div data-testid="section_form-dialog">
+        <DialogTitle>
+          {loadingMessage && isLoading ? loadingMessage : title}
+        </DialogTitle>
+        <DialogContent className={classes.dialogContent}>
+          {message && <DialogContentText>{message}</DialogContentText>}
+          {isLoading ? (
+            <div className={classes.loadingContainer}>
+              <CircularProgress />
+            </div>
+          ) : (
+            <TextField
+              ref={inputRef}
+              autoFocus={true}
+              error={validation.error}
+              helperText={validation.message}
+              className={classes.textfield}
+              label={t(inputLabel)}
+              InputLabelProps={{ shrink: true }}
+              defaultValue={value}
+              placeholder={placeholder}
+              multiline={multiline}
+              onPaste={handlePaste}
+              onKeyPress={handleKeyPress}
+              onChange={handleOnChange}
+              inputProps={{
+                "data-testid": "input_value",
+                maxLength: multiline ? "" : maxLength
+              }} // limit of characters here
+              margin="normal"
+            />
+          )}
+        </DialogContent>
+        <DialogActions data-testid="section_dialog-actions">
+          <Button
+            data-testid="input_close"
+            onClick={handleClose}
+            color="secondary"
+          >
+            {t("Cancel")}
+          </Button>
+          <Button
+            data-testid="input_confirm"
+            onClick={handleSubmit}
+            disabled={validation.error}
+            color="primary"
+          >
+            {submitText}
+          </Button>
+        </DialogActions>
+      </div>
     </Dialog>
   );
 };

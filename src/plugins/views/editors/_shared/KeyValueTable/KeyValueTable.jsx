@@ -16,7 +16,8 @@ const KeyValueTable = props => {
     onRowDelete,
     openEditDialog,
     editable,
-    columns
+    columns,
+    testId = "section_key-value-table"
   } = props;
   // Hooks
   const { t } = useTranslation();
@@ -85,7 +86,7 @@ const KeyValueTable = props => {
   //========================================================================================
 
   return (
-    <CollapsibleHeader title={title}>
+    <CollapsibleHeader testId={testId} title={title}>
       <MaterialTable
         columns={columns}
         data={formatData(data)}
