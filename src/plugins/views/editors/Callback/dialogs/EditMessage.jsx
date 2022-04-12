@@ -10,7 +10,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { PLUGINS } from "../../../../../utils/Constants";
-import { ERROR_MESSAGES } from "../../../../../utils/Constants";
+import { ERROR_MESSAGES } from "../../../../../utils/Messages";
 import { withTheme } from "../../../../../decorators/withTheme";
 import { DialogTitle } from "../../../../Dialog/components/AppDialog/AppDialog";
 import Loader from "../../_shared/Loader/Loader";
