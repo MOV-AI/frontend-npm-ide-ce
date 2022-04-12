@@ -49,7 +49,7 @@ const AppDialog = props => {
     onSubmit,
     onClose,
     closeOnBackdrop,
-    title = t("Are you sure?"),
+    title = t("DefaultDialogTitle"),
     submitText = t("Submit")
   } = props;
   const [open, setOpen] = useState(true);

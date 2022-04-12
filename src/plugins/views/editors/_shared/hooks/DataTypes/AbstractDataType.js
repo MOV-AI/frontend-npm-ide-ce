@@ -58,7 +58,7 @@ class AbstractDataType {
     );
     return Promise.resolve({
       success: false,
-      error: "Validation method not implemented"
+      error: "ValidationMethodNotImplemented"
     });
   }
 

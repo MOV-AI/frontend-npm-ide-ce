@@ -326,7 +326,7 @@ const IOConfig = props => {
   //========================================================================================
 
   return (
-    <CollapsibleHeader title={t("I/O Configuration")} defaultExpanded={true}>
+    <CollapsibleHeader title={t("IOConfiguration")} defaultExpanded={true}>
       <Typography
         component="div"
         className={classes.details}

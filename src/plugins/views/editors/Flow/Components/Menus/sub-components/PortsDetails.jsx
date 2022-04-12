@@ -70,7 +70,7 @@ const PortsDetails = props => {
           key={`${callback}_${index}`}
           placement={"bottom-start"}
           className={classes.portCallbackLink}
-          title={t("Open {{callbackName}}", { callbackName: callback })}
+          title={t("OpenCallbackName", { callbackName: callback })}
         >
           <span>
             <Link
@@ -138,7 +138,7 @@ const PortsDetails = props => {
   return (
     <>
       <Typography component="div" className={classes.detailsSection}>
-        {t("Ports:")}
+        {t("Ports-Colon")}
       </Typography>
       <Typography component="div" className={classes.detailsContent}>
         <Typography component="div">

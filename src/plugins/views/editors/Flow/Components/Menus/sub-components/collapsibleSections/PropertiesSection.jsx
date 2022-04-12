@@ -16,22 +16,22 @@ const PropertiesSection = ({
       persistent: {
         title: t("Persistent"),
         options: [
-          { text: t("Is persistent"), value: true },
-          { text: t("Not persistent"), value: false }
+          { text: t("IsPersistent"), value: true },
+          { text: t("NotPersistent"), value: false }
         ]
       },
       remappable: {
         title: t("Remappable"),
         options: [
-          { text: t("Is remappable"), value: true },
-          { text: t("Not remappable"), value: false }
+          { text: t("IsRemappable"), value: true },
+          { text: t("NotRemappable"), value: false }
         ]
       },
       launch: {
         title: t("Launch"),
         options: [
-          { text: t("To launch"), value: true },
-          { text: t("Not to launch"), value: false }
+          { text: t("ToLaunch"), value: true },
+          { text: t("NotToLaunch"), value: false }
         ]
       }
     }),

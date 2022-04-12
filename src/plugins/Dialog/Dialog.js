@@ -1,5 +1,6 @@
 import ReactDOM from "react-dom";
 import { SelectScopeModal } from "@mov-ai/mov-fe-lib-react";
+import i18n from "../../i18n/i18n";
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
 import { randomId } from "../../utils/Utils";
 import { PLUGINS, SAVE_OUTDATED_DOC_ACTIONS } from "../../utils/Constants";
@@ -72,8 +73,8 @@ class Dialog extends IDEPlugin {
     ReactDOM.render(
       <NewDocumentDialog
         call={this.call}
-        title={`New ${data.scope}`}
-        submitText={"Create"}
+        title={i18n.t("NewDocTitle", { scope: data.scope })}
+        submitText={i18n.t("Create")}
         placeholder={data.placeholder}
         scope={data.scope}
         onSubmit={data.onSubmit}
@@ -93,9 +94,9 @@ class Dialog extends IDEPlugin {
       <NewDocumentDialog
         call={this.call}
         scope={data.scope}
-        title={`Copy "${data.name}" to`}
-        loadingMessage={"Copying document"}
-        submitText={"Copy"}
+        title={i18n.t("CopyDocTo", { docName: data.name })}
+        loadingMessage={i18n.t("CopyingDoc")}
+        submitText={i18n.t("Copy")}
         onSubmit={data.onSubmit}
         onClose={() => this._handleDialogClose(targetElement, data.onClose)}
       />,
@@ -146,12 +147,15 @@ class Dialog extends IDEPlugin {
    */
   closeDirtyDocument(data) {
     const targetElement = this._handleDialogOpen();
-    const title = "Do you want to save the changes?";
-    const message = `Your changes to the ${data.scope} "${data.name}" will be lost if you don't save them.`;
+    const title = i18n.t("SaveChangesConfirmationTitle");
+    const message = i18n.t("SaveChangesConfirmationMessage", {
+      scope: data.scope,
+      name: data.name
+    });
     const actions = {
-      dontSave: { label: "Don't Save" },
-      cancel: { label: "Cancel" },
-      save: { label: "Save" }
+      dontSave: { label: i18n.t("DontSave") },
+      cancel: { label: i18n.t("Cancel") },
+      save: { label: i18n.t("Save") }
     };
     ReactDOM.render(
       <AlertBeforeAction
@@ -168,16 +172,17 @@ class Dialog extends IDEPlugin {
   saveOutdatedDocument(data) {
     const targetElement = this._handleDialogOpen();
     // Set dialog message
-    const title = "The document is outdated";
-    const message =
-      "This document has recent updates in the Database. The version you are working is outdated.\n\nIf you update document your changes will be lost.";
+    const title = i18n.t("SaveOutdatedDocTitle");
+    const message = i18n.t("SaveOutdatedDocMessage");
     // Set dialog actions
     const actions = {
-      [SAVE_OUTDATED_DOC_ACTIONS.UPDATE_DOC]: { label: "Update document" },
-      [SAVE_OUTDATED_DOC_ACTIONS.OVERWRITE_DOC]: {
-        label: "Overwrite document"
+      [SAVE_OUTDATED_DOC_ACTIONS.UPDATE_DOC]: {
+        label: i18n.t("UpdateDoc")
       },
-      [SAVE_OUTDATED_DOC_ACTIONS.CANCEL]: { label: "Cancel" }
+      [SAVE_OUTDATED_DOC_ACTIONS.OVERWRITE_DOC]: {
+        label: i18n.t("OverwriteDoc")
+      },
+      [SAVE_OUTDATED_DOC_ACTIONS.CANCEL]: { label: i18n.t("Cancel") }
     };
     // Show dialog
     ReactDOM.render(

@@ -137,7 +137,7 @@ const RecentDocuments = props => {
     <Paper className={classes.paper}>
       <div className={`${classes.columnTitle} ${classes.flexTitle}`}>
         <span>{t("Recent")}</span>
-        <Tooltip title={t("Remove all")}>
+        <Tooltip title={t("RemoveAll")}>
           <span>
             <IconButton
               onClick={handleRemoveRecentDocuments}

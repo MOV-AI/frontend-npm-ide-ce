@@ -57,13 +57,16 @@ export const systemMenuItemStyles = makeStyles(theme => ({
   },
   menuButton: {
     ...menuButtonStyles,
+    fontFamily: "Open Sans",
+    display: "inline-flex",
+    fontSize: "0.875rem",
     width: "100%",
     justifyContent: "space-between",
     color: theme.palette.grey[200],
     "& > .MuiButton-label": { paddingLeft: "10px" },
     "&:hover": {
       background: theme.palette.grey[900],
-      "& > .MuiButton-label > div[class*=subMenuHolder]": {
+      "& > .MuiButton-label > ul[class*=subMenuHolder]": {
         opacity: "1",
         maxWidth: "500px"
       }
@@ -90,6 +93,8 @@ export const systemMenuItemStyles = makeStyles(theme => ({
     opacity: "0",
     borderRadius: "3px",
     boxShadow: "1px 1px 2px 1px #333",
+    margin: "0",
+    padding: "0",
     background: theme.topBarColor,
     transform: "translate(99%)",
     transition: "opacity .3s, max-width .3s"
