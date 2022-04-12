@@ -1,17 +1,16 @@
 {
-    "Callback": {
-        "backend.NodeEditor": {
-            "Code": "\"\"\"\n   Copyright (C) Mov.ai  - All Rights Reserved\n   Unauthorized copying of this file, via any medium is strictly prohibited\n   Proprietary and confidential\n   Developers:\n   - Pedro Cristóvão (pedro.cristovao@mov.ai) - 2020\n   - Vicente Queiroz (vicente.queiroz@mov.ai) - 2020\n\"\"\"\nfrom movai.data.scope import ScopesTree\n\ndef get_filtered_callbacks(workspace, message_type=None):\n    index = 0\n    scopeIndex = -1\n    answer = []\n    message_type_predicate = (lambda msg_type: True) if not message_type else (lambda msg_type: msg_type == message_type)\n    my_scope = ScopesTree()(workspace=workspace)\n    \n    for cb_scope in my_scope.list_scopes(scope=\"Callback\"):\n        firstTime = True\n        for cb_version in my_scope.list_versions(scope=\"Callback\", ref=cb_scope['ref']):\n            callback = my_scope.Callback[cb_scope['ref'], cb_version['tag']]\n            if message_type_predicate(callback.Message):\n                if workspace == \"global\":\n                    answer.append(get_callback_struct(cb_scope, callback, index, False))\n                    index = index + 1\n                else:\n                    if firstTime:\n                        scopeIndex = scopeIndex + 1\n                        answer.append(get_callback_struct(cb_scope, callback, scopeIndex, True))\n                        answer[scopeIndex][\"children\"].append(get_version_struct(cb_version))\n                        firstTime = False\n                    else:\n                        answer[scopeIndex][\"children\"].append(get_version_struct(cb_version))\n\n    return answer\n\ndef get_callback_struct(callback_scope, callback, index, hasChildren):\n    if hasChildren:\n        return {\n            'id': index,\n            'name': callback_scope['ref'],\n            'url': callback_scope['url'],\n            'children': []\n        }\n    else:\n        return {\n            'id': index,\n            'name': callback_scope['ref'],\n            'url': callback_scope['url'],\n        }       \n\ndef get_version_struct(callback):\n    return {\n        'id': callback['tag'],\n        'name': callback['tag'],\n        'url': callback['url'],\n    }\n\n# Main\nkey2action_map = {\n    \"getFilteredCallbacks\": get_filtered_callbacks\n}\n\nfunc, args = msg['func'], msg[\"args\"]\nprint(\"function called...\", func)\nprint(\"with args...\", args)\ntry:\n    response = {\"success\": True}\n    if isinstance(args, list):\n        response[\"result\"] = key2action_map[func](*args)\n    else:\n        response[\"result\"] = key2action_map[func](args)\nexcept Exception as e:\n    logger.error(\"Exception caught at backend.NodeEditor\" + str(e))\n    response = {\"success\": False, \"error\": \"Exception caught at backend.NodeEditor, please check logs\"}",
-            "Label": "backend.NodeEditor",
-            "LastUpdate": {
-                "date": "5/02/2021 at 19:16:30",
-                "user": "movai"
-            },
-            "VersionDelta": {},
-            "User": "",
-            "Info": "",
-            "Version": "",
-            "Message": ""
-        }
+  "Callback": {
+    "backend.NodeEditor": {
+      "Label": "backend.NodeEditor",
+      "LastUpdate": {
+        "date": "05/02/2021 at 19:16:30",
+        "user": "movai"
+      },
+      "VersionDelta": {},
+      "User": "movai",
+      "Info": "",
+      "Version": "",
+      "Message": ""
     }
+  }
 }
