@@ -1,3 +1,5 @@
+import i18n from "../i18n/i18n";
+
 export const APP_DEFAULT_CONFIG = "app-ide-ce";
 export const APP_CUSTOM_CONFIG = "app-custom-ide-ce";
 
@@ -225,7 +227,10 @@ export const FLOW_EXPLORER_PROFILE = {
   title: "Add Node / Sub-flow"
 };
 
-export const HOMETAB_PROFILE = { name: "HomeTab", title: "Welcome" };
+export const HOMETAB_PROFILE = {
+  name: "HomeTab",
+  title: i18n.t("HomeTabTitle")
+};
 
 export const DEFAULT_TABS = new Map(
   Object.entries({ [HOMETAB_PROFILE.name]: { id: HOMETAB_PROFILE.name } })
