@@ -217,7 +217,7 @@ const Node = (props, ref) => {
   const renderRightMenu = useCallback(() => {
     const details = props.data?.details ?? {};
     const menuName = `${id}-detail-menu`;
-    const menuTitle = t("Node Details Menu");
+    const menuTitle = t("NodeDetailsMenuTitle");
     // add bookmark
     call(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.CALL.SET_BOOKMARK, {
       [menuName]: {
@@ -264,7 +264,7 @@ const Node = (props, ref) => {
         },
         nameValidation: newData =>
           Promise.resolve(validateName(newData, param, obj.name)),
-        title: t("Edit {{paramType}}", { paramType }),
+        title: t("EditParamType", { paramType }),
         data: obj,
         preventRenderType: param !== TABLE_KEYS_NAMES.PARAMETERS,
         call
@@ -425,7 +425,7 @@ const Node = (props, ref) => {
       ></ParametersTable>
       <KeyValueTable
         testId="section_env-vars"
-        title={t("Environment Variables")}
+        title={t("EnvironmentVariables")}
         editable={editable}
         data={data.envVars}
         columns={defaultColumns}
@@ -435,7 +435,7 @@ const Node = (props, ref) => {
       ></KeyValueTable>
       <KeyValueTable
         testId="section_command-line"
-        title={t("Command Line")}
+        title={t("CommandLine")}
         editable={editable}
         data={data.commands}
         columns={defaultColumns}

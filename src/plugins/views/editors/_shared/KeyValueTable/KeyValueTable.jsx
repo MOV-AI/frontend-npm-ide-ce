@@ -72,7 +72,7 @@ const KeyValueTable = props => {
     if (editable)
       actions.push({
         icon: () => <AddBox></AddBox>,
-        tooltip: `${t("Add")} ${title}`,
+        tooltip: t("AddAction", { actionTitle: title }),
         isFreeAction: true,
         onClick: () => openEditDialog(varName)
       });
@@ -113,10 +113,6 @@ KeyValueTable.propTypes = {
 
 KeyValueTable.defaultProps = {
   data: [],
-  columns: [
-    { field: "name", title: "Name" },
-    { field: "value", title: "Value" }
-  ],
   editable: false
 };
 

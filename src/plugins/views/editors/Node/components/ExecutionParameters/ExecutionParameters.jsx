@@ -124,28 +124,26 @@ const ExecutionParameters = props => {
   return (
     <CollapsibleHeader
       testId="section_execution-parameters"
-      title={t("Execution Parameters")}
+      title={t("ExecutionParameters")}
     >
       <Typography component="div" className={classes.center}>
         {/*-------------------- Persistent ------------------------*/}
         {renderCheckbox("persistent", t("Persistent"), persistent, {
           id: TOOLTIP.persistent,
-          title: t("Persistent node"),
-          description: t(
-            "After launch, the node will remain active during the flow execution."
-          )
+          title: t("PersistentNodeTitle"),
+          description: t("PersistentNodeDescription")
         })}
         {/* ---------------- Remappable -------------------*/}
         {renderCheckbox("remappable", t("Remappable"), remappable, {
           id: TOOLTIP.remappable,
           title: t("Remappable"),
-          description: t("Allows, or not, the ports of the node to be remapped")
+          description: t("RemappableDescription")
         })}
         {/* ---------------- Launch -------------------*/}
         {renderCheckbox("launch", t("Launch"), launch, {
           id: TOOLTIP.launch,
           title: t("Launch"),
-          description: t("Controls whether the Node is to be launched or not")
+          description: t("LaunchDescription")
         })}
       </Typography>
       <TextField

@@ -83,6 +83,11 @@ export default class PluginManagerIDE {
     await PluginManagerIDE.getInstance().install(pluginName, plugin);
   }
 
+  /**
+   * Get plugin by its name
+   * @param {string} pluginName : Plugin name
+   * @returns {Plugin} Found plugin or undefined
+   */
   static getPlugin(pluginName) {
     return PluginManagerIDE.getInstance().getPlugin(pluginName);
   }

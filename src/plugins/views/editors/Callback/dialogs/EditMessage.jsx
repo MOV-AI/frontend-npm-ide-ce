@@ -10,6 +10,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { PLUGINS } from "../../../../../utils/Constants";
+import { ERROR_MESSAGES } from "../../../../../utils/Messages";
 import { withTheme } from "../../../../../decorators/withTheme";
 import { DialogTitle } from "../../../../Dialog/components/AppDialog/AppDialog";
 import Loader from "../../_shared/Loader/Loader";
@@ -146,8 +147,8 @@ const EditMessageDialog = props => {
       ></MaterialTree>
     ) : (
       <>
-        <h2>{t("SomethingWentWrong")}</h2>
-        <h3>{t("FailedLoadMessages")}</h3>
+        <h2>{t(ERROR_MESSAGES.SOMETHING_WENT_WRONG)}</h2>
+        <h3>{t("FailedToLoadMessages")}</h3>
       </>
     );
   };
@@ -160,7 +161,7 @@ const EditMessageDialog = props => {
       classes={{ paper: classes.paper }}
     >
       <DialogTitle onClose={onClose} hasCloseButton={true}>
-        {t("Edit Message")}
+        {t("EditMessage")}
       </DialogTitle>
       <DialogContent>
         <Search onSearch={onSearch} />
@@ -169,7 +170,7 @@ const EditMessageDialog = props => {
         </Typography>
         <TextField
           fullWidth
-          label={"Message"}
+          label={t("Message")}
           value={selectedMsg}
           margin="normal"
           disabled

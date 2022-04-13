@@ -74,14 +74,14 @@ const GroupItem = ({
         )}
       </IconButton>
       {editable && (
-        <Tooltip title={t("Edit Group")}>
+        <Tooltip title={t("EditGroup")}>
           <IconButton data-testid="input_edit" onClick={handleGroupEdit}>
             <EditIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       )}
       {editable && (
-        <Tooltip title={t("Delete Group")}>
+        <Tooltip title={t("DeleteGroup")}>
           <IconButton data-testid="input_delete" onClick={handleGroupDelete}>
             <DeleteIcon fontSize="small" />
           </IconButton>

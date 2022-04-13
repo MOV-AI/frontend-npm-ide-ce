@@ -88,7 +88,7 @@ const ContainerMenu = props => {
 
       const args = {
         onSubmit: handleSubmitParameter,
-        title: t("Edit {{paramType}}", { paramType }),
+        title: t("EditParamType", { paramType }),
         data: obj,
         showDefault: true,
         showValueOptions: true,
@@ -144,7 +144,7 @@ const ContainerMenu = props => {
         id={data.id}
         model={data.model}
         template={data.ContainerFlow}
-        label={"Template Name:"}
+        label="TemplateName-Colon"
         type={"Sub-Flow"}
         openDoc={openDoc}
       />

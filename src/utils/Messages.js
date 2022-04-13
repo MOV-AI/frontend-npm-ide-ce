@@ -1,20 +1,25 @@
 const MESSAGES = {
   ERROR_MESSAGES: {
-    FILE_DOESNT_EXIST: "The file '{{FILE_URL}}' doesn't exist.",
-    FAILED_TO_SAVE: "Failed to save",
-    ERROR_RUNNING_SPECIFIC_CALLBACK: "Error running {{callbackName}} callback",
-    TYPE_NAME_IS_MANDATORY: "{{typeName}} name is mandatory",
-    INVALID_TYPE_NAME: "Invalid {{typeName}} name",
-    MULTIPLE_ENTRIES_WITH_SAME_NAME:
-      "Cannot have multiple instances with same name",
-    NO_TRANSPORT_PROTOCOL_CHOSEN: "No Transport and Protocol chosen",
-    NO_PACKAGE_CHOSEN: "No Package chosen",
-    NO_MESSAGE_CHOSEN: "No Message chosen"
+    INVALID_NAME: "InvalidName",
+    NAME_IS_MANDATORY: "MandatoryName",
+    SOMETHING_WENT_WRONG: "SomethingWentWrong",
+    DATA_VALIDATION_FAILED: "DataValidationFailed",
+    FILE_DOESNT_EXIST: "FileUrlDoesntExist",
+    FAILED_TO_SAVE: "FailedToSave",
+    ERROR_RUNNING_SPECIFIC_CALLBACK: "ErrorRunningSpecificCallback",
+    TYPE_NAME_IS_MANDATORY: "MandatoryTypeName",
+    INSTANCE_NAME_IS_MANDATORY: "MandatoryInstanceName",
+    INVALID_TYPE_NAME: "InvalidTypeName",
+    INVALID_INSTANCE_NAME: "InvalidInstanceName",
+    MULTIPLE_ENTRIES_WITH_SAME_NAME: "MultipleInstancesSameName",
+    NO_TRANSPORT_PROTOCOL_CHOSEN: "NoTransportProtocolChosen",
+    NO_PACKAGE_CHOSEN: "NoPackageChosen",
+    NO_MESSAGE_CHOSEN: "NoMessageChosen"
   },
   WARNING_MESSAGES: {},
   SUCCESS_MESSAGES: {
-    SAVED_SUCCESSFULLY: "Saved successfully",
-    CALLBACK_CREATED: "Callback created"
+    SAVED_SUCCESSFULLY: "SavedSuccessfully",
+    CALLBACK_CREATED: "CallbackCreated"
   }
 };
 

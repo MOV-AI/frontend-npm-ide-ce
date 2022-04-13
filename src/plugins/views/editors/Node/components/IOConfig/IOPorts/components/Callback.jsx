@@ -81,7 +81,7 @@ const Callback = props => {
       <Grid item xs={3} className={classes.actionColumn}>
         {/* FolderIcon - Open Modal to Select Callback (with Workspace and Version) */}
         {props.editable && (
-          <Tooltip title={t("Select a callback")}>
+          <Tooltip title={t("SelectCallback")}>
             <IconButton
               data-testid="input_select-callback"
               className={classes.icon}
@@ -94,7 +94,7 @@ const Callback = props => {
         )}
 
         {/* EditIcon - Call Callback Editor */}
-        <Tooltip title={t("Edit callback")}>
+        <Tooltip title={t("EditCallback")}>
           <>
             <IconButton
               data-testid="input_edit-callback"
@@ -110,7 +110,7 @@ const Callback = props => {
 
         {/* AddIcon - Create new Callback with associated Message */}
         {props.editable && (
-          <Tooltip title={t("Create callback")}>
+          <Tooltip title={t("CreateCallback")}>
             <IconButton
               data-testid="input_create-callback"
               className={classes.icon}

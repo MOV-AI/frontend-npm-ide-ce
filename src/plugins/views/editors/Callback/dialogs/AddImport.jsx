@@ -15,6 +15,7 @@ import Loader from "../../_shared/Loader/Loader";
 import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
 import Search from "../../_shared/Search/Search";
 import { searchImports } from "./utils";
+import { ERROR_MESSAGES } from "../../../../../utils/Messages";
 
 const useStyles = makeStyles(_theme => ({
   paper: {
@@ -115,8 +116,8 @@ const AddImportDialog = props => {
       ></MaterialTree>
     ) : (
       <>
-        <h2>{t("SomethingWentWrong")}</h2>
-        <h3>{t("FailedLoadLibraries")}</h3>
+        <h2>{t(ERROR_MESSAGES.SOMETHING_WENT_WRONG)}</h2>
+        <h3>{t("FailedToLoadLibraries")}</h3>
       </>
     );
   };

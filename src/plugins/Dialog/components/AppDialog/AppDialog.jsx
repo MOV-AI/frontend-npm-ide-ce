@@ -54,7 +54,7 @@ const AppDialog = props => {
     onSubmit,
     onClose,
     closeOnBackdrop,
-    title = t("Are you sure?"),
+    title = t("DefaultDialogTitle"),
     submitText = t("Submit"),
     testId = "section_app-dialog"
   } = props;

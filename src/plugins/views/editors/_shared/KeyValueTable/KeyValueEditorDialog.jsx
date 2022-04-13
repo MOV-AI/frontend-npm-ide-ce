@@ -99,7 +99,7 @@ const KeyValueEditorDialog = props => {
         setValidation({
           component: COMPONENTS.NAME,
           error: !res.result,
-          message: res.error
+          message: t(res.error)
         });
       });
     }
@@ -130,7 +130,7 @@ const KeyValueEditorDialog = props => {
         setValidation({
           component: COMPONENTS.VALUE,
           error: !res.result,
-          message: res.error
+          message: t(res.error)
         });
       });
     }

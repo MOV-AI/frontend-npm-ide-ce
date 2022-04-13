@@ -100,6 +100,7 @@ export const PLUGINS = {
       CLOSE: "close",
       OPEN_EDITOR: "openEditor",
       UPDATE_TAB_ID: "updateTabId",
+      FOCUS_ACTIVE_TAB: "focusActiveTab",
       GET_ACTIVE_TAB: "getActiveTab"
     },
     ON: {
@@ -173,7 +174,7 @@ export const EMPTY_MESSAGE = {
 
 export const DIALOG_TITLE = {
   PARAMETERS: "Parameter",
-  ENVVARS: "Environment Variable",
+  ENVVARS: "EnvironmentVariable",
   COMMANDS: "Command Line"
 };
 
@@ -221,7 +222,7 @@ export const DOCK_MODES = {
 
 export const FLOW_EXPLORER_PROFILE = {
   name: "FlowExplorer",
-  title: "Add Node / Sub-flow"
+  title: "AddNodeOrSubFlow"
 };
 
 export const HOMETAB_PROFILE = { name: "HomeTab", title: "Welcome" };

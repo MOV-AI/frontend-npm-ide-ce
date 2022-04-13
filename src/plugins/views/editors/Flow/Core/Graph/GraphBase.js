@@ -1,7 +1,6 @@
 import { Subject } from "rxjs";
 import _isEqual from "lodash/isEqual";
 import _debounce from "lodash/debounce";
-import i18n from "../../../../../../i18n/i18n";
 import { PLUGINS } from "../../../../../../utils/Constants";
 import StartNode from "../../Components/Nodes/StartNode";
 import BaseLink from "../../Components/Links/BaseLink";
@@ -178,9 +177,7 @@ export default class GraphBase {
       const node = this.nodes.get(obj.node);
       node
         ? node.obj.setExposedPort(obj.port, obj.value)
-        : console.error(
-            `${i18n.t("Exposed port: node")} ${obj.node} ${i18n.t("not found")}`
-          );
+        : console.error(`Exposed port: node ${obj.node} not found`);
     });
     this.exposedPorts = exposedPorts;
     return this;

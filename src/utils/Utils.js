@@ -6,6 +6,7 @@ import DescriptionIcon from "@material-ui/icons/Description";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import { Utils } from "@mov-ai/mov-fe-lib-core";
 import movaiIcon from "../plugins/views/editors/_shared/Branding/movai-logo-white.png";
+import { ERROR_MESSAGES } from "./Messages";
 
 /**
  * Export a non implemented empty function
@@ -142,7 +143,7 @@ export function getWorkspaceFromUrl(url) {
  */
 export function validateDocumentName(name) {
   if (!Utils.validateEntityName(name)) {
-    throw new Error("Invalid name");
+    throw new Error(ERROR_MESSAGES.INVALID_NAME);
   } else {
     return true;
   }

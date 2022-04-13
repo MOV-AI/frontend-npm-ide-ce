@@ -129,9 +129,13 @@ const useTabLayout = (props, dockRef) => {
         );
       }
 
+      activeTabId.current = layoutActiveId;
+
       if (!tabExists && layoutActiveId) {
-        if (maxboxChildren) maxboxChildren.activeId = getNextTabFromStack();
-        else _layout.dockbox.children[0].activeId = getNextTabFromStack();
+        const newActiveTabId = getNextTabFromStack();
+        if (maxboxChildren) maxboxChildren.activeId = newActiveTabId;
+        else _layout.dockbox.children[0].activeId = newActiveTabId;
+        activeTabId.current = newActiveTabId;
       }
     },
     [getNextTabFromStack]
@@ -411,6 +415,28 @@ const useTabLayout = (props, dockRef) => {
   );
 
   /**
+   * Install tab plugin
+   * @param {*} docFactory : Document Factory
+   * @param {{id: string, name: string, scope: string}} docData : Document data
+   * @returns {Promise} Promise resolved on installation
+   */
+  const installTabPlugin = useCallback(async (docFactory, docData) => {
+    // If Plugin is already installed, doesn't install it again
+    const plugin = PluginManagerIDE.getPlugin(docData.id);
+    if (plugin) return Promise.resolve(plugin);
+    else {
+      const Plugin = docFactory.plugin;
+      const viewPlugin = new Plugin(
+        { name: docData.id },
+        { id: docData.id, name: docData.name, scope: docData.scope }
+      );
+      return PluginManagerIDE.install(docData.id, viewPlugin).then(
+        () => viewPlugin
+      );
+    }
+  }, []);
+
+  /**
    * Get tab data based in document data
    * @param {{id: String, title: String, name: String, scope: String}} docData : document basic data
    * @returns {TabData} Tab data to be set in Layout
@@ -425,12 +451,7 @@ const useTabLayout = (props, dockRef) => {
         try {
           if (!docFactory) return docData;
 
-          const Plugin = docFactory.plugin;
-          const viewPlugin = new Plugin(
-            { name: docData.id },
-            { id: docData.id, name: docData.name, scope: docData.scope }
-          );
-          return PluginManagerIDE.install(docData.id, viewPlugin).then(() => {
+          return installTabPlugin(docFactory, docData).then(viewPlugin => {
             // Create and return tab data
             const extension = docFactory.store.model.EXTENSION ?? "";
             // Return TabData
@@ -451,7 +472,7 @@ const useTabLayout = (props, dockRef) => {
         }
       });
     },
-    [call, _getCustomTab, _closeTab]
+    [call, _getCustomTab, _closeTab, installTabPlugin]
   );
 
   /**
@@ -693,6 +714,13 @@ const useTabLayout = (props, dockRef) => {
     return tabsById.current.get(activeTabId.current);
   }, []);
 
+  /**
+   * Focus on active tab
+   */
+  const focusActiveTab = useCallback(() => {
+    focusExistingTab(activeTabId.current);
+  }, [focusExistingTab]);
+
   //========================================================================================
   /*                                                                                      *
    *                                   React lifecycles                                   *
@@ -767,10 +795,11 @@ const useTabLayout = (props, dockRef) => {
       _tabs.forEach(tab => {
         tab.status === "fulfilled" &&
           tabsById.current.set(tab.value.id, tab.value);
-        // This is to get the last tab rendered (which is the one focused when we mount the component)
-        activeTabId.current = tab.value.id;
       });
       setLayout(lastLayout);
+
+      // Save current active tab id
+      const currentActiveTabId = activeTabId.current;
 
       // Open Home Tab
       if (lastTabs.has(HOMETAB_PROFILE.name)) {
@@ -778,6 +807,8 @@ const useTabLayout = (props, dockRef) => {
         tabsById.current.set(tabData.id, tabData);
         workspaceManager.setTabs(tabsById.current);
         dockRef.current.updateTab(HOMETAB_PROFILE.name, tabData, false);
+        // Set current active tab id after home tab update
+        activeTabId.current = currentActiveTabId;
       }
     });
 
@@ -802,6 +833,7 @@ const useTabLayout = (props, dockRef) => {
     onLayoutChange,
     focusExistingTab,
     getActiveTab,
+    focusActiveTab,
     updateTabId
   };
 };
