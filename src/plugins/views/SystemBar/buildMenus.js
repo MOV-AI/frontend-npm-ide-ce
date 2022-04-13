@@ -1,5 +1,6 @@
 import i18n from "../../../i18n/i18n";
 import { getIconByScope } from "../../../utils/Utils";
+import { getHomeTab } from "../HomeTab/HomeTab";
 import {
   APP_INFORMATION,
   APP_LINKS,
@@ -92,6 +93,14 @@ const buildMenus = async (call, classes) => {
     window.open(link, "_blank");
   }
 
+  /**
+   * Open Welcome tab
+   */
+  const openWelcomeTab = () => {
+    const homeTab = getHomeTab();
+    call("tabs", "open", homeTab);
+  };
+
   return [
     {
       id: "fileMenu",
@@ -140,6 +149,12 @@ const buildMenus = async (call, classes) => {
       id: "helpMenu",
       title: "Help",
       data: [
+        {
+          id: "getStarted",
+          title: "HomeTabTitle",
+          callback: openWelcomeTab
+        },
+        {},
         {
           id: "documentation",
           title: "Documentation",
