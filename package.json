@@ -17,7 +17,7 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.60",
     "@material-ui/styles": "^4.11.4",
-    "@mov-ai/mov-fe-lib-code-editor": "^0.0.3-0",
+    "@mov-ai/mov-fe-lib-code-editor": "^0.0.5-0",
     "@mov-ai/mov-fe-lib-core": "^1.0.36",
     "@mov-ai/mov-fe-lib-react": "^1.0.40",
     "@remixproject/engine": "^0.3.19",
@@ -70,10 +70,10 @@
   "devDependencies": {
     "@codingame/monaco-languageclient": "^0.17.4",
     "customize-cra": "^1.0.0",
+    "http-proxy-middleware": "^2.0.4",
     "monaco-editor-core": "^0.33.0",
     "react-app-rewired": "^2.2.1",
-    "webpack-node-externals": "^3.0.0",
-    "http-proxy-middleware": "^2.0.4"
+    "webpack-node-externals": "^3.0.0"
   },
   "jest": {
     "transformIgnorePatterns": [
