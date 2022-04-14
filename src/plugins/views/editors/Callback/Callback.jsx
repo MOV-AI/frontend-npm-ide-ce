@@ -73,10 +73,6 @@ const Callback = (props, ref) => {
 
   const onEditorLoad = editor => {
     if (!id) editor.focus();
-    // Add testid
-    editor._domElement
-      .querySelector("textarea")
-      .setAttribute("data-testid", "input_code");
   };
 
   //========================================================================================

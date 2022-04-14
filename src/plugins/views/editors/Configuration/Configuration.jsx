@@ -110,10 +110,6 @@ const Configuration = (props, ref) => {
    */
   const onLoadEditor = editor => {
     if (!id) editor.focus();
-    // Add testid
-    editor._domElement
-      .querySelector("textarea")
-      .setAttribute("data-testid", "input_code");
   };
 
   //========================================================================================
@@ -124,7 +120,10 @@ const Configuration = (props, ref) => {
 
   const renderEditor = () => {
     return (
-      <div className={classes.container}>
+      <div
+        data-testid="section_configuration-editor"
+        className={classes.container}
+      >
         <MonacoCodeEditor
           value={data.code}
           language={data.extension}

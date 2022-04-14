@@ -127,16 +127,16 @@ class AbstractDataType {
    */
   codeEditComponent = props => {
     return (
-      <Typography component="div" style={{ height: "100px", width: "100%" }}>
+      <Typography
+        data-testid="section_data-type-code-editor"
+        component="div"
+        style={{ height: "100px", width: "100%" }}
+      >
         <MonacoCodeEditor
           value={_toString(props.rowData.value)}
           onLoad={editor => {
             if (!props.isNew) editor.focus();
             props.onLoadEditor && props.onLoadEditor(editor);
-            // Add testid
-            editor._domElement
-              .querySelector("textarea")
-              .setAttribute("data-testid", "input_value");
           }}
           language="python"
           disableMinimap={true}
