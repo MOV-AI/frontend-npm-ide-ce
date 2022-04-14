@@ -1,5 +1,7 @@
 #! /bin/bash
 
+# How to run this script: Outside dev container, run `cd scripts`, `./import_calback.sh <robotName>`
+
 robot_name=$1;
 
 if [ -z $robot_name ]
@@ -17,8 +19,13 @@ if [ ! "$(docker ps -q -f name=${backend_container})" ]; then
     exit 1
 fi
 
-docker exec ${backend_container} python3 -m tools.backup -a import -p ../feapps/github/frontend-npm-ide/database -r .
+echo "Copying database to userspace"
+cp -r ../database ~/movai/userspace/.tmp_database
+echo "Importing files to movai"
+docker exec ${backend_container} python3 -m tools.backup -a import -p ../user/.tmp_database -r .
 docker restart ${backend_container}
+echo "clean up"
+rm -rf ~/movai/userspace/.tmp_database
 
 echo "DONE! All callbacks were imported."
 exit 0

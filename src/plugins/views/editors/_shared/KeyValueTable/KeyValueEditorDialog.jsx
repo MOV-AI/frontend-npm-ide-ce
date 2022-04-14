@@ -92,67 +92,85 @@ const KeyValueEditorDialog = props => {
    * On change Name
    * @param {Event} evt : OnChange event
    */
-  const onChangeName = evt => {
-    const name = evt?.target?.value;
-    if (nameValidation && validate) {
-      nameValidation({ name }).then(res => {
-        setValidation({
-          component: COMPONENTS.NAME,
-          error: !res.result,
-          message: t(res.error)
+  const onChangeName = useCallback(
+    evt => {
+      const name = evt?.target?.value;
+      let isValid = Promise.resolve(true);
+      if (nameValidation && validate) {
+        isValid = nameValidation({ name }).then(res => {
+          setValidation({
+            component: COMPONENTS.NAME,
+            error: !res.result,
+            message: t(res.error)
+          });
+          // Return validation
+          return res.result;
         });
-      });
-    }
+      }
 
-    setData(prevState => {
-      return { ...prevState, name };
-    });
-  };
+      // Set data
+      setData(prevState => {
+        return { ...prevState, name };
+      });
+      // Return validation result
+      return isValid;
+    },
+    [nameValidation, t, validate]
+  );
 
   /**
    * On change Description
    * @param {Event} evt : OnChange event
    */
-  const onChangeDescription = evt => {
+  const onChangeDescription = useCallback(evt => {
     const description = evt?.target?.value;
     setData(prevState => {
       return { ...prevState, description };
     });
-  };
+  }, []);
 
   /**
    * On change Value
    * @param {string} value : Code editor value
    */
-  const onChangeValue = value => {
-    if (valueValidation && validate) {
-      validate({ value }).then(res => {
-        setValidation({
-          component: COMPONENTS.VALUE,
-          error: !res.result,
-          message: t(res.error)
+  const onChangeValue = useCallback(
+    value => {
+      if (valueValidation && validate) {
+        validate({ value }).then(res => {
+          setValidation({
+            component: COMPONENTS.VALUE,
+            error: !res.result,
+            message: t(res.error)
+          });
         });
-      });
-    }
+      }
 
-    setData(prevState => {
-      return { ...prevState, value };
-    });
-  };
+      setData(prevState => {
+        return { ...prevState, value };
+      });
+    },
+    [t, validate, valueValidation]
+  );
 
   /**
    * Submit form and close dialog
    */
   const onSave = useCallback(() => {
-    validate(data).then(res => {
-      if (res.result ?? res.success) {
-        onSubmit(res.data);
-        onClose();
-      } else {
-        setValidation({ error: true, message: res.error });
+    // Validate name
+    onChangeName({ target: { value: data.name } }).then(isValid => {
+      if (isValid) {
+        // Validate data type
+        validate(data).then(res => {
+          if (res.result ?? res.success) {
+            onSubmit(res.data);
+            onClose();
+          } else {
+            setValidation({ error: true, message: res.error });
+          }
+        });
       }
     });
-  }, [data, onClose, onSubmit, validate]);
+  }, [data, onClose, onSubmit, validate, onChangeName]);
 
   //========================================================================================
   /*                                                                                      *

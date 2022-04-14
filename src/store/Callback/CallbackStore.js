@@ -15,7 +15,13 @@ class CallbackStore extends Store {
     });
 
     // Set protectedDocs list
-    this.protectedDocs = ["place_holder"];
+    this.protectedDocs = [
+      "place_holder",
+      "backend.CallbackEditor",
+      "backend.DataValidation",
+      "backend.FlowTopBar",
+      "backend.getPortsData"
+    ];
   }
 
   // Set helper object with cloudFunction

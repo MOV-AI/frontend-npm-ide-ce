@@ -14,7 +14,7 @@ class ConfigurationType extends DataType {
    */
   validate(value) {
     return Rest.cloudFunction({
-      cbName: "backend.viewer",
+      cbName: "backend.DataValidation",
       func: "validateConfiguration",
       args: value
     })
