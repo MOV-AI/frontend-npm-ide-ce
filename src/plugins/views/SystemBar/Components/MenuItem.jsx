@@ -1,5 +1,4 @@
 import React, { useCallback } from "react";
-import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import Button from "@material-ui/core/Button";
 import ListItem from "@material-ui/core/ListItem";
@@ -12,7 +11,6 @@ import { systemMenuItemStyles } from "../styles";
 const MenuItem = ({ item, closeMenu }) => {
   const { id, title, icon, callback, keybind, externalLink, data } = item;
   const classes = systemMenuItemStyles();
-  const { t } = useTranslation();
 
   //========================================================================================
   /*                                                                                      *
@@ -64,7 +62,7 @@ const MenuItem = ({ item, closeMenu }) => {
         <div className={classes.menuButton}>
           <span className="MuiButton-label">
             {icon && <span className={classes.icon}>{icon}</span>}
-            {t(title)}
+            {title}
             <>
               <ArrowRightIcon></ArrowRightIcon>
               {renderSubMenu()}
@@ -75,7 +73,7 @@ const MenuItem = ({ item, closeMenu }) => {
         <Button className={classes.menuButton} onClick={handleOptionClick}>
           <span>
             {icon && <span className={classes.icon}>{icon}</span>}
-            {t(title)}
+            {title}
           </span>
           {keybind && <span className={classes.keybind}>{keybind}</span>}
           {externalLink && <LinkIcon className={classes.keybind}></LinkIcon>}

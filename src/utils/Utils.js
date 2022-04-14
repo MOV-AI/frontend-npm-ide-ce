@@ -85,14 +85,6 @@ export const getIconByScope = (scope, style) => {
 };
 
 /**
- * Simple Event to Stop Propagation
- * @param e: event to stop the propagation
- */
-export const stopPropagation = e => {
-  e?.stopPropagation();
-};
-
-/**
  * Returns the document version from an URL
  * @param {String} url
  * @returns {String}
@@ -195,6 +187,21 @@ export function boolToPython(value) {
 export function pythonToBool(value) {
   return PythonToBoolOptions[value];
 }
+
+export function parseKeybinds(shortcuts) {
+  let parsedShortcuts = shortcuts;
+  if (Array.isArray(parsedShortcuts)) parsedShortcuts = shortcuts.join(",");
+
+  return parsedShortcuts;
+}
+
+/**
+ * Simple Event to Stop Propagation
+ * @param e: event to stop the propagation
+ */
+export const stopPropagation = e => {
+  e?.stopPropagation();
+};
 
 /**
  * Trigger a simulated mouse click (react element)

@@ -8,6 +8,7 @@ import React, {
 import { Tooltip } from "@material-ui/core";
 import {
   HOMETAB_PROFILE,
+  SHORTCUTS_PROFILE,
   DEFAULT_LAYOUT,
   DOCK_POSITIONS,
   DOCK_MODES,
@@ -22,6 +23,7 @@ import {
 import PluginManagerIDE from "../../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Workspace from "../../../../utils/Workspace";
 import { getHomeTab } from "../../HomeTab/HomeTab";
+import { getShortcutsTab } from "../../Keybinding/Shortcuts";
 import useTabStack from "./useTabStack";
 
 const useTabLayout = (props, dockRef) => {
@@ -39,6 +41,33 @@ const useTabLayout = (props, dockRef) => {
    *                                    Private Methods                                   *
    *                                                                                      */
   //========================================================================================
+
+  const openExtraTabs = useCallback(
+    lastTabs => {
+      // Save current active tab id
+      const currentActiveTabId = activeTabId.current;
+
+      // Open Home Tab
+      if (lastTabs.has(HOMETAB_PROFILE.name)) {
+        const tabData = getHomeTab();
+        tabsById.current.set(tabData.id, tabData);
+        workspaceManager.setTabs(tabsById.current);
+        dockRef.current.updateTab(HOMETAB_PROFILE.name, tabData, false);
+      }
+
+      // Open Home Tab
+      if (lastTabs.has(SHORTCUTS_PROFILE.name)) {
+        const tabData = getShortcutsTab();
+        tabsById.current.set(tabData.id, tabData);
+        workspaceManager.setTabs(tabsById.current);
+        dockRef.current.updateTab(SHORTCUTS_PROFILE.name, tabData, false);
+      }
+
+      // Set current active tab id after extra tabs update
+      activeTabId.current = currentActiveTabId;
+    },
+    [dockRef, workspaceManager]
+  );
 
   /**
    * Helper function to find if a tab exists in the DockLayout
@@ -779,25 +808,20 @@ const useTabLayout = (props, dockRef) => {
       });
       setLayout(lastLayout);
 
-      // Save current active tab id
-      const currentActiveTabId = activeTabId.current;
-
-      // Open Home Tab
-      if (lastTabs.has(HOMETAB_PROFILE.name)) {
-        const tabData = getHomeTab();
-        tabsById.current.set(tabData.id, tabData);
-        workspaceManager.setTabs(tabsById.current);
-        dockRef.current.updateTab(HOMETAB_PROFILE.name, tabData, false);
-        // Set current active tab id after home tab update
-        activeTabId.current = currentActiveTabId;
-      }
+      openExtraTabs(lastTabs);
     });
 
     // Destroy local workspace manager instance on unmount
     return () => {
       workspaceManager.destroy();
     };
-  }, [dockRef, workspaceManager, _getTabData, layoutActiveIdIsValid]);
+  }, [
+    dockRef,
+    workspaceManager,
+    _getTabData,
+    layoutActiveIdIsValid,
+    openExtraTabs
+  ]);
 
   //========================================================================================
   /*                                                                                      *

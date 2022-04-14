@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import hotkeys from "hotkeys-js";
-import { getRefComponent } from "../utils/Utils";
-import { KEYBINDINGS } from "../utils/Keybindings";
+import { getRefComponent, parseKeybinds } from "../utils/Utils";
+import { KEYBINDINGS } from "../plugins/views/Keybinding/shortcuts";
 
 /**
  * By default hotkeys are not enabled for INPUT SELECT TEXTAREA elements.
@@ -11,7 +11,7 @@ hotkeys.filter = function () {
   return true;
 };
 
-hotkeys(KEYBINDINGS.SAVE, event => {
+hotkeys(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE.SHORTCUTS, event => {
   event.preventDefault();
 });
 
@@ -33,8 +33,9 @@ const withKeyBinds = Component => {
      * Activate scope shortcuts.
      * This will automatically deactivate all other scopes
      */
-    const activateKeyBind = () => {
-      hotkeys.setScope(scopeRef.current);
+    const activateKeyBind = (scope = scopeRef.current) => {
+      console.log("activateKeyBind scope", scope);
+      hotkeys.setScope(scope);
     };
 
     /**
@@ -50,20 +51,22 @@ const withKeyBinds = Component => {
      * @param {*} keys
      * @param {*} callback
      */
-    const addKeyBind = (keys, callback) => {
-      if (!scopeRef.current) return;
-      const keysToBind = Array.isArray(keys) ? keys.join(",") : keys;
-      activateKeyBind();
-      hotkeys(keysToBind, scopeRef.current, callback);
+    const addKeyBind = (keys, callback, scope = scopeRef.current) => {
+      console.log("addKeyBind keys", keys);
+      console.log("addKeyBind scope", scope);
+      if (!scope) return;
+      const keysToBind = parseKeybinds(keys);
+      activateKeyBind(scope);
+      hotkeys(keysToBind, scope, callback);
     };
 
     /**
      * Remove key bind from scope
      * @param {*} key
      */
-    const removeKeyBind = keys => {
-      const keysToUnbind = Array.isArray(keys) ? keys.join(",") : keys;
-      hotkeys.unbind(keysToUnbind, scopeRef.current);
+    const removeKeyBind = (keys, scope = scopeRef.current) => {
+      const keysToUnbind = parseKeybinds(keys);
+      hotkeys.unbind(keysToUnbind, scope);
     };
 
     /**

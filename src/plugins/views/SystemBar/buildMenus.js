@@ -1,14 +1,15 @@
 import i18n from "../../../i18n/i18n";
-import { getIconByScope } from "../../../utils/Utils";
-import { getHomeTab } from "../HomeTab/HomeTab";
+import { getIconByScope, parseKeybinds } from "../../../utils/Utils";
 import {
   APP_INFORMATION,
   APP_LINKS,
   BRANDING,
   PLUGINS
 } from "../../../utils/Constants";
-import { KEYBINDINGS } from "../../../utils/Keybindings";
+import { KEYBINDINGS } from "../Keybinding/shortcuts";
+import { getHomeTab } from "../HomeTab/HomeTab";
 import movaiIconWhite from "../editors/_shared/Branding/movai-logo-white.png";
+import { getShortcutsTab } from "../Keybinding/Shortcuts";
 
 const buildMenus = async (call, classes) => {
   const buildNewFileSubmenu = async () => {
@@ -98,7 +99,15 @@ const buildMenus = async (call, classes) => {
    */
   const openWelcomeTab = () => {
     const homeTab = getHomeTab();
-    call("tabs", "open", homeTab);
+    call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN, homeTab);
+  };
+
+  /**
+   * Open Shortcuts tab
+   */
+  const openShortcutsTab = () => {
+    const shortcutsTab = getShortcutsTab();
+    call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN, shortcutsTab);
   };
 
   return [
@@ -108,20 +117,24 @@ const buildMenus = async (call, classes) => {
       data: [
         {
           id: "newFile",
-          title: "NewDoc",
+          title: i18n.t("NewDoc"),
           data: await buildNewFileSubmenu()
         },
         {},
         {
           id: "saveFile",
-          title: "SaveDoc",
-          keybind: KEYBINDINGS.SAVE,
+          title: i18n.t(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE.LABEL),
+          keybind: parseKeybinds(
+            KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE.SHORTCUTS
+          ),
           callback: saveDocument
         },
         {
           id: "saveAllFiles",
-          title: "SaveAllDocs",
-          keybind: KEYBINDINGS.SAVE_ALL,
+          title: i18n.t(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE_ALL.LABEL),
+          keybind: parseKeybinds(
+            KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE_ALL.SHORTCUTS
+          ),
           callback: saveAllDocument
         }
       ]
@@ -133,14 +146,14 @@ const buildMenus = async (call, classes) => {
     //   data: [
     //     {
     //       id: "copy",
-    //       title: "Copy",
-    //       keybind: KEYBINDINGS.COPY,
+    //       title: i18n.t(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.COPY.LABEL),
+    //       keybind: parseKeybinds(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.COPY.SHORTCUTS),
     //       callback: copyCode
     //     },
     //     {
     //       id: "paste",
-    //       title: "Paste",
-    //       keybind: KEYBINDINGS.PASTE,
+    //       title: i18n.t(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.PASTE.LABEL),
+    //       keybind: parseKeybinds(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.PASTE.SHORTCUTS),
     //       callback: pasteCode
     //     }
     //   ]
@@ -151,26 +164,37 @@ const buildMenus = async (call, classes) => {
       data: [
         {
           id: "getStarted",
-          title: "HomeTabTitle",
+          title: i18n.t(KEYBINDINGS.GENERAL.KEYBINDS.OPEN_WELCOME_TAB.LABEL),
+          keybind: parseKeybinds(
+            KEYBINDINGS.GENERAL.KEYBINDS.OPEN_WELCOME_TAB.SHORTCUTS
+          ),
           callback: openWelcomeTab
+        },
+        {
+          id: "keyboardShortcuts",
+          title: i18n.t(KEYBINDINGS.GENERAL.KEYBINDS.OPEN_SHORTCUTS_TAB.LABEL),
+          keybind: parseKeybinds(
+            KEYBINDINGS.GENERAL.KEYBINDS.OPEN_SHORTCUTS_TAB.SHORTCUTS
+          ),
+          callback: openShortcutsTab
         },
         {},
         {
           id: "documentation",
-          title: "Documentation",
+          title: i18n.t("Documentation"),
           externalLink: true,
           callback: () => openLink(APP_LINKS.DOCUMENTATION)
         },
         {
           id: "forum",
-          title: "Forum",
+          title: i18n.t("Forum"),
           externalLink: true,
           callback: () => openLink(APP_LINKS.FORUM)
         },
         {},
         {
           id: "about",
-          title: "About",
+          title: i18n.t("About"),
           callback: aboutPopup
         }
       ]

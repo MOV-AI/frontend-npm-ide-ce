@@ -4,7 +4,7 @@ import withKeyBinds from "../../decorators/withKeyBinds";
 import withMenuHandler from "../../decorators/withMenuHandler";
 import withLoader from "../../decorators/withLoader";
 import { withDataHandler } from "../../plugins/DocManager/DataHandler";
-import { KEYBINDINGS } from "../../utils/Keybindings";
+import { KEYBINDINGS } from "../../plugins/views/Keybinding/shortcuts";
 import { PLUGINS } from "../../utils/Constants";
 import { ViewPlugin } from "./ViewReactPlugin";
 
@@ -73,8 +73,11 @@ export function withEditorPlugin(ReactComponent, methods = []) {
      */
     useEffect(() => {
       initRightMenu();
-      addKeyBind(KEYBINDINGS.SAVE, save);
-      addKeyBind(KEYBINDINGS.SAVE_ALL, saveAllDocuments);
+      addKeyBind(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE.SHORTCUTS, save);
+      addKeyBind(
+        KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE_ALL.SHORTCUTS,
+        saveAllDocuments
+      );
       on(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE, data => {
         if (data.id === id) {
           activateEditor();
@@ -83,8 +86,8 @@ export function withEditorPlugin(ReactComponent, methods = []) {
 
       // Remove key bind on component unmount
       return () => {
-        removeKeyBind(KEYBINDINGS.SAVE);
-        removeKeyBind(KEYBINDINGS.SAVE_ALL);
+        removeKeyBind(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE.SHORTCUTS);
+        removeKeyBind(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE_ALL.SHORTCUTS);
         off(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE);
       };
     }, [

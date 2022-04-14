@@ -15,7 +15,7 @@ import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { FLOW_EXPLORER_PROFILE, PLUGINS } from "../../../../utils/Constants";
-import { KEYBINDINGS } from "../../../../utils/Keybindings";
+import { KEYBINDINGS } from "../../Keybinding/shortcuts";
 import Clipboard, { KEYS } from "./Utils/Clipboard";
 import Vec2 from "./Utils/Vec2";
 import BaseFlow from "./Views/BaseFlow";
@@ -987,16 +987,25 @@ const Flow = (props, ref) => {
   //========================================================================================
 
   useEffect(() => {
-    addKeyBind(KEYBINDINGS.COPY, handleCopyNode);
-    addKeyBind(KEYBINDINGS.PASTE, handlePasteNodes);
-    addKeyBind("esc", setFlowsToDefault);
-    addKeyBind(["del", "backspace"], handleDeleteNode);
+    addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.COPY_NODE.SHORTCUTS, handleCopyNode);
+    addKeyBind(
+      KEYBINDINGS.FLOW.KEYBINDS.PASTE_NODE.SHORTCUTS,
+      handlePasteNodes
+    );
+    addKeyBind(
+      KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.CANCEL.SHORTCUTS,
+      setFlowsToDefault
+    );
+    addKeyBind(
+      KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.DELETE.SHORTCUTS,
+      handleDeleteNode
+    );
     // remove keyBind on unmount
     return () => {
-      removeKeyBind(KEYBINDINGS.COPY);
-      removeKeyBind(KEYBINDINGS.PASTE);
-      removeKeyBind("esc");
-      removeKeyBind(["del", "backspace"]);
+      removeKeyBind(KEYBINDINGS.FLOW.KEYBINDS.COPY_NODE.SHORTCUTS);
+      removeKeyBind(KEYBINDINGS.FLOW.KEYBINDS.PASTE_NODE.SHORTCUTS);
+      removeKeyBind(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.CANCEL.SHORTCUTS);
+      removeKeyBind(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.DELETE.SHORTCUTS);
     };
   }, [
     addKeyBind,
