@@ -154,7 +154,12 @@ const EditMessageDialog = props => {
   };
 
   return (
-    <Dialog open={true} onClose={onClose} classes={{ paper: classes.paper }}>
+    <Dialog
+      data-testid="section_edit-message"
+      open={true}
+      onClose={onClose}
+      classes={{ paper: classes.paper }}
+    >
       <DialogTitle onClose={onClose} hasCloseButton={true}>
         {t("EditMessage")}
       </DialogTitle>
@@ -172,8 +177,11 @@ const EditMessageDialog = props => {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button data-testid="input_cancel" onClick={onClose}>
+          {t("Cancel")}
+        </Button>
         <Button
+          data-testid="input_confirm"
           color="primary"
           onClick={() => {
             onSubmit(selectedMsg);
@@ -181,7 +189,7 @@ const EditMessageDialog = props => {
           }}
           disabled={!selectedMsg}
         >
-          Submit
+          {t("Submit")}
         </Button>
       </DialogActions>
     </Dialog>

@@ -637,9 +637,11 @@ const Flow = (props, ref) => {
    * Call broadcast method to emit event to all open flows
    */
   const setFlowsToDefault = useCallback(() => {
-    // Remove selected node and link
+    // Remove selected node and link bookmark
     onNodeSelected(null);
     onLinkSelected(null);
+    // Update render of right menu
+    renderRightMenu();
     // broadcast event to other flows
     call(
       PLUGINS.DOC_MANAGER.NAME,
@@ -647,7 +649,7 @@ const Flow = (props, ref) => {
       PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR,
       { action: "setMode", value: EVT_NAMES.DEFAULT }
     );
-  }, [call, onLinkSelected, onNodeSelected]);
+  }, [call, onLinkSelected, onNodeSelected, renderRightMenu]);
 
   /**
    * Subscribe to mainInterface and canvas events
@@ -1014,7 +1016,7 @@ const Flow = (props, ref) => {
   //========================================================================================
 
   return (
-    <div className={classes.root}>
+    <div data-testid="section_flow-editor" className={classes.root}>
       <div id="flow-top-bar">
         <FlowTopBar
           id={id}

@@ -80,6 +80,7 @@ const useIOConfigColumns = data => {
           value={props.value === undefined ? "" : props.value}
           onChange={event => props.onChange(event.target.value)}
           inputProps={{
+            "data-testid": "input_name",
             style: {
               fontSize: 13,
               textAlign: "left"
@@ -129,6 +130,7 @@ const useIOConfigColumns = data => {
         <div className={classes.formHolder}>
           <FormControl className={classes.formControl}>
             <NativeSelect
+              inputProps={{ "data-testid": "input_protocol" }}
               className={classes.control}
               value={props.value}
               onChange={onChange}
@@ -189,6 +191,7 @@ const useIOConfigColumns = data => {
         <div className={classes.formHolder}>
           <FormControl className={classes.formControl}>
             <NativeSelect
+              inputProps={{ "data-testid": "input_package" }}
               className={classes.control}
               value={props.value}
               onChange={onChange}
@@ -225,6 +228,7 @@ const useIOConfigColumns = data => {
         <div className={classes.formHolder}>
           <FormControl className={classes.formControl}>
             <NativeSelect
+              inputProps={{ "data-testid": "input_message" }}
               className={classes.control}
               value={props.value}
               onChange={onChange}
@@ -262,22 +266,35 @@ const useIOConfigColumns = data => {
         title: t("Name"),
         field: "name",
         defaultSort: "asc",
+        render: rowData => (
+          <span data-testid="output_name">{rowData.name}</span>
+        ),
         editComponent: getNameEditComponent
       },
       {
         title: t("TransportProtocol"),
         field: "template",
-        render: rowData => <div>{scopePorts[rowData?.template]?.Label}</div>, // what you see (not in edit mode)
+        render: rowData => (
+          <span data-testid="output_protocol">
+            {scopePorts[rowData?.template]?.Label}
+          </span>
+        ), // what you see (not in edit mode)
         editComponent: getTransportEditComponent
       },
       {
         title: t("Package"),
         field: "msgPackage",
+        render: rowData => (
+          <span data-testid="output_package">{rowData.msgPackage}</span>
+        ),
         editComponent: getPackageEditComponent
       },
       {
         title: t("Message"),
         field: "message",
+        render: rowData => (
+          <span data-testid="output_message">{rowData.message}</span>
+        ),
         editComponent: getMessageEditComponent
       }
     ];

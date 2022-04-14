@@ -155,7 +155,7 @@ const Explorer = props => {
   //========================================================================================
 
   return (
-    <Typography component="div">
+    <Typography data-testid="section_flow-explorer-menu" component="div">
       <Typography component="div" className={classes.typography}>
         <Preview node={selectedNode} flowId={flowId} call={call} />
       </Typography>

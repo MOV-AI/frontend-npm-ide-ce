@@ -98,7 +98,7 @@ const buildMenus = async (call, classes) => {
    */
   const openWelcomeTab = () => {
     const homeTab = getHomeTab();
-    call("tabs", "open", homeTab);
+    call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN, homeTab);
   };
 
   return [

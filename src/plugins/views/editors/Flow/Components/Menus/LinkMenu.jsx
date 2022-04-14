@@ -81,7 +81,7 @@ const LinkMenu = props => {
   //========================================================================================
 
   return (
-    <>
+    <div data-testid="section_flow-link-menu">
       <h2>{t("Link")}</h2>
       <List sx={{ width: "100%", bgcolor: "background.paper" }} component="nav">
         <ListItem>
@@ -151,7 +151,7 @@ const LinkMenu = props => {
           </>
         )}
       </List>
-    </>
+    </div>
   );
 };
 

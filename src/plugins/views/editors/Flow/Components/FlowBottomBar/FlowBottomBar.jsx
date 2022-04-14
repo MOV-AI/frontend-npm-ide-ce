@@ -104,6 +104,7 @@ const FlowBottomBar = props => {
 
   return (
     <Typography
+      data-testid="section_flow-bottom-bar"
       component="div"
       className={`${classes.bar} ${classes[barStatus]}`}
     >
@@ -116,6 +117,7 @@ const FlowBottomBar = props => {
             )}`}
           >
             <Typography
+              data-testid="input_open-flow"
               component="div"
               className={classes.action}
               onClick={evt => handleOpenFlow(evt)}
@@ -127,6 +129,7 @@ const FlowBottomBar = props => {
         )}
         <Tooltip title="Show warnings" classes={{ tooltip: classes.tooltip }}>
           <Typography
+            data-testid="input_show-warnings"
             component="div"
             className={`${classes.action} ${classes.alignRight} ${
               warningVisibility ? classes.actionActive : ""
