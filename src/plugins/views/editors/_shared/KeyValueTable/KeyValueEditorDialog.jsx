@@ -162,82 +162,94 @@ const KeyValueEditorDialog = props => {
 
   return (
     <Dialog open={true} onClose={onClose} classes={{ paper: classes.paper }}>
-      <DialogTitle onClose={onClose} hasCloseButton={true}>
-        {title}
-      </DialogTitle>
-      <DialogContent>
-        <Typography component="div" className={classes.container}>
-          <TextField
-            label={`${t("Name")} *`}
-            error={getValidationComponent(COMPONENTS.NAME) && validation.error}
-            helperText={
-              getValidationComponent(COMPONENTS.NAME) && validation.message
-            }
-            value={data.name}
-            autoFocus={isNew}
-            disabled={disableName}
-            className={classes.input}
-            onChange={onChangeName}
-          />
-          <FormControl className={classes.marginTop}>
+      <div data-testid="section_key-value-editor-dialog">
+        <DialogTitle onClose={onClose} hasCloseButton={true}>
+          {title}
+        </DialogTitle>
+        <DialogContent>
+          <Typography component="div" className={classes.container}>
             <TextField
-              label={t("Description")}
-              value={data.description}
+              label={`${t("Name")} *`}
+              error={
+                getValidationComponent(COMPONENTS.NAME) && validation.error
+              }
+              helperText={
+                getValidationComponent(COMPONENTS.NAME) && validation.message
+              }
+              value={data.name}
+              autoFocus={isNew}
+              disabled={disableName}
               className={classes.input}
-              multiline
-              minRows={3}
-              maxRows={10}
-              disabled={disableDescription}
-              onChange={onChangeDescription}
+              onChange={onChangeName}
+              inputProps={{ "data-testid": "input_name" }}
             />
-          </FormControl>
-          {renderCustomContent && renderCustomContent()}
-          <InputLabel className={classes.label}>{t("Value")}</InputLabel>
-          <FormControl className={classes.marginTop}>
-            {renderValueEditor(data.value, {
-              isNew,
-              onChange: onChangeValue,
-              error:
-                getValidationComponent(COMPONENTS.VALUE) && validation.error,
-              helperText:
-                getValidationComponent(COMPONENTS.VALUE) && validation.message,
-              disabled: disabled,
-              defaultValue: data.defaultValue
-            })}
-          </FormControl>
-          {showDefault && (
-            <Accordion className={classes.accordion} defaultExpanded>
-              <AccordionSummary
-                className={classes.accordionSummary}
-                expandIcon={<ExpandMoreIcon />}
-              >
-                <Typography className={classes.label}>
-                  {t("DefaultValue")}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails className={classes.noHorizontalPadding}>
-                {renderValueEditor(data.defaultValue, {
-                  isNew,
-                  onChange: onChangeValue,
-                  isDefault: true,
-                  disabled: true
-                })}
-              </AccordionDetails>
-            </Accordion>
-          )}
-        </Typography>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{t("Cancel")}</Button>
-        <Button
-          color="primary"
-          onClick={onSave}
-          // Let's only disable the save button if we are doing a name validation (which is validated on change)
-          disabled={getValidationComponent(COMPONENTS.NAME) && validation.error}
-        >
-          {t("Save")}
-        </Button>
-      </DialogActions>
+            <FormControl className={classes.marginTop}>
+              <TextField
+                label={t("Description")}
+                value={data.description}
+                className={classes.input}
+                multiline
+                minRows={3}
+                maxRows={10}
+                disabled={disableDescription}
+                onChange={onChangeDescription}
+                inputProps={{ "data-testid": "input_description" }}
+              />
+            </FormControl>
+            {renderCustomContent && renderCustomContent()}
+            <InputLabel className={classes.label}>{t("Value")}</InputLabel>
+            <FormControl className={classes.marginTop}>
+              {renderValueEditor(data.value, {
+                isNew,
+                onChange: onChangeValue,
+                error:
+                  getValidationComponent(COMPONENTS.VALUE) && validation.error,
+                helperText:
+                  getValidationComponent(COMPONENTS.VALUE) &&
+                  validation.message,
+                disabled: disabled,
+                defaultValue: data.defaultValue
+              })}
+            </FormControl>
+            {showDefault && (
+              <Accordion className={classes.accordion} defaultExpanded>
+                <AccordionSummary
+                  className={classes.accordionSummary}
+                  expandIcon={<ExpandMoreIcon />}
+                >
+                  <Typography className={classes.label}>
+                    {t("Default Value")}
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails className={classes.noHorizontalPadding}>
+                  {renderValueEditor(data.defaultValue, {
+                    isNew,
+                    onChange: onChangeValue,
+                    isDefault: true,
+                    disabled: true
+                  })}
+                </AccordionDetails>
+              </Accordion>
+            )}
+          </Typography>
+        </DialogContent>
+        <DialogActions data-testid="section_dialog-actions">
+          <Button data-testid="input_close" onClick={onClose}>
+            {t("Cancel")}
+          </Button>
+          <Button
+            data-testid="input_confirm"
+            color="primary"
+            onClick={onSave}
+            // Let's only disable the save button if we are doing a name validation (which is validated on change)
+            disabled={
+              getValidationComponent(COMPONENTS.NAME) && validation.error
+            }
+          >
+            {t("Save")}
+          </Button>
+        </DialogActions>
+      </div>
     </Dialog>
   );
 };

@@ -15,7 +15,10 @@ const Examples = props => {
   const { t } = useTranslation();
 
   return (
-    <Paper className={`${classes.paper} ${classes.examplePaper}`}>
+    <Paper
+      data-testid="section_examples"
+      className={`${classes.paper} ${classes.examplePaper}`}
+    >
       <div className={classes.columnTitle}>{t("Examples")}</div>
       <Divider />
       <div className={classes.columnExample}>

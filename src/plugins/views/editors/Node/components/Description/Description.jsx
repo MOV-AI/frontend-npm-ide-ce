@@ -61,9 +61,14 @@ const Description = props => {
   };
 
   return (
-    <CollapsibleHeader title={renderTitleSection()} defaultExpanded={true}>
+    <CollapsibleHeader
+      testId="section_description"
+      title={renderTitleSection()}
+      defaultExpanded={true}
+    >
       {/* ---------------- Description -------------------*/}
       <TextField
+        inputProps={{ "data-testid": "input_description" }}
         disabled={!editable}
         className={classes.textField}
         label={t("Description")}

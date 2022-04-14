@@ -78,33 +78,39 @@ const IOPorts = props => {
                 <AccordionDetails className={classes.details}>
                   {/* ------------------------- Callback ------------------------- */}
                   {callback !== null && (
-                    <Callback
-                      id={callback}
-                      ioPort={ioPort}
-                      editable={editable}
-                      message={message}
-                      direction={direction}
-                      portName={props.rowData.name}
-                      protectedCallbacks={protectedCallbacks}
-                      handleNewCallback={handleNewCallback}
-                      handleOpenCallback={handleOpenCallback}
-                      handleOpenSelectScopeModal={handleOpenSelectScopeModal}
-                    />
+                    <div data-testid="section_callback">
+                      <Callback
+                        id={callback}
+                        ioPort={ioPort}
+                        editable={editable}
+                        message={message}
+                        direction={direction}
+                        portName={props.rowData.name}
+                        protectedCallbacks={protectedCallbacks}
+                        handleNewCallback={handleNewCallback}
+                        handleOpenCallback={handleOpenCallback}
+                        handleOpenSelectScopeModal={handleOpenSelectScopeModal}
+                      />
+                    </div>
                   )}
                   {/* ------------------------- Parameters ------------------------- */}
-                  {Object.keys(parameters).map((param, paramIndex) => {
-                    return (
-                      <Parameters
-                        {...props}
-                        key={paramIndex + direction}
-                        editable={editable}
-                        param={param}
-                        paramValue={parameters[param]}
-                        direction={direction}
-                        ioPort={ioPort}
-                      />
-                    );
-                  })}
+                  <div data-testid="section_parameters">
+                    {Object.keys(parameters).map((param, paramIndex) => {
+                      return (
+                        <div data-testid={`section_parameter-${param}`}>
+                          <Parameters
+                            {...props}
+                            key={paramIndex + direction}
+                            editable={editable}
+                            param={param}
+                            paramValue={parameters[param]}
+                            direction={direction}
+                            ioPort={ioPort}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
                 </AccordionDetails>
               </Accordion>
             );
@@ -114,7 +120,10 @@ const IOPorts = props => {
   };
 
   return (
-    <div className={`${classes.root} ${props.classNames}`}>
+    <div
+      data-testid="section_io-ports"
+      className={`${classes.root} ${props.classNames}`}
+    >
       {renderIoPort("portIn")}
       {renderIoPort("portOut")}
     </div>

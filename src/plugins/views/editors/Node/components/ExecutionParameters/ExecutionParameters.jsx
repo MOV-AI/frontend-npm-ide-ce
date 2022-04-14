@@ -84,6 +84,7 @@ const ExecutionParameters = props => {
         className={classes.formControlLabel}
         control={
           <Checkbox
+            inputProps={{ "data-testid": `input_${keyName}` }}
             disabled={!editable}
             checked={checkboxValue}
             onChange={() => onChangeExecutionParams(keyName, !checkboxValue)}
@@ -93,7 +94,7 @@ const ExecutionParameters = props => {
         label={title}
       />
       <ClickAwayListener onClickAway={() => handleTooltipClose(tooltip.id)}>
-        <Typography component="div">
+        <Typography data-testid="section_tooltip" component="div">
           <HtmlTooltip
             PopperProps={{ disablePortal: true }}
             onClose={handleTooltipClose}
@@ -108,6 +109,7 @@ const ExecutionParameters = props => {
             }
           >
             <IconButton
+              data-testid="input_toggle-tooltip"
               className={classes.logo}
               onClick={() => handleTooltipToggle(tooltip.id)}
             >
@@ -120,7 +122,10 @@ const ExecutionParameters = props => {
   );
 
   return (
-    <CollapsibleHeader title={t("ExecutionParameters")}>
+    <CollapsibleHeader
+      testId="section_execution-parameters"
+      title={t("ExecutionParameters")}
+    >
       <Typography component="div" className={classes.center}>
         {/*-------------------- Persistent ------------------------*/}
         {renderCheckbox("persistent", t("Persistent"), persistent, {
@@ -142,6 +147,7 @@ const ExecutionParameters = props => {
         })}
       </Typography>
       <TextField
+        inputProps={{ "data-testid": "input_path" }}
         label={t("Path")}
         disabled={!editable}
         className={classes.textField}

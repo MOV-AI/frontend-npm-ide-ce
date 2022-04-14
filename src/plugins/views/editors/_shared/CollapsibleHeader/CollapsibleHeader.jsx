@@ -10,11 +10,16 @@ import Divider from "@material-ui/core/Divider";
 import { collapsibleHeaderStyles } from "./styles";
 
 const CollapsibleHeader = props => {
-  const { title, children, defaultExpanded } = props;
+  const {
+    title,
+    children,
+    defaultExpanded,
+    testId = "section_accordion"
+  } = props;
   const classes = collapsibleHeaderStyles();
 
   return (
-    <Typography component="div" className={classes.root}>
+    <Typography data-testid={testId} component="div" className={classes.root}>
       <Accordion defaultExpanded={defaultExpanded}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography component="div" className={classes.column}>

@@ -18,6 +18,7 @@ const BookmarkTab = props => {
   return (
     <Tooltip title={bookmark.title || bookmark.name} placement="left">
       <IconButton
+        data-testid="input_bookmark-tab"
         onClick={handleOnClick}
         aria-label={bookmark.title}
         className={classes.bookmark}

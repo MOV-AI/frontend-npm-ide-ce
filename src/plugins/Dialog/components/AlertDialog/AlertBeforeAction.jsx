@@ -21,9 +21,10 @@ const AlertBeforeAction = props => {
 
   const getActions = () => {
     return (
-      <DialogActions>
+      <DialogActions data-testid="section_dialog-actions">
         {Object.keys(actions).map(key => (
           <Button
+            data-testid={actions[key].testId ?? "input_confirm"}
             key={key}
             onClick={() => handleConfirmation(key)}
             color="default"
@@ -37,6 +38,7 @@ const AlertBeforeAction = props => {
 
   return (
     <AppDialog
+      testId="section_alert-before-action-dialog"
       hasCloseButton={false}
       title={title}
       onClose={onClose}

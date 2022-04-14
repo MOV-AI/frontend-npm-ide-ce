@@ -15,7 +15,13 @@ const Menu = ({ name, model, details: detailsProp }) => {
    *                                                                                      */
   //========================================================================================
 
-  return <DetailsMenu name={name} details={details}></DetailsMenu>;
+  return (
+    <DetailsMenu
+      data-testid="section_configuration-details-menu"
+      name={name}
+      details={details}
+    ></DetailsMenu>
+  );
 };
 
 export default Menu;

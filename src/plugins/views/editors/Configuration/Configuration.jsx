@@ -120,7 +120,10 @@ const Configuration = (props, ref) => {
 
   const renderEditor = () => {
     return (
-      <div className={classes.container}>
+      <div
+        data-testid="section_configuration-editor"
+        className={classes.container}
+      >
         <MonacoCodeEditor
           value={data.code}
           language={data.extension}
@@ -135,9 +138,20 @@ const Configuration = (props, ref) => {
   };
 
   return (
-    <div className={classes.container}>
-      <AppBar position="static" className={classes.appBar}>
-        <Toolbar variant="dense" onClick={activateEditor}>
+    <div
+      data-testid="section_configuration-editor"
+      className={classes.container}
+    >
+      <AppBar
+        data-testid="section_app-bar"
+        position="static"
+        className={classes.appBar}
+      >
+        <Toolbar
+          data-testid="input-toolbar"
+          variant="dense"
+          onClick={activateEditor}
+        >
           <ToggleButtonGroup
             size="small"
             exclusive

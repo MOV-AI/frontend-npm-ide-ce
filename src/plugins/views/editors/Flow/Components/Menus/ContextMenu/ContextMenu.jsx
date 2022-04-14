@@ -11,6 +11,7 @@ const ContextMenu = props => {
 
   return (
     <Menu
+      data-testid="section_context-menu"
       anchorReference="anchorPosition"
       anchorPosition={anchorPosition}
       open={Boolean(anchorPosition)}
@@ -18,7 +19,12 @@ const ContextMenu = props => {
     >
       {menuList.map((item, index) => {
         return (
-          <MenuItem onClick={item.onClick} disabled={readOnly} key={index}>
+          <MenuItem
+            data-testid="input_context-option"
+            onClick={item.onClick}
+            disabled={readOnly}
+            key={index}
+          >
             {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
             <ListItemText>{item.label || item.element}</ListItemText>
           </MenuItem>
