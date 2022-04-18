@@ -79,7 +79,7 @@ const HomeTab = props => {
   //========================================================================================
 
   return (
-    <div className={classes.root}>
+    <div data-testid="section_hometab" className={classes.root}>
       <div className={classes.body}>
         <div className={classes.column}>
           <QuickAccessComponent call={call} />

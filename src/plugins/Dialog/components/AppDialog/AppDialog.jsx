@@ -22,10 +22,15 @@ export const DialogTitle = props => {
   const { children, onClose, hasCloseButton } = props;
   const classes = appDialogTitleStyles();
   return (
-    <MuiDialogTitle disableTypography className={classes.root}>
+    <MuiDialogTitle
+      data-testid="section_dialog-title"
+      disableTypography
+      className={classes.root}
+    >
       <Typography variant="h6">{children}</Typography>
       {hasCloseButton ? (
         <IconButton
+          data-testid="input_close"
           aria-label="close"
           className={classes.closeButton}
           onClick={onClose}
@@ -50,7 +55,8 @@ const AppDialog = props => {
     onClose,
     closeOnBackdrop,
     title = t("DefaultDialogTitle"),
-    submitText = t("Submit")
+    submitText = t("Submit"),
+    testId = "section_app-dialog"
   } = props;
   const [open, setOpen] = useState(true);
   const classes = appDialogStyles();
@@ -78,12 +84,16 @@ const AppDialog = props => {
 
   const getDefaultActions = () => {
     return (
-      <DialogActions>
-        <Button onClick={handleClose} color="default">
+      <DialogActions data-testid="section_dialog-actions">
+        <Button data-testid="input_close" onClick={handleClose} color="default">
           {onSubmit ? t("Cancel") : t("Ok")}
         </Button>
         {onSubmit && (
-          <Button onClick={handleSubmit} color="primary">
+          <Button
+            data-testid="input_confirm"
+            onClick={handleSubmit}
+            color="primary"
+          >
             {submitText}
           </Button>
         )}
@@ -93,13 +103,15 @@ const AppDialog = props => {
 
   return (
     <Dialog open={open} onClose={handleClose}>
-      <DialogTitle onClose={handleClose} {...props}>
-        {title}
-      </DialogTitle>
-      <DialogContent dividers className={classes.dialogContent}>
-        {props.children}
-      </DialogContent>
-      {actions ?? getDefaultActions()}
+      <div data-testid={testId}>
+        <DialogTitle onClose={handleClose} {...props}>
+          {title}
+        </DialogTitle>
+        <DialogContent dividers className={classes.dialogContent}>
+          {props.children}
+        </DialogContent>
+        {actions ?? getDefaultActions()}
+      </div>
     </Dialog>
   );
 };

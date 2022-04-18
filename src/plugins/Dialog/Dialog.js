@@ -153,9 +153,9 @@ class Dialog extends IDEPlugin {
       name: data.name
     });
     const actions = {
-      dontSave: { label: i18n.t("DontSave") },
-      cancel: { label: i18n.t("Cancel") },
-      save: { label: i18n.t("Save") }
+      dontSave: { label: i18n.t("DontSave"), testId: "input_dont-save" },
+      cancel: { label: i18n.t("Cancel"), testId: "input_close" },
+      save: { label: i18n.t("Save"), testId: "input_save" }
     };
     ReactDOM.render(
       <AlertBeforeAction
@@ -177,12 +177,17 @@ class Dialog extends IDEPlugin {
     // Set dialog actions
     const actions = {
       [SAVE_OUTDATED_DOC_ACTIONS.UPDATE_DOC]: {
-        label: i18n.t("UpdateDoc")
+        label: i18n.t("UpdateDoc"),
+        testId: "input_update"
       },
       [SAVE_OUTDATED_DOC_ACTIONS.OVERWRITE_DOC]: {
-        label: i18n.t("OverwriteDoc")
+        label: i18n.t("OverwriteDoc"),
+        testId: "input_overwrite"
       },
-      [SAVE_OUTDATED_DOC_ACTIONS.CANCEL]: { label: i18n.t("Cancel") }
+      [SAVE_OUTDATED_DOC_ACTIONS.CANCEL]: {
+        label: i18n.t("Cancel"),
+        testId: "input_cancel"
+      }
     };
     // Show dialog
     ReactDOM.render(

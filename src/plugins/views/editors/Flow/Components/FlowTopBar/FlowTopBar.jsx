@@ -35,10 +35,11 @@ const BACKEND_CALLBACK_NAME = "backend.FlowTopBar";
 const FEEDBACK_TIMEOUT = 10000;
 
 const ButtonTopBar = forwardRef((props, ref) => {
-  const { disabled, onClick, children } = props;
+  const { disabled, onClick, children, testId = "input_top-bar" } = props;
   const classes = buttonStyles();
   return (
     <Button
+      data-testid={testId}
       ref={ref}
       size="small"
       color="primary"
@@ -480,11 +481,16 @@ const FlowTopBar = props => {
   }, [loading, t]);
 
   return (
-    <AppBar position="static" color="inherit">
+    <AppBar
+      data-testid="section-flow-top-bar"
+      position="static"
+      color="inherit"
+    >
       <Toolbar variant="dense">
         <Typography component="div" className={classes.grow}>
           <FormControl className={classes.formControl}>
             <Select
+              inputProps={{ "data-testid": "input_change-robot" }}
               id="robot-selector"
               value={robotSelected}
               startAdornment={<i className="icon-Happy"></i>}
@@ -506,6 +512,7 @@ const FlowTopBar = props => {
           </FormControl>
           {getFlowPath() === robotStatus.activeFlow ? (
             <ButtonTopBar
+              testId="input_stop-flow"
               ref={buttonDOMRef}
               disabled={loading}
               onClick={handleStopFlow}
@@ -514,6 +521,7 @@ const FlowTopBar = props => {
             </ButtonTopBar>
           ) : (
             <ButtonTopBar
+              testId="input_save-before-start"
               ref={buttonDOMRef}
               disabled={!robotStatus.isOnline || loading}
               onClick={handleSaveBeforeStart}
@@ -522,19 +530,23 @@ const FlowTopBar = props => {
             </ButtonTopBar>
           )}
         </Typography>
-        <Typography component="div" className={classes.visualizationToggle}>
+        <Typography
+          data-testid="section_view-mode-toggle"
+          component="div"
+          className={classes.visualizationToggle}
+        >
           {/* <ToggleButtonGroup
             exclusive
             size="small"
             value={viewMode}
             onChange={handleViewModeChange}
           >
-            <ToggleButton value={FLOW_VIEW_MODE.default}>
+            <ToggleButton data-testid="input_default-flow" value={FLOW_VIEW_MODE.default}>
               <Tooltip title={t("DefaultFlowView")}>
                 <GrainIcon fontSize="small" />
               </Tooltip>
             </ToggleButton>
-            <ToggleButton value={FLOW_VIEW_MODE.treeView} disabled>
+            <ToggleButton data-testid="input_tree-view-flow" value={FLOW_VIEW_MODE.treeView} disabled>
               <Tooltip title={t("TreeView")}>
                 <i className="icon-tree" style={{ fontSize: "1.2rem" }}></i>
               </Tooltip>

@@ -6,7 +6,8 @@ const sharedStyles = {
     display: "flex",
     flexWrap: "wrap",
     boxSizing: "border-box",
-    padding: "10px"
+    padding: "10px",
+    alignItems: "center"
   },
   titleColumn: {
     margin: "auto"

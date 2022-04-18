@@ -7,6 +7,10 @@
    - Vicente Queiroz (vicente.queiroz@mov.ai) - 2020
 
 """
+"""
+ FleetRobot and Robot are builtin in callbacks
+ 
+"""
 
 
 def get_default_robot(msg):

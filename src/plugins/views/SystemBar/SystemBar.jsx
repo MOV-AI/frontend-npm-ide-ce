@@ -93,12 +93,13 @@ const SystemBar = props => {
   return (
     <>
       {systemMenus && (
-        <div className={classes.systemBar}>
+        <div data-testid="section_system-bar" className={classes.systemBar}>
           {systemMenus.map(menu => {
             const activeButtonClass =
               openedMenuId === menu.id ? classes.activeMenu : "";
             return (
               <Button
+                data-testid="input_menu-item"
                 key={menu.id}
                 className={`${classes.menuButton} ${activeButtonClass}`}
                 onClick={handleClickMenu}
@@ -110,6 +111,7 @@ const SystemBar = props => {
           })}
           {menuOpen && openedMenuId && (
             <SystemMenu
+              data-testid="section_sub-menu"
               menuOpen={menuOpen}
               anchorEl={anchorEl}
               data={systemMenus.find(menu => menu.id === openedMenuId)?.data}

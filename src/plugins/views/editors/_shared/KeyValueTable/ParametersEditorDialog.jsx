@@ -259,6 +259,7 @@ const ParameterEditorDialog = props => {
           value={data.type || DATA_TYPES.ANY}
           onChange={handleTypeChange}
           disabled={disableType}
+          inputProps={{ "data-testid": "input_type" }}
         >
           {getDataTypes().map(key => (
             <MenuItem key={key} value={key}>
@@ -283,23 +284,24 @@ const ParameterEditorDialog = props => {
     return (
       <FormControl component="fieldset">
         <RadioGroup
+          data-testid="section_value-option"
           value={valueOption}
           onChange={handleChangeValueOption}
           className={classes.valueOptions}
         >
           <FormControlLabel
             value={VALUE_OPTIONS.CUSTOM}
-            control={<Radio />}
+            control={<Radio inputProps={{ "data-testid": "input_custom" }} />}
             label={t("UseCustomValue")}
           />
           <FormControlLabel
             value={VALUE_OPTIONS.DEFAULT}
-            control={<Radio />}
+            control={<Radio inputProps={{ "data-testid": "input_default" }} />}
             label={t("UseDefaultValue")}
           />
           <FormControlLabel
             value={VALUE_OPTIONS.DISABLED}
-            control={<Radio />}
+            control={<Radio inputProps={{ "data-testid": "input_disabled" }} />}
             label={t("DisableParamType", {
               paramType: data.paramType || t("Value")
             })}

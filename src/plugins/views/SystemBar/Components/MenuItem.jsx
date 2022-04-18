@@ -70,7 +70,11 @@ const MenuItem = ({ item, closeMenu }) => {
           </span>
         </div>
       ) : (
-        <Button className={classes.menuButton} onClick={handleOptionClick}>
+        <Button
+          data-testid="input_menu-item"
+          className={classes.menuButton}
+          onClick={handleOptionClick}
+        >
           <span>
             {icon && <span className={classes.icon}>{icon}</span>}
             {title}

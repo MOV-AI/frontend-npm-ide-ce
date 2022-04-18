@@ -57,14 +57,22 @@ const Search = props => {
   };
 
   return (
-    <Typography component="div" className={classes.root}>
+    <Typography
+      data-testid="section_search"
+      component="div"
+      className={classes.root}
+    >
       <InputBase
         value={searchInput}
         className={classes.input}
         placeholder={t("Search")}
         onChange={handleChange}
       />
-      <IconButton className={classes.iconButton} onClick={resetValue}>
+      <IconButton
+        data-testid="input_confirm"
+        className={classes.iconButton}
+        onClick={resetValue}
+      >
         {isEmpty() ? (
           <SearchIcon className={classes.icon} />
         ) : (
