@@ -1,5 +1,5 @@
-import PropTypes from "prop-types";
 import React from "react";
+import PropTypes from "prop-types";
 import { withHostReactPlugin } from "../../../engine/ReactPlugin/HostReactPlugin";
 
 const SidePanel = props => {
@@ -15,8 +15,4 @@ export default withHostReactPlugin(SidePanel);
 
 SidePanel.propTypes = {
   hostName: PropTypes.string.isRequired
-};
-
-SidePanel.defaultProps = {
-  hostName: "topBar"
 };

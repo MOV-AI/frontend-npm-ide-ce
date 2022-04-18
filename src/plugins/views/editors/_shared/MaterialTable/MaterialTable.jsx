@@ -1,114 +1,147 @@
-import React from "react";
+import React, { forwardRef, useEffect, useRef, memo } from "react";
+import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import MaterialTableCore from "@material-table/core";
 import { useTheme } from "@material-ui/core/styles";
-import { useTranslation } from "../mocks";
 
-const MaterialTable = React.forwardRef((props, ref) => {
+import { materialTableStyles } from "./styles";
+
+const MaterialTable = forwardRef((props, ref) => {
   const {
     columns,
     actions,
     data,
     editable,
     options,
-    title,
+    title = "",
     detailPanel,
     components
   } = props;
   // Hooks
   const theme = useTheme();
+  const classes = materialTableStyles();
   const { t } = useTranslation();
   // Refs
-  const defaultTableRef = React.useRef();
-  const openedPanels = React.useRef({});
-  const oldFunction = React.useRef();
+  const defaultTableRef = useRef();
+  const openedPanels = useRef({});
+  const toggleDetailPanelHandler = useRef();
   const tableRef = ref || defaultTableRef;
 
-  React.useEffect(() => {
-    if (!oldFunction.current) {
-      oldFunction.current = tableRef.current?.onToggleDetailPanel;
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Get a row style to apply to alternated rows
+   * @param {*} _
+   * @param {Int} rowIndex : the rowIndex
+   * @returns
+   */
+  const getRowStyle = (_, rowIndex) => {
+    return (
+      rowIndex % 2 !== 0 && {
+        backgroundColor: theme.nodeEditor.stripeColor
+      }
+    );
+  };
+
+  // TODO Dependent on backend ticket: https://movai.atlassian.net/browse/BP-546
+  // const openOpenedDetails = useCallback(() => {
+  //   const tableData = tableRef.current?.state?.data;
+  //   if (!tableData) return;
+  //   tableData.forEach((row, i) => {
+  //     if (openedPanels.current[row.id])
+  //       toggleDetailPanelHandler.current([i], openedPanels.current[row.id]);
+  //   });
+  // }, [tableRef]);
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    React Lifecycle                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  useEffect(() => {
+    if (!toggleDetailPanelHandler.current) {
+      toggleDetailPanelHandler.current = tableRef.current?.onToggleDetailPanel;
     }
 
-    if (oldFunction.current === tableRef.current?.onToggleDetailPanel) {
+    if (
+      toggleDetailPanelHandler.current === tableRef.current?.onToggleDetailPanel
+    ) {
       tableRef.current.onToggleDetailPanel = (path, render) => {
-        if (tableRef.current.props.data[path[0]]?.tableData?.showDetailPanel) {
-          delete openedPanels.current[path[0]];
+        const index = tableRef.current.state.data[path[0]]?.id || path[0];
+        if (openedPanels.current[index]) {
+          delete openedPanels.current[index];
         } else {
-          openedPanels.current = {
-            ...openedPanels.current,
-            [path[0]]: true
-          };
+          openedPanels.current[index] = render;
         }
 
-        oldFunction.current(path, render);
+        toggleDetailPanelHandler.current(path, render);
       };
     }
-  }, [ref, tableRef]);
+  }, [tableRef]);
+
+  // TODO while faking id's works in the meanwhile, deep stuff, like checking after new data comes
+  // for id, makes faking id's not work. This is dependent on backend ticket: https://movai.atlassian.net/browse/BP-546
+  // useEffect(() => {
+  //   openOpenedDetails(data);
+  // }, [data, openOpenedDetails]);
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Render                                        *
+   *                                                                                      */
+  //========================================================================================
 
   return (
-    <MaterialTableCore
-      tableRef={tableRef}
-      style={{ boxShadow: "none", justifyContent: "center" }}
-      title={title ? title : ""}
-      detailPanel={detailPanel}
-      columns={columns}
-      actions={actions}
-      editable={editable}
-      components={components}
-      data={
-        data?.map((d, i) => {
-          const detailPanelFunction =
-            typeof props.detailPanel === "function"
-              ? props.detailPanel
-              : rowData => props.detailPanel[0](rowData).render();
-          return {
-            ...d,
-            tableData: {
-              showDetailPanel: openedPanels.current[i]
-                ? detailPanelFunction
-                : null
+    <div className={classes.tableContainer}>
+      <MaterialTableCore
+        tableRef={tableRef}
+        title={title}
+        detailPanel={detailPanel}
+        columns={columns}
+        actions={actions}
+        editable={editable}
+        components={components}
+        data={data}
+        options={{
+          ...options,
+          rowStyle: getRowStyle,
+          search: true,
+          searchFieldAlignment: "left",
+          actionsCellStyle: {
+            textAlign: "right",
+            color: theme.palette.primary.main
+          },
+          actionsColumnIndex: -1,
+          draggable: false,
+          grouping: false,
+          paging: false
+        }}
+        localization={{
+          toolbar: { searchPlaceholder: t("Search") },
+          pagination: {
+            labelDisplayedRows: "{from}-{to} of {count}"
+          },
+          header: {
+            actions: t("Actions")
+          },
+          body: {
+            emptyDataSourceMessage: t("NoRecordsMessage"),
+            deleteTooltip: t("Delete"),
+            editTooltip: t("Edit"),
+            addTooltip: t("Add"),
+            editRow: {
+              cancelTooltip: t("Cancel"),
+              saveTooltip: t("Confirm")
             }
-          };
-        }) || []
-      }
-      options={{
-        ...options,
-        rowStyle: (rowData, index) => {
-          return index % 2 === 0
-            ? {}
-            : { backgroundColor: theme.nodeEditor.stripeColor };
-        },
-        search: true,
-        searchFieldAlignment: "left",
-        actionsCellStyle: {
-          textAlign: "right",
-          color: theme.palette.primary.main
-        },
-        actionsColumnIndex: -1,
-        draggable: false,
-        grouping: false,
-        paging: false
-      }}
-      localization={{
-        toolbar: { searchPlaceholder: t("Search") },
-        pagination: {
-          labelDisplayedRows: "{from}-{to} of {count}"
-        },
-        header: {
-          actions: t("Actions")
-        },
-        body: {
-          emptyDataSourceMessage: t("No records to display"),
-          deleteTooltip: t("Delete"),
-          editTooltip: t("Edit"),
-          addTooltip: t("Add"),
-          editRow: {
-            cancelTooltip: t("Cancel"),
-            saveTooltip: t("Confirm")
           }
-        }
-      }}
-    />
+        }}
+      />
+    </div>
   );
 });
 
@@ -118,7 +151,8 @@ MaterialTable.propTypes = {
 };
 
 MaterialTable.defaultProps = {
-  options: {}
+  options: {},
+  data: []
 };
 
-export default MaterialTable;
+export default memo(MaterialTable);

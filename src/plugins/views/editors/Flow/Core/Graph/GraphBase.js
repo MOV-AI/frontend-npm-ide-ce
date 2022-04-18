@@ -1,13 +1,14 @@
 import { Subject } from "rxjs";
 import _isEqual from "lodash/isEqual";
+import _debounce from "lodash/debounce";
+import { PLUGINS } from "../../../../../../utils/Constants";
 import StartNode from "../../Components/Nodes/StartNode";
 import BaseLink from "../../Components/Links/BaseLink";
-import GraphValidator from "./GraphValidator";
 import { InvalidLink } from "../../Components/Links/Errors";
 import { FLOW_VIEW_MODE, NODE_TYPES } from "../../Constants/constants";
-import { shouldUpdateExposedPorts } from "./Utils";
-import _debounce from "lodash/debounce";
 import Factory from "../../Components/Nodes/Factory";
+import { shouldUpdateExposedPorts } from "./Utils";
+import GraphValidator from "./GraphValidator";
 
 const NODE_DATA = {
   NODE: {
@@ -20,10 +21,7 @@ const NODE_DATA = {
   }
 };
 
-// to remove
-const t = v => v;
-
-export default class Graph {
+export default class GraphBase {
   constructor({ mInterface, canvas, id, docManager }) {
     this.mInterface = mInterface;
     this.canvas = canvas;
@@ -78,8 +76,8 @@ export default class Graph {
     });
     // Subscribe to node/containers template update
     this.docManager(
-      "docManager",
-      "subscribeToChanges",
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.SUBSCRIBE_TO_CHANGES,
       this.id,
       this.onTemplateUpdate
     );
@@ -122,7 +120,11 @@ export default class Graph {
    */
   destroy = () => {
     // Unsubscribe to changes from docManager
-    this.docManager("docManager", "unSubscribeToChanges", this.id);
+    this.docManager(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.UNSUBSCRIBE_TO_CHANGES,
+      this.id
+    );
   };
 
   /**
@@ -175,9 +177,7 @@ export default class Graph {
       const node = this.nodes.get(obj.node);
       node
         ? node.obj.setExposedPort(obj.port, obj.value)
-        : console.error(
-            `${t("Exposed port: node")} ${obj.node} ${t("not found")}`
-          );
+        : console.error(`Exposed port: node ${obj.node} not found`);
     });
     this.exposedPorts = exposedPorts;
     return this;

@@ -55,7 +55,7 @@ class Store extends BaseStore {
       type: this.scope,
       body: {}
     })
-      .then(a => {
+      .then(_ => {
         // delete only if successfully deleted from the database
         return this.deleteDocFromStore(name);
       })
@@ -104,6 +104,7 @@ class Store extends BaseStore {
       if (res.success) {
         doc.setIsNew(false).setDirty(false);
         this.observer.onDocumentDirty(this.name, doc, doc.getDirty());
+        res.model = doc;
       }
       return res;
     });

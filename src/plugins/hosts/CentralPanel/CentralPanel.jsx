@@ -1,5 +1,5 @@
-import PropTypes from "prop-types";
 import React from "react";
+import PropTypes from "prop-types";
 import { withHostReactPlugin } from "../../../engine/ReactPlugin/HostReactPlugin";
 
 function CentralPanel(props) {
@@ -15,8 +15,4 @@ export default withHostReactPlugin(CentralPanel);
 
 CentralPanel.propTypes = {
   hostName: PropTypes.string.isRequired
-};
-
-CentralPanel.defaultProps = {
-  hostName: "topBar"
 };

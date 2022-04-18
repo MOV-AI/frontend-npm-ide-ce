@@ -67,7 +67,7 @@ const Preview = props => {
       {!node.children && node.name ? (
         <div ref={svg}></div>
       ) : (
-        <p>{t("Hover a node to see more information")}</p>
+        <p>{t("PreviewHelperText")}</p>
       )}
     </div>
   );

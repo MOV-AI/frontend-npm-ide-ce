@@ -1,5 +1,6 @@
-import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
 import { snackbar } from "@mov-ai/mov-fe-lib-react";
+import { PLUGINS } from "../../utils/Constants";
+import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
 
 class Alerts extends IDEPlugin {
   constructor(profile = {}) {
@@ -17,7 +18,11 @@ class Alerts extends IDEPlugin {
   show({ title, message, severity, location = "snackbar" }) {
     const alertByLocation = {
       snackbar: () => snackbar({ message, severity }),
-      modal: () => this.call("dialog", "alert", { title, message })
+      modal: () =>
+        this.call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.ALERT, {
+          title,
+          message
+        })
     };
     // Show Alert
     alertByLocation[location]();

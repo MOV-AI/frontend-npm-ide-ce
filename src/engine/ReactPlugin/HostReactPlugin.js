@@ -1,7 +1,16 @@
 import React from "react";
-import PluginManagerIDE from "../PluginManagerIDE/PluginManagerIDE";
 import PropTypes from "prop-types";
+import { defaultFunction, getRefComponent } from "../../utils/Utils";
+import PluginManagerIDE from "../PluginManagerIDE/PluginManagerIDE";
 import IDEPlugin from "../IDEPlugin/IDEPlugin";
+
+const DEFAULT_PLUGIN = {
+  call: () => defaultFunction("call"),
+  emit: () => defaultFunction("emit"),
+  on: () => defaultFunction("on"),
+  off: () => defaultFunction("off"),
+  onTopic: () => defaultFunction("onTopic")
+};
 
 export class HostReactPlugin extends IDEPlugin {
   constructor(profile) {
@@ -14,26 +23,26 @@ export class HostReactPlugin extends IDEPlugin {
 
   /**
    *
-   * @param {Object} profile
-   * @param {React Component} view
+   * @param {Object} _profile
+   * @param {React Component} _view
    */
-  addView(profile, view) {
+  addView(_profile, _view) {
     // Abstract method to implement in subclasses
   }
   /**
    *
-   * @param {Object} profile
+   * @param {Object} _profile
    */
-  removeView(profile) {
+  removeView(_profile) {
     // Abstract method to implement in subclasses
   }
 
   /**
    *
-   * @param {String} viewName
-   * @param {Object} viewPluginProps
+   * @param {String} _viewName
+   * @param {Object} _viewPluginProps
    */
-  update(viewName, viewPluginProps) {
+  update(_viewName, _viewPluginProps) {
     // Abstract method to implement in subclasses
   }
 }
@@ -46,9 +55,7 @@ export class HostReactPlugin extends IDEPlugin {
 export function withHostReactPlugin(ReactComponent, methods = []) {
   const InnerHost = props => {
     const ref = React.useRef();
-    const RefComponent = React.forwardRef((props, ref) =>
-      ReactComponent(props, ref)
-    );
+    const RefComponent = getRefComponent(ReactComponent);
     const { viewPlugins, plugin } = useHostReactPlugin(
       {
         name: props.hostName,
@@ -65,6 +72,7 @@ export function withHostReactPlugin(ReactComponent, methods = []) {
         onTopic={plugin.onTopic}
         call={plugin.call}
         emit={plugin.emit}
+        off={plugin.off}
         on={plugin.on}
       />
     );
@@ -88,8 +96,8 @@ export const useHostReactPlugin = ({ name, methods }, componentRef) => {
       }
 
       initMethods = () => {
-        methods.forEach(name => {
-          this[name] = (...args) => componentRef.current[name](...args);
+        methods.forEach(_name => {
+          this[_name] = (...args) => componentRef.current[_name](...args);
         });
       };
 
@@ -123,11 +131,4 @@ export const useHostReactPlugin = ({ name, methods }, componentRef) => {
 
 useHostReactPlugin.propTypes = {
   profile: PropTypes.object.isRequired
-};
-
-const DEFAULT_PLUGIN = {
-  call: () => {},
-  emit: () => {},
-  on: () => {},
-  onTopic: () => {}
 };

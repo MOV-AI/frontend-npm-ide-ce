@@ -8,36 +8,36 @@ class NodeInstance extends Model {
   constructor() {
     // inject imported schema and forward constructor arguments
     super({ schema, ...arguments[0] });
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                        Events                                        *
+     *                                                                                      */
+    //========================================================================================
+
+    this.propEvents = {
+      onAny: (event, name, value) => this.propsUpdate(event, name, value)
+    };
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                   Model Properties                                   *
+     *                                                                                      */
+    //========================================================================================
+
+    this.template = "";
+    this.persistent = false;
+    this.launch = true;
+    this.remappable = true;
+    this.groups = [];
+    this.position = new Position();
+    this.parameters = new Manager("parameters", Parameter, this.propEvents);
+    this.envVars = new Manager("envVars", EnvVar, this.propEvents);
+    this.commands = new Manager("commands", Command, this.propEvents);
+
+    // Define observable properties
+    this.observables = Object.values(NodeInstance.OBSERVABLE_KEYS);
   }
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                        Events                                        *
-   *                                                                                      */
-  //========================================================================================
-
-  propEvents = {
-    onAny: (event, name, value) => this.propsUpdate(event, name, value)
-  };
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                   Model Properties                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  template = "";
-  persistent = false;
-  launch = true;
-  remappable = true;
-  groups = [];
-  position = new Position();
-  parameters = new Manager("parameters", Parameter, this.propEvents);
-  envVars = new Manager("envVars", EnvVar, this.propEvents);
-  commands = new Manager("commands", Command, this.propEvents);
-
-  // Define observable properties
-  observables = Object.values(NodeInstance.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -317,7 +317,7 @@ class NodeInstance extends Model {
    * @param {string} prop : The of the property updated
    * @param {any} value : The new value of the property
    */
-  propsUpdate(event, prop, value) {
+  propsUpdate(_, prop, value) {
     // force dispatch
     this.dispatch(prop, value);
   }

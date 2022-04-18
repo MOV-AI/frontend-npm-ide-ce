@@ -1,20 +1,23 @@
-import React from "react";
-import Loader from "../../_shared/Loader/Loader";
-import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
-import Search from "../../_shared/Search/Search";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import _debounce from "lodash/debounce";
 import { makeStyles } from "@material-ui/core/styles";
-import { searchImports } from "./utils";
-import { withTheme } from "../../../../../decorators/withTheme";
-import { DialogTitle } from "../../../../Dialog/components/AppDialog/AppDialog";
 import {
   Dialog,
   DialogContent,
   Button,
   DialogActions
 } from "@material-ui/core";
+import { PLUGINS } from "../../../../../utils/Constants";
+import { withTheme } from "../../../../../decorators/withTheme";
+import { DialogTitle } from "../../../../Dialog/components/AppDialog/AppDialog";
+import Loader from "../../_shared/Loader/Loader";
+import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
+import Search from "../../_shared/Search/Search";
+import { searchImports } from "./utils";
+import { ERROR_MESSAGES } from "../../../../../utils/Messages";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(_theme => ({
   paper: {
     minWidth: "40%"
   }
@@ -24,12 +27,14 @@ const AddImportDialog = props => {
   // Props
   const { call, scope, onClose, onSubmit } = props;
   // State hooks
-  const [loading, setLoading] = React.useState(false);
-  const [pyLibs, setPyLibs] = React.useState();
-  const [filteredLibs, setFilteredLibs] = React.useState();
-  const [selectedLibs, setSelectedLibs] = React.useState();
+  const [loading, setLoading] = useState(false);
+  const [pyLibs, setPyLibs] = useState();
+  const [filteredLibs, setFilteredLibs] = useState();
+  const [selectedLibs, setSelectedLibs] = useState();
   // Style hook
   const classes = useStyles();
+  // Translation hook
+  const { t } = useTranslation();
 
   //========================================================================================
   /*                                                                                      *
@@ -37,9 +42,13 @@ const AddImportDialog = props => {
    *                                                                                      */
   //========================================================================================
 
-  React.useEffect(() => {
+  useEffect(() => {
     setLoading(true);
-    call("docManager", "getStore", scope).then(store => {
+    call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.GET_STORE,
+      scope
+    ).then(store => {
       store.helper.getAllLibraries().then(libs => {
         if (libs) {
           setPyLibs(libs);
@@ -107,24 +116,32 @@ const AddImportDialog = props => {
       ></MaterialTree>
     ) : (
       <>
-        <h2>Something went wrong :(</h2>
-        <h3>Failed to load libraries</h3>
+        <h2>{t(ERROR_MESSAGES.SOMETHING_WENT_WRONG)}</h2>
+        <h3>{t("FailedToLoadLibraries")}</h3>
       </>
     );
   };
 
   return (
-    <Dialog open={true} onClose={onClose} classes={{ paper: classes.paper }}>
+    <Dialog
+      data-testid="section_add-import-dialog"
+      open={true}
+      onClose={onClose}
+      classes={{ paper: classes.paper }}
+    >
       <DialogTitle onClose={onClose} hasCloseButton={true}>
-        Add Import
+        {t("Add Import")}
       </DialogTitle>
       <DialogContent>
         <Search onSearch={onSearch} />
         {renderTree()}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button data-testid="input_cancel" onClick={onClose}>
+          {t("Cancel")}
+        </Button>
         <Button
+          data-testid="input_confirm"
           color="primary"
           onClick={() => {
             onSubmit(selectedLibs);
@@ -132,7 +149,7 @@ const AddImportDialog = props => {
           }}
           disabled={!selectedLibs}
         >
-          Add
+          {t("Add")}
         </Button>
       </DialogActions>
     </Dialog>

@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import {
@@ -27,6 +27,7 @@ import DetailsMenu from "../../../_shared/DetailsMenu/DetailsMenu";
 import TableKeyValue from "./sub-components/TableKeyValue";
 import GroupItem from "./sub-components/GroupItem";
 import menuStyles from "./styles";
+import { ERROR_MESSAGES } from "../../../../../../utils/Messages";
 
 const ACTIVE_ITEM = {
   description: 1,
@@ -40,11 +41,10 @@ const Menu = ({
   details: detailsProp,
   editable,
   call,
-  handleGroupVisibility,
-  openDialog
+  handleGroupVisibility
 }) => {
   // State hook
-  const [activeItem, setActiveItem] = React.useState(0);
+  const [activeItem, setActiveItem] = useState(0);
   const { data } = useDataSubscriber({
     instance: model,
     propsData: detailsProp
@@ -98,11 +98,10 @@ const Menu = ({
    */
   const editGroupName = useCallback(
     (submitCallback, prevName = "") => {
-      const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
       const args = {
         size: "sm",
-        title: prevName ? t("Edit Group") : t("Add Group"),
-        inputLabel: t("Group Name"),
+        title: prevName ? t("EditGroup") : t("AddGroup"),
+        inputLabel: t("GroupName"),
         value: prevName,
         onValidation: value => {
           try {
@@ -117,9 +116,10 @@ const Menu = ({
         },
         onSubmit: submitCallback
       };
-      openDialog({ method, args });
+
+      call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, args);
     },
-    [openDialog, t]
+    [call, t]
   );
 
   /**
@@ -134,13 +134,13 @@ const Menu = ({
       const { name: newName } = newData;
 
       try {
-        if (!newName) throw new Error(`Name is mandatory`);
+        if (!newName) throw new Error(ERROR_MESSAGES.NAME_IS_MANDATORY);
         else if (!Utils.validateEntityName(newName, []))
-          throw new Error(`Invalid Name`);
+          throw new Error(ERROR_MESSAGES.INVALID_NAME);
 
         // Validate against repeated names
         if (oldName !== newName && model.current.getParameter(newName)) {
-          throw new Error(`Cannot have 2 entries with the same name`);
+          throw new Error(ERROR_MESSAGES.MULTIPLE_ENTRIES_WITH_SAME_NAME);
         }
       } catch (error) {
         return Promise.resolve({ result: false, error: error.message });
@@ -179,7 +179,6 @@ const Menu = ({
   const handleParameterDialog = useCallback(
     dataId => {
       const obj = model.current.getParameter(dataId) || DEFAULT_KEY_VALUE_DATA;
-      const method = PLUGINS.DIALOG.CALL.CUSTOM_DIALOG;
 
       const args = {
         onSubmit: formData => handleSubmitParameter(obj.name, formData),
@@ -190,9 +189,14 @@ const Menu = ({
         call
       };
 
-      openDialog({ method, args }, ParameterEditorDialog);
+      call(
+        PLUGINS.DIALOG.NAME,
+        PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
+        args,
+        ParameterEditorDialog
+      );
     },
-    [model, openDialog, call, validateParamName, handleSubmitParameter, t]
+    [model, call, validateParamName, handleSubmitParameter, t]
   );
 
   //========================================================================================
@@ -219,17 +223,17 @@ const Menu = ({
    * Open dialog to edit flow description
    */
   const handleEditDescriptionClick = useCallback(() => {
-    const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
     const args = {
       size: "md",
       multiline: true,
-      title: t("Edit Description"),
+      title: t("EditDescription"),
       inputLabel: t("Description"),
       value: model.current.getDescription(),
       onSubmit: description => model.current.setDescription(description)
     };
-    openDialog({ method, args });
-  }, [openDialog, t, model]);
+
+    call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, args);
+  }, [model, call, t]);
 
   /**
    * Handle Add new Parameter
@@ -256,19 +260,18 @@ const Menu = ({
    */
   const handleParamDelete = useCallback(
     ({ key, value }) => {
-      const method = PLUGINS.DIALOG.CALL.CONFIRMATION;
       const args = {
         submitText: t("Delete"),
-        title: t('Confirm to delete "{{paramName}}"', { paramName: key }),
+        title: t("ConfirmDeleteParam", { paramName: key }),
         onSubmit: () => model.current.deleteParameter(key),
-        message: t(
-          'Are you sure you want to delete the param "{{paramName}}" with the value "{{value}}"?',
-          { paramName: key, value }
-        )
+        message: t("ParameterDeleteConfirmationMessage", {
+          paramName: key,
+          value
+        })
       };
-      openDialog({ method, args });
+      call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, args);
     },
-    [model, openDialog, t]
+    [model, call, t]
   );
 
   /**
@@ -277,6 +280,33 @@ const Menu = ({
   const handleAddGroupClick = useCallback(() => {
     editGroupName(groupName => model.current.addGroup(groupName));
   }, [editGroupName, model]);
+
+  /**
+   * Handle Description Edit
+   * @param {*} e
+   */
+  const handleDescriptionClick = e => {
+    e.stopPropagation();
+    handleEditDescriptionClick();
+  };
+
+  /**
+   * Handle Add Parameter
+   * @param {*} e
+   */
+  const handleAddParameter = e => {
+    e.stopPropagation();
+    handleAddParameterClick();
+  };
+
+  /**
+   * Handle Add Group
+   * @param {*} e
+   */
+  const handleAddGroup = e => {
+    e.stopPropagation();
+    handleAddGroupClick();
+  };
 
   //========================================================================================
   /*                                                                                      *
@@ -309,7 +339,7 @@ const Menu = ({
     return params.length ? (
       <Typography component="div" className={classes.parametersContainer}>
         <TableKeyValue
-          list={getParameters()}
+          list={params}
           allowDelete={editable}
           allowEdit={editable}
           handleParameterDeleteModal={handleParamDelete}
@@ -320,10 +350,10 @@ const Menu = ({
       </Typography>
     ) : (
       <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-        No Parameters
+        {t("NoParameters")}
       </Typography>
     );
-  }, [classes, editable, getParameters, handleParamDelete, handleParamEdit]);
+  }, [classes, editable, getParameters, handleParamDelete, handleParamEdit, t]);
 
   /**
    * Render groups
@@ -334,6 +364,7 @@ const Menu = ({
     return groups.length ? (
       groups.map(group => (
         <GroupItem
+          data-testid="section_group-item"
           key={group.id}
           item={group}
           model={model}
@@ -344,7 +375,7 @@ const Menu = ({
       ))
     ) : (
       <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-        No Groups
+        {t("NoGroups")}
       </Typography>
     );
   }, [
@@ -353,26 +384,26 @@ const Menu = ({
     model,
     editable,
     editGroupName,
-    handleGroupVisibility
+    handleGroupVisibility,
+    t
   ]);
 
   return (
-    <Typography component="div">
+    <Typography data-testid="section_flow-details-menu" component="div">
       <DetailsMenu name={name} details={data.details || {}}></DetailsMenu>
       <List>
         {/* ============ DESCRIPTION ============ */}
         <ListItem
+          data-testid="input_description-expand"
           button
           data-menu-id={ACTIVE_ITEM.description}
           onClick={handleExpandClick}
         >
           <ListItemText primary={t("Description")} />
           <IconButton
+            data-testid="input_description-edit"
             disabled={!editable}
-            onClick={e => {
-              e.stopPropagation();
-              handleEditDescriptionClick();
-            }}
+            onClick={handleDescriptionClick}
           >
             <EditIcon />
           </IconButton>
@@ -388,17 +419,16 @@ const Menu = ({
         </Collapse>
         {/* ============ PARAMETERS ============ */}
         <ListItem
+          data-testid="input_parameters-expand"
           button
           data-menu-id={ACTIVE_ITEM.parameters}
           onClick={handleExpandClick}
         >
           <ListItemText primary={t("Parameters")} />
           <IconButton
+            data-testid="input_parameters-add"
             disabled={!editable}
-            onClick={e => {
-              e.stopPropagation();
-              handleAddParameterClick();
-            }}
+            onClick={handleAddParameter}
           >
             <Add />
           </IconButton>
@@ -408,29 +438,36 @@ const Menu = ({
             <ExpandMore />
           )}
         </ListItem>
-        <Collapse in={activeItem === ACTIVE_ITEM.parameters} unmountOnExit>
+        <Collapse
+          data-testid="section_parameters-table"
+          in={activeItem === ACTIVE_ITEM.parameters}
+          unmountOnExit
+        >
           {renderParameters()}
           <Divider />
         </Collapse>
         {/* ============ GROUPS ============ */}
         <ListItem
+          data-testid="input_groups-expand"
           button
           data-menu-id={ACTIVE_ITEM.groups}
           onClick={handleExpandClick}
         >
           <ListItemText primary={t("Groups")} />
           <IconButton
+            data-testid="input_groups-add"
             disabled={!editable}
-            onClick={e => {
-              e.stopPropagation();
-              handleAddGroupClick();
-            }}
+            onClick={handleAddGroup}
           >
             <Add />
           </IconButton>
           {activeItem === ACTIVE_ITEM.groups ? <ExpandLess /> : <ExpandMore />}
         </ListItem>
-        <Collapse in={activeItem === ACTIVE_ITEM.groups} unmountOnExit>
+        <Collapse
+          data-testid="section_groups-table"
+          in={activeItem === ACTIVE_ITEM.groups}
+          unmountOnExit
+        >
           {renderGroups()}
           <Divider />
         </Collapse>

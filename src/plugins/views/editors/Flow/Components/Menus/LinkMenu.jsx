@@ -81,7 +81,7 @@ const LinkMenu = props => {
   //========================================================================================
 
   return (
-    <>
+    <div data-testid="section_flow-link-menu">
       <h2>{t("Link")}</h2>
       <List sx={{ width: "100%", bgcolor: "background.paper" }} component="nav">
         <ListItem>
@@ -123,7 +123,7 @@ const LinkMenu = props => {
           <>
             <Divider />
             <ListItem>
-              <ListItemText primary={t("Link Dependencies")} />
+              <ListItemText primary={t("LinkDependencies")} />
             </ListItem>
             <Collapse in>
               <Typography
@@ -131,19 +131,19 @@ const LinkMenu = props => {
                 className={classes.dependencyContainer}
               >
                 <FormControl fullWidth={true}>
-                  <InputLabel>{t("Dependencies Level")}</InputLabel>
+                  <InputLabel>{t("DependenciesLevel")}</InputLabel>
                   <Select
                     value={dependencyLevel}
                     onChange={onChangeDependency}
                     disabled={!editable}
                   >
-                    <MenuItem value={0}>{t(`All dependencies`)}</MenuItem>
-                    <MenuItem value={1}>{t(`Only From -> To`)}</MenuItem>
-                    <MenuItem value={2}>{t(`Only To -> From`)}</MenuItem>
-                    <MenuItem value={3}>{t(`No dependencies`)}</MenuItem>
+                    <MenuItem value={0}>{t("AllDependencies")}</MenuItem>
+                    <MenuItem value={1}>{t("OnlyFrom")}</MenuItem>
+                    <MenuItem value={2}>{t("OnlyTo")}</MenuItem>
+                    <MenuItem value={3}>{t("NoDependencies")}</MenuItem>
                   </Select>
                   <FormHelperText>
-                    {t("Checks node dependencies")}
+                    {t("LinkDependenciesHelperText")}
                   </FormHelperText>
                 </FormControl>
               </Typography>
@@ -151,7 +151,7 @@ const LinkMenu = props => {
           </>
         )}
       </List>
-    </>
+    </div>
   );
 };
 

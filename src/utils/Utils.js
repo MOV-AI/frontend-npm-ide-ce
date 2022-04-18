@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import AccountTreeIcon from "@material-ui/icons/AccountTree";
 import BuildIcon from "@material-ui/icons/Build";
 import CodeIcon from "@material-ui/icons/Code";
@@ -5,8 +6,27 @@ import DescriptionIcon from "@material-ui/icons/Description";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import { Utils } from "@mov-ai/mov-fe-lib-core";
 import movaiIcon from "../plugins/views/editors/_shared/Branding/movai-logo-white.png";
-import { HOMETAB_PROFILE } from "./Constants";
-import HomeTab from "../plugins/views/HomeTab/HomeTab";
+import { ERROR_MESSAGES } from "./Messages";
+
+/**
+ * Export a non implemented empty function
+ * @param {String} name : function name
+ * @returns console.warn call with the function name
+ */
+export const defaultFunction = name => console.warn(`${name} not implemented`);
+
+/**
+ * Checks if it's a React Component or Functional Component to return it's ref
+ * @param {*} Component
+ * @returns {Component} RefComponent
+ */
+export const getRefComponent = Component => {
+  let RefComponent = Component;
+  if (typeof Component === "function")
+    RefComponent = forwardRef((props, ref) => Component(props, ref));
+
+  return RefComponent;
+};
 
 /**
  * Generate random ID
@@ -65,16 +85,6 @@ export const getIconByScope = (scope, style) => {
 };
 
 /**
- * Document scopes
- */
-export const SCOPES = {
-  CALLBACK: "Callback",
-  CONFIGURATION: "Configuration",
-  NODE: "Node",
-  FLOW: "Flow"
-};
-
-/**
  * Simple Event to Stop Propagation
  * @param e: event to stop the propagation
  */
@@ -83,12 +93,47 @@ export const stopPropagation = e => {
 };
 
 /**
+ * Returns the document version from an URL
+ * @param {String} url
+ * @returns {String}
+ */
+export function getVersionFromUrl(url) {
+  if (!url) return "";
+  const splittedUrl = url.split("/");
+  return splittedUrl[3];
+}
+
+/**
  * Returns the document name from an URL
  * @param {String} url
  * @returns {String}
  */
 export function getNameFromURL(url) {
-  return url?.substring(url.lastIndexOf("/") + 1);
+  if (!url) return "";
+  const splittedUrl = url.split("/");
+  return splittedUrl.length === 1 ? url : splittedUrl[2];
+}
+
+/**
+ * Returns the document scope from an URL
+ * @param {String} url
+ * @returns {String}
+ */
+export function getScopeFromURL(url) {
+  if (!url) return "";
+  const splittedUrl = url.split("/");
+  return splittedUrl[1];
+}
+
+/**
+ * Returns the document workspace from an URL
+ * @param {String} url
+ * @returns {String}
+ */
+export function getWorkspaceFromUrl(url) {
+  if (!url) return "";
+  const splittedUrl = url.split("/");
+  return splittedUrl[0];
 }
 
 /**
@@ -98,10 +143,20 @@ export function getNameFromURL(url) {
  */
 export function validateDocumentName(name) {
   if (!Utils.validateEntityName(name)) {
-    throw new Error("Invalid name");
+    throw new Error(ERROR_MESSAGES.INVALID_NAME);
   } else {
     return true;
   }
+}
+
+/**
+ * Build a document path from a doc
+ * @param {Document} doc
+ * @returns
+ */
+export function buildDocPath(doc) {
+  const { workspace, scope, name } = doc;
+  return `${workspace}/${scope}/${name}`;
 }
 
 const boolToPythonOptions = {
@@ -142,20 +197,18 @@ export function pythonToBool(value) {
 }
 
 /**
- * Gets the HomeTab Plugin
- * @private
- * @returns {Promise} the HomeTab
+ * Trigger a simulated mouse click (react element)
+ * @param {*} element
  */
-export const getHomeTab = () => {
-  const viewPlugin = new HomeTab(HOMETAB_PROFILE);
-
-  return Promise.resolve({
-    ...HOMETAB_PROFILE,
-    id: HOMETAB_PROFILE.name,
-    name: HOMETAB_PROFILE.title,
-    tabTitle: HOMETAB_PROFILE.title,
-    scope: HOMETAB_PROFILE.name,
-    extension: "",
-    content: viewPlugin.render()
-  });
-};
+export function simulateMouseClick(element) {
+  ["mousedown", "click", "mouseup"].forEach(mouseEventType =>
+    element.dispatchEvent(
+      new MouseEvent(mouseEventType, {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+        buttons: 1
+      })
+    )
+  );
+}

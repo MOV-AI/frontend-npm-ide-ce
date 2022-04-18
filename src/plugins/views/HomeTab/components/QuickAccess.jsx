@@ -6,6 +6,7 @@ import Paper from "@material-ui/core/Paper";
 import Divider from "@material-ui/core/Divider";
 import AddIcon from "@material-ui/icons/Add";
 import ChromeReaderModeIcon from "@material-ui/icons/ChromeReaderMode";
+import { APP_LINKS, PLUGINS } from "../../../../utils/Constants";
 import { getIconByScope } from "../../../../utils/Utils";
 // This is already working - just leaving this here for posteriority
 // import {
@@ -35,14 +36,14 @@ const QuickAccess = props => {
   //   const name = APP_CUSTOM_CONFIG;
   //   const scope = Configuration.SCOPE;
 
-  //   call("docManager", "checkDocumentExists", {
+  //   call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.CHECK_DOCUMENT_EXISTS, {
   //     name,
   //     scope
   //   }).then(fileExists => {
   //     if (!fileExists) {
   //       call(
-  //         "docManager",
-  //         "copy",
+  //         PLUGINS.DOC_MANAGER.NAME,
+  //         PLUGINS.DOC_MANAGER.CALL.COPY,
   //         {
   //           name: APP_DEFAULT_CONFIG,
   //           scope
@@ -51,7 +52,7 @@ const QuickAccess = props => {
   //       );
   //     }
 
-  //     call("tabs", "openEditor", {
+  //     call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, {
   //       id: `global/${scope}/${name}`,
   //       name,
   //       scope
@@ -69,42 +70,45 @@ const QuickAccess = props => {
    * Component Did Mount
    */
   useEffect(() => {
-    call("docManager", "getDocTypes").then(_docTypes => {
-      setDocTypes(_docTypes);
-    });
+    call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.GET_DOC_TYPES).then(
+      _docTypes => {
+        setDocTypes(_docTypes);
+      }
+    );
   }, [call]);
 
   return (
-    <Paper className={classes.paper}>
-      <div className={classes.columnTitle}>{t("Quick access")}</div>
+    <Paper data-testid="section_quick-access" className={classes.paper}>
+      <div className={classes.columnTitle}>{t("QuickAccess")}</div>
       <Divider />
       <div className={classes.columnBody}>
         <ContextMenu
           element={
             <div className={classes.link}>
               <AddIcon className={classes.linkIcon} />
-              {t("Create New")}
+              {t("CreateNewDoc")}
             </div>
           }
           menuList={docTypes.map(docType => ({
             onClick: () =>
-              call("docManager", "create", { scope: docType.scope }).then(
-                document => {
-                  call("tabs", "openEditor", {
-                    id: document.getUrl(),
-                    name: document.getName(),
-                    scope: docType.scope,
-                    isNew: true
-                  });
-                }
-              ),
+              call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.CREATE, {
+                scope: docType.scope
+              }).then(document => {
+                call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, {
+                  id: document.getUrl(),
+                  name: document.getName(),
+                  scope: docType.scope,
+                  isNew: true
+                });
+              }),
             element: docType.scope,
             icon: getIconByScope(docType.scope),
             onClose: true
           }))}
         ></ContextMenu>
         <a
-          href="https://movai-flow.readme.io/docs"
+          data-testid="input_documentation"
+          href={APP_LINKS.DOCUMENTATION}
           target="_blank"
           rel="noreferrer"
           className={classes.link}
@@ -114,7 +118,8 @@ const QuickAccess = props => {
           {t("Documentation")}
         </a>
         <a
-          href="https://discourse.aws.cloud.mov.ai/"
+          data-testid="input_forum"
+          href={APP_LINKS.FORUM}
           target="_blank"
           rel="noreferrer"
           className={classes.link}
@@ -123,7 +128,7 @@ const QuickAccess = props => {
 
           {t("Forum")}
         </a>
-        {/* <div className={classes.link} onClick={handleOpenAppConfig}>
+        {/* <div data-testid="input_app-config" className={classes.link} onClick={handleOpenAppConfig}>
           <BuildIcon className={classes.linkIcon} />
           {t("App Configuration")}
         </div> */}

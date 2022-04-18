@@ -154,7 +154,7 @@ class GraphTreeView extends GraphBase {
    * @param {Object} nodes
    * @param {*} robotStatus
    */
-  nodeStatusUpdated(nodes, robotStatus) {
+  nodeStatusUpdated(nodes, _) {
     Object.keys(nodes).forEach(nodeName => {
       const status = nodes[nodeName];
       this._updateNodeStatus(nodeName, status);
@@ -241,7 +241,7 @@ class GraphTreeView extends GraphBase {
    * @param {string} nodeId node's unique id
    * @param {obj} data node's data that has changed
    */
-  updateNode = (event, nodeId, data, _type = "NodeInst") => {
+  updateNode = (_event, _nodeId, _data, _type = "NodeInst") => {
     // TODO: Handle changes in nodes from main flow
     return;
   };

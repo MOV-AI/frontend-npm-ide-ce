@@ -1,3 +1,4 @@
+import { PLUGINS } from "../../../../../utils/Constants";
 import { validateDocumentName } from "../../../../../utils/Utils";
 
 /**
@@ -26,10 +27,14 @@ const useNewDocument = ({ call, scope }) => {
    * Async validation to check if document already exists
    */
   const onPostValidation = name => {
-    return call("docManager", "checkDocumentExists", {
-      scope: scope,
-      name
-    }).then(docExists => {
+    return call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.CHECK_DOCUMENT_EXISTS,
+      {
+        scope: scope,
+        name
+      }
+    ).then(docExists => {
       const message = docExists ? "Document already exists" : "";
       return { error: docExists, message };
     });

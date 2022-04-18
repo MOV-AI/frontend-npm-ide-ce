@@ -1,7 +1,13 @@
 import { Document } from "@mov-ai/mov-fe-lib-core";
-import { PLUGINS } from "../../utils/Constants";
+import i18n from "../../i18n/i18n";
+import {
+  PLUGINS,
+  ALERT_SEVERITIES,
+  SAVE_OUTDATED_DOC_ACTIONS
+} from "../../utils/Constants";
+import { SUCCESS_MESSAGES, ERROR_MESSAGES } from "../../utils/Messages";
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
-import docsFactory from "./docs";
+import docsFactory from "./factory";
 
 /**
  * Document Manager plugin to handle requests, subscribers and more
@@ -12,21 +18,7 @@ class DocManager extends IDEPlugin {
     const methods = Array.from(
       new Set([
         ...(profile.methods ?? []),
-        "broadcast",
-        "getStore",
-        "getDocTypes",
-        "getDocFactory",
-        "subscribeToChanges",
-        "unSubscribeToChanges",
-        "getDocFromNameType",
-        "checkDocumentExists",
-        "discardDocChanges",
-        "reloadDoc",
-        "copy",
-        "delete",
-        "create",
-        "read",
-        "save"
+        ...Object.values(PLUGINS.DOC_MANAGER.CALL)
       ])
     );
     super({ ...profile, methods });
@@ -37,6 +29,7 @@ class DocManager extends IDEPlugin {
     window.onunload = this.onUnload;
     // Subscriber
     this.docSubscriptions = new Map();
+    this.saveStack = new Map();
   }
 
   getName() {
@@ -170,17 +163,107 @@ class DocManager extends IDEPlugin {
   /**
    * Update existing document
    * @param {{name: String, scope: String}} modelKey
-   * @param {String} newName : Used in document creation, where we need to replace "untitled" by newName
+   * @param {Function} callback : Used to call said function after all is done (more reliable than a .then)
    * @returns {Promise<Model>}
    */
-  save(modelKey, newName) {
-    const { name, scope } = modelKey;
-    this.emit(PLUGINS.DOC_MANAGER.ON.SAVE_DOC, {
-      docManager: this,
-      doc: Document.parsePath(name, scope),
-      newName
+  async save(modelKey, callback) {
+    const { name, scope, data } = modelKey;
+
+    const thisDoc = await this.read(modelKey);
+    const { isNew, isDirty, isOutdated } = thisDoc;
+
+    // let's replace some data locally before saving if it was passed in
+    if (data) thisDoc.setData(data);
+
+    if (!isDirty) return;
+    if (!isNew && !isOutdated) return this.doSave(modelKey, callback);
+
+    if (this.saveStack.has(`${name}_${scope}`)) return;
+    this.saveStack.set(`${name}_${scope}`, { name, scope });
+
+    if (isOutdated) {
+      return this.call(
+        PLUGINS.DIALOG.NAME,
+        PLUGINS.DIALOG.CALL.SAVE_OUTDATED_DOC,
+        {
+          name,
+          scope,
+          onSubmit: action => {
+            switch (action) {
+              case SAVE_OUTDATED_DOC_ACTIONS.UPDATE_DOC:
+                // TODO this is not working, needs development from https://movai.atlassian.net/browse/FP-1621
+                this.reloadDoc(modelKey);
+                this.saveStack.delete(`${name}_${scope}`);
+                break;
+              case SAVE_OUTDATED_DOC_ACTIONS.OVERWRITE_DOC:
+                this.doSave(modelKey, callback);
+                break;
+              case SAVE_OUTDATED_DOC_ACTIONS.CANCEL:
+              default:
+                return;
+            }
+          },
+          onClose: () => this.saveStack.delete(`${name}_${scope}`)
+        }
+      );
+    }
+
+    return this.call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
+      scope,
+      placeholder: name,
+      onSubmit: newName => this.doSave(modelKey, callback, newName),
+      onClose: () => this.saveStack.delete(`${name}_${scope}`)
     });
-    return this.getStore(scope).saveDoc(name, newName);
+  }
+
+  /**
+   * Actually saves the document passed in the "save" function
+   * @param {{name: String, scope: String}} modelKey
+   * @param {String} newName : Used in document creation, where we need to replace "untitled" by newName
+   * @param {Function} callback : Used to call said function after all is done (more reliable than a .then)
+   * @returns {Promise<Model>}
+   */
+  async doSave(modelKey, callback, newName) {
+    const { name, scope } = modelKey;
+    let returnMessage = { success: false };
+
+    try {
+      const model = await this.getStore(scope).saveDoc(name, newName);
+
+      this.emit(PLUGINS.DOC_MANAGER.ON.SAVE_DOC, {
+        docManager: this,
+        doc: Document.parsePath(name, scope),
+        newName
+      });
+
+      this.call(PLUGINS.ALERT.NAME, PLUGINS.ALERT.CALL.SHOW, {
+        message: i18n.t(SUCCESS_MESSAGES.SAVED_SUCCESSFULLY),
+        severity: ALERT_SEVERITIES.SUCCESS
+      });
+
+      returnMessage = model;
+    } catch (error) {
+      returnMessage.message = error;
+      console.warn("failed to save document", error);
+
+      this.call(PLUGINS.ALERT.NAME, PLUGINS.ALERT.CALL.SHOW, {
+        message: i18n.t(ERROR_MESSAGES.FAILED_TO_SAVE),
+        severity: ALERT_SEVERITIES.ERROR
+      });
+    }
+
+    callback && callback(returnMessage);
+    this.saveStack.delete(`${name}_${scope}`);
+    return returnMessage;
+  }
+
+  /**
+   * Saves the tab that is currently active
+   */
+  saveActiveEditor() {
+    this.call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.GET_ACTIVE_TAB).then(tab =>
+      this.save({ name: tab.name, scope: tab.scope }, tab.isNew)
+    );
   }
 
   /**
@@ -225,11 +308,13 @@ class DocManager extends IDEPlugin {
    * @returns {Promise<Array>}
    */
   saveDirties() {
-    const promises = this.getStores().map(store => {
-      return store.saveDirties();
+    this.getStores().forEach(store => {
+      store.getDirties().forEach(obj => {
+        const { name, isNew } = obj;
+        const scope = obj.getScope();
+        this.save({ name, scope }, isNew);
+      });
     });
-
-    return Promise.allSettled(promises);
   }
 
   //========================================================================================
@@ -246,7 +331,7 @@ class DocManager extends IDEPlugin {
    * Emits an event when a store fires an onLoad event
    * @param {string} store : The name of the store firing the event
    */
-  onStoreLoad(store) {
+  onStoreLoad() {
     this.emit(PLUGINS.DOC_MANAGER.ON.LOAD_DOCS, this);
   }
 
@@ -255,7 +340,7 @@ class DocManager extends IDEPlugin {
    * @param {string} store : The name of the store firing the event
    * @param {object<{documentName, documentType}>} doc
    */
-  onStoreUpdate(store, doc, action = "set") {
+  onStoreUpdate(_, doc, action = "set") {
     this.emit(PLUGINS.DOC_MANAGER.ON.UPDATE_DOCS, this, {
       action,
       ...doc
@@ -268,7 +353,7 @@ class DocManager extends IDEPlugin {
    * @param {model} instance : Document model instance
    * @param {boolean} value : Document Dirty state
    */
-  onDocumentDirty(store, instance, value) {
+  onDocumentDirty(_, instance, value) {
     this.emit(PLUGINS.DOC_MANAGER.ON.UPDATE_DOC_DIRTY, {
       instance,
       value
@@ -300,7 +385,7 @@ class DocManager extends IDEPlugin {
    *  Remove subscribers
    * @param {Event} event
    */
-  onUnload = event => {
+  onUnload = _event => {
     this.getStores().forEach(store => {
       const dirtyDocs = store.getDirties();
 

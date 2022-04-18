@@ -107,42 +107,6 @@ export const manhattanPath = (src, trg) => {
   ].map(z => z.toObject());
 };
 
-export const fuzzyManhattanPath = (src, trg) => {
-  const noise = 3;
-  const sigma = 1.5;
-
-  const { x0, x1, xIn, xOut, srcSize, trgSize } = getBaseVars(src, trg);
-  const dx = x1.sub(x0);
-  const dInOut = xIn.sub(xOut);
-  const dInOutDual = dInOut.dual().normalize();
-
-  const dot = dx.dot(Vec2.e2);
-  const angle = Math.abs(Math.acos(dot / dx.length()));
-  const isLine =
-    angle < (7 * Math.PI) / 8 && angle > Math.PI / 8 && dx.dot(Vec2.e1) > 0;
-
-  return [
-    x0,
-    xOut,
-    xOut.add(
-      isLine
-        ? dInOut
-            .scale(Math.random() / 2)
-            .add(dInOutDual.scale(-noise + 2 * noise * Math.random()))
-        : Vec2.e2.scale(Math.sign(dot) * srcSize.y * sigma)
-    ),
-    xIn.add(
-      isLine
-        ? dInOut
-            .scale(-Math.random() / 2)
-            .add(dInOutDual.scale(-noise + 2 * noise * Math.random()))
-        : Vec2.e2.scale(Math.sign(dot) * -trgSize.y * sigma)
-    ),
-    xIn,
-    x1
-  ].map(z => z.toObject());
-};
-
 export const simplePotentialV = (src, trg) => {
   const tooCloseDistance = 50;
   const iterator = {
@@ -180,9 +144,9 @@ export const simplePotentialA = (src, trg) => {
 
 const relaxSpeed = (path, srcBox, trgBox) => {
   let speed = [...Array(path.length)];
-  const boxForce = (p, box) => {
-    const dist2Box = box.sdf(p);
-    const grad = box.grad(p);
+  const boxForce = (p, _box) => {
+    const dist2Box = _box.sdf(p);
+    const grad = _box.grad(p);
     return grad.scale(200 / dist2Box);
   };
   // assumes path length > 3

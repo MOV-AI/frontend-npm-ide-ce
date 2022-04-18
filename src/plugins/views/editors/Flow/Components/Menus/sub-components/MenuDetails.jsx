@@ -1,14 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import { ListItem, ListItemText, Typography } from "@material-ui/core";
+import { defaultFunction } from "../../../../../../../utils/Utils";
 import NodeLink from "./NodeLink";
-import { DEFAULT_FUNCTION, useTranslation } from "../../../../_shared/mocks";
 
 import { menuDetailsStyles } from "../styles";
 
 const MenuDetails = props => {
   // Props
-  const { id, template, model, type, openDoc } = props;
+  const { id, template, model, type, openDoc, label } = props;
   // Other hooks
   const classes = menuDetailsStyles();
   const { t } = useTranslation();
@@ -23,17 +24,22 @@ const MenuDetails = props => {
     <>
       <h2 className={classes.header}>{id}</h2>
       <ListItem divider>
-        <ListItemText primary={t("Name:")} />
-        <NodeLink name={template} scope={model} openDoc={openDoc}>
+        <ListItemText primary={t(label)} />
+        <NodeLink
+          data-testid="section_node-link"
+          name={template}
+          scope={model}
+          openDoc={openDoc}
+        >
           {template}
         </NodeLink>
       </ListItem>
       <ListItem divider>
-        <ListItemText primary={t("Scope:")} />
+        <ListItemText primary={t("Scope-Colon")} />
         <Typography>{model}</Typography>
       </ListItem>
       <ListItem divider>
-        <ListItemText primary={t("Type:")} />
+        <ListItemText primary={t("Type-Colon")} />
         <Typography>{type}</Typography>
       </ListItem>
     </>
@@ -43,6 +49,7 @@ const MenuDetails = props => {
 MenuDetails.propTypes = {
   id: PropTypes.string,
   template: PropTypes.string,
+  label: PropTypes.string,
   model: PropTypes.string,
   type: PropTypes.string,
   openDoc: PropTypes.func
@@ -53,7 +60,8 @@ MenuDetails.defaultProps = {
   template: "-",
   model: "-",
   type: "-",
-  openDoc: () => DEFAULT_FUNCTION("openDoc")
+  label: "NameColon",
+  openDoc: () => defaultFunction("openDoc")
 };
 
 export default MenuDetails;

@@ -1,8 +1,6 @@
-import React, { memo } from "react";
+import React, { useCallback, useState, memo } from "react";
 import PropTypes from "prop-types";
-import { useTranslation } from "../../../_shared/mocks";
-import { HtmlTooltip } from "../_shared/HtmlTooltip";
-import { makeStyles } from "@material-ui/core/styles";
+import { useTranslation } from "react-i18next";
 import Typography from "@material-ui/core/Typography";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -11,65 +9,10 @@ import InfoLogo from "@material-ui/icons/Info";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import TextField from "@material-ui/core/TextField";
 import _isEqual from "lodash/isEqual";
-import CollapsibleHeader from "../_shared/CollapsibleHeader";
+import CollapsibleHeader from "../../../_shared/CollapsibleHeader/CollapsibleHeader";
+import { HtmlTooltip } from "../../../_shared/HtmlTooltip/HtmlTooltip";
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    padding: "5px 0px 5px 0px",
-    width: "100%"
-  },
-  heading: {
-    fontSize: "1.5rem"
-  },
-  details: {
-    display: "flex",
-    flexDirection: "column"
-  },
-  column: {
-    flexBasis: "90%"
-  },
-  input: {
-    margin: theme.spacing(1),
-    fontFamily: "inherit",
-    width: "80%",
-    fontWeight: "bold"
-  },
-  text: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center"
-  },
-  row: {
-    display: "flex",
-    flexDirection: "row"
-  },
-  center: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap"
-  },
-  centerCheckboxTooltip: {
-    justifyContent: "center",
-    display: "flex",
-    flexDirection: "row",
-    flexGrow: 1
-  },
-  logo: {
-    margin: "12px 12px 12px 12px",
-    padding: "0px"
-  },
-  formControlLabel: {
-    margin: "0%"
-  },
-  textField: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1)
-  },
-  noMargin: {
-    margin: 0
-  }
-}));
+import { executionParamStyles } from "./styles";
 
 const TOOLTIP = {
   close: 0,
@@ -89,9 +32,9 @@ const ExecutionParameters = props => {
     editable
   } = props;
   // Handle tooltip open state
-  const [openTooltip, setOpenTooltip] = React.useState(TOOLTIP.close);
+  const [openTooltip, setOpenTooltip] = useState(TOOLTIP.close);
   // Hooks
-  const classes = useStyles();
+  const classes = executionParamStyles();
   const { t } = useTranslation();
 
   //========================================================================================
@@ -103,7 +46,7 @@ const ExecutionParameters = props => {
   /**
    * Handle tooltip close
    */
-  const handleTooltipClose = React.useCallback(
+  const handleTooltipClose = useCallback(
     triggeredBy => {
       if (triggeredBy !== openTooltip) return;
       setOpenTooltip(TOOLTIP.close);
@@ -114,7 +57,7 @@ const ExecutionParameters = props => {
   /**
    * Handle tooltip toggle
    */
-  const handleTooltipToggle = React.useCallback(newState => {
+  const handleTooltipToggle = useCallback(newState => {
     setOpenTooltip(prevState => {
       if (prevState === newState) return TOOLTIP.close;
       else return newState;
@@ -141,6 +84,7 @@ const ExecutionParameters = props => {
         className={classes.formControlLabel}
         control={
           <Checkbox
+            inputProps={{ "data-testid": `input_${keyName}` }}
             disabled={!editable}
             checked={checkboxValue}
             onChange={() => onChangeExecutionParams(keyName, !checkboxValue)}
@@ -150,7 +94,7 @@ const ExecutionParameters = props => {
         label={title}
       />
       <ClickAwayListener onClickAway={() => handleTooltipClose(tooltip.id)}>
-        <Typography component="div">
+        <Typography data-testid="section_tooltip" component="div">
           <HtmlTooltip
             PopperProps={{ disablePortal: true }}
             onClose={handleTooltipClose}
@@ -158,13 +102,14 @@ const ExecutionParameters = props => {
             disableFocusListener
             disableHoverListener
             title={
-              <React.Fragment>
+              <>
                 <Typography color="inherit">{tooltip.title}</Typography>
                 {tooltip.description}
-              </React.Fragment>
+              </>
             }
           >
             <IconButton
+              data-testid="input_toggle-tooltip"
               className={classes.logo}
               onClick={() => handleTooltipToggle(tooltip.id)}
             >
@@ -177,30 +122,32 @@ const ExecutionParameters = props => {
   );
 
   return (
-    <CollapsibleHeader title={t("Execution Parameters")}>
+    <CollapsibleHeader
+      testId="section_execution-parameters"
+      title={t("ExecutionParameters")}
+    >
       <Typography component="div" className={classes.center}>
         {/*-------------------- Persistent ------------------------*/}
         {renderCheckbox("persistent", t("Persistent"), persistent, {
           id: TOOLTIP.persistent,
-          title: t("Persistent node"),
-          description: t(
-            "After launch, the node will remain active during the flow execution."
-          )
+          title: t("PersistentNodeTitle"),
+          description: t("PersistentNodeDescription")
         })}
         {/* ---------------- Remappable -------------------*/}
         {renderCheckbox("remappable", t("Remappable"), remappable, {
           id: TOOLTIP.remappable,
           title: t("Remappable"),
-          description: t("Allows, or not, the ports of the node to be remapped")
+          description: t("RemappableDescription")
         })}
         {/* ---------------- Launch -------------------*/}
         {renderCheckbox("launch", t("Launch"), launch, {
           id: TOOLTIP.launch,
           title: t("Launch"),
-          description: t("Controls whether the Node is to be launched or not")
+          description: t("LaunchDescription")
         })}
       </Typography>
       <TextField
+        inputProps={{ "data-testid": "input_path" }}
         label={t("Path")}
         disabled={!editable}
         className={classes.textField}

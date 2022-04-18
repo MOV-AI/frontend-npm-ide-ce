@@ -7,29 +7,29 @@ export default class Callback extends Model {
   constructor() {
     // inject imported schema and forward constructor arguments
     super({ schema, ...arguments[0] });
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                        Events                                        *
+     *                                                                                      */
+    //========================================================================================
+
+    this.pyLibs = new Manager("pyLibs", PyLib, {
+      onAny: (event, name, value) => this.propsUpdate(event, name, value)
+    });
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                   Model Properties                                   *
+     *                                                                                      */
+    //========================================================================================
+
+    this.code = "";
+    this.message = "";
+
+    // Define observable properties
+    this.observables = Object.values(Callback.OBSERVABLE_KEYS);
   }
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                        Events                                        *
-   *                                                                                      */
-  //========================================================================================
-
-  pyLibs = new Manager("pyLibs", PyLib, {
-    onAny: (event, name, value) => this.propsUpdate(event, name, value)
-  });
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                   Model Properties                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  code = "";
-  message = "";
-
-  // Define observable properties
-  observables = Object.values(Callback.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *
@@ -146,7 +146,7 @@ export default class Callback extends Model {
    * @param {string} prop : The of the property updated
    * @param {any} value : The new value of the property
    */
-  propsUpdate(event, prop, value) {
+  propsUpdate(_, prop, value) {
     // force dispatch
     this.dispatch(prop, value);
   }
@@ -232,4 +232,6 @@ export default class Callback extends Model {
     DETAILS: "details",
     MESSAGE: "message"
   };
+
+  static KEYS_TO_DISCONSIDER = [this.OBSERVABLE_KEYS.CODE];
 }

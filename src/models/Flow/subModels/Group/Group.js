@@ -1,23 +1,23 @@
-import IdBasedModel from "../../../subModels/IdBasedModel/IdBasedModel";
+import IdBasedModel from "../../../subModels/IdBasedModel/IdBased";
 import schema from "./schema";
 
 class Group extends IdBasedModel {
   constructor() {
     // inject imported schema and forward constructor arguments
     super({ schema, ...arguments[0] });
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                   Model Properties                                   *
+     *                                                                                      */
+    //========================================================================================
+
+    this.id = "";
+    this.enabled = true;
+
+    // Define observable properties
+    this.observables = Object.values(Group.OBSERVABLE_KEYS);
   }
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                   Model Properties                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  id = "";
-  enabled = true;
-
-  // Define observable properties
-  observables = Object.values(Group.OBSERVABLE_KEYS);
 
   //========================================================================================
   /*                                                                                      *

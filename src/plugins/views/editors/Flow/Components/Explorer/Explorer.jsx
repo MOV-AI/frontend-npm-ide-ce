@@ -3,10 +3,10 @@ import PropTypes from "prop-types";
 import _get from "lodash/get";
 import _set from "lodash/set";
 import { Typography } from "@material-ui/core";
-import { withViewPlugin } from "../../../../../../engine/ReactPlugin/ViewReactPlugin";
 import VirtualizedTree from "./../../../../Explorer/components/VirtualizedTree/VirtualizedTree";
-import Preview from "./Preview";
+import { withViewPlugin } from "../../../../../../engine/ReactPlugin/ViewReactPlugin";
 import { PLUGINS } from "../../../../../../utils/Constants";
+import Preview from "./Preview";
 
 import { explorerStyles } from "./styles";
 
@@ -71,7 +71,7 @@ const Explorer = props => {
         }
       };
       _get(deepnessToAction, node.deepness, () => {
-        console.log("action not implemented");
+        console.warn("action not implemented");
       })();
     },
     [emit]
@@ -97,7 +97,7 @@ const Explorer = props => {
    * Handle Mouse Leave on Node
    * @param {NodeObject} node
    */
-  const handleMouseLeaveNode = useCallback(node => {
+  const handleMouseLeaveNode = useCallback(_node => {
     if (shouldUpdatePreview.current) {
       setSelectedNode({});
     }
@@ -114,15 +114,16 @@ const Explorer = props => {
    * @param {DocManager} docManager
    */
   const loadDocs = useCallback(docManager => {
-    return setData(_ =>
+    return setData(_node =>
       [docManager.getStore("Node"), docManager.getStore("Flow")].map(
         (store, id) => {
           const { name, title } = store;
+          const filteredChildren = store.getDocs().filter(d => !d.isNew);
           return {
             id,
             name,
             title,
-            children: store.getDocs().map((doc, childId) => {
+            children: filteredChildren.map((doc, childId) => {
               return {
                 id: childId,
                 name: doc.getName(),
@@ -144,7 +145,7 @@ const Explorer = props => {
   //========================================================================================
 
   useEffect(() => {
-    on("docManager", "loadDocs", loadDocs);
+    on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.LOAD_DOCS, loadDocs);
   }, [on, loadDocs]);
 
   //========================================================================================
@@ -154,7 +155,7 @@ const Explorer = props => {
   //========================================================================================
 
   return (
-    <Typography component="div">
+    <Typography data-testid="section_flow-explorer-menu" component="div">
       <Typography component="div" className={classes.typography}>
         <Preview node={selectedNode} flowId={flowId} call={call} />
       </Typography>

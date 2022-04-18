@@ -1,28 +1,16 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import AppDialog from "../AppDialog/AppDialog";
 import WarningIcon from "@material-ui/icons/Warning";
 import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 import { DialogContentText } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
 
-function useTranslation() {
-  return { t: s => s };
-}
-
-const useStyles = makeStyles(theme => ({
-  icon: {
-    float: "left",
-    marginRight: 20
-  },
-  message: {
-    whiteSpace: "pre-wrap"
-  }
-}));
+import { alertBeforeActionStyles } from "./styles";
 
 const AlertBeforeAction = props => {
-  const classes = useStyles();
+  const classes = alertBeforeActionStyles();
   const { t } = useTranslation();
   const { onSubmit, onClose, actions, message, showAlertIcon, title } = props;
 
@@ -33,9 +21,10 @@ const AlertBeforeAction = props => {
 
   const getActions = () => {
     return (
-      <DialogActions>
+      <DialogActions data-testid="section_dialog-actions">
         {Object.keys(actions).map(key => (
           <Button
+            data-testid={actions[key].testId ?? "input_confirm"}
             key={key}
             onClick={() => handleConfirmation(key)}
             color="default"
@@ -49,6 +38,7 @@ const AlertBeforeAction = props => {
 
   return (
     <AppDialog
+      testId="section_alert-before-action-dialog"
       hasCloseButton={false}
       title={title}
       onClose={onClose}

@@ -91,18 +91,24 @@ const MaterialTree = props => {
    * @returns {ReactElement} Rendered Tree
    */
   const recursiveArrayTree = (array, id) => {
-    return array.map((elem, elemIndex) => {
+    return array.map(elem => {
       const elementId = id ? `${id}/${elem.text}` : elem.text;
 
       return elem.children === undefined ? (
         <StyledTreeItem
+          data-testid="input_select-tree-item"
           key={elementId}
           nodeId={elementId}
           label={elem.text}
           onClick={() => onSelectItem(elem, elementId.split("/"))}
         />
       ) : (
-        <StyledTreeItem key={elementId} nodeId={elementId} label={elem.text}>
+        <StyledTreeItem
+          data-testid="input_select-tree-item"
+          key={elementId}
+          nodeId={elementId}
+          label={elem.text}
+        >
           {recursiveArrayTree(elem.children, elementId)}
         </StyledTreeItem>
       );
@@ -122,6 +128,7 @@ const MaterialTree = props => {
         const elementId = id ? `${id}.${key}` : key;
         return (
           <StyledTreeItem
+            data-testid="input_select-tree-item"
             key={elementId}
             nodeId={elementId}
             label={key}
@@ -130,14 +137,16 @@ const MaterialTree = props => {
             {Object.keys(obj[key]).map(innerKey => {
               return obj[key][innerKey].length > 0 ? (
                 <StyledTreeItem
+                  data-testid="input_select-tree-item"
                   key={elementId + "." + innerKey}
                   nodeId={elementId + "." + innerKey}
                   label={innerKey}
                   onClick={() => onSelectItem(key, id || key)}
                 >
-                  {obj[key][innerKey].map((elem, elemIndex) => {
+                  {obj[key][innerKey].map(elem => {
                     return (
                       <StyledTreeItem
+                        data-testid="input_select-tree-item"
                         key={elementId + "." + innerKey + "." + elem}
                         nodeId={elementId + "." + innerKey + "." + elem}
                         label={elem}
@@ -157,6 +166,7 @@ const MaterialTree = props => {
 
   return (
     <TreeView
+      data-testid="section_tree-view"
       multiSelect={multiSelect}
       style={{ marginTop: 15 }}
       onNodeSelect={(_, selectedNodes) => onNodeSelect(selectedNodes)}

@@ -1,7 +1,7 @@
 import Model from "../../models/Callback/Callback";
 import DBSubscriber from "../DBSubscriber";
 import Store from "../Store";
-import Helper from "./CallbackHelper";
+import Helper from "./Helper";
 
 class CallbackStore extends Store {
   constructor(workspace, observer) {
@@ -13,6 +13,15 @@ class CallbackStore extends Store {
       plugins: [DBSubscriber],
       observer
     });
+
+    // Set protectedDocs list
+    this.protectedDocs = [
+      "place_holder",
+      "backend.CallbackEditor",
+      "backend.DataValidation",
+      "backend.FlowTopBar",
+      "backend.getPortsData"
+    ];
   }
 
   // Set helper object with cloudFunction

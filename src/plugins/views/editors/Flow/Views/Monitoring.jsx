@@ -1,13 +1,13 @@
-import React, { Component } from "react";
+import React, { Component, createRef } from "react";
+import ReactResizeDetector from "react-resize-detector";
 import PropTypes from "prop-types";
+import { Rest } from "@mov-ai/mov-fe-lib-core";
+import { Backdrop, CircularProgress } from "@material-ui/core";
+import { randomId, defaultFunction } from "../../../../../utils/Utils";
 import MainInterface from "../Components/interface/MainInterface";
 import GraphTreeView from "../Core/Graph/GraphTreeView";
-import { Backdrop, CircularProgress } from "@material-ui/core";
-import ReactResizeDetector from "react-resize-detector";
 import Warnings from "../Components/Warnings/Warnings";
 import Tooltip from "../Components/Tooltips/Tooltip";
-import { Rest } from "@mov-ai/mov-fe-lib-core";
-import { DEFAULT_FUNCTION } from "../../_shared/mocks";
 
 class Monitoring extends Component {
   state = {
@@ -20,11 +20,11 @@ class Monitoring extends Component {
   type = this.props.type || "flow";
   interface = null;
 
-  container = React.createRef();
-  warnings = React.createRef();
-  tooltip = React.createRef();
+  container = createRef();
+  warnings = createRef();
+  tooltip = createRef();
 
-  containerId = `baseTree-${Math.floor(Math.random() * 9999)}`;
+  containerId = `baseTree-${randomId()}`;
 
   //========================================================================================
   /*                                                                                      *
@@ -192,11 +192,7 @@ class Monitoring extends Component {
           </Backdrop>
         )}
         <div
-          style={{
-            width: "100%",
-            height: "100%",
-            flexGrow: 1
-          }}
+          className={classes.flowCanvas}
           id={this.containerId}
           ref={this.container}
         >
@@ -206,14 +202,14 @@ class Monitoring extends Component {
             onResize={this.onResize}
           />
           {this.container.current && (
-            <React.Fragment>
+            <>
               <Warnings
                 ref={this.warnings}
                 warnings={this.state.warnings}
                 domNode={this.container}
               />
               <Tooltip ref={this.tooltip} domNode={this.container} />
-            </React.Fragment>
+            </>
           )}
         </div>
       </div>
@@ -239,9 +235,9 @@ Monitoring.defaultProps = {
   type: "flow",
   robotSelected: "Default",
   nodeContextMenu: {},
-  onNodeSelected: () => DEFAULT_FUNCTION("onNodeSelected"),
-  onDblClick: () => DEFAULT_FUNCTION("onDblClick"),
-  updateRMainMenu: () => DEFAULT_FUNCTION("updateRMainMenu"),
+  onNodeSelected: () => defaultFunction("onNodeSelected"),
+  onDblClick: () => defaultFunction("onDblClick"),
+  updateRMainMenu: () => defaultFunction("updateRMainMenu"),
   masterComponent: { alert: window.alert, ALERTS: { error: 1 } },
   model: "Flow",
   readOnly: false,

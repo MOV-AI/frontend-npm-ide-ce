@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useRef
 } from "react";
+import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { filter } from "rxjs/operators";
 import { makeStyles } from "@material-ui/core/styles";
@@ -14,6 +15,7 @@ import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { FLOW_EXPLORER_PROFILE, PLUGINS } from "../../../../utils/Constants";
+import { KEYBINDINGS } from "../../../../utils/Keybindings";
 import Clipboard, { KEYS } from "./Utils/Clipboard";
 import Vec2 from "./Utils/Vec2";
 import BaseFlow from "./Views/BaseFlow";
@@ -32,7 +34,7 @@ import { FLOW_VIEW_MODE } from "./Constants/constants";
 
 import "./Resources/css/Flow.css";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(_theme => ({
   root: {
     width: "100%",
     height: "100%",
@@ -54,8 +56,6 @@ const Flow = (props, ref) => {
     alert,
     addKeyBind,
     removeKeyBind,
-    activateKeyBind,
-    deactivateKeyBind,
     confirmationAlert,
     saveDocument,
     on
@@ -66,15 +66,15 @@ const Flow = (props, ref) => {
     Object.freeze({
       DETAIL: {
         NAME: "detail-menu",
-        TITLE: "Flow Details"
+        TITLE: "FlowDetailsMenuTitle"
       },
       NODE: {
         NAME: "node-menu",
-        TITLE: "Node Instance Menu"
+        TITLE: "NodeInstanceMenuTitle"
       },
       LINK: {
         NAME: "link-menu",
-        TITLE: "Link Instance Menu"
+        TITLE: "LinkInstanceMenuTitle"
       }
     })
   );
@@ -97,12 +97,12 @@ const Flow = (props, ref) => {
   const { t } = useTranslation();
   const clipboard = useMemo(() => new Clipboard(), []);
   // Refs
-  const baseFlowRef = React.useRef();
-  const mainInterfaceRef = React.useRef();
-  const debounceSelection = React.useRef();
-  const selectedNodeRef = React.useRef();
-  const selectedLinkRef = React.useRef();
-  const isEditableComponentRef = React.useRef(true);
+  const baseFlowRef = useRef();
+  const mainInterfaceRef = useRef();
+  const debounceSelection = useRef();
+  const selectedNodeRef = useRef();
+  const selectedLinkRef = useRef();
+  const isEditableComponentRef = useRef(true);
 
   //========================================================================================
   /*                                                                                      *
@@ -203,18 +203,6 @@ const Flow = (props, ref) => {
   }, [contextMenuOptions]);
 
   /**
-   * Call broadcast method to emit event to all open flows
-   */
-  const setFlowsToDefault = useCallback(() => {
-    call(
-      PLUGINS.DOC_MANAGER.NAME,
-      PLUGINS.DOC_MANAGER.CALL.BROADCAST,
-      PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR,
-      { action: "setMode", value: EVT_NAMES.DEFAULT }
-    );
-  }, [call]);
-
-  /**
    * Open document in new tab
    * @param {*} docData
    */
@@ -257,46 +245,15 @@ const Flow = (props, ref) => {
       // Don't show dialog if no invalid params found
       if (!invalidContainerParams || !invalidContainerParams.length) return;
       // Set title and message for alert
-      const title = t("Sub-flows with invalid parameters");
-      let message = `${t(
-        "The parameters of the sub-flow should come from the flow template."
-      )} ${t(
-        "The following sub-flows contains custom parameters that are not present on its template:"
-      )}\n`;
+      const title = t("InvalidContainersParamTitle");
       // Add containers name to message
-      invalidContainerParams.forEach(containerId => {
-        message += `\n ${containerId}`;
-      });
-      // Add how to fix information
-      message += `\n\n${t(
-        "To fix it, you can either remove the custom parameter on the sub-flow or add the parameter on the template."
-      )}`;
+      const invalidContainers = invalidContainerParams.join("\n ");
+      const message = t("InvalidContainersParamMessage", { invalidContainers });
 
       // Show alert dialog
       alert({ message, title, location: "modal" });
     },
     [t, alert]
-  );
-
-  /**
-   * Handle dialog opening
-   * @param {*} method
-   * @param {*} args
-   * @param {*} resolve
-   */
-  const openDialog = useCallback(
-    ({ method, args, resolve }, dialogComponent) => {
-      // Deactivate key bind before opening dialog
-      deactivateKeyBind();
-      // On close dialog reactivate keybind and resolve promise
-      args.onClose = () => {
-        activateKeyBind();
-        resolve && resolve();
-      };
-      // Call dialog plugin with given method and args
-      call(PLUGINS.DIALOG.NAME, method, args, dialogComponent);
-    },
-    [activateKeyBind, call, deactivateKeyBind]
   );
 
   /**
@@ -309,10 +266,10 @@ const Flow = (props, ref) => {
     (position, nodeToCopy) => {
       const node = nodeToCopy.node;
       return new Promise(resolve => {
-        const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
         const args = {
-          title: `${t("Paste")} ${node.model}`,
+          title: t("PasteNodeModel", { nodeModel: node.model }),
           value: `${node.id}_copy`,
+          onClose: resolve,
           onValidation: newName =>
             getMainInterface().graph.validator.validateNodeName(
               newName,
@@ -322,10 +279,10 @@ const Flow = (props, ref) => {
             getMainInterface().pasteNode(newName, node, position)
         };
         // Open Dialog
-        openDialog({ method, args, resolve });
+        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, args);
       });
     },
-    [t, openDialog]
+    [call, t]
   );
 
   //========================================================================================
@@ -367,7 +324,6 @@ const Flow = (props, ref) => {
             openDoc={openDoc}
             editable={isEditableComponentRef.current}
             groupsVisibilities={groupsVisibilities}
-            openDialog={openDialog}
           />
         )
       };
@@ -378,7 +334,6 @@ const Flow = (props, ref) => {
       id,
       instance,
       openDoc,
-      openDialog,
       getMenuComponent,
       groupsVisibilities,
       t
@@ -422,12 +377,11 @@ const Flow = (props, ref) => {
             link={link.data}
             flowModel={instance}
             sourceMessage={link?.src?.data?.message}
-            openDialog={openDialog}
           />
         )
       };
     },
-    [MENUS, openDialog, call, id, instance, t]
+    [MENUS, call, id, instance, t]
   );
 
   /**
@@ -466,7 +420,6 @@ const Flow = (props, ref) => {
             model={instance}
             handleGroupVisibility={handleGroupVisibility}
             editable={isEditableComponentRef.current}
-            openDialog={openDialog}
           ></Menu>
         )
       },
@@ -509,7 +462,6 @@ const Flow = (props, ref) => {
     instance,
     props.data,
     call,
-    openDialog,
     getNodeMenuToAdd,
     getLinkMenuToAdd,
     handleGroupVisibility,
@@ -672,16 +624,32 @@ const Flow = (props, ref) => {
       if (invalidLinks.length) {
         call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
           submitText: t("Fix"),
-          title: t("Invalid Links Found"),
+          title: t("InvalidLinksFoundTitle"),
           onSubmit: () => deleteInvalidLinks(invalidLinks, callback),
-          message: t(
-            "Do you want to fix this? This will remove all invalid links and save the flow"
-          )
+          message: t("InvalidLinksFoundMessage")
         });
       }
     },
     [call, t, deleteInvalidLinks]
   );
+
+  /**
+   * Call broadcast method to emit event to all open flows
+   */
+  const setFlowsToDefault = useCallback(() => {
+    // Remove selected node and link bookmark
+    onNodeSelected(null);
+    onLinkSelected(null);
+    // Update render of right menu
+    renderRightMenu();
+    // broadcast event to other flows
+    call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.BROADCAST,
+      PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR,
+      { action: "setMode", value: EVT_NAMES.DEFAULT }
+    );
+  }, [call, onLinkSelected, onNodeSelected, renderRightMenu]);
 
   /**
    * Subscribe to mainInterface and canvas events
@@ -691,8 +659,6 @@ const Flow = (props, ref) => {
       // subscribe to on enter default mode
       // When enter default mode remove other node/sub-flow bookmarks
       mainInterface.mode.default.onEnter.subscribe(() => {
-        onNodeSelected(null);
-        onLinkSelected(null);
         setFlowsToDefault();
       });
 
@@ -739,9 +705,8 @@ const Flow = (props, ref) => {
 
       mainInterface.mode.addNode.onClick.subscribe(() => {
         const nodeName = getMainInterface().mode.current.props.node.data.name;
-        const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
         const args = {
-          title: t("Add Node"),
+          title: t("AddNode"),
           submitText: t("Add"),
           value: nodeName,
           onValidation: newName =>
@@ -749,28 +714,29 @@ const Flow = (props, ref) => {
               newName,
               t("Node")
             ),
+          onClose: setFlowsToDefault,
           onSubmit: newName => getMainInterface().addNode(newName)
         };
         // Open form dialog
-        openDialog({ method, args });
+        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, args);
       });
 
       mainInterface.mode.addFlow.onClick.subscribe(() => {
         const flowName = getMainInterface().mode.current.props.node.data.name;
-        const method = PLUGINS.DIALOG.CALL.FORM_DIALOG;
         const args = {
-          title: t("Add Sub-flow"),
+          title: t("AddSubFlow"),
           submitText: t("Add"),
           value: flowName,
           onValidation: newName =>
             getMainInterface().graph.validator.validateNodeName(
               newName,
-              t("Sub-flow")
+              t("SubFlow")
             ),
+          onClose: setFlowsToDefault,
           onSubmit: newName => getMainInterface().addFlow(newName)
         };
         // Open form dialog
-        openDialog({ method, args });
+        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.FORM_DIALOG, args);
       });
 
       // Subscribe to link context menu events
@@ -786,14 +752,6 @@ const Flow = (props, ref) => {
           onClose: handleContextClose
         });
       });
-
-      // Subscribe to add link event
-      mainInterface.events.onAddLink.subscribe(evtData =>
-        alert({
-          location: "snackbar",
-          message: "Link created"
-        })
-      );
 
       // Subscribe to canvas context menu
       mainInterface.mode.canvasCtxMenu.onEnter.subscribe(evtData => {
@@ -907,9 +865,8 @@ const Flow = (props, ref) => {
       invalidContainersParamAlert,
       openDoc,
       handleContextClose,
-      t,
-      openDialog,
-      alert
+      call,
+      t
     ]
   );
 
@@ -927,7 +884,7 @@ const Flow = (props, ref) => {
     ({ message, callback }) => {
       call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
         submitText: t("Delete"),
-        title: t("Confirm to delete"),
+        title: t("ConfirmDelete"),
         onSubmit: callback,
         message
       });
@@ -997,11 +954,12 @@ const Flow = (props, ref) => {
       unselectNode();
     };
     // Compose confirmation message
-    let message = t("Are you sure you want to delete");
-    message +=
-      selectedNodes.length === 1
-        ? ` "${selectedNodes[0].data.id}"?`
-        : ` ${t("the selected nodes")}?`;
+    const message = t("NodeDeleteConfirmation", {
+      nodes:
+        selectedNodes.length === 1
+          ? selectedNodes[0].data.id
+          : t("TheSelectedNodes")
+    });
     // Show confirmation before delete
     handleDelete({ message, callback });
 
@@ -1031,14 +989,14 @@ const Flow = (props, ref) => {
   //========================================================================================
 
   useEffect(() => {
-    addKeyBind("ctrl+c", handleCopyNode);
-    addKeyBind("ctrl+v", handlePasteNodes);
+    addKeyBind(KEYBINDINGS.COPY, handleCopyNode);
+    addKeyBind(KEYBINDINGS.PASTE, handlePasteNodes);
     addKeyBind("esc", setFlowsToDefault);
     addKeyBind(["del", "backspace"], handleDeleteNode);
     // remove keyBind on unmount
     return () => {
-      removeKeyBind("ctrl+c");
-      removeKeyBind("ctrl+v");
+      removeKeyBind(KEYBINDINGS.COPY);
+      removeKeyBind(KEYBINDINGS.PASTE);
       removeKeyBind("esc");
       removeKeyBind(["del", "backspace"]);
     };
@@ -1058,11 +1016,12 @@ const Flow = (props, ref) => {
   //========================================================================================
 
   return (
-    <div className={classes.root}>
+    <div data-testid="section_flow-editor" className={classes.root}>
       <div id="flow-top-bar">
         <FlowTopBar
           id={id}
           call={call}
+          name={name}
           alert={alert}
           confirmationAlert={confirmationAlert}
           scope={scope}
@@ -1074,7 +1033,6 @@ const Flow = (props, ref) => {
           onStartStopFlow={onStartStopFlow}
           nodeStatusUpdated={onNodeStatusUpdate}
           onViewModeChange={onViewModeChange}
-          onReady={onReady}
           // nodeCompleteStatusUpdated={this.onMonitoringNodeStatusUpdate}
         ></FlowTopBar>
       </div>
@@ -1095,13 +1053,14 @@ const Flow = (props, ref) => {
       />
       {contextMenuOptions && (
         <FlowContextMenu
-          {...contextMenuOptions}
+          onClose={handleContextClose}
           onNodeCopy={handleCopyNode}
           onCanvasPaste={handlePasteNodes}
           onLinkDelete={handleDeleteLink}
           onNodeDelete={handleDeleteNode}
           onSubFlowDelete={handleDeleteNode}
           onPortToggle={handleToggleExposedPort}
+          {...contextMenuOptions}
         />
       )}
       {tooltipConfig && <PortTooltip {...tooltipConfig} />}
@@ -1109,8 +1068,20 @@ const Flow = (props, ref) => {
   );
 };
 
-Flow.defaultProps = {
-  name: ""
+Flow.propTypes = {
+  id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  scope: PropTypes.string.isRequired,
+  call: PropTypes.func.isRequired,
+  on: PropTypes.func.isRequired,
+  data: PropTypes.object,
+  instance: PropTypes.object,
+  editable: PropTypes.bool,
+  alert: PropTypes.func,
+  addKeyBind: PropTypes.func,
+  removeKeyBind: PropTypes.func,
+  confirmationAlert: PropTypes.func,
+  saveDocument: PropTypes.func
 };
 
 export default withEditorPlugin(Flow);

@@ -1,3 +1,4 @@
+import { PLUGINS } from "../../../../../../utils/Constants";
 import ClassicNode from "./ClassicNode";
 import ContainerNode from "./ContainerNode";
 import TemporaryContainerNode from "./TemporaryContainerNode";
@@ -5,7 +6,6 @@ import TemporaryNode from "./TemporaryNode";
 import TreeClassicNode from "./TreeView/TreeClassicNode";
 import PreviewClassicNode from "./Preview/PreviewClassicNode";
 import PreviewContainerNode from "./Preview/PreviewContainerNode";
-import { DOCS_MNG } from "./constants";
 
 /**
  * Factory class to produce Nodes and Containers (aka Sub-Flows)
@@ -23,10 +23,14 @@ class Factory {
    */
   async getTemplate(name) {
     const { scope } = this.output;
-    const obj = await this.docManager(DOCS_MNG.NAME, DOCS_MNG.ACTION.READ, {
-      scope,
-      name
-    });
+    const obj = await this.docManager(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.READ,
+      {
+        scope,
+        name
+      }
+    );
 
     return obj.serializeToDB();
   }

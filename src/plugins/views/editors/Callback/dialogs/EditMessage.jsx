@@ -1,7 +1,5 @@
-import React from "react";
-import Loader from "../../_shared/Loader/Loader";
-import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
-import Search from "../../_shared/Search/Search";
+import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Typography,
   TextField,
@@ -11,11 +9,16 @@ import {
   DialogActions
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { searchMessages } from "./utils";
+import { PLUGINS } from "../../../../../utils/Constants";
+import { ERROR_MESSAGES } from "../../../../../utils/Messages";
 import { withTheme } from "../../../../../decorators/withTheme";
 import { DialogTitle } from "../../../../Dialog/components/AppDialog/AppDialog";
+import Loader from "../../_shared/Loader/Loader";
+import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
+import Search from "../../_shared/Search/Search";
+import { searchMessages } from "./utils";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(_theme => ({
   treeRoot: {
     overflowY: "auto",
     overflowX: "hidden",
@@ -32,12 +35,14 @@ const EditMessageDialog = props => {
   // Props
   const { call, scope, selectedMessage, onClose, onSubmit } = props;
   // State hooks
-  const [loading, setLoading] = React.useState(false);
-  const [messages, setMessages] = React.useState();
-  const [filteredMsg, setFilteredMsg] = React.useState();
-  const [selectedMsg, setSelectedMsg] = React.useState(selectedMessage);
+  const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState();
+  const [filteredMsg, setFilteredMsg] = useState();
+  const [selectedMsg, setSelectedMsg] = useState(selectedMessage);
   // Style hook
   const classes = useStyles();
+  // Translation hook
+  const { t } = useTranslation();
 
   //========================================================================================
   /*                                                                                      *
@@ -48,7 +53,7 @@ const EditMessageDialog = props => {
   /**
    * Format message list to tree structure
    */
-  const _updateMessages = React.useCallback(list => {
+  const _updateMessages = useCallback(list => {
     let messagesStruct = [];
     Object.keys(list)
       .sort()
@@ -90,7 +95,7 @@ const EditMessageDialog = props => {
   /**
    * On search tree
    */
-  const onSearch = React.useCallback(
+  const onSearch = useCallback(
     value => {
       const result = searchMessages(value, messages);
       setFilteredMsg(result);
@@ -107,9 +112,13 @@ const EditMessageDialog = props => {
   /**
    * Component mounted
    */
-  React.useEffect(() => {
+  useEffect(() => {
     setLoading(true);
-    call("docManager", "getStore", scope).then(store => {
+    call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.GET_STORE,
+      scope
+    ).then(store => {
       store.helper.getAllMessages().then(msgs => {
         if (msgs) _updateMessages(msgs);
         setLoading(false);
@@ -138,16 +147,21 @@ const EditMessageDialog = props => {
       ></MaterialTree>
     ) : (
       <>
-        <h2>Something went wrong :(</h2>
-        <h3>Failed to load messages</h3>
+        <h2>{t(ERROR_MESSAGES.SOMETHING_WENT_WRONG)}</h2>
+        <h3>{t("FailedToLoadMessages")}</h3>
       </>
     );
   };
 
   return (
-    <Dialog open={true} onClose={onClose} classes={{ paper: classes.paper }}>
+    <Dialog
+      data-testid="section_edit-message"
+      open={true}
+      onClose={onClose}
+      classes={{ paper: classes.paper }}
+    >
       <DialogTitle onClose={onClose} hasCloseButton={true}>
-        Edit Message
+        {t("EditMessage")}
       </DialogTitle>
       <DialogContent>
         <Search onSearch={onSearch} />
@@ -156,15 +170,18 @@ const EditMessageDialog = props => {
         </Typography>
         <TextField
           fullWidth
-          label={"Message"}
+          label={t("Message")}
           value={selectedMsg}
           margin="normal"
           disabled
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button data-testid="input_cancel" onClick={onClose}>
+          {t("Cancel")}
+        </Button>
         <Button
+          data-testid="input_confirm"
           color="primary"
           onClick={() => {
             onSubmit(selectedMsg);
@@ -172,7 +189,7 @@ const EditMessageDialog = props => {
           }}
           disabled={!selectedMsg}
         >
-          Submit
+          {t("Submit")}
         </Button>
       </DialogActions>
     </Dialog>

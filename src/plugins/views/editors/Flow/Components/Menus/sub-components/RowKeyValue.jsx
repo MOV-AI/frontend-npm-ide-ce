@@ -113,12 +113,20 @@ const RowKeyValue = ({
       </Typography>
       {renderParamRow(item)}
       {(allowEdit || viewOnly) && (
-        <IconButton onClick={handleKeyValueEditModal} size="small">
+        <IconButton
+          data-testid="input_edit"
+          onClick={handleKeyValueEditModal}
+          size="small"
+        >
           {viewOnly ? <VisibilityIcon /> : <Edit></Edit>}
         </IconButton>
       )}
       {allowDelete && (
-        <IconButton onClick={handleKeyValueDeleteModal} size="small">
+        <IconButton
+          data-testid="input_delete"
+          onClick={handleKeyValueDeleteModal}
+          size="small"
+        >
           <DeleteIcon />
         </IconButton>
       )}

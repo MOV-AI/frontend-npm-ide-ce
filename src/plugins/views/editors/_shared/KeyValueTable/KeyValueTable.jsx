@@ -5,7 +5,7 @@ import _isEqual from "lodash/isEqual";
 import AddBox from "@material-ui/icons/AddBox";
 import Edit from "@material-ui/icons/Edit";
 import CollapsibleHeader from "../CollapsibleHeader/CollapsibleHeader";
-import MaterialTable from "../_shared/MaterialTable/MaterialTable";
+import MaterialTable from "../MaterialTable/MaterialTable";
 
 const KeyValueTable = props => {
   // Props
@@ -16,7 +16,8 @@ const KeyValueTable = props => {
     onRowDelete,
     openEditDialog,
     editable,
-    columns
+    columns,
+    testId = "section_key-value-table"
   } = props;
   // Hooks
   const { t } = useTranslation();
@@ -71,7 +72,7 @@ const KeyValueTable = props => {
     if (editable)
       actions.push({
         icon: () => <AddBox></AddBox>,
-        tooltip: `${t("Add")} ${title}`,
+        tooltip: t("AddAction", { actionTitle: title }),
         isFreeAction: true,
         onClick: () => openEditDialog(varName)
       });
@@ -85,7 +86,7 @@ const KeyValueTable = props => {
   //========================================================================================
 
   return (
-    <CollapsibleHeader title={title}>
+    <CollapsibleHeader testId={testId} title={title}>
       <MaterialTable
         columns={columns}
         data={formatData(data)}
@@ -112,10 +113,6 @@ KeyValueTable.propTypes = {
 
 KeyValueTable.defaultProps = {
   data: [],
-  columns: [
-    { field: "name", title: "Name" },
-    { field: "value", title: "Value" }
-  ],
   editable: false
 };
 

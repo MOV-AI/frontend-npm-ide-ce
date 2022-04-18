@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -7,25 +8,10 @@ import DialogContent from "@material-ui/core/DialogContent";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import CloseIcon from "@material-ui/icons/Close";
 import { IconButton, Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { defaultFunction } from "../../../../utils/Utils";
 import { withTheme } from "../../../../decorators/withTheme";
 
-function useTranslation() {
-  return { t: s => s };
-}
-
-const useStyles = makeStyles(theme => ({
-  root: {
-    margin: 0,
-    padding: theme.spacing(2)
-  },
-  closeButton: {
-    position: "absolute",
-    right: theme.spacing(1),
-    top: theme.spacing(1),
-    color: theme.palette.grey[500]
-  }
-}));
+import { appDialogTitleStyles, appDialogStyles } from "./styles";
 
 /**
  * Custom Dialog Title : Render close icon button
@@ -33,13 +19,18 @@ const useStyles = makeStyles(theme => ({
  * @returns {ReactComponent} DialogTitle Component
  */
 export const DialogTitle = props => {
-  const classes = useStyles();
   const { children, onClose, hasCloseButton } = props;
+  const classes = appDialogTitleStyles();
   return (
-    <MuiDialogTitle disableTypography className={classes.root}>
+    <MuiDialogTitle
+      data-testid="section_dialog-title"
+      disableTypography
+      className={classes.root}
+    >
       <Typography variant="h6">{children}</Typography>
       {hasCloseButton ? (
         <IconButton
+          data-testid="input_close"
           aria-label="close"
           className={classes.closeButton}
           onClick={onClose}
@@ -58,9 +49,17 @@ export const DialogTitle = props => {
  */
 const AppDialog = props => {
   const { t } = useTranslation();
-  const [open, setOpen] = React.useState(true);
-  const { title, actions, onSubmit, onClose, submitText, closeOnBackdrop } =
-    props;
+  const {
+    actions,
+    onSubmit,
+    onClose,
+    closeOnBackdrop,
+    title = t("DefaultDialogTitle"),
+    submitText = t("Submit"),
+    testId = "section_app-dialog"
+  } = props;
+  const [open, setOpen] = useState(true);
+  const classes = appDialogStyles();
 
   /**
    * Handle Dialog close
@@ -85,12 +84,16 @@ const AppDialog = props => {
 
   const getDefaultActions = () => {
     return (
-      <DialogActions>
-        <Button onClick={handleClose} color="default">
+      <DialogActions data-testid="section_dialog-actions">
+        <Button data-testid="input_close" onClick={handleClose} color="default">
           {onSubmit ? t("Cancel") : t("Ok")}
         </Button>
         {onSubmit && (
-          <Button onClick={handleSubmit} color="primary">
+          <Button
+            data-testid="input_confirm"
+            onClick={handleSubmit}
+            color="primary"
+          >
             {submitText}
           </Button>
         )}
@@ -100,13 +103,15 @@ const AppDialog = props => {
 
   return (
     <Dialog open={open} onClose={handleClose}>
-      <DialogTitle onClose={handleClose} {...props}>
-        {title}
-      </DialogTitle>
-      <DialogContent dividers style={{ minWidth: 450 }}>
-        {props.children}
-      </DialogContent>
-      {actions ?? getDefaultActions()}
+      <div data-testid={testId}>
+        <DialogTitle onClose={handleClose} {...props}>
+          {title}
+        </DialogTitle>
+        <DialogContent dividers className={classes.dialogContent}>
+          {props.children}
+        </DialogContent>
+        {actions ?? getDefaultActions()}
+      </div>
     </Dialog>
   );
 };
@@ -122,9 +127,7 @@ AppDialog.propTypes = {
 };
 
 AppDialog.defaultProps = {
-  title: "Are you sure?",
-  submitText: "Submit",
-  onClose: () => console.log("Not Implemented"),
+  onClose: () => defaultFunction("onClose"),
   hasCloseButton: true,
   closeOnBackdrop: false
 };

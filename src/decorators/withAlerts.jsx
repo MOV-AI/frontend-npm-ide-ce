@@ -1,4 +1,6 @@
 import React from "react";
+import { getRefComponent } from "../utils/Utils";
+import { PLUGINS } from "../utils/Constants";
 
 /**
  * Pass snackbar alerts to components
@@ -6,24 +8,18 @@ import React from "react";
  * @returns
  */
 const withAlerts = Component => {
+  const RefComponent = getRefComponent(Component);
+
   return (props, ref) => {
     // Props
     const { call } = props;
-
-    // Consts
-    const SEVERITIES = {
-      SUCCESS: "success",
-      ERROR: "error",
-      INFO: "info",
-      WARNING: "warning"
-    };
 
     /**
      * Create snackbar alert
      * @param {{title: String, message: String, location: String, severity: String}} alertData
      */
     const alert = options => {
-      call("alert", "show", options);
+      call(PLUGINS.ALERT.NAME, PLUGINS.ALERT.CALL.SHOW, options);
     };
 
     /**
@@ -31,16 +27,20 @@ const withAlerts = Component => {
      * @param {{title: string, message: string, submitText: string, onSubmit: function}} confirmationData
      */
     const confirmationAlert = ({ title, message, onSubmit, submitText }) => {
-      call("dialog", "confirmation", { title, message, onSubmit, submitText });
+      call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
+        title,
+        message,
+        onSubmit,
+        submitText
+      });
     };
 
     return (
-      <Component
+      <RefComponent
         {...props}
         ref={ref}
         alert={alert}
         confirmationAlert={confirmationAlert}
-        alertSeverities={SEVERITIES}
       />
     );
   };

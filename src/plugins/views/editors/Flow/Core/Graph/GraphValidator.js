@@ -7,20 +7,21 @@
  */
 
 import i18n from "../../../../../../i18n/i18n";
+import MESSAGES from "../../../../../../utils/Messages";
 import { ROS_VALID_NAMES } from "../../../../../../utils/Constants";
-import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
+import { defaultFunction } from "../../../../../../utils/Utils";
 import { MisMatchMessageLink } from "../../Components/Links/Errors";
 import { isLinkeable } from "../../Components/Nodes/BaseNode/PortValidator";
 
 const messages = {
   startLink: {
-    message: i18n.t("Start link(s) not found"),
+    message: i18n.t("StartLinkNotFound"),
     type: "warning",
     isRuntime: true,
     isPersistent: false
   },
   linkMismatchMessage: {
-    message: i18n.t("There're links with message mismatch"),
+    message: i18n.t("MessageMismatchedLinks"),
     type: "warning",
     isRuntime: false,
     isPersistent: true
@@ -150,15 +151,19 @@ export default class GraphValidator {
       const re = ROS_VALID_NAMES;
       if (!newName)
         throw new Error(
-          i18n.t("{{instance}} name is mandatory", { instance: instType })
+          i18n.t(MESSAGES.ERROR_MESSAGES.INSTANCE_NAME_IS_MANDATORY, {
+            instance: instType
+          })
         );
       if (!re.test(newName))
         throw new Error(
-          i18n.t("Invalid {{instance}} name", { instance: instType })
+          i18n.t(MESSAGES.ERROR_MESSAGES.INVALID_INSTANCE_NAME, {
+            instance: instType
+          })
         );
       if (this.graph.nodes.has(newName))
         throw new Error(
-          i18n.t("Cannot have multiple instances with same name")
+          i18n.t(MESSAGES.ERROR_MESSAGES.MULTIPLE_ENTRIES_WITH_SAME_NAME)
         );
 
       return { result: true, error: "" };
@@ -217,12 +222,15 @@ export default class GraphValidator {
       nodes
     );
 
+    // Check if it still has source/target ports
+    if (!sourcePortPos || !targetPortPos) return;
+
     // Check if link is invalid to define error
     const error = !isLinkeable(sourcePortPos.data, targetPortPos.data)
       ? new MisMatchMessageLink(
           link,
           { source: sourcePortPos, target: targetPortPos },
-          () => DEFAULT_FUNCTION("")
+          () => defaultFunction("")
         )
       : null;
 

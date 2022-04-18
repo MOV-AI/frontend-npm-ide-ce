@@ -45,7 +45,7 @@ i18n
     }
   });
 //   .changeLanguage("en", (err, t) => {
-//     if (err) return console.log("something went wrong loading", err);
+//     if (err) return console.warn("something went wrong loading", err);
 //   });
 
 export default i18n;

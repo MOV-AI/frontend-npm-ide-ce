@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
@@ -9,7 +9,7 @@ import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin
 import InfoIcon from "@material-ui/icons/Info";
 import Menu from "./Menu";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(_theme => ({
   container: {
     display: "flex",
     flexDirection: "column",
@@ -30,6 +30,7 @@ const Callback = (props, ref) => {
     saveDocument,
     editable = true
   } = props;
+
   // Style Hooks
   const classes = useStyles();
   const theme = useTheme();
@@ -41,13 +42,13 @@ const Callback = (props, ref) => {
    *                                                                                      */
   //========================================================================================
 
-  const renderRightMenu = React.useCallback(() => {
+  const renderRightMenu = useCallback(() => {
     const menuName = `${id}-detail-menu`;
-    const menuTitle = t("Callback Details Menu");
+    const menuTitle = t("CallbackDetailsMenuTitle");
     // add bookmark
     call(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.CALL.SET_BOOKMARK, {
       [menuName]: {
-        icon: <InfoIcon></InfoIcon>,
+        icon: <InfoIcon />,
         name: menuName,
         title: menuTitle,
         view: <Menu id={id} call={call} name={name} scope={scope} />
@@ -70,6 +71,10 @@ const Callback = (props, ref) => {
     if (instance.current) instance.current.setCode(value);
   };
 
+  const onEditorLoad = editor => {
+    if (!id) editor.focus();
+  };
+
   //========================================================================================
   /*                                                                                      *
    *                                   Render Functions                                   *
@@ -77,30 +82,31 @@ const Callback = (props, ref) => {
   //========================================================================================
 
   return (
-    <div className={classes.container}>
+    <div data-testid="section_callback-editor" className={classes.container}>
       <MonacoCodeEditor
-        style={{ flexGrow: 1, height: "100%", width: "100%" }}
         value={data?.code}
         language={"python"}
         theme={theme.codeEditor.theme}
         options={{ readOnly: !editable }}
         onChange={updateCallbackCode}
         onSave={saveDocument}
-        onLoad={editor => {
-          if (!id) editor.focus();
-        }}
+        onLoad={onEditorLoad}
       />
     </div>
   );
 };
 
-export default withEditorPlugin(Callback);
-
 Callback.scope = "Configuration";
 
 Callback.propTypes = {
-  profile: PropTypes.object.isRequired,
+  id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  scope: PropTypes.string.isRequired,
+  call: PropTypes.func.isRequired,
   data: PropTypes.object,
+  instance: PropTypes.object,
   editable: PropTypes.bool,
-  alert: PropTypes.func
+  saveDocument: PropTypes.func
 };
+
+export default withEditorPlugin(Callback);

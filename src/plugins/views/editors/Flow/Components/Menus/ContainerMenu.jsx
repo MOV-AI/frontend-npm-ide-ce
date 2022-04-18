@@ -4,15 +4,19 @@ import PropTypes from "prop-types";
 import { Collapse, Divider, ListItem, ListItemText } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import { DATA_TYPES, PLUGINS } from "../../../../../../utils/Constants";
+import {
+  DATA_TYPES,
+  PLUGINS,
+  TABLE_KEYS_NAMES,
+  DIALOG_TITLE
+} from "../../../../../../utils/Constants";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
-import { TABLE_KEYS_NAMES, DIALOG_TITLE } from "../../Constants/constants";
 import KeyValuesSection from "./sub-components/collapsibleSections/KeyValuesSection";
 import MenuDetails from "./sub-components/MenuDetails";
 
 const ContainerMenu = props => {
   // Props
-  const { nodeInst, call, openDoc, flowModel, editable, openDialog } = props;
+  const { nodeInst, call, openDoc, flowModel, editable } = props;
   // State hooks
   const [templateData, setTemplateData] = useState({});
   const [flowData, setFlowData] = useState({});
@@ -82,10 +86,9 @@ const ContainerMenu = props => {
         paramType
       };
 
-      const method = PLUGINS.DIALOG.CALL.CUSTOM_DIALOG;
       const args = {
         onSubmit: handleSubmitParameter,
-        title: t("Edit {{paramType}}", { paramType }),
+        title: t("EditParamType", { paramType }),
         data: obj,
         showDefault: true,
         showValueOptions: true,
@@ -96,9 +99,14 @@ const ContainerMenu = props => {
         call
       };
 
-      openDialog({ method, args }, ParameterEditorDialog);
+      call(
+        PLUGINS.DIALOG.NAME,
+        PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
+        args,
+        ParameterEditorDialog
+      );
     },
-    [openDialog, call, handleSubmitParameter, t]
+    [call, handleSubmitParameter, t]
   );
 
   //========================================================================================
@@ -116,7 +124,10 @@ const ContainerMenu = props => {
     const name = data?.ContainerFlow;
     if (!name) return;
     // Read node template
-    call("docManager", "read", { name, scope: data.model }).then(doc => {
+    call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.READ, {
+      name,
+      scope: data.model
+    }).then(doc => {
       setTemplateData(doc.serialize());
     });
   }, [data, call]);
@@ -128,16 +139,21 @@ const ContainerMenu = props => {
   //========================================================================================
 
   return (
-    <>
+    <div data-testid="section_flow-container-menu">
       <MenuDetails
         id={data.id}
         model={data.model}
         template={data.ContainerFlow}
+        label="TemplateName-Colon"
         type={"Sub-Flow"}
         openDoc={openDoc}
       />
       {/* =========================== PARAMETERS =========================== */}
-      <ListItem button onClick={toggleExpanded}>
+      <ListItem
+        data-testid="input_toggle-expanded-parameters"
+        button
+        onClick={toggleExpanded}
+      >
         <ListItemText primary={t("Parameters")} />
         {expanded ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
@@ -151,7 +167,7 @@ const ContainerMenu = props => {
         />
         <Divider />
       </Collapse>
-    </>
+    </div>
   );
 };
 

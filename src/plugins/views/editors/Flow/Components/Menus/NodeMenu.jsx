@@ -11,9 +11,14 @@ import {
 } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import { DATA_TYPES } from "../../../../../../utils/Constants";
+import {
+  DATA_TYPES,
+  TABLE_KEYS_NAMES,
+  DIALOG_TITLE,
+  PLUGINS,
+  SCOPES
+} from "../../../../../../utils/Constants";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
-import { TABLE_KEYS_NAMES, DIALOG_TITLE } from "../../Constants/constants";
 import MenuDetails from "./sub-components/MenuDetails";
 import PortsDetails from "./sub-components/PortsDetails";
 import PropertiesSection from "./sub-components/collapsibleSections/PropertiesSection";
@@ -42,20 +47,13 @@ const ACTIVE_ITEM = {
  * @returns {ReaactElement} Node Menu
  */
 const NodeMenu = memo(
-  ({
-    nodeInst,
-    openDialog,
-    call,
-    openDoc,
-    editable,
-    flowModel,
-    groupsVisibilities
-  }) => {
+  ({ nodeInst, call, openDoc, editable, flowModel, groupsVisibilities }) => {
     const data = nodeInst.data;
     // State hooks
     const [templateData, setTemplateData] = useState({});
     const [activeItem, setActiveItem] = useState(0);
     const [nodeData, setNodeData] = useState({});
+    const [protectedDocs, setProtectedDocs] = useState([]);
     // Other hooks
     const classes = nodeMenuStyles();
     const { t } = useTranslation();
@@ -126,14 +124,26 @@ const NodeMenu = memo(
     //========================================================================================
 
     useEffect(() => {
+      // Get node data
       setNodeData(getNodeData());
-    }, [getNodeData]);
+      // Get protected callbacks
+      call(
+        PLUGINS.DOC_MANAGER.NAME,
+        PLUGINS.DOC_MANAGER.CALL.GET_STORE,
+        SCOPES.CALLBACK
+      ).then(store => {
+        setProtectedDocs(store.protectedDocs);
+      });
+    }, [getNodeData, call]);
 
     useEffect(() => {
       const name = data?.Template;
       if (!data?.Template) return;
       // Read node template
-      call("docManager", "read", { name, scope: data.model }).then(doc => {
+      call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.READ, {
+        name,
+        scope: data.model
+      }).then(doc => {
         setTemplateData(doc.serialize());
       });
     }, [data, call]);
@@ -176,10 +186,9 @@ const NodeMenu = memo(
           paramType
         };
 
-        const method = "customDialog";
         const args = {
           onSubmit: handleSubmitParameter,
-          title: t("Edit {{paramType}}", { paramType }),
+          title: t("EditParamType", { paramType }),
           data: obj,
           showDefault: true,
           showValueOptions: true,
@@ -190,9 +199,14 @@ const NodeMenu = memo(
           call
         };
 
-        openDialog({ method, args }, ParameterEditorDialog);
+        call(
+          PLUGINS.DIALOG.NAME,
+          PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
+          args,
+          ParameterEditorDialog
+        );
       },
-      [openDialog, call, handleSubmitParameter, t]
+      [call, handleSubmitParameter, t]
     );
 
     /**
@@ -230,17 +244,27 @@ const NodeMenu = memo(
     );
 
     return (
-      <Typography component="div" className={classes.root}>
+      <Typography
+        data-testid="section_flow-node-menu"
+        component="div"
+        className={classes.root}
+      >
         <MenuDetails
           id={data.id}
           model={data.model}
           template={data.Template}
+          label="TemplateName-Colon"
           type={templateData.type}
           openDoc={openDoc}
         />
-        <PortsDetails openDoc={openDoc} templateData={templateData.ports} />
+        <PortsDetails
+          openDoc={openDoc}
+          templateData={templateData.ports}
+          protectedDocs={protectedDocs}
+        />
         {/* =========================== PROPERTIES =========================== */}
         <ListItem
+          data-testid="input_properties-expand"
           button
           data-menu-id={ACTIVE_ITEM.PROPERTIES}
           onClick={handleExpandClick}
@@ -261,6 +285,7 @@ const NodeMenu = memo(
         </Collapse>
         {/* =========================== PARAMETERS =========================== */}
         <ListItem
+          data-testid="input_parameters-expand"
           button
           data-menu-id={ACTIVE_ITEM.PARAMETERS}
           onClick={handleExpandClick}
@@ -280,11 +305,12 @@ const NodeMenu = memo(
         </Collapse>
         {/* =========================== ENV. VARIABLES =========================== */}
         <ListItem
+          data-testid="input_env-var-expand"
           button
           data-menu-id={ACTIVE_ITEM.ENVVARS}
           onClick={handleExpandClick}
         >
-          <ListItemText primary={t("Env. Variables")} />
+          <ListItemText primary={t("EnvVars")} />
           {renderExpandIcon(ACTIVE_ITEM.ENVVARS)}
         </ListItem>
         <Collapse in={activeItem === ACTIVE_ITEM.ENVVARS} unmountOnExit>
@@ -299,11 +325,12 @@ const NodeMenu = memo(
         </Collapse>
         {/* =========================== COMMAND LINES =========================== */}
         <ListItem
+          data-testid="input_cmd-line-expand"
           button
           data-menu-id={ACTIVE_ITEM.CMDLINE}
           onClick={handleExpandClick}
         >
-          <ListItemText primary={t("Command Line")} />
+          <ListItemText primary={t("CommandLine")} />
           {renderExpandIcon(ACTIVE_ITEM.CMDLINE)}
         </ListItem>
         <Collapse in={activeItem === ACTIVE_ITEM.CMDLINE} unmountOnExit>
@@ -318,6 +345,7 @@ const NodeMenu = memo(
         </Collapse>
         {/* =========================== GROUP =========================== */}
         <ListItem
+          data-testid="input_group-expand"
           button
           data-menu-id={ACTIVE_ITEM.GROUP}
           onClick={handleExpandClick}
@@ -327,6 +355,7 @@ const NodeMenu = memo(
         </ListItem>
         <Collapse in={activeItem === ACTIVE_ITEM.GROUP} unmountOnExit>
           <NodeGroupSection
+            data-testid="section_node-group-section"
             flowGroups={flowModel.current.getGroups().serialize()}
             nodeGroups={nodeData.groups}
             handleBelongGroup={handleBelongGroup}
