@@ -17,7 +17,7 @@ const useDataTypes = () => {
    * @param {Array} excluded : Excluded keys
    * @returns {Array} List of valid data types to be displayed in the select box
    */
-  const getDataTypes = (excluded = []) => {
+  const getDataTypes = (excluded = ["config"]) => {
     return dataTypeManager
       .getTypeKeys()
       .filter(type => !excluded.includes(type));
