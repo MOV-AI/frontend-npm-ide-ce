@@ -1,93 +1,95 @@
+import i18n from "../../../i18n/i18n";
+
 export const KEYBINDINGS = {
   GENERAL: {
     NAME: "appShortcuts",
-    LABEL: "AppKeybindLabel",
-    DESCRIPTION: "AppKeybindDescription",
+    LABEL: i18n.t("AppKeybindLabel"),
+    DESCRIPTION: i18n.t("AppKeybindDescription"),
     KEYBINDS: {
       OPEN_WELCOME_TAB: {
         NAME: "openWelcomeTab",
-        LABEL: "HomeTabTitle",
-        DESCRIPTION: "HomeTabKeybindDescription",
+        LABEL: i18n.t("HomeTabTitle"),
+        DESCRIPTION: i18n.t("HomeTabKeybindDescription"),
         SHORTCUTS: "ctrl+shift+home"
       },
       OPEN_SHORTCUTS_TAB: {
         NAME: "openShortcutsTab",
-        LABEL: "ShortcutsTabTitle",
-        DESCRIPTION: "ShortcutsTabKeybindDescription",
+        LABEL: i18n.t("ShortcutsTabTitle"),
+        DESCRIPTION: i18n.t("ShortcutsTabKeybindDescription"),
         SHORTCUTS: "ctrl+shift+k"
       }
     }
   },
   EDITOR_GENERAL: {
     NAME: "editorGeneral",
-    LABEL: "EditorGeneralKeybindLabel",
-    DESCRIPTION: "EditorGeneralKeybindDescription",
+    LABEL: i18n.t("EditorGeneralKeybindLabel"),
+    DESCRIPTION: i18n.t("EditorGeneralKeybindDescription"),
     KEYBINDS: {
       SAVE: {
         NAME: "save",
-        LABEL: "SaveDoc",
-        DESCRIPTION: "SaveDocKeybindDescription",
+        LABEL: i18n.t("SaveDoc"),
+        DESCRIPTION: i18n.t("SaveDocKeybindDescription"),
         SHORTCUTS: "ctrl+s"
       },
       SAVE_ALL: {
         NAME: "saveAll",
-        LABEL: "SaveAllDocs",
-        DESCRIPTION: "SaveAllDocsKeybindDescription",
+        LABEL: i18n.t("SaveAllDocs"),
+        DESCRIPTION: i18n.t("SaveAllDocsKeybindDescription"),
         SHORTCUTS: "ctrl+shift+s"
       },
       UNDO: {
         NAME: "undo",
-        LABEL: "Undo",
-        DESCRIPTION: "UndoKeybindDescription",
+        LABEL: i18n.t("Undo"),
+        DESCRIPTION: i18n.t("UndoKeybindDescription"),
         SHORTCUTS: "ctrl+z"
       },
       REDO: {
         NAME: "redo",
-        LABEL: "Redo",
-        DESCRIPTION: "RedoKeybindDescription",
+        LABEL: i18n.t("Redo"),
+        DESCRIPTION: i18n.t("RedoKeybindDescription"),
         SHORTCUTS: "ctrl+shift+z"
       },
       COPY: {
         NAME: "copy",
-        LABEL: "Copy",
-        DESCRIPTION: "CopyKeybindDescription",
+        LABEL: i18n.t("Copy"),
+        DESCRIPTION: i18n.t("CopyKeybindDescription"),
         SHORTCUTS: "ctrl+c"
       },
       PASTE: {
         NAME: "paste",
-        LABEL: "Paste",
-        DESCRIPTION: "PasteKeybindDescription",
+        LABEL: i18n.t("Paste"),
+        DESCRIPTION: i18n.t("PasteKeybindDescription"),
         SHORTCUTS: "ctrl+v"
       },
       CANCEL: {
         NAME: "cancel",
-        LABEL: "Cancel",
-        DESCRIPTION: "CancelKeybindDescription",
+        LABEL: i18n.t("Cancel"),
+        DESCRIPTION: i18n.t("CancelKeybindDescription"),
         SHORTCUTS: "esc"
       },
       DELETE: {
         NAME: "delete",
-        LABEL: "Delete",
-        DESCRIPTION: "DeleteKeybindDescription",
+        LABEL: i18n.t("Delete"),
+        DESCRIPTION: i18n.t("DeleteKeybindDescription"),
         SHORTCUTS: ["del", "backspace"]
       }
     }
   },
   FLOW: {
     NAME: "editorFlow",
-    LABEL: "EditorFlowKeybindLabel",
-    DESCRIPTION: "EditorGeneralKeybindDescription",
-    SHORTCUTS: {
+    LABEL: i18n.t("EditorFlowKeybindLabel"),
+    DESCRIPTION: i18n.t("EditorFlowKeybindDescription"),
+    KEYBINDS: {
       COPY_NODE: {
         NAME: "copyNode",
-        LABEL: "CopyNode",
-        DESCRIPTION: "CopyNodeKeybindDescription",
+        LABEL: i18n.t("CopyNode"),
+        DESCRIPTION: i18n.t("CopyNodeKeybindDescription"),
         SHORTCUTS: "ctrl+c"
       },
       PASTE_NODE: {
         NAME: "pasteNode",
-        LABEL: "PasteNode",
-        DESCRIPTION: "PasteNodeKeybindDescription",
+        LABEL: i18n.t("PasteNode"),
+        DESCRIPTION: i18n.t("PasteNodeKeybindDescription"),
         SHORTCUTS: "ctrl+v"
       }
     }

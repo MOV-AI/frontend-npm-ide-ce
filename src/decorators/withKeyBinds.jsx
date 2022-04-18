@@ -34,7 +34,6 @@ const withKeyBinds = Component => {
      * This will automatically deactivate all other scopes
      */
     const activateKeyBind = (scope = scopeRef.current) => {
-      console.log("activateKeyBind scope", scope);
       hotkeys.setScope(scope);
     };
 
@@ -52,8 +51,6 @@ const withKeyBinds = Component => {
      * @param {*} callback
      */
     const addKeyBind = (keys, callback, scope = scopeRef.current) => {
-      console.log("addKeyBind keys", keys);
-      console.log("addKeyBind scope", scope);
       if (!scope) return;
       const keysToBind = parseKeybinds(keys);
       activateKeyBind(scope);

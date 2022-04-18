@@ -26,6 +26,8 @@ import { getHomeTab } from "../../HomeTab/HomeTab";
 import { getShortcutsTab } from "../../Keybinding/Shortcuts";
 import useTabStack from "./useTabStack";
 
+const NON_EDITOR_TABS = [HOMETAB_PROFILE.name, SHORTCUTS_PROFILE.name];
+
 const useTabLayout = (props, dockRef) => {
   const { emit, call, on, off } = props;
   const workspaceManager = useMemo(() => new Workspace(), []);
@@ -42,7 +44,7 @@ const useTabLayout = (props, dockRef) => {
    *                                                                                      */
   //========================================================================================
 
-  const openExtraTabs = useCallback(
+  const openNonEditorTabs = useCallback(
     lastTabs => {
       // Save current active tab id
       const currentActiveTabId = activeTabId.current;
@@ -55,7 +57,7 @@ const useTabLayout = (props, dockRef) => {
         dockRef.current.updateTab(HOMETAB_PROFILE.name, tabData, false);
       }
 
-      // Open Home Tab
+      // Open Shortcuts Tab
       if (lastTabs.has(SHORTCUTS_PROFILE.name)) {
         const tabData = getShortcutsTab();
         tabsById.current.set(tabData.id, tabData);
@@ -65,8 +67,9 @@ const useTabLayout = (props, dockRef) => {
 
       // Set current active tab id after extra tabs update
       activeTabId.current = currentActiveTabId;
+      emit(PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE, { id: currentActiveTabId });
     },
-    [dockRef, workspaceManager]
+    [dockRef, workspaceManager, emit]
   );
 
   /**
@@ -518,6 +521,7 @@ const useTabLayout = (props, dockRef) => {
         z: 1
       };
 
+      emit(PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE, { id: tabData.id });
       !preventFocus && !tabData.isNew && addTabToStack(tabData.id, tabPosition);
       tabsById.current.set(tabData.id, tabData);
       workspaceManager.setTabs(tabsById.current);
@@ -558,7 +562,8 @@ const useTabLayout = (props, dockRef) => {
       getDefaultTabPosition,
       focusExistingTab,
       addTabToStack,
-      findTab
+      findTab,
+      emit
     ]
   );
 
@@ -568,19 +573,23 @@ const useTabLayout = (props, dockRef) => {
    */
   const openEditor = useCallback(
     async docData => {
-      const doc = await call(
-        PLUGINS.DOC_MANAGER.NAME,
-        PLUGINS.DOC_MANAGER.CALL.READ,
-        { name: docData.name, scope: docData.scope }
-      );
+      try {
+        const doc = await call(
+          PLUGINS.DOC_MANAGER.NAME,
+          PLUGINS.DOC_MANAGER.CALL.READ,
+          { name: docData.name, scope: docData.scope }
+        );
 
-      docData.isNew = docData.isNew ?? doc.isNew;
-      docData.isDirty = docData.isDirty ?? doc.isDirty;
+        docData.isNew = docData.isNew ?? doc.isNew;
+        docData.isDirty = docData.isDirty ?? doc.isDirty;
 
-      _getTabData(docData).then(tabData => {
-        emit(PLUGINS.TABS.ON.OPEN_EDITOR, tabData);
-        open(tabData);
-      });
+        _getTabData(docData).then(tabData => {
+          emit(PLUGINS.TABS.ON.OPEN_EDITOR, tabData);
+          open(tabData);
+        });
+      } catch (e) {
+        console.warn(e);
+      }
     },
     [call, emit, _getTabData, open]
   );
@@ -654,8 +663,8 @@ const useTabLayout = (props, dockRef) => {
       } else {
         // Update layout
         applyLayout(newLayout);
-        const doc =
-          tabId === HOMETAB_PROFILE.name
+        try {
+          const doc = NON_EDITOR_TABS.includes(tabId)
             ? {}
             : await call(
                 PLUGINS.DOC_MANAGER.NAME,
@@ -666,9 +675,12 @@ const useTabLayout = (props, dockRef) => {
                 }
               );
 
-        !firstLoad.current && !doc?.isNew && addTabToStack(tabId, dock);
+          !firstLoad.current && !doc?.isNew && addTabToStack(tabId, dock);
 
-        firstLoad.current = false;
+          firstLoad.current = false;
+        } catch (e) {
+          console.warn(e);
+        }
       }
       // Emit new active tab id
       if (!tabId) return;
@@ -808,7 +820,7 @@ const useTabLayout = (props, dockRef) => {
       });
       setLayout(lastLayout);
 
-      openExtraTabs(lastTabs);
+      openNonEditorTabs(lastTabs);
     });
 
     // Destroy local workspace manager instance on unmount
@@ -820,7 +832,7 @@ const useTabLayout = (props, dockRef) => {
     workspaceManager,
     _getTabData,
     layoutActiveIdIsValid,
-    openExtraTabs
+    openNonEditorTabs
   ]);
 
   //========================================================================================

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import hotkeys from "hotkeys-js";
 import withKeyBinds from "../../../decorators/withKeyBinds";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import { KEYBIND_SCOPES, PLUGINS } from "../../../utils/Constants";
+import { PLUGINS } from "../../../utils/Constants";
 import { getHomeTab } from "../HomeTab/HomeTab";
 import { getShortcutsTab } from "./Shortcuts";
 import { KEYBINDINGS } from "./shortcuts";
@@ -68,7 +68,7 @@ const AppKeybindings = props => {
    *                                                                                      */
   //========================================================================================
 
-  return <div>KEYBINDS</div>;
+  return <></>;
 };
 
 AppKeybindings.propTypes = {
