@@ -14,13 +14,13 @@ class ConfigurationType extends DataType {
    */
   validate(value) {
     return Rest.cloudFunction({
-      cbName: "backend.viewer",
+      cbName: "backend.DataValidation",
       func: "validateConfiguration",
       args: value
     })
       .then(res => {
         const isValid = res.success && res.result;
-        return { success: isValid, error: "Configuration/key not found" };
+        return { success: isValid, error: "ConfigurationNotFound" };
       })
       .catch(err => {
         console.log("Configuration validation err", err);

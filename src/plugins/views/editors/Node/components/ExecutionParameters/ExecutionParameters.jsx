@@ -84,6 +84,7 @@ const ExecutionParameters = props => {
         className={classes.formControlLabel}
         control={
           <Checkbox
+            inputProps={{ "data-testid": `input_${keyName}` }}
             disabled={!editable}
             checked={checkboxValue}
             onChange={() => onChangeExecutionParams(keyName, !checkboxValue)}
@@ -93,7 +94,7 @@ const ExecutionParameters = props => {
         label={title}
       />
       <ClickAwayListener onClickAway={() => handleTooltipClose(tooltip.id)}>
-        <Typography component="div">
+        <Typography data-testid="section_tooltip" component="div">
           <HtmlTooltip
             PopperProps={{ disablePortal: true }}
             onClose={handleTooltipClose}
@@ -108,6 +109,7 @@ const ExecutionParameters = props => {
             }
           >
             <IconButton
+              data-testid="input_toggle-tooltip"
               className={classes.logo}
               onClick={() => handleTooltipToggle(tooltip.id)}
             >
@@ -120,30 +122,32 @@ const ExecutionParameters = props => {
   );
 
   return (
-    <CollapsibleHeader title={t("Execution Parameters")}>
+    <CollapsibleHeader
+      testId="section_execution-parameters"
+      title={t("ExecutionParameters")}
+    >
       <Typography component="div" className={classes.center}>
         {/*-------------------- Persistent ------------------------*/}
         {renderCheckbox("persistent", t("Persistent"), persistent, {
           id: TOOLTIP.persistent,
-          title: t("Persistent node"),
-          description: t(
-            "After launch, the node will remain active during the flow execution."
-          )
+          title: t("PersistentNodeTitle"),
+          description: t("PersistentNodeDescription")
         })}
         {/* ---------------- Remappable -------------------*/}
         {renderCheckbox("remappable", t("Remappable"), remappable, {
           id: TOOLTIP.remappable,
           title: t("Remappable"),
-          description: t("Allows, or not, the ports of the node to be remapped")
+          description: t("RemappableDescription")
         })}
         {/* ---------------- Launch -------------------*/}
         {renderCheckbox("launch", t("Launch"), launch, {
           id: TOOLTIP.launch,
           title: t("Launch"),
-          description: t("Controls whether the Node is to be launched or not")
+          description: t("LaunchDescription")
         })}
       </Typography>
       <TextField
+        inputProps={{ "data-testid": "input_path" }}
         label={t("Path")}
         disabled={!editable}
         className={classes.textField}

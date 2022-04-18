@@ -39,7 +39,12 @@ const NodeLink = props => {
   //========================================================================================
 
   return (
-    <Link component="button" className={classes.link} onClick={onClickLink}>
+    <Link
+      data-testid="input_link"
+      component="button"
+      className={classes.link}
+      onClick={onClickLink}
+    >
       {children}
     </Link>
   );

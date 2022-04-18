@@ -1,3 +1,5 @@
+import i18n from "../i18n/i18n";
+
 export const APP_DEFAULT_CONFIG = "app-ide-ce";
 export const APP_CUSTOM_CONFIG = "app-custom-ide-ce";
 
@@ -100,6 +102,7 @@ export const PLUGINS = {
       CLOSE: "close",
       OPEN_EDITOR: "openEditor",
       UPDATE_TAB_ID: "updateTabId",
+      FOCUS_ACTIVE_TAB: "focusActiveTab",
       GET_ACTIVE_TAB: "getActiveTab"
     },
     ON: {
@@ -173,7 +176,7 @@ export const EMPTY_MESSAGE = {
 
 export const DIALOG_TITLE = {
   PARAMETERS: "Parameter",
-  ENVVARS: "Environment Variable",
+  ENVVARS: "EnvironmentVariable",
   COMMANDS: "Command Line"
 };
 
@@ -221,10 +224,13 @@ export const DOCK_MODES = {
 
 export const FLOW_EXPLORER_PROFILE = {
   name: "FlowExplorer",
-  title: "Add Node / Sub-flow"
+  title: "AddNodeOrSubFlow"
 };
 
-export const HOMETAB_PROFILE = { name: "HomeTab", title: "Welcome" };
+export const HOMETAB_PROFILE = {
+  name: "HomeTab",
+  title: i18n.t("HomeTabTitle")
+};
 
 export const DEFAULT_TABS = new Map(
   Object.entries({ [HOMETAB_PROFILE.name]: { id: HOMETAB_PROFILE.name } })

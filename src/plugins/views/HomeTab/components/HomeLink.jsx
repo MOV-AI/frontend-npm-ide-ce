@@ -30,13 +30,17 @@ function HomeLink(props) {
   return (
     <Tooltip
       arrow
-      title={`${t("Open")} ${props.doc.url}`}
+      title={t("OpenDocUrl", { docUrl: props.doc.url })}
       disableFocusListener
       disableHoverListener
       disableTouchListener
       placement="right-start"
     >
-      <div className={rowClasses} onClick={handleOpenDocument}>
+      <div
+        data-testid="input_open-document"
+        className={rowClasses}
+        onClick={handleOpenDocument}
+      >
         <Tooltip title={id}>
           <div className={classes.iconLink}>
             {getIconByScope(scope)}

@@ -1,5 +1,6 @@
 import i18n from "../../../i18n/i18n";
 import { getIconByScope } from "../../../utils/Utils";
+import { getHomeTab } from "../HomeTab/HomeTab";
 import {
   APP_INFORMATION,
   APP_LINKS,
@@ -43,20 +44,21 @@ const buildMenus = async (call, classes) => {
     return (
       <div className={classes.contentHolder}>
         <p>
-          {i18n.t("Version")}: {APP_INFORMATION.VERSION}
+          {i18n.t("Version-Colon")} {APP_INFORMATION.VERSION}
         </p>
         <p>
-          {i18n.t("Last update")}: {APP_INFORMATION.LAST_UPDATE}
+          {i18n.t("LastUpdate-Colon")} {APP_INFORMATION.LAST_UPDATE}
         </p>
         <p>
-          {i18n.t("Configuration File")}: {APP_INFORMATION.CONFIGURATION_FILE}
+          {i18n.t("ConfigurationFile-Colon")}{" "}
+          {APP_INFORMATION.CONFIGURATION_FILE}
         </p>
         <p>
-          {i18n.t("Custom Configuration File")}:
+          {i18n.t("CustomConfigurationFile-Colon")}
           {APP_INFORMATION.CUSTOM_CONFIGURATION_FILE}
         </p>
         <p>
-          {i18n.t("App Description")}: {APP_INFORMATION.DESCRIPTION}
+          {i18n.t("AppDescription")}: {APP_INFORMATION.DESCRIPTION}
         </p>
       </div>
     );
@@ -83,13 +85,21 @@ const buildMenus = async (call, classes) => {
         </>
       ),
       message: renderPopupInfo(),
-      submitText: i18n.t("OK")
+      submitText: i18n.t("Ok")
     });
   };
 
   function openLink(link) {
     window.open(link, "_blank");
   }
+
+  /**
+   * Open Welcome tab
+   */
+  const openWelcomeTab = () => {
+    const homeTab = getHomeTab();
+    call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN, homeTab);
+  };
 
   return [
     {
@@ -98,19 +108,19 @@ const buildMenus = async (call, classes) => {
       data: [
         {
           id: "newFile",
-          title: "New File",
+          title: "NewDoc",
           data: await buildNewFileSubmenu()
         },
         {},
         {
           id: "saveFile",
-          title: "Save File",
+          title: "SaveDoc",
           keybind: KEYBINDINGS.SAVE,
           callback: saveDocument
         },
         {
           id: "saveAllFiles",
-          title: "Save All",
+          title: "SaveAllDocs",
           keybind: KEYBINDINGS.SAVE_ALL,
           callback: saveAllDocument
         }
@@ -139,6 +149,12 @@ const buildMenus = async (call, classes) => {
       id: "helpMenu",
       title: "Help",
       data: [
+        {
+          id: "getStarted",
+          title: "HomeTabTitle",
+          callback: openWelcomeTab
+        },
+        {},
         {
           id: "documentation",
           title: "Documentation",

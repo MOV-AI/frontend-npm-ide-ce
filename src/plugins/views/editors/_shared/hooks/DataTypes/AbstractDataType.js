@@ -58,7 +58,7 @@ class AbstractDataType {
     );
     return Promise.resolve({
       success: false,
-      error: "Validation method not implemented"
+      error: "ValidationMethodNotImplemented"
     });
   }
 
@@ -111,6 +111,7 @@ class AbstractDataType {
     const value = parsedValue !== undefined ? parsedValue : props.rowData.value;
     return (
       <TextField
+        inputProps={{ "data-testid": "input_value" }}
         fullWidth
         placeholder={placeholder}
         value={value || ""}
@@ -126,7 +127,11 @@ class AbstractDataType {
    */
   codeEditComponent = props => {
     return (
-      <Typography component="div" style={{ height: "100px", width: "100%" }}>
+      <Typography
+        data-testid="section_data-type-code-editor"
+        component="div"
+        style={{ height: "100px", width: "100%" }}
+      >
         <MonacoCodeEditor
           value={_toString(props.rowData.value)}
           onLoad={editor => {

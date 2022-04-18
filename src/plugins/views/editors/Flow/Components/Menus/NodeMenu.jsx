@@ -188,7 +188,7 @@ const NodeMenu = memo(
 
         const args = {
           onSubmit: handleSubmitParameter,
-          title: t("Edit {{paramType}}", { paramType }),
+          title: t("EditParamType", { paramType }),
           data: obj,
           showDefault: true,
           showValueOptions: true,
@@ -244,12 +244,16 @@ const NodeMenu = memo(
     );
 
     return (
-      <Typography component="div" className={classes.root}>
+      <Typography
+        data-testid="section_flow-node-menu"
+        component="div"
+        className={classes.root}
+      >
         <MenuDetails
           id={data.id}
           model={data.model}
           template={data.Template}
-          label={"Template Name:"}
+          label="TemplateName-Colon"
           type={templateData.type}
           openDoc={openDoc}
         />
@@ -260,6 +264,7 @@ const NodeMenu = memo(
         />
         {/* =========================== PROPERTIES =========================== */}
         <ListItem
+          data-testid="input_properties-expand"
           button
           data-menu-id={ACTIVE_ITEM.PROPERTIES}
           onClick={handleExpandClick}
@@ -280,6 +285,7 @@ const NodeMenu = memo(
         </Collapse>
         {/* =========================== PARAMETERS =========================== */}
         <ListItem
+          data-testid="input_parameters-expand"
           button
           data-menu-id={ACTIVE_ITEM.PARAMETERS}
           onClick={handleExpandClick}
@@ -299,11 +305,12 @@ const NodeMenu = memo(
         </Collapse>
         {/* =========================== ENV. VARIABLES =========================== */}
         <ListItem
+          data-testid="input_env-var-expand"
           button
           data-menu-id={ACTIVE_ITEM.ENVVARS}
           onClick={handleExpandClick}
         >
-          <ListItemText primary={t("Env. Variables")} />
+          <ListItemText primary={t("EnvVars")} />
           {renderExpandIcon(ACTIVE_ITEM.ENVVARS)}
         </ListItem>
         <Collapse in={activeItem === ACTIVE_ITEM.ENVVARS} unmountOnExit>
@@ -318,11 +325,12 @@ const NodeMenu = memo(
         </Collapse>
         {/* =========================== COMMAND LINES =========================== */}
         <ListItem
+          data-testid="input_cmd-line-expand"
           button
           data-menu-id={ACTIVE_ITEM.CMDLINE}
           onClick={handleExpandClick}
         >
-          <ListItemText primary={t("Command Line")} />
+          <ListItemText primary={t("CommandLine")} />
           {renderExpandIcon(ACTIVE_ITEM.CMDLINE)}
         </ListItem>
         <Collapse in={activeItem === ACTIVE_ITEM.CMDLINE} unmountOnExit>
@@ -337,6 +345,7 @@ const NodeMenu = memo(
         </Collapse>
         {/* =========================== GROUP =========================== */}
         <ListItem
+          data-testid="input_group-expand"
           button
           data-menu-id={ACTIVE_ITEM.GROUP}
           onClick={handleExpandClick}
@@ -346,6 +355,7 @@ const NodeMenu = memo(
         </ListItem>
         <Collapse in={activeItem === ACTIVE_ITEM.GROUP} unmountOnExit>
           <NodeGroupSection
+            data-testid="section_node-group-section"
             flowGroups={flowModel.current.getGroups().serialize()}
             nodeGroups={nodeData.groups}
             handleBelongGroup={handleBelongGroup}

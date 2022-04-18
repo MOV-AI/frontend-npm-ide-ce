@@ -26,7 +26,9 @@ const ParametersTable = props => {
       whiteSpace: "nowrap",
       overflow: "hidden"
     },
-    render: rowData => getLabel(rowData.type)
+    render: rowData => (
+      <span data-testid="output_type">{getLabel(rowData.type)}</span>
+    )
   };
   const columns = [...defaultColumns];
   columns.push(typeColumn);
@@ -39,6 +41,7 @@ const ParametersTable = props => {
 
   return (
     <KeyValueTable
+      testId="section_parameters"
       title={t("Parameters")}
       varName="parameters"
       editable={editable}

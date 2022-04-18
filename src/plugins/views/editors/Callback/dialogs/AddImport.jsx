@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import _debounce from "lodash/debounce";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -14,6 +15,7 @@ import Loader from "../../_shared/Loader/Loader";
 import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
 import Search from "../../_shared/Search/Search";
 import { searchImports } from "./utils";
+import { ERROR_MESSAGES } from "../../../../../utils/Messages";
 
 const useStyles = makeStyles(_theme => ({
   paper: {
@@ -31,6 +33,8 @@ const AddImportDialog = props => {
   const [selectedLibs, setSelectedLibs] = useState();
   // Style hook
   const classes = useStyles();
+  // Translation hook
+  const { t } = useTranslation();
 
   //========================================================================================
   /*                                                                                      *
@@ -112,24 +116,32 @@ const AddImportDialog = props => {
       ></MaterialTree>
     ) : (
       <>
-        <h2>Something went wrong :(</h2>
-        <h3>Failed to load libraries</h3>
+        <h2>{t(ERROR_MESSAGES.SOMETHING_WENT_WRONG)}</h2>
+        <h3>{t("FailedToLoadLibraries")}</h3>
       </>
     );
   };
 
   return (
-    <Dialog open={true} onClose={onClose} classes={{ paper: classes.paper }}>
+    <Dialog
+      data-testid="section_add-import-dialog"
+      open={true}
+      onClose={onClose}
+      classes={{ paper: classes.paper }}
+    >
       <DialogTitle onClose={onClose} hasCloseButton={true}>
-        Add Import
+        {t("Add Import")}
       </DialogTitle>
       <DialogContent>
         <Search onSearch={onSearch} />
         {renderTree()}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button data-testid="input_cancel" onClick={onClose}>
+          {t("Cancel")}
+        </Button>
         <Button
+          data-testid="input_confirm"
           color="primary"
           onClick={() => {
             onSubmit(selectedLibs);
@@ -137,7 +149,7 @@ const AddImportDialog = props => {
           }}
           disabled={!selectedLibs}
         >
-          Add
+          {t("Add")}
         </Button>
       </DialogActions>
     </Dialog>

@@ -15,7 +15,11 @@ function HomeTabCard(props) {
   );
 
   return (
-    <div className={classes.card} onClick={handleOnClick}>
+    <div
+      data-testid="input_open-example"
+      className={classes.card}
+      onClick={handleOnClick}
+    >
       <div
         className={example.imageLink ? classes.haveImage : classes.fullWidth}
       >
@@ -33,6 +37,7 @@ function HomeTabCard(props) {
               endIcon={<CallMadeIcon />}
             >
               <a
+                data-testid="section_external-link"
                 href={example.externalLink}
                 rel="noopener noreferrer"
                 target="_blank"

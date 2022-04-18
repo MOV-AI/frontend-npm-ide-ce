@@ -47,7 +47,10 @@ const NodeGroupSection = props => {
                 {groupName}
               </Typography>
             </Tooltip>
-            <IconButton onClick={() => handleBelongGroup(key, !checked)}>
+            <IconButton
+              data-testid="input_belong-group"
+              onClick={() => handleBelongGroup(key, !checked)}
+            >
               {checked && <LayersIcon fontSize="small" color="primary" />}
               {!checked && (
                 <LayersClearIcon fontSize="small" color="disabled" />
@@ -59,7 +62,7 @@ const NodeGroupSection = props => {
     </Typography>
   ) : (
     <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-      {t("No groups")}
+      {t("NoGroups")}
     </Typography>
   );
 };

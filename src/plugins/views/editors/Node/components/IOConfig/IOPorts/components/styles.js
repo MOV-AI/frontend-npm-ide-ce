@@ -6,7 +6,8 @@ const sharedStyles = {
     display: "flex",
     flexWrap: "wrap",
     boxSizing: "border-box",
-    padding: "10px"
+    padding: "10px",
+    alignItems: "center"
   },
   titleColumn: {
     margin: "auto"
@@ -39,7 +40,7 @@ export const callbackStyles = makeStyles(theme => {
   };
 });
 
-export const parametersStyles = makeStyles(theme => {
+export const parametersStyles = makeStyles(_theme => {
   return {
     ...sharedStyles,
     input: {

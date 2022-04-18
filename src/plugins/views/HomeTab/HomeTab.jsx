@@ -79,7 +79,7 @@ const HomeTab = props => {
   //========================================================================================
 
   return (
-    <div className={classes.root}>
+    <div data-testid="section_hometab" className={classes.root}>
       <div className={classes.body}>
         <div className={classes.column}>
           <QuickAccessComponent call={call} />
@@ -98,9 +98,29 @@ const HomeTab = props => {
   );
 };
 
-export default withViewPlugin(withAlerts(HomeTab));
+const HomeTabPlugin = withViewPlugin(withAlerts(HomeTab));
+
+export default HomeTabPlugin;
 
 HomeTab.propTypes = {
   call: PropTypes.func.isRequired,
   on: PropTypes.func.isRequired
+};
+
+/**
+ * Get welcome tab data
+ * @returns {TabData} Data used to create tab
+ */
+export const getHomeTab = () => {
+  const viewPlugin = new HomeTabPlugin(HOMETAB_PROFILE);
+
+  return {
+    ...HOMETAB_PROFILE,
+    id: HOMETAB_PROFILE.name,
+    name: HOMETAB_PROFILE.title,
+    tabTitle: HOMETAB_PROFILE.title,
+    scope: HOMETAB_PROFILE.name,
+    extension: "",
+    content: viewPlugin.render()
+  };
 };

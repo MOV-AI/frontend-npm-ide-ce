@@ -25,16 +25,21 @@ const MenuDetails = props => {
       <h2 className={classes.header}>{id}</h2>
       <ListItem divider>
         <ListItemText primary={t(label)} />
-        <NodeLink name={template} scope={model} openDoc={openDoc}>
+        <NodeLink
+          data-testid="section_node-link"
+          name={template}
+          scope={model}
+          openDoc={openDoc}
+        >
           {template}
         </NodeLink>
       </ListItem>
       <ListItem divider>
-        <ListItemText primary={t("Scope:")} />
+        <ListItemText primary={t("Scope-Colon")} />
         <Typography>{model}</Typography>
       </ListItem>
       <ListItem divider>
-        <ListItemText primary={t("Type:")} />
+        <ListItemText primary={t("Type-Colon")} />
         <Typography>{type}</Typography>
       </ListItem>
     </>
@@ -55,7 +60,7 @@ MenuDetails.defaultProps = {
   template: "-",
   model: "-",
   type: "-",
-  label: "Name:",
+  label: "NameColon",
   openDoc: () => defaultFunction("openDoc")
 };
 

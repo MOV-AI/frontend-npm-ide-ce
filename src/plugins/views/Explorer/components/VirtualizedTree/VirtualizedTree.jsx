@@ -118,6 +118,7 @@ class VirtualizedTree extends Component {
         >
           <div style={{ height: this.props.height }}>
             <Tree
+              data-testid="section_explorer"
               nodes={this.searchFilter(nodes, this.state.searchValue)}
               onChange={this.props.handleChange}
             >
@@ -128,6 +129,7 @@ class VirtualizedTree extends Component {
                 // Render tree element
                 return (
                   <div
+                    data-testid="input_node"
                     style={style}
                     onMouseEnter={() => this.props.onMouseEnter(node)}
                     onMouseLeave={() => this.props.onMouseLeave(node)}

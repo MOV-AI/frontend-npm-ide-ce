@@ -82,62 +82,68 @@ const MainMenu = props => {
   //========================================================================================
 
   return (
-    <VerticalBar
-      unsetAccountAreaPadding={true}
-      backgroundColor={theme.palette.background.default}
-      upperElement={
-        <ContextMenu
-          element={
-            <Tooltip title={t("Create new document")} placement="right" arrow>
-              <AddBoxIcon
-                id="mainMenuCreateNewDocument"
-                className={classes.icon}
-              ></AddBoxIcon>
-            </Tooltip>
-          }
-          menuList={docTypes.map(docType => ({
-            onClick: () =>
-              call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.CREATE, {
-                scope: docType.scope
-              }).then(document => {
-                call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, {
-                  id: document.getUrl(),
-                  name: document.getName(),
-                  scope: docType.scope,
-                  isNew: true
-                });
-              }),
-            element: docType.scope,
-            icon: getIconByScope(docType.scope),
-            onClose: true
-          }))}
-        ></ContextMenu>
-      }
-      navigationList={MENUS.current.map(menu => (
-        <Tooltip key={menu.name} title={menu.title} placement="right" arrow>
-          {menu.icon({
-            className: classes.icon,
-            onClick: () => menu.getOnClick()
-          })}
-        </Tooltip>
-      ))}
-      lowerElement={[
-        <ProfileMenu
-          key={"profileMenu"}
-          version={APP_INFORMATION.VERSION}
-          userName={Authentication.getTokenData().message.name ?? ""}
-          isDarkTheme={isDarkTheme}
-          handleLogout={handleLogoutClick}
-          handleToggleTheme={handleToggleTheme}
-        />,
-        <img
-          key={"movaiIcon"}
-          src={movaiIcon}
-          className={classes.movaiIcon}
-          alt="MOV.AI"
-        />
-      ]}
-    ></VerticalBar>
+    <div className={classes.mainMenuHolder} data-testid="section_main-menu">
+      <VerticalBar
+        unsetAccountAreaPadding={true}
+        backgroundColor={theme.palette.background.default}
+        upperElement={
+          <ContextMenu
+            element={
+              <Tooltip title={t("CreateNewDoc")} placement="right" arrow>
+                <AddBoxIcon
+                  id="mainMenuCreateNewDocument"
+                  className={classes.icon}
+                ></AddBoxIcon>
+              </Tooltip>
+            }
+            menuList={docTypes.map(docType => ({
+              onClick: () =>
+                call(
+                  PLUGINS.DOC_MANAGER.NAME,
+                  PLUGINS.DOC_MANAGER.CALL.CREATE,
+                  {
+                    scope: docType.scope
+                  }
+                ).then(document => {
+                  call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, {
+                    id: document.getUrl(),
+                    name: document.getName(),
+                    scope: docType.scope,
+                    isNew: true
+                  });
+                }),
+              element: docType.scope,
+              icon: getIconByScope(docType.scope),
+              onClose: true
+            }))}
+          ></ContextMenu>
+        }
+        navigationList={MENUS.current.map(menu => (
+          <Tooltip key={menu.name} title={menu.title} placement="right" arrow>
+            {menu.icon({
+              className: classes.icon,
+              onClick: () => menu.getOnClick()
+            })}
+          </Tooltip>
+        ))}
+        lowerElement={[
+          <ProfileMenu
+            key={"profileMenu"}
+            version={APP_INFORMATION.VERSION}
+            userName={Authentication.getTokenData().message.name ?? ""}
+            isDarkTheme={isDarkTheme}
+            handleLogout={handleLogoutClick}
+            handleToggleTheme={handleToggleTheme}
+          />,
+          <img
+            key={"movaiIcon"}
+            src={movaiIcon}
+            className={classes.movaiIcon}
+            alt="MOV.AI"
+          />
+        ]}
+      ></VerticalBar>
+    </div>
   );
 };
 

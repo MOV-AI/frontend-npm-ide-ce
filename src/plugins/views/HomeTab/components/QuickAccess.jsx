@@ -78,15 +78,15 @@ const QuickAccess = props => {
   }, [call]);
 
   return (
-    <Paper className={classes.paper}>
-      <div className={classes.columnTitle}>{t("Quick access")}</div>
+    <Paper data-testid="section_quick-access" className={classes.paper}>
+      <div className={classes.columnTitle}>{t("QuickAccess")}</div>
       <Divider />
       <div className={classes.columnBody}>
         <ContextMenu
           element={
             <div className={classes.link}>
               <AddIcon className={classes.linkIcon} />
-              {t("Create New")}
+              {t("CreateNewDoc")}
             </div>
           }
           menuList={docTypes.map(docType => ({
@@ -107,6 +107,7 @@ const QuickAccess = props => {
           }))}
         ></ContextMenu>
         <a
+          data-testid="input_documentation"
           href={APP_LINKS.DOCUMENTATION}
           target="_blank"
           rel="noreferrer"
@@ -117,6 +118,7 @@ const QuickAccess = props => {
           {t("Documentation")}
         </a>
         <a
+          data-testid="input_forum"
           href={APP_LINKS.FORUM}
           target="_blank"
           rel="noreferrer"
@@ -126,7 +128,7 @@ const QuickAccess = props => {
 
           {t("Forum")}
         </a>
-        {/* <div className={classes.link} onClick={handleOpenAppConfig}>
+        {/* <div data-testid="input_app-config" className={classes.link} onClick={handleOpenAppConfig}>
           <BuildIcon className={classes.linkIcon} />
           {t("App Configuration")}
         </div> */}

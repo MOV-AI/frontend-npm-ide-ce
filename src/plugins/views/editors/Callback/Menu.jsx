@@ -239,8 +239,12 @@ const Menu = props => {
                 primary={pyLib.name}
               />
               <ListItemSecondaryAction>
-                <Tooltip title={t("Remove import")}>
-                  <IconButton edge="end" onClick={() => deleteImport(pyLib)}>
+                <Tooltip title={t("RemoveImport")}>
+                  <IconButton
+                    data-testid="input_delete-import"
+                    edge="end"
+                    onClick={() => deleteImport(pyLib)}
+                  >
                     <DeleteIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
@@ -251,7 +255,7 @@ const Menu = props => {
       })
     ) : (
       <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-        {t("No imports")}
+        {t("NoImports")}
       </Typography>
     );
   }, [classes, getImportsList, deleteImport, t]);
@@ -270,8 +274,12 @@ const Menu = props => {
             primary={data.message}
           />
           <ListItemSecondaryAction>
-            <Tooltip title={t("Remove message")}>
-              <IconButton edge="end" onClick={handleRemoveMessage}>
+            <Tooltip title={t("RemoveMessage")}>
+              <IconButton
+                data-testid="input_delete-message"
+                edge="end"
+                onClick={handleRemoveMessage}
+              >
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -280,23 +288,32 @@ const Menu = props => {
       </Typography>
     ) : (
       <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-        {t("No message defined")}
+        {t("NoMessageDefined")}
       </Typography>
     );
   }, [classes, data.message, handleRemoveMessage, t]);
 
   return (
     <div>
-      <DetailsMenu name={name} details={data.details || {}}></DetailsMenu>
+      <DetailsMenu
+        data-testid="section_callback-details-menu"
+        name={name}
+        details={data.details || {}}
+      ></DetailsMenu>
       <List>
         {/* ============ IMPORTS ============ */}
         <ListItem
+          data-testid="input_imports-expand"
           button
           data-active-item={ACTIVE_ITEM.IMPORTS}
           onClick={handleExpandClick}
         >
           <ListItemText primary={t("Imports")} />
-          <IconButton disabled={!editable} onClick={handleAddImportsClick}>
+          <IconButton
+            data-testid="input_add-import"
+            disabled={!editable}
+            onClick={handleAddImportsClick}
+          >
             <AddIcon />
           </IconButton>
           {isActive(ACTIVE_ITEM.IMPORTS) ? <ExpandLess /> : <ExpandMore />}
@@ -307,12 +324,17 @@ const Menu = props => {
         </Collapse>
         {/* ============ MESSAGE ============ */}
         <ListItem
+          data-testid="input_message-expand"
           button
           data-active-item={ACTIVE_ITEM.MESSAGE}
           onClick={handleExpandClick}
         >
           <ListItemText primary={t("Message")} />
-          <IconButton disabled={!editable} onClick={handleEditMessageClick}>
+          <IconButton
+            data-testid="input_edit-message"
+            disabled={!editable}
+            onClick={handleEditMessageClick}
+          >
             <EditIcon />
           </IconButton>
           {isActive(ACTIVE_ITEM.MESSAGE) ? <ExpandLess /> : <ExpandMore />}

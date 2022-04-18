@@ -185,6 +185,7 @@ const withBookmarks = Component => {
             <div className={classes.panel}>
               {Object.values(bookmarks).map((bookmark, index) => (
                 <BookmarkTab
+                  data-testid="section_bookmark-tab"
                   key={index}
                   classes={classes}
                   bookmark={bookmark}

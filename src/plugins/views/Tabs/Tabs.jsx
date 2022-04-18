@@ -22,6 +22,7 @@ const Tabs = (props, ref) => {
     onLayoutChange,
     focusExistingTab,
     getActiveTab,
+    focusActiveTab,
     loadTab,
     updateTabId
   } = useTabLayout(props, dockRef);
@@ -31,6 +32,7 @@ const Tabs = (props, ref) => {
     openEditor,
     updateTabId,
     getActiveTab,
+    focusActiveTab,
     close
   });
 
@@ -51,7 +53,11 @@ const Tabs = (props, ref) => {
   };
 
   return (
-    <div className={classes.root} onClick={focusActivePanelTab}>
+    <div
+      data-testid="input_tab-panel"
+      className={classes.root}
+      onClick={focusActivePanelTab}
+    >
       <DockLayout
         ref={dockRef}
         layout={layout}

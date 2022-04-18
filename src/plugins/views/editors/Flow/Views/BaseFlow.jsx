@@ -29,7 +29,6 @@ const BaseFlow = forwardRef((props, ref) => {
     dataFromDB,
     off,
     on,
-    onNodeSelected,
     warnings,
     warningsVisibility,
     onReady
@@ -38,13 +37,12 @@ const BaseFlow = forwardRef((props, ref) => {
 
   // State Hooks
   const [loading, setLoading] = useState(true);
-
-  const containerId = useMemo(() => generateContainerId(id), [id]);
-
   // Refs
   const containerRef = useRef();
+  const isMountedRef = useRef(false);
   // Other hooks
   const classes = baseFlowStyles();
+  const containerId = useMemo(() => generateContainerId(id), [id]);
 
   const { mainInterface } = useMainInterface({
     classes,
@@ -90,7 +88,8 @@ const BaseFlow = forwardRef((props, ref) => {
 
   useEffect(() => {
     const mInt = getMainInterface();
-    if (!mInt) return;
+    if (!mInt || isMountedRef.current) return;
+    isMountedRef.current = true;
 
     // Subscribe to on loading exit (finish) event
     mInt.mode.loading.onExit.subscribe(() => {
@@ -99,11 +98,14 @@ const BaseFlow = forwardRef((props, ref) => {
 
     // Dispatch on ready event
     onReady(mInt);
-  }, [getMainInterface, dataFromDB, onNodeSelected, onReady]);
+  }, [getMainInterface, dataFromDB, onReady]);
 
   // On before unmount
   useEffect(() => {
-    return () => getMainInterface().graph.destroy();
+    return () => {
+      getMainInterface().graph.destroy();
+      isMountedRef.current = false;
+    };
   }, [getMainInterface]);
 
   usePluginMethods(ref, { mainInterface });

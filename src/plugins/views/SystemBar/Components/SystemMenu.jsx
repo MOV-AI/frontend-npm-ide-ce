@@ -33,7 +33,7 @@ const SystemMenu = ({ data, menuOpen, anchorEl, closeMenu }) => {
             <Paper className={classes.listHolder}>
               <List component="nav" className={classes.list}>
                 {data &&
-                  data.map(item => {
+                  data.map((item, index) => {
                     if (item.id)
                       return (
                         <MenuItem
@@ -42,7 +42,10 @@ const SystemMenu = ({ data, menuOpen, anchorEl, closeMenu }) => {
                           closeMenu={closeMenu}
                         />
                       );
-                    else return <Divider className={classes.menuDivider} />;
+                    else
+                      return (
+                        <Divider key={index} className={classes.menuDivider} />
+                      );
                   })}
               </List>
             </Paper>
@@ -56,7 +59,7 @@ const SystemMenu = ({ data, menuOpen, anchorEl, closeMenu }) => {
 export default SystemMenu;
 
 SystemMenu.propTypes = {
-  data: PropTypes.object.isRequired,
-  anchorEl: PropTypes.node.isRequired,
+  data: PropTypes.array.isRequired,
+  anchorEl: PropTypes.object.isRequired,
   menuOpened: PropTypes.bool
 };
