@@ -33,6 +33,7 @@
 - [FP-1612 - Only reset ports when need](https://movai.atlassian.net/browse/FP-1612)
 - [FP-1613 - No longer duplicating ports when type changes](https://movai.atlassian.net/browse/FP-1613)
 - [FP-1625 - Fixed a few issues regarding Node Editor](https://movai.atlassian.net/browse/FP-1625)
+- [FP-1692 - Allow '\_' character to start param name](https://movai.atlassian.net/browse/FP-1692)-
 
 **Home Tab**
 
