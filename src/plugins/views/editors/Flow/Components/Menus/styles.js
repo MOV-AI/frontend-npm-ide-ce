@@ -76,6 +76,14 @@ export const nodeMenuStyles = makeStyles(_theme => ({
 }));
 
 export const linkMenuStyles = makeStyles(_theme => ({
+  listHolder: {
+    width: "100%",
+    "& p": {
+      textOverflow: "ellipsis",
+      maxWidth: "calc(100% - 50px)",
+      overflow: "hidden"
+    }
+  },
   dependencyContainer: {
     padding: "5px 25px"
   },

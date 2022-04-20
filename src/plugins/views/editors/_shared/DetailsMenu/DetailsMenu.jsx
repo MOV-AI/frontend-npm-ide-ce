@@ -26,12 +26,12 @@ const DetailsMenu = ({ name, details }) => {
         </ListItem>
         <Divider />
         <ListItem divider>
-          <ListItemText primary={t("LastUpdated-Colon")} />
+          <ListItemText primary={t("LastUpdate-Colon")} />
           <Typography>{details.date || "N/A"}</Typography>
         </ListItem>
         <Divider />
         <ListItem divider>
-          <ListItemText primary={"User-Colon"} />
+          <ListItemText primary={t("User-Colon")} />
           <Typography>{details.user || "N/A"}</Typography>
         </ListItem>
       </List>
