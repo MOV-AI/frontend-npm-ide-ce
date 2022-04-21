@@ -1,4 +1,7 @@
-import { DISABLED_VALUE } from "../../../../../../../utils/Constants";
+import {
+  DEFAULT_VALUE,
+  DISABLED_VALUE
+} from "../../../../../../../utils/Constants";
 
 /**
  * Checks if provided value is empty or DISABLED_VALUE
@@ -6,5 +9,5 @@ import { DISABLED_VALUE } from "../../../../../../../utils/Constants";
  * @returns
  */
 export function checkIfDefaultOrDisabled(value) {
-  return value === "" || value === DISABLED_VALUE;
+  return value === DEFAULT_VALUE || value === DISABLED_VALUE;
 }
