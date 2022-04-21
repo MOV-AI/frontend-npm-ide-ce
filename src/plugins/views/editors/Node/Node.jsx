@@ -13,6 +13,7 @@ import {
   DIALOG_TITLE,
   DATA_TYPES,
   ROS_VALID_NAMES,
+  ROS_VALID_NAMES_VARIATION,
   PLUGINS,
   SCOPES,
   ALERT_SEVERITIES
@@ -63,7 +64,7 @@ const Node = (props, ref) => {
     (paramName, type, previousData) => {
       const typeName = DIALOG_TITLE[type.toUpperCase()] ?? type;
       const newName = paramName.name ?? paramName;
-      const re = ROS_VALID_NAMES;
+      const re = type === "ports" ? ROS_VALID_NAMES : ROS_VALID_NAMES_VARIATION;
       try {
         if (!paramName)
           throw new Error(
