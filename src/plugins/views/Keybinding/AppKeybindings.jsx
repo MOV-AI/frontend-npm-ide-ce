@@ -33,6 +33,14 @@ const AppKeybindings = props => {
     call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN, shortcutsTab);
   }, [call]);
 
+  /**
+   * Save all documents :
+   *  Saves all documents that are dirty
+   */
+  const saveAllDocuments = useCallback(() => {
+    call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.SAVE_DIRTIES);
+  }, [call]);
+
   //========================================================================================
   /*                                                                                      *
    *                                    React Lifecycle                                   *
@@ -41,7 +49,9 @@ const AppKeybindings = props => {
 
   useEffect(() => {
     hotkeys(
-      `${KEYBINDINGS.GENERAL.KEYBINDS.OPEN_WELCOME_TAB.SHORTCUTS},${KEYBINDINGS.GENERAL.KEYBINDS.OPEN_SHORTCUTS_TAB.SHORTCUTS}`,
+      `${KEYBINDINGS.GENERAL.KEYBINDS.OPEN_WELCOME_TAB.SHORTCUTS},
+      ${KEYBINDINGS.GENERAL.KEYBINDS.OPEN_SHORTCUTS_TAB.SHORTCUTS},
+      ${KEYBINDINGS.GENERAL.KEYBINDS.SAVE_ALL.SHORTCUTS}`,
       function (event, handler) {
         switch (handler.key) {
           case KEYBINDINGS.GENERAL.KEYBINDS.OPEN_WELCOME_TAB.SHORTCUTS:
@@ -49,6 +59,9 @@ const AppKeybindings = props => {
             break;
           case KEYBINDINGS.GENERAL.KEYBINDS.OPEN_SHORTCUTS_TAB.SHORTCUTS:
             openShortcutsTab();
+            break;
+          case KEYBINDINGS.GENERAL.KEYBINDS.SAVE_ALL.SHORTCUTS:
+            saveAllDocuments();
             break;
           default:
             console.warn(event);
@@ -59,8 +72,15 @@ const AppKeybindings = props => {
     return () => {
       hotkeys.unbind(KEYBINDINGS.GENERAL.KEYBINDS.OPEN_WELCOME_TAB.SHORTCUTS);
       hotkeys.unbind(KEYBINDINGS.GENERAL.KEYBINDS.OPEN_SHORTCUTS_TAB.SHORTCUTS);
+      hotkeys.unbind(KEYBINDINGS.GENERAL.KEYBINDS.SAVE_ALL.SHORTCUTS);
     };
-  }, [addKeyBind, removeKeyBind, openWelcomeTab, openShortcutsTab]);
+  }, [
+    addKeyBind,
+    removeKeyBind,
+    openWelcomeTab,
+    openShortcutsTab,
+    saveAllDocuments
+  ]);
 
   //========================================================================================
   /*                                                                                      *

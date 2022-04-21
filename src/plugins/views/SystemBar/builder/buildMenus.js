@@ -41,9 +41,9 @@ const buildMenus = async (call, classes, _activeEditorScope) => {
         },
         {
           id: "saveAllFiles",
-          title: i18n.t(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE_ALL.LABEL),
+          title: i18n.t(KEYBINDINGS.GENERAL.KEYBINDS.SAVE_ALL.LABEL),
           keybind: parseKeybinds(
-            KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE_ALL.SHORTCUTS
+            KEYBINDINGS.GENERAL.KEYBINDS.SAVE_ALL.SHORTCUTS
           ),
           callback: () => saveAllDocument(call)
         }

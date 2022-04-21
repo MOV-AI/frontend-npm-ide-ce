@@ -10,13 +10,19 @@ export const KEYBINDINGS = {
         NAME: "openWelcomeTab",
         LABEL: i18n.t("HomeTabTitle"),
         DESCRIPTION: i18n.t("HomeTabKeybindDescription"),
-        SHORTCUTS: "ctrl+shift+home"
+        SHORTCUTS: "ctrl+alt+home"
       },
       OPEN_SHORTCUTS_TAB: {
         NAME: "openShortcutsTab",
         LABEL: i18n.t("ShortcutsTabTitle"),
         DESCRIPTION: i18n.t("ShortcutsTabKeybindDescription"),
-        SHORTCUTS: "ctrl+shift+k"
+        SHORTCUTS: "ctrl+alt+k"
+      },
+      SAVE_ALL: {
+        NAME: "saveAll",
+        LABEL: i18n.t("SaveAllDocs"),
+        DESCRIPTION: i18n.t("SaveAllDocsKeybindDescription"),
+        SHORTCUTS: "ctrl+alt+s"
       }
     }
   },
@@ -31,12 +37,6 @@ export const KEYBINDINGS = {
         DESCRIPTION: i18n.t("SaveDocKeybindDescription"),
         SHORTCUTS: "ctrl+s"
       },
-      SAVE_ALL: {
-        NAME: "saveAll",
-        LABEL: i18n.t("SaveAllDocs"),
-        DESCRIPTION: i18n.t("SaveAllDocsKeybindDescription"),
-        SHORTCUTS: "ctrl+shift+s"
-      },
       // TODO Add later when we have a working UNDO / REDO engine
       // UNDO: {
       //   NAME: "undo",
@@ -48,7 +48,7 @@ export const KEYBINDINGS = {
       //   NAME: "redo",
       //   LABEL: i18n.t("Redo"),
       //   DESCRIPTION: i18n.t("RedoKeybindDescription"),
-      //   SHORTCUTS: "ctrl+shift+z"
+      //   SHORTCUTS: ["ctrl+shift+z", "ctrl+y"]
       // },
       // COPY: {
       //   NAME: "copy",
@@ -76,11 +76,23 @@ export const KEYBINDINGS = {
       }
     }
   },
-  CALLBACK: {
-    NAME: "editorCallback",
-    LABEL: i18n.t("EditorCallbackKeybindLabel"),
-    DESCRIPTION: i18n.t("EditorCallbackKeybindDescription"),
+  MONACO_SPECIFIC: {
+    NAME: "monacoCodeEditor",
+    LABEL: i18n.t("EditorMonacoKeybindLabel"),
+    DESCRIPTION: i18n.t("EditorMonacoKeybindDescription"),
     KEYBINDS: {
+      CHANGE_ALL_OCURRENCES: {
+        NAME: "changeAllOcurrences",
+        LABEL: i18n.t("ChangeAllOcurrencesKeybindLabel"),
+        DESCRIPTION: i18n.t("ChangeAllOcurrencesKeybindDescription"),
+        SHORTCUTS: "ctrl+F2"
+      },
+      COMMAND_PALETTE: {
+        NAME: "commandPalette",
+        LABEL: i18n.t("CommandPaletteKeybindLabel"),
+        DESCRIPTION: i18n.t("CommandPaletteKeybindDescription"),
+        SHORTCUTS: "F1"
+      },
       UNDO: {
         NAME: "undo",
         LABEL: i18n.t("Undo"),
@@ -91,47 +103,22 @@ export const KEYBINDINGS = {
         NAME: "redo",
         LABEL: i18n.t("Redo"),
         DESCRIPTION: i18n.t("RedoKeybindDescription"),
-        SHORTCUTS: "ctrl+shift+z"
+        SHORTCUTS: ["ctrl+shift+z", "ctrl+y"]
       },
-      COPY_NODE: {
-        NAME: "callbackCopyCode",
+      CUT: {
+        NAME: "monacoEditorCutCode",
+        LABEL: i18n.t("CutCode"),
+        DESCRIPTION: i18n.t("CutCodeKeybindDescription"),
+        SHORTCUTS: "ctrl+x"
+      },
+      COPY: {
+        NAME: "monacoEditorCopyCode",
         LABEL: i18n.t("CopyCode"),
         DESCRIPTION: i18n.t("CopyCodeKeybindDescription"),
         SHORTCUTS: "ctrl+c"
       },
-      PASTE_NODE: {
-        NAME: "callbackPasteCode",
-        LABEL: i18n.t("PasteCode"),
-        DESCRIPTION: i18n.t("PasteCodeKeybindDescription"),
-        SHORTCUTS: "ctrl+v"
-      }
-    }
-  },
-  CONFIGURATION: {
-    NAME: "editorConfiguration",
-    LABEL: i18n.t("EditorConfigurationKeybindLabel"),
-    DESCRIPTION: i18n.t("EditorConfigurationKeybindDescription"),
-    KEYBINDS: {
-      UNDO: {
-        NAME: "undo",
-        LABEL: i18n.t("Undo"),
-        DESCRIPTION: i18n.t("UndoKeybindDescription"),
-        SHORTCUTS: "ctrl+z"
-      },
-      REDO: {
-        NAME: "redo",
-        LABEL: i18n.t("Redo"),
-        DESCRIPTION: i18n.t("RedoKeybindDescription"),
-        SHORTCUTS: "ctrl+shift+z"
-      },
-      COPY_NODE: {
-        NAME: "configurationCopyCode",
-        LABEL: i18n.t("CopyCode"),
-        DESCRIPTION: i18n.t("CopyCodeKeybindDescription"),
-        SHORTCUTS: "ctrl+c"
-      },
-      PASTE_NODE: {
-        NAME: "configurationPasteCode",
+      PASTE: {
+        NAME: "monacoEditorPasteCode",
         LABEL: i18n.t("PasteCode"),
         DESCRIPTION: i18n.t("PasteCodeKeybindDescription"),
         SHORTCUTS: "ctrl+v"

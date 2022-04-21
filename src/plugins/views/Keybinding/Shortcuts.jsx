@@ -76,8 +76,6 @@ const Shortcuts = props => {
    *                                                                                      */
   //========================================================================================
 
-  console.log("shortcutsData.current", shortcutsData.current);
-
   return (
     <div data-testid="section_shortcuts" className={classes.root}>
       <div className={classes.body}>
@@ -90,10 +88,9 @@ const Shortcuts = props => {
         </div>
         <div className={classes.bigColumn}>
           <ShortcutsTable
-            title={
-              shortcutsData.current.scopes.find(s => s.id === selectedScope)
-                .label
-            }
+            scope={shortcutsData.current.scopes.find(
+              s => s.id === selectedScope
+            )}
             data={shortcutsData.current[selectedScope]}
           />
         </div>

@@ -41,7 +41,6 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       id,
       on,
       off,
-      call,
       scope,
       addKeyBind,
       removeKeyBind,
@@ -51,14 +50,6 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       initRightMenu,
       updateRightMenu
     } = props;
-
-    /**
-     * Save all documents :
-     *  Saves all documents that are dirty
-     */
-    const saveAllDocuments = useCallback(() => {
-      call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.SAVE_DIRTIES);
-    }, [call]);
 
     /**
      * Activate editor : activate editor's keybinds and update right menu
@@ -74,10 +65,6 @@ export function withEditorPlugin(ReactComponent, methods = []) {
     useEffect(() => {
       initRightMenu();
       addKeyBind(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE.SHORTCUTS, save);
-      addKeyBind(
-        KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE_ALL.SHORTCUTS,
-        saveAllDocuments
-      );
       on(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE, data => {
         if (data.id === id) {
           activateEditor();
@@ -87,7 +74,6 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       // Remove key bind on component unmount
       return () => {
         removeKeyBind(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE.SHORTCUTS);
-        removeKeyBind(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE_ALL.SHORTCUTS);
         off(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE);
       };
     }, [
@@ -98,8 +84,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       initRightMenu,
       on,
       off,
-      save,
-      saveAllDocuments
+      save
     ]);
 
     return (

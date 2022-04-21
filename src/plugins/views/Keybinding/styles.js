@@ -49,12 +49,18 @@ export const shortcutsListStyles = makeStyles(_theme => ({
   listItem: {
     padding: "20px 10px",
     borderBottom: "1px solid #666",
-    borderRadius: "3px"
+    borderRadius: "3px",
+    "&.activeItem": {
+      backgroundColor: "rgba(54,181,230, 0.4)"
+    }
   },
   listContent: {
     display: "inline-flex",
     width: "100%",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    "& > MuiSvgIcon-root": {
+      fontSize: "26px"
+    }
   }
 }));
 
@@ -65,5 +71,10 @@ export const shortcutsTableStyles = makeStyles(_theme => ({
     "& .MuiToolbar-root": {
       paddingLeft: "0px"
     }
+  },
+  description: {
+    fontSize: "20px",
+    fontStyle: "italic",
+    padding: "0 15px"
   }
 }));

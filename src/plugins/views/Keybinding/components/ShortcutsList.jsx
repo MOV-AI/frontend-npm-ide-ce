@@ -13,6 +13,16 @@ const ShortcutsList = props => {
 
   //========================================================================================
   /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  const isSelectedScope = scopeId => {
+    return selectedScope === scopeId;
+  };
+
+  //========================================================================================
+  /*                                                                                      *
    *                                       Handlers                                       *
    *                                                                                      */
   //========================================================================================
@@ -33,13 +43,15 @@ const ShortcutsList = props => {
             data-testid="input_shortcut-scope"
             key={scope.id}
             id={scope.id}
-            className={classes.listItem}
+            className={`${classes.listItem} ${
+              isSelectedScope(scope.id) ? "activeItem" : ""
+            }`}
             onClick={handleChangeScope}
           >
             <Tooltip title={scope.description} placement="bottom-start">
               <span className={classes.listContent}>
                 {scope.label}
-                {selectedScope === scope.id && <ArrowRightIcon />}
+                {isSelectedScope(scope.id) && <ArrowRightIcon />}
               </span>
             </Tooltip>
           </MenuItem>
