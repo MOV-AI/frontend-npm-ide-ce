@@ -16,7 +16,8 @@ import {
   TABLE_KEYS_NAMES,
   DIALOG_TITLE,
   PLUGINS,
-  SCOPES
+  SCOPES,
+  DEFAULT_VALUE
 } from "../../../../../../utils/Constants";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
 import MenuDetails from "./sub-components/MenuDetails";
@@ -103,7 +104,7 @@ const NodeMenu = memo(
         const nodeInstance = flowModel.current.getNodeInstanceItem(data.id);
 
         if (nodeInstance.getKeyValue(varName, formData.name)) {
-          if (formData.value === "") {
+          if (formData.value === DEFAULT_VALUE) {
             nodeInstance.deleteKeyValue(varName, formData.name);
           } else {
             nodeInstance.updateKeyValueItem(varName, formData);

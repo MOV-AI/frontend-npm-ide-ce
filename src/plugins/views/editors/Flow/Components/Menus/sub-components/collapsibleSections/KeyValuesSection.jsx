@@ -34,7 +34,7 @@ const KeyValuesSection = props => {
   const getTableValues = useCallback(() => {
     const output = [];
     Object.keys(templateValues).forEach(key => {
-      const value = instanceValues[key]?.value || "";
+      const value = instanceValues[key]?.value;
       const type = templateValues[key]?.type;
       const defaultValue = templateValues[key]?.value;
       const description = templateValues[key]?.description || "";

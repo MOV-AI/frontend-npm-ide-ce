@@ -23,6 +23,7 @@ export const BRANDING = {
   NAME: "Mov.ai Flow™"
 };
 
+export const DEFAULT_VALUE = undefined;
 export const DISABLED_VALUE = "None";
 
 export const DATA_TYPES = {
