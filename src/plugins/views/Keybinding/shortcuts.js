@@ -37,6 +37,50 @@ export const KEYBINDINGS = {
         DESCRIPTION: i18n.t("SaveAllDocsKeybindDescription"),
         SHORTCUTS: "ctrl+shift+s"
       },
+      // TODO Add later when we have a working UNDO / REDO engine
+      // UNDO: {
+      //   NAME: "undo",
+      //   LABEL: i18n.t("Undo"),
+      //   DESCRIPTION: i18n.t("UndoKeybindDescription"),
+      //   SHORTCUTS: "ctrl+z"
+      // },
+      // REDO: {
+      //   NAME: "redo",
+      //   LABEL: i18n.t("Redo"),
+      //   DESCRIPTION: i18n.t("RedoKeybindDescription"),
+      //   SHORTCUTS: "ctrl+shift+z"
+      // },
+      // COPY: {
+      //   NAME: "copy",
+      //   LABEL: i18n.t("Copy"),
+      //   DESCRIPTION: i18n.t("CopyKeybindDescription"),
+      //   SHORTCUTS: "ctrl+c"
+      // },
+      // PASTE: {
+      //   NAME: "paste",
+      //   LABEL: i18n.t("Paste"),
+      //   DESCRIPTION: i18n.t("PasteKeybindDescription"),
+      //   SHORTCUTS: "ctrl+v"
+      // },
+      CANCEL: {
+        NAME: "cancel",
+        LABEL: i18n.t("Cancel"),
+        DESCRIPTION: i18n.t("CancelKeybindDescription"),
+        SHORTCUTS: "esc"
+      },
+      DELETE: {
+        NAME: "delete",
+        LABEL: i18n.t("Delete"),
+        DESCRIPTION: i18n.t("DeleteKeybindDescription"),
+        SHORTCUTS: ["del", "backspace"]
+      }
+    }
+  },
+  CALLBACK: {
+    NAME: "editorCallback",
+    LABEL: i18n.t("EditorCallbackKeybindLabel"),
+    DESCRIPTION: i18n.t("EditorCallbackKeybindDescription"),
+    KEYBINDS: {
       UNDO: {
         NAME: "undo",
         LABEL: i18n.t("Undo"),
@@ -49,29 +93,48 @@ export const KEYBINDINGS = {
         DESCRIPTION: i18n.t("RedoKeybindDescription"),
         SHORTCUTS: "ctrl+shift+z"
       },
-      COPY: {
-        NAME: "copy",
-        LABEL: i18n.t("Copy"),
-        DESCRIPTION: i18n.t("CopyKeybindDescription"),
+      COPY_NODE: {
+        NAME: "callbackCopyCode",
+        LABEL: i18n.t("CopyCode"),
+        DESCRIPTION: i18n.t("CopyCodeKeybindDescription"),
         SHORTCUTS: "ctrl+c"
       },
-      PASTE: {
-        NAME: "paste",
-        LABEL: i18n.t("Paste"),
-        DESCRIPTION: i18n.t("PasteKeybindDescription"),
+      PASTE_NODE: {
+        NAME: "callbackPasteCode",
+        LABEL: i18n.t("PasteCode"),
+        DESCRIPTION: i18n.t("PasteCodeKeybindDescription"),
         SHORTCUTS: "ctrl+v"
+      }
+    }
+  },
+  CONFIGURATION: {
+    NAME: "editorConfiguration",
+    LABEL: i18n.t("EditorConfigurationKeybindLabel"),
+    DESCRIPTION: i18n.t("EditorConfigurationKeybindDescription"),
+    KEYBINDS: {
+      UNDO: {
+        NAME: "undo",
+        LABEL: i18n.t("Undo"),
+        DESCRIPTION: i18n.t("UndoKeybindDescription"),
+        SHORTCUTS: "ctrl+z"
       },
-      CANCEL: {
-        NAME: "cancel",
-        LABEL: i18n.t("Cancel"),
-        DESCRIPTION: i18n.t("CancelKeybindDescription"),
-        SHORTCUTS: "esc"
+      REDO: {
+        NAME: "redo",
+        LABEL: i18n.t("Redo"),
+        DESCRIPTION: i18n.t("RedoKeybindDescription"),
+        SHORTCUTS: "ctrl+shift+z"
       },
-      DELETE: {
-        NAME: "delete",
-        LABEL: i18n.t("Delete"),
-        DESCRIPTION: i18n.t("DeleteKeybindDescription"),
-        SHORTCUTS: ["del", "backspace"]
+      COPY_NODE: {
+        NAME: "configurationCopyCode",
+        LABEL: i18n.t("CopyCode"),
+        DESCRIPTION: i18n.t("CopyCodeKeybindDescription"),
+        SHORTCUTS: "ctrl+c"
+      },
+      PASTE_NODE: {
+        NAME: "configurationPasteCode",
+        LABEL: i18n.t("PasteCode"),
+        DESCRIPTION: i18n.t("PasteCodeKeybindDescription"),
+        SHORTCUTS: "ctrl+v"
       }
     }
   },

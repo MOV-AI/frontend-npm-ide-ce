@@ -9,13 +9,13 @@ import MaterialTable from "../../editors/_shared/MaterialTable/MaterialTable";
 import { parseKeybinds } from "../../../../utils/Utils";
 
 const ShortcutsTable = props => {
-  const { data } = props;
-
   // Translation hook
   const { t } = useTranslation();
   // Style hook
   const classes = shortcutsTableStyles();
   const columns = useRef(getColumns());
+
+  const { data, title = t("ShortcutsTabTitle") } = props;
 
   //========================================================================================
   /*                                                                                      *
@@ -25,11 +25,6 @@ const ShortcutsTable = props => {
 
   function getColumns() {
     return [
-      // {
-      //   title: t("Id"),
-      //   field: "id",
-      //   sorting: false
-      // },
       {
         title: t("Label"),
         field: "label"
@@ -54,7 +49,7 @@ const ShortcutsTable = props => {
 
   return (
     <Paper className={classes.paper}>
-      <div className={classes.columnTitle}>{t("ShortcutsTabTitle")}</div>
+      <div className={classes.columnTitle}>{title}</div>
       <Divider />
       <div className={classes.columnBody}>
         <MaterialTable columns={columns.current} data={data} />
