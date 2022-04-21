@@ -42,6 +42,9 @@ export const SCOPES = {
 };
 
 export const HOSTS = {
+  ABSTRACT_HOST: {
+    NAME: "abstractHost"
+  },
   TOP_BAR: {
     NAME: "topBar"
   },
@@ -65,6 +68,9 @@ export const HOSTS = {
 };
 
 export const PLUGINS = {
+  APP_KEYBINDINGS: {
+    NAME: "appKeybindings"
+  },
   DOC_MANAGER: {
     NAME: "docManager",
     CALL: {
@@ -162,6 +168,10 @@ export const PLUGINS = {
   }
 };
 
+export const KEYBIND_SCOPES = {
+  APP: "all"
+};
+
 export const TABLE_KEYS_NAMES = {
   PARAMETERS: "parameters",
   ENVVARS: "envVars",
@@ -247,6 +257,11 @@ export const FLOW_EXPLORER_PROFILE = {
 export const HOMETAB_PROFILE = {
   name: "HomeTab",
   title: i18n.t("HomeTabTitle")
+};
+
+export const SHORTCUTS_PROFILE = {
+  name: "ShortcutsTab",
+  title: i18n.t("ShortcutsTabTitle")
 };
 
 export const DEFAULT_TABS = new Map(

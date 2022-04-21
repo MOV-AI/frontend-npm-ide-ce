@@ -1,3 +1,9 @@
+# 3.0.1
+
+**IDE**
+
+- [FP-1085 - Add Shortcuts helper with all keybind shortcuts](https://movai.atlassian.net/browse/FP-1085)
+
 # 3.0.0
 
 **System Bar**

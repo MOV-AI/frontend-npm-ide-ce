@@ -4,6 +4,7 @@ import BuildIcon from "@material-ui/icons/Build";
 import CodeIcon from "@material-ui/icons/Code";
 import DescriptionIcon from "@material-ui/icons/Description";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
+import KeyboardIcon from "@material-ui/icons/Keyboard";
 import { Utils } from "@mov-ai/mov-fe-lib-core";
 import movaiIcon from "../plugins/views/editors/_shared/Branding/movai-logo-white.png";
 import { ERROR_MESSAGES } from "./Messages";
@@ -78,18 +79,11 @@ export const getIconByScope = (scope, style) => {
     Node: <i className={`icon-Nodes`} style={{ color, ...style }}></i>,
     Configuration: <BuildIcon style={{ color, ...style }} />,
     HomeTab: homeTabIcon,
+    ShortcutsTab: <KeyboardIcon style={{ color, ...style }} />,
     Default: <></>
   };
 
   return icon[scope];
-};
-
-/**
- * Simple Event to Stop Propagation
- * @param e: event to stop the propagation
- */
-export const stopPropagation = e => {
-  e?.stopPropagation();
 };
 
 /**
@@ -195,6 +189,21 @@ export function boolToPython(value) {
 export function pythonToBool(value) {
   return PythonToBoolOptions[value];
 }
+
+export function parseKeybinds(shortcuts, sep = ",") {
+  let parsedShortcuts = shortcuts;
+  if (Array.isArray(parsedShortcuts)) parsedShortcuts = shortcuts.join(sep);
+
+  return parsedShortcuts;
+}
+
+/**
+ * Simple Event to Stop Propagation
+ * @param e: event to stop the propagation
+ */
+export const stopPropagation = e => {
+  e?.stopPropagation();
+};
 
 /**
  * Trigger a simulated mouse click (react element)
