@@ -29,6 +29,7 @@ import ContainerMenu from "./Components/Menus/ContainerMenu";
 import Explorer from "./Components/Explorer/Explorer";
 import LinkMenu from "./Components/Menus/LinkMenu";
 import PortTooltip from "./Components/Tooltips/PortTooltip";
+import InvalidLinksWarning from "./Components/Warnings/InvalidLinksWarning";
 import { EVT_NAMES, EVT_TYPES } from "./events";
 import { FLOW_VIEW_MODE } from "./Constants/constants";
 
@@ -622,12 +623,17 @@ const Flow = (props, ref) => {
     eventData => {
       const { invalidLinks, callback } = eventData;
       if (invalidLinks.length) {
-        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
-          submitText: t("Fix"),
-          title: t("InvalidLinksFoundTitle"),
-          onSubmit: () => deleteInvalidLinks(invalidLinks, callback),
-          message: t("InvalidLinksFoundMessage")
-        });
+        call(
+          PLUGINS.DIALOG.NAME,
+          PLUGINS.DIALOG.CALL.CUSTOM,
+          {
+            submitText: t("Fix"),
+            title: t("InvalidLinksFoundTitle"),
+            onSubmit: () => deleteInvalidLinks(invalidLinks, callback),
+            invalidLinks
+          },
+          InvalidLinksWarning
+        );
       }
     },
     [call, t, deleteInvalidLinks]
