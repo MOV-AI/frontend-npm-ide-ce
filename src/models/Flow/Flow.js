@@ -549,6 +549,7 @@ class Flow extends Model {
   }
 
   static SCOPE = "Flow";
+  static CLASSNAME = "flow-interface";
 
   static EXTENSION = ".flo";
 
