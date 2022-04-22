@@ -8,7 +8,8 @@ import {
   DATA_TYPES,
   PLUGINS,
   TABLE_KEYS_NAMES,
-  DIALOG_TITLE
+  DIALOG_TITLE,
+  DEFAULT_VALUE
 } from "../../../../../../utils/Constants";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
 import KeyValuesSection from "./sub-components/collapsibleSections/KeyValuesSection";
@@ -44,7 +45,7 @@ const ContainerMenu = props => {
       const varName = formData.varName;
       const containerInstance = flowModel.current.getSubFlowItem(data.id);
       if (containerInstance.getKeyValue(varName, formData.name)) {
-        if (formData.value === "") {
+        if (formData.value === DEFAULT_VALUE) {
           containerInstance.deleteKeyValue(varName, formData.name);
         } else {
           containerInstance.updateKeyValueItem(varName, formData);
