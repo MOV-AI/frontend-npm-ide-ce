@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import { Subject } from "rxjs";
+import FlowModel from "../../../../../../models/Flow/Flow";
 import { defaultFunction } from "../../../../../../utils/Utils";
 import Factory from "../../Components/Nodes/Factory";
 import {
@@ -89,7 +90,10 @@ class Canvas {
       .attr("tabindex", "-1")
       .style("outline", "none")
       //.style("background-color", classes.flowEditor.interfaceColor)
-      .attr("class", `flow-interface ${classes.flowEditor.interfaceColor}`)
+      .attr(
+        "class",
+        `${FlowModel.CLASSNAME} ${classes.flowEditor.interfaceColor}`
+      )
       .call(this.zoomBehavior);
     return this;
   };
