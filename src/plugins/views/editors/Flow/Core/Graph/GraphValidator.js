@@ -105,7 +105,7 @@ export default class GraphValidator {
    * @returns {Array} List of container id that has invalid params
    */
   validateContainerParams = () => {
-    const invalidContainers = new Map();
+    const invalidContainers = [];
     const containers = new Map(
       [...this.graph.nodes].filter(
         ([_, node]) => node.obj.data.type === "Container"
@@ -115,14 +115,24 @@ export default class GraphValidator {
       const containerNode = container.obj;
       const instanceParams = containerNode?.data?.Parameter ?? {};
       const templateParams = containerNode?._template?.Parameter ?? {};
+      const invalidParams = [];
+
       for (const param in instanceParams) {
         if (!Object.hasOwnProperty.call(templateParams, param)) {
-          invalidContainers.set(containerNode.data.id, containerNode);
+          invalidParams.push(param);
         }
       }
+      invalidParams.length &&
+        invalidContainers.push({
+          id: containerNode.data.id,
+          name: containerNode.data.name,
+          containerNode,
+          invalidParams
+        });
     });
+
     // return containers id
-    return [...invalidContainers.keys()];
+    return invalidContainers;
   };
 
   /**

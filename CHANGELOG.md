@@ -7,6 +7,7 @@
 **FLOW**
 
 - [FP-1667 - Add More information to missing links](https://movai.atlassian.net/browse/FP-1667)
+- [FP-1669 - Add More information to missing parameters](https://movai.atlassian.net/browse/FP-1669)
 
 # 3.0.0
 

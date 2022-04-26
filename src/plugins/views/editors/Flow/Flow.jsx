@@ -31,6 +31,7 @@ import Explorer from "./Components/Explorer/Explorer";
 import LinkMenu from "./Components/Menus/LinkMenu";
 import PortTooltip from "./Components/Tooltips/PortTooltip";
 import InvalidLinksWarning from "./Components/Warnings/InvalidLinksWarning";
+import InvalidParametersWarning from "./Components/Warnings/InvalidParametersWarning";
 import { EVT_NAMES, EVT_TYPES } from "./events";
 import { FLOW_VIEW_MODE } from "./Constants/constants";
 
@@ -246,16 +247,19 @@ const Flow = (props, ref) => {
     invalidContainerParams => {
       // Don't show dialog if no invalid params found
       if (!invalidContainerParams || !invalidContainerParams.length) return;
-      // Set title and message for alert
-      const title = t("InvalidContainersParamTitle");
-      // Add containers name to message
-      const invalidContainers = invalidContainerParams.join("\n ");
-      const message = t("InvalidContainersParamMessage", { invalidContainers });
 
       // Show alert dialog
-      alert({ message, title, location: "modal" });
+      call(
+        PLUGINS.DIALOG.NAME,
+        PLUGINS.DIALOG.CALL.CUSTOM,
+        {
+          title: t("InvalidContainersParamTitle"),
+          invalidContainerParams
+        },
+        InvalidParametersWarning
+      );
     },
-    [t, alert]
+    [t, call]
   );
 
   /**

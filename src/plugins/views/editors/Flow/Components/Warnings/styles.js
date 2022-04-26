@@ -6,6 +6,31 @@ const commonStyles = {
   justifyContent: "space-between"
 };
 
+const headerStyles = {
+  ...commonStyles,
+  paddingBottom: "20px",
+  borderBottom: "1px dashed #ccc",
+  marginBottom: "10px"
+};
+
+const lineStyles = {
+  ...commonStyles,
+  paddingBottom: "10px",
+  borderBottom: "1px dashed #ccc",
+  marginBottom: "10px",
+  "& > div": {
+    overflow: "hidden",
+    maxWidth: "230px",
+    textOverflow: "ellipsis",
+    "& > p": {
+      margin: "0px"
+    }
+  },
+  "& > div:last-of-type": {
+    textAlign: "right"
+  }
+};
+
 export const warningsStyles = makeStyles(theme => ({
   root: {
     position: "absolute",
@@ -29,11 +54,11 @@ export const warningsStyles = makeStyles(theme => ({
     backgroundColor: amber[700]
   },
   icon: {
-    fontSize: 20
+    fontSize: "20px"
   },
   iconVariant: {
     opacity: 0.9,
-    marginRight: 10
+    marginRight: "10px"
   },
   message: {
     display: "flex",
@@ -44,27 +69,24 @@ export const warningsStyles = makeStyles(theme => ({
 
 export const invalidLinksWarningStyles = makeStyles(_theme => ({
   invalidLinksHeader: {
-    ...commonStyles,
-    marginBottom: "20px"
+    ...headerStyles
   },
   invalidLinkHolder: {
-    ...commonStyles,
-    paddingBottom: "10px",
-    borderBottom: "1px dashed #ccc",
-    marginBottom: "10px",
-    "& > div": {
-      overflow: "hidden",
-      maxWidth: "230px",
-      textOverflow: "ellipsis",
-      "& > p": {
-        margin: "0px"
-      }
-    },
-    "& > div:last-of-type": {
-      textAlign: "right"
-    }
+    ...lineStyles
   },
   fixMessage: {
+    marginTop: "40px"
+  }
+}));
+
+export const invalidParametersWarningStyles = makeStyles(_theme => ({
+  invalidParametersHeader: {
+    ...headerStyles
+  },
+  invalidParameterHolder: {
+    ...lineStyles
+  },
+  postMessage: {
     marginTop: "40px"
   }
 }));
