@@ -14,6 +14,7 @@ import { withTheme } from "../../../../../decorators/withTheme";
 import { ERROR_MESSAGES } from "../../../../../utils/Messages";
 import {
   DATA_TYPES,
+  DEFAULT_VALUE,
   DISABLED_VALUE,
   ALERT_SEVERITIES
 } from "../../../../../utils/Constants";
@@ -79,7 +80,7 @@ const ParameterEditorDialog = props => {
     if (value === DISABLED_VALUE) {
       result = VALUE_OPTIONS.DISABLED;
     }
-    if (value === "") {
+    if (value === DEFAULT_VALUE) {
       result = VALUE_OPTIONS.DEFAULT;
     }
 
@@ -92,7 +93,7 @@ const ParameterEditorDialog = props => {
    * @returns {*} Formatted value
    */
   const valueToRender = useCallback(formData => {
-    const formValue = formData.value || formData.defaultValue;
+    const formValue = formData.value ?? formData.defaultValue;
     return formData?.type === DATA_TYPES.STRING
       ? JSON.stringify(formValue)
       : formValue;
@@ -109,7 +110,7 @@ const ParameterEditorDialog = props => {
 
       if (showValueOptions) {
         if (valueOption === VALUE_OPTIONS.DEFAULT) {
-          return "";
+          return DEFAULT_VALUE;
         }
         if (valueOption === VALUE_OPTIONS.DISABLED) {
           return DISABLED_VALUE;
@@ -139,7 +140,7 @@ const ParameterEditorDialog = props => {
         ...formData,
         value:
           showValueOptions && valueOption === VALUE_OPTIONS.DEFAULT
-            ? ""
+            ? DEFAULT_VALUE
             : data.value,
         type: data.type
       };

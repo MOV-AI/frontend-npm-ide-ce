@@ -43,12 +43,12 @@ const filter = (searchQuery, subject) => {
     case DATA_TYPES.OBJECT:
       // Is array
       if (Array.isArray(subject)) {
-        subject = subject.filter(e => {
+        subject = subject?.filter(e => {
           const value = filter(searchQuery, e);
 
           if (typeof value === DATA_TYPES.BOOLEAN) return value;
 
-          return Boolean(value.length !== 0);
+          return Boolean(value?.length !== 0);
         });
         return subject;
       }

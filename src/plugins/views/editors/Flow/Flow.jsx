@@ -12,6 +12,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from "@material-ui/icons/Info";
 import Add from "@material-ui/icons/Add";
 import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
+import FlowModel from "../../../../models/Flow/Flow";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { FLOW_EXPLORER_PROFILE, PLUGINS } from "../../../../utils/Constants";
@@ -895,29 +896,37 @@ const Flow = (props, ref) => {
   /**
    * Handle copy node
    */
-  const handleCopyNode = useCallback(() => {
-    const selectedNodes = getSelectedNodes();
-    const nodesPos = selectedNodes.map(n =>
-      Vec2.of(n.center.xCenter, n.center.yCenter)
-    );
-    let center = nodesPos.reduce((e, x) => e.add(x), Vec2.ZERO);
-    center = center.scale(1 / selectedNodes.length);
-    // Nodes to copy
-    const nodesToCopy = {
-      nodes: selectedNodes.map(n => n.data),
-      flow: data.id,
-      nodesPosFromCenter: nodesPos.map(pos => pos.sub(center))
-    };
-    // Write nodes to copy to clipboard
-    clipboard.write(KEYS.NODES_TO_COPY, nodesToCopy);
-  }, [clipboard, getSelectedNodes, data.id]);
+  const handleCopyNode = useCallback(
+    evt => {
+      if (!document.activeElement.classList.contains(FlowModel.CLASSNAME))
+        return;
+      evt && evt.preventDefault();
+      const selectedNodes = getSelectedNodes();
+      const nodesPos = selectedNodes.map(n =>
+        Vec2.of(n.center.xCenter, n.center.yCenter)
+      );
+      let center = nodesPos.reduce((e, x) => e.add(x), Vec2.ZERO);
+      center = center.scale(1 / selectedNodes.length);
+      // Nodes to copy
+      const nodesToCopy = {
+        nodes: selectedNodes.map(n => n.data),
+        flow: data.id,
+        nodesPosFromCenter: nodesPos.map(pos => pos.sub(center))
+      };
+      // Write nodes to copy to clipboard
+      clipboard.write(KEYS.NODES_TO_COPY, nodesToCopy);
+    },
+    [clipboard, getSelectedNodes, data.id]
+  );
 
   /**
    * Handle paste nodes in canvas
    */
   const handlePasteNodes = useCallback(
     async evt => {
-      if (evt) evt.preventDefault();
+      if (!document.activeElement.classList.contains(FlowModel.CLASSNAME))
+        return;
+      evt && evt.preventDefault();
       const { args: position = getMainInterface().canvas.mousePosition } =
         contextMenuOptions || {};
       const nodesToCopy = clipboard.read(KEYS.NODES_TO_COPY);

@@ -23,6 +23,7 @@ export const BRANDING = {
   NAME: "Mov.ai Flow™"
 };
 
+export const DEFAULT_VALUE = undefined;
 export const DISABLED_VALUE = "None";
 
 export const DATA_TYPES = {
@@ -193,8 +194,25 @@ export const DEFAULT_KEY_VALUE_DATA = {
   value: ""
 };
 
+/**
+ * Used for Port Names
+ * We’re using a valid ROS validation which only allows for a name to begin with a letter, tilde (~) or a forward slash (/),
+ * and then followed by any letters, numbers, underscores and forward slash (/),
+ * but can’t have 2 underscores in a row;
+ */
 export const ROS_VALID_NAMES = new RegExp(
   /(?!.*__.*)^[a-zA-Z~/]{1}?[a-zA-Z0-9_/]*$/
+);
+
+/**
+ * Used for Parameters, Environment Variables and Command Line
+ * We’re using a variation of the valid ROS validation which only allows for a name to begin with a letter,
+ * tilde (~) or a forward slash (/), but also allowing the first character to be an underscore (_),
+ * and then followed by any letters, numbers, underscores and forward slash (/),
+ * but can’t have 2 underscores in a row;
+ */
+export const ROS_VALID_NAMES_VARIATION = new RegExp(
+  /(?!.*__.*)^[a-zA-Z_~/]{1}?[a-zA-Z0-9_/]*$/
 );
 
 export const ALERT_SEVERITIES = {

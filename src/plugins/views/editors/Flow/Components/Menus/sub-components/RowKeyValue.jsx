@@ -7,6 +7,7 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import { Typography } from "@material-ui/core";
 import {
   DATA_TYPES,
+  DEFAULT_VALUE,
   DISABLED_VALUE
 } from "../../../../../../../utils/Constants";
 
@@ -72,7 +73,7 @@ const RowKeyValue = ({
    */
   const renderParamRow = useCallback(
     row => {
-      if (row.value === "" || row.value === null) {
+      if (row.value === DEFAULT_VALUE || row.value === null) {
         return (
           <Typography
             component="div"
