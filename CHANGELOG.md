@@ -4,6 +4,10 @@
 
 - [FP-1085 - Add Shortcuts helper with all keybind shortcuts](https://movai.atlassian.net/browse/FP-1085)
 
+**FLOW**
+
+- [FP-1667 - Add More information to missing links](https://movai.atlassian.net/browse/FP-1667)
+
 # 3.0.0
 
 **System Bar**
