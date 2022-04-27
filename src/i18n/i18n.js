@@ -7,19 +7,18 @@ import { initReactI18next } from "react-i18next";
 // have a look at the Quick start guide
 // for passing in lng and translations on init
 
-import translationEN from "./fallback.json";
+import translationEN from "./languages/en.json";
+import translationPT from "./languages/pt.json";
 
 // the translations
-const resources =
-  window.SERVER_DATA === undefined || window.SERVER_DATA.Languages === undefined
-    ? {
-        en: { translation: translationEN }
-      }
-    : window.SERVER_DATA.Languages;
+const resources = {
+  en: { translation: translationEN },
+  pt: { translation: translationPT }
+};
 
 // default language
 const language =
-  window.SERVER_DATA === undefined || window.SERVER_DATA.Language === undefined
+  window?.SERVER_DATA?.Language === undefined
     ? "en"
     : window.SERVER_DATA.Language;
 
