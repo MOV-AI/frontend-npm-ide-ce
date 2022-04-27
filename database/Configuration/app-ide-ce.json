@@ -1,13 +1,13 @@
 {
-    "Configuration": {
-        "app-ide-ce": {
-            "Label": "app-ide-ce",
-            "LastUpdate": {
-                "date": "24/11/2021 at 12:05:23",
-                "user": "movai"
-            },
-            "Type": "",
-            "User": ""
-        }
+  "Configuration": {
+    "app-ide-ce": {
+      "Label": "app-ide-ce",
+      "LastUpdate": {
+        "date": "27/04/2022 at 17:18:47",
+        "user": "movai"
+      },
+      "Type": "Yaml",
+      "User": "movai"
     }
+  }
 }
