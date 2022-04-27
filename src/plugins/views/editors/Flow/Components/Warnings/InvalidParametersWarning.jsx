@@ -75,7 +75,7 @@ const InvalidParametersWarning = props => {
 };
 
 InvalidParametersWarning.propTypes = {
-  invalidLinks: PropTypes.array.isRequired
+  invalidContainerParams: PropTypes.array.isRequired
 };
 
 export default InvalidParametersWarning;
