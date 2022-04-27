@@ -45,8 +45,8 @@ const InvalidParametersWarning = props => {
     <>
       <p>{t("InvalidContainersParamMessagePre")}</p>
       <div className={classes.invalidParametersHeader}>
-        <h3>{t("Node")}</h3>
-        <h3>{t("Parameters")}</h3>
+        <h5>{t("Node")}</h5>
+        <h5>{t("Parameters")}</h5>
       </div>
       {invalidContainerParams.map(nodeInfo => (
         <Tooltip

@@ -44,8 +44,8 @@ const InvalidLinksWarning = props => {
   return (
     <div className={classes.invalidLinksMessageHolder}>
       <div className={classes.invalidLinksHeader}>
-        <h3>{t("Link Source")}</h3>
-        <h3>{t("Link Target")}</h3>
+        <h5>{t("SourcePort")}</h5>
+        <h5>{t("TargetPort")}</h5>
       </div>
       {invalidLinks.map(linkInfo => (
         <div key={linkInfo.id} className={classes.invalidLinkHolder}>
