@@ -23,6 +23,8 @@ export const BRANDING = {
   NAME: "Mov.ai Flow™"
 };
 
+export const GLOBAL_WORKSPACE = "global";
+
 export const DEFAULT_VALUE = undefined;
 export const DISABLED_VALUE = "None";
 

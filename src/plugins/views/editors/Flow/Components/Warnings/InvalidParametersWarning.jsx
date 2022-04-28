@@ -1,12 +1,13 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
-import Tooltip from "@material-ui/core/Tooltip";
+import Typography from "@material-ui/core/Typography";
+import ParameterLine from "./components/ParameterLine";
 
 import { invalidParametersWarningStyles } from "./styles";
 
 const InvalidParametersWarning = props => {
-  const { invalidContainerParams } = props;
+  const { invalidContainerParams, call, closeModal } = props;
 
   // Style hooks
   const classes = invalidParametersWarningStyles();
@@ -15,62 +16,31 @@ const InvalidParametersWarning = props => {
 
   //========================================================================================
   /*                                                                                      *
-   *                                    Private Methods                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  /**
-   * Builds the tooltip title
-   * @param {String} node
-   * @param {String} port
-   * @returns {JSX} build title
-   */
-  const buildTooltipTitle = (node, params) => {
-    return (
-      <p>
-        <strong>{t("Node-Colon")}</strong> {node}
-        <br />
-        <strong>{t("Parameters-Colon")}</strong> {params.join(", ")}
-      </p>
-    );
-  };
-
-  //========================================================================================
-  /*                                                                                      *
    *                                        Render                                        *
    *                                                                                      */
   //========================================================================================
 
   return (
-    <>
+    <div testid="section_invalid-parameters-warning">
       <p>{t("InvalidContainersParamMessagePre")}</p>
       <div className={classes.invalidParametersHeader}>
-        <h5>{t("Node")}</h5>
-        <h5>{t("Parameters")}</h5>
+        <Typography variant="h6">{t("InvalidSubFlowParameters")}</Typography>
+        <Typography variant="h6">{t("FlowTemplate")}</Typography>
       </div>
-      {invalidContainerParams.map(nodeInfo => (
-        <Tooltip
-          key={nodeInfo.id}
-          title={buildTooltipTitle(nodeInfo.name, nodeInfo.invalidParams)}
-        >
-          <div className={classes.invalidParameterHolder}>
-            <div>
-              <strong>{nodeInfo.name}</strong>
-            </div>
-            <div>
-              {nodeInfo.invalidParams.map(param => (
-                <p key={param}>
-                  <strong>{param}</strong>
-                </p>
-              ))}
-            </div>
-          </div>
-        </Tooltip>
-      ))}
+      <div className={classes.invalidParametersMessageHolder}>
+        {invalidContainerParams.map(subFlowInfo => (
+          <ParameterLine
+            key={subFlowInfo.id}
+            call={call}
+            closeModal={closeModal}
+            subFlowInfo={subFlowInfo}
+          />
+        ))}
+      </div>
       <p className={classes.postMessage}>
         {t("InvalidContainersParamMessagePost")}
       </p>
-    </>
+    </div>
   );
 };
 

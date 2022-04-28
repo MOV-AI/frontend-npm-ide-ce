@@ -8,16 +8,26 @@ const commonStyles = {
 
 const headerStyles = {
   ...commonStyles,
-  paddingBottom: "20px",
-  borderBottom: "1px dashed #ccc",
-  marginBottom: "10px"
+  marginBottom: "40px"
+};
+
+const linesHolderStyles = {
+  maxHeight: "35vh",
+  overflowY: "auto",
+  paddingRight: "10px"
 };
 
 const lineStyles = {
   ...commonStyles,
+  paddingTop: "10px",
   paddingBottom: "10px",
+  borderTop: "1px dashed #ccc",
   borderBottom: "1px dashed #ccc",
   marginBottom: "10px",
+  "& ~ div": {
+    paddingTop: "0px",
+    borderTop: "0 none"
+  },
   "& > div": {
     overflow: "hidden",
     maxWidth: "230px",
@@ -71,6 +81,9 @@ export const invalidLinksWarningStyles = makeStyles(_theme => ({
   invalidLinksHeader: {
     ...headerStyles
   },
+  invalidLinksMessageHolder: {
+    ...linesHolderStyles
+  },
   invalidLinkHolder: {
     ...lineStyles
   },
@@ -83,10 +96,23 @@ export const invalidParametersWarningStyles = makeStyles(_theme => ({
   invalidParametersHeader: {
     ...headerStyles
   },
-  invalidParameterHolder: {
-    ...lineStyles
+  invalidParametersMessageHolder: {
+    ...linesHolderStyles
   },
   postMessage: {
     marginTop: "40px"
+  }
+}));
+
+export const parameterLineStyles = makeStyles(_theme => ({
+  invalidParameterHolder: {
+    ...lineStyles
+  },
+  paramsList: {
+    marginTop: "0px"
+  },
+  linkButton: {
+    textTransform: "none",
+    fontSize: "16px"
   }
 }));

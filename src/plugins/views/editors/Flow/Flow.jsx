@@ -254,7 +254,8 @@ const Flow = (props, ref) => {
         PLUGINS.DIALOG.CALL.CUSTOM,
         {
           title: t("InvalidContainersParamTitle"),
-          invalidContainerParams
+          invalidContainerParams,
+          call
         },
         InvalidParametersWarning
       );
