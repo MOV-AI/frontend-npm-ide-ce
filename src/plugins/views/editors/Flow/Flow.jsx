@@ -20,6 +20,7 @@ import { KEYBINDINGS } from "../../Keybinding/shortcuts";
 import Clipboard, { KEYS } from "./Utils/Clipboard";
 import Vec2 from "./Utils/Vec2";
 import BaseFlow from "./Views/BaseFlow";
+import TreeView from "./Views/TreeView";
 import Menu from "./Components/Menus/Menu";
 import NodeMenu from "./Components/Menus/NodeMenu";
 import FlowTopBar from "./Components/FlowTopBar/FlowTopBar";
@@ -1039,6 +1040,29 @@ const Flow = (props, ref) => {
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Render Base flow with default visualization mode
+   */
+  const renderBaseFlow = useCallback(() => {
+    return (
+      <BaseFlow
+        {...props}
+        ref={baseFlowRef}
+        dataFromDB={dataFromDB}
+        warnings={warnings}
+        warningsVisibility={warningsVisibility}
+        onReady={onReady}
+      />
+    );
+  }, [dataFromDB, onReady, props, warnings, warningsVisibility]);
+
+  /**
+   * Render flow in tree view
+   */
+  const renderTreeView = useCallback(() => {
+    return <TreeView {...props} ref={baseFlowRef} dataFromDB={dataFromDB} />;
+  }, [dataFromDB, props]);
+
   return (
     <div data-testid="section_flow-editor" className={classes.root}>
       <div id="flow-top-bar">
@@ -1060,14 +1084,9 @@ const Flow = (props, ref) => {
           // nodeCompleteStatusUpdated={this.onMonitoringNodeStatusUpdate}
         ></FlowTopBar>
       </div>
-      <BaseFlow
-        {...props}
-        ref={baseFlowRef}
-        dataFromDB={dataFromDB}
-        warnings={warnings}
-        warningsVisibility={warningsVisibility}
-        onReady={onReady}
-      />
+      {viewMode === FLOW_VIEW_MODE.default
+        ? renderBaseFlow()
+        : renderTreeView()}
       <FlowBottomBar
         openFlow={openDoc}
         onToggleWarnings={onToggleWarnings}

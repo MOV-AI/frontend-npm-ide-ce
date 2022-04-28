@@ -1,6 +1,5 @@
 import GraphBase from "./GraphBase";
 import BaseLink from "../../Components/Links/BaseLink";
-import TreeStateNode from "../../Components/Nodes/TreeView/TreeStateNode";
 import TreeClassicNode from "../../Components/Nodes/TreeView/TreeClassicNode";
 import TreeContainerNode from "../../Components/Nodes/TreeView/TreeContainerNode";
 import { FLOW_VIEW_MODE } from "../../Constants/constants";
@@ -107,8 +106,7 @@ class GraphTreeView extends GraphBase {
   async addNode(node, _type, parent) {
     const cls = {
       NodeInst: TreeClassicNode,
-      Container: TreeContainerNode,
-      State: TreeStateNode
+      Container: TreeContainerNode
     };
     let inst;
     try {
@@ -299,8 +297,7 @@ class GraphTreeView extends GraphBase {
   _addNode(node, _type = "NodeInst") {
     const cls = {
       NodeInst: TreeClassicNode,
-      Container: TreeContainerNode,
-      State: TreeStateNode
+      Container: TreeContainerNode
     };
     const inst = new cls[_type](this.canvas, node, {});
     this.nodes.set(node.id, { obj: inst, links: [] });

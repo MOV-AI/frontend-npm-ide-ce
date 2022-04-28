@@ -14,6 +14,7 @@ import {
   Button,
   CircularProgress
 } from "@material-ui/core";
+import GrainIcon from "@material-ui/icons/Grain";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -22,11 +23,12 @@ import Toolbar from "@material-ui/core/Toolbar";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import StopIcon from "@material-ui/icons/Stop";
 import { RobotManager } from "@mov-ai/mov-fe-lib-core";
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import Workspace from "../../../../../../utils/Workspace";
 import { PLUGINS, ALERT_SEVERITIES } from "../../../../../../utils/Constants";
 import { ERROR_MESSAGES } from "../../../../../../utils/Messages";
 import { defaultFunction } from "../../../../../../utils/Utils";
-import { ROBOT_BLACKLIST } from "../../Constants/constants";
+import { FLOW_VIEW_MODE, ROBOT_BLACKLIST } from "../../Constants/constants";
 import useNodeStatusUpdate from "./hooks/useNodeStatusUpdate";
 
 import { buttonStyles, flowTopBarStyles } from "./styles";
@@ -63,9 +65,9 @@ const FlowTopBar = props => {
     id,
     name,
     onRobotChange,
+    onViewModeChange,
     defaultViewMode,
     confirmationAlert
-    // onViewModeChange
   } = props;
   // State hooks
   const [loading, setLoading] = useState(false);
@@ -230,9 +232,6 @@ const FlowTopBar = props => {
      * On component unmount
      */
     return () => {
-      // TEMPORARY HACK: Added log to remove warning of unused
-      // Once that handleViewModeChange method is uncommented, this should be removed
-      console.log(setViewMode);
       robotUnsubscribe();
       // Unmount
       isMounted.current = false;
@@ -429,18 +428,17 @@ const FlowTopBar = props => {
    * @param {string} newViewMode : New value
    * @returns
    */
-  // Commented out for posterity
-  // const handleViewModeChange = useCallback(
-  //   (_event, newViewMode) => {
-  //     if (!newViewMode) return;
-  //     setViewMode(prevState => {
-  //       if (prevState === newViewMode) return prevState;
-  //       onViewModeChange(newViewMode);
-  //       return newViewMode;
-  //     });
-  //   },
-  //   [onViewModeChange]
-  // );
+  const handleViewModeChange = useCallback(
+    (_event, newViewMode) => {
+      if (!newViewMode) return;
+      setViewMode(prevState => {
+        if (prevState === newViewMode) return prevState;
+        onViewModeChange(newViewMode);
+        return newViewMode;
+      });
+    },
+    [onViewModeChange]
+  );
 
   //========================================================================================
   /*                                                                                      *
@@ -535,23 +533,29 @@ const FlowTopBar = props => {
           component="div"
           className={classes.visualizationToggle}
         >
-          {/* <ToggleButtonGroup
+          <ToggleButtonGroup
             exclusive
             size="small"
             value={viewMode}
             onChange={handleViewModeChange}
           >
-            <ToggleButton data-testid="input_default-flow" value={FLOW_VIEW_MODE.default}>
+            <ToggleButton
+              data-testid="input_default-flow"
+              value={FLOW_VIEW_MODE.default}
+            >
               <Tooltip title={t("DefaultFlowView")}>
                 <GrainIcon fontSize="small" />
               </Tooltip>
             </ToggleButton>
-            <ToggleButton data-testid="input_tree-view-flow" value={FLOW_VIEW_MODE.treeView} disabled>
+            <ToggleButton
+              data-testid="input_tree-view-flow"
+              value={FLOW_VIEW_MODE.treeView}
+            >
               <Tooltip title={t("TreeView")}>
-                <i className="icon-tree" style={{ fontSize: "1.2rem" }}></i>
+                <i className={`icon-tree ${classes.treeIcon}`}></i>
               </Tooltip>
             </ToggleButton>
-          </ToggleButtonGroup> */}
+          </ToggleButtonGroup>
         </Typography>
       </Toolbar>
     </AppBar>
