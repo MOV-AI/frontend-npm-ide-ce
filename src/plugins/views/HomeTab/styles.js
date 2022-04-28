@@ -117,6 +117,12 @@ export const examplesDocumentsStyles = makeStyles(_theme => ({
     margin: "3px",
     overflow: "auto",
     maxHeight: "calc(100% - 90px)"
+  },
+  defaultMessage: {
+    textAlign: "center",
+    "& i": {
+      fontSize: "80px"
+    }
   }
 }));
 
