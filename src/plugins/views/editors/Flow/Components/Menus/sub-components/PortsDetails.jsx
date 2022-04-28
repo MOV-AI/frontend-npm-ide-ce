@@ -75,7 +75,6 @@ const PortsDetails = props => {
           <span>
             <Link
               data-testid="input_open-callback"
-              disabled={true}
               component="button"
               onClick={event => {
                 openDoc({
