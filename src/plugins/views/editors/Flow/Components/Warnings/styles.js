@@ -14,6 +14,7 @@ const headerStyles = {
 const linesHolderStyles = {
   maxHeight: "35vh",
   overflowY: "auto",
+  paddingLeft: "10px",
   paddingRight: "10px"
 };
 
