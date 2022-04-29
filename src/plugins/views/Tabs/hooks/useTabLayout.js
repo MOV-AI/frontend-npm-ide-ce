@@ -429,10 +429,10 @@ const useTabLayout = (props, dockRef) => {
         PLUGINS.DOC_MANAGER.CALL.GET_DOC_FACTORY,
         docData.scope
       ).then(docFactory => {
-        try {
-          if (!docFactory) return docData;
+        if (!docFactory) return docData;
 
-          return installTabPlugin(docFactory, docData).then(viewPlugin => {
+        return installTabPlugin(docFactory, docData)
+          .then(viewPlugin => {
             // Create and return tab data
             const extension = docFactory.store.model.EXTENSION ?? "";
             // Return TabData
@@ -446,11 +446,11 @@ const useTabLayout = (props, dockRef) => {
               scope: docData.scope,
               content: viewPlugin.render()
             };
+          })
+          .catch(err => {
+            console.warn("debug can't open tab", err);
+            return docData;
           });
-        } catch (err) {
-          console.warn("debug can't open tab", err);
-          return docData;
-        }
       });
     },
     [call, _getCustomTab, _closeTab, installTabPlugin]
