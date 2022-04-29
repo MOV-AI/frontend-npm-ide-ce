@@ -66,7 +66,7 @@ export const systemMenuItemStyles = makeStyles(theme => ({
     "& > .MuiButton-label": { paddingLeft: "10px" },
     "&:hover": {
       background: theme.palette.grey[900],
-      "& > .MuiButton-label > ul[class*=subMenuHolder]": {
+      "& > .MuiButton-label > ul": {
         opacity: "1",
         maxWidth: "500px"
       }
