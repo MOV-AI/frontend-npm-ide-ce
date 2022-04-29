@@ -1,4 +1,5 @@
 import ReactDOM from "react-dom";
+import hotkeys from "hotkeys-js";
 import { SelectScopeModal } from "@mov-ai/mov-fe-lib-react";
 import i18n from "../../i18n/i18n";
 import IDEPlugin from "../../engine/IDEPlugin/IDEPlugin";
@@ -22,6 +23,7 @@ class Dialog extends IDEPlugin {
       ])
     );
     super({ ...profile, methods });
+    this.oldScope = "all";
   }
 
   //========================================================================================
@@ -291,6 +293,8 @@ class Dialog extends IDEPlugin {
     const targetElement = document.createElement("div");
     targetElement.id = randomId();
     containerElement.appendChild(targetElement);
+    this.oldScope = hotkeys.getScope();
+    hotkeys.setScope("all");
     return targetElement;
   }
 
@@ -302,6 +306,7 @@ class Dialog extends IDEPlugin {
     ReactDOM.unmountComponentAtNode(targetElement);
     targetElement.parentNode.removeChild(targetElement);
     this.call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.FOCUS_ACTIVE_TAB);
+    hotkeys.setScope(this.oldScope);
     onClose && onClose();
   }
 
