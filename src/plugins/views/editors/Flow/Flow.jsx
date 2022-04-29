@@ -898,8 +898,6 @@ const Flow = (props, ref) => {
    */
   const handleCopyNode = useCallback(
     evt => {
-      if (!document.activeElement.classList.contains(FlowModel.CLASSNAME))
-        return;
       evt && evt.preventDefault();
       const selectedNodes = getSelectedNodes();
       const nodesPos = selectedNodes.map(n =>
@@ -924,8 +922,6 @@ const Flow = (props, ref) => {
    */
   const handlePasteNodes = useCallback(
     async evt => {
-      if (!document.activeElement.classList.contains(FlowModel.CLASSNAME))
-        return;
       evt && evt.preventDefault();
       const { args: position = getMainInterface().canvas.mousePosition } =
         contextMenuOptions || {};
