@@ -50,7 +50,7 @@ const buildMenus = async (call, classes) => {
           {i18n.t("LastUpdate-Colon")} {APP_INFORMATION.LAST_UPDATE}
         </p>
         <p>
-          {i18n.t("ConfigurationFile-Colon")}{" "}
+          {i18n.t("ConfigurationFile-Colon")}
           {APP_INFORMATION.CONFIGURATION_FILE}
         </p>
         <p>
