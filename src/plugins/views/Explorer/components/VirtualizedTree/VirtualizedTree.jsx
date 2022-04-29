@@ -90,9 +90,9 @@ class VirtualizedTree extends Component {
     const hasOverflow = target.offsetWidth < target.scrollWidth;
     const nodeUrl = node.url ?? node.name;
     if (hasOverflow && nodeTooltip !== nodeUrl) {
-      setImmediate(() => {
+      setTimeout(() => {
         this.setState({ nodeTooltip: nodeUrl });
-      });
+      }, 0);
     }
   }, 500);
 

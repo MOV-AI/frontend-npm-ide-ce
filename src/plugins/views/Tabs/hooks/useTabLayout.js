@@ -83,9 +83,10 @@ const useTabLayout = (props, dockRef) => {
     tabId => {
       const dockLayout = dockRef.current.state.layout;
       const tabData = findTab(tabId);
-      const panelId = tabData.parent.parent.id;
+      const panelId = tabData?.parent?.parent?.id;
 
-      const index = Object.values(dockLayout).findIndex(v => v.id === panelId);
+      const index =
+        Object.values(dockLayout).findIndex(v => v.id === panelId) ?? 0;
       return Object.keys(dockLayout)[index];
     },
     [dockRef, findTab]
