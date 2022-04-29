@@ -3,24 +3,26 @@ import i18n from "../i18n/i18n";
 export const APP_DEFAULT_CONFIG = "app-ide-ce";
 export const APP_CUSTOM_CONFIG = "app-custom-ide-ce";
 
+const APPLICATION_DATA = window.SERVER_DATA?.Application;
+
 export const MANAGER = "manager";
 
+export const BRANDING = {
+  NAME: "MOV.AI Flow™"
+};
+
 export const APP_INFORMATION = {
-  VERSION: window.SERVER_DATA?.Application?.Version || "0.0.1",
-  LAST_UPDATE: window.SERVER_DATA?.Application?.LastUpdate || "-",
-  CONFIGURATION_FILE: window.SERVER_DATA?.Application?.Configuration || "-",
-  CUSTOM_CONFIGURATION_FILE: window.SERVER_DATA?.CustomConfiguration || "-",
-  DESCRIPTION: window.SERVER_DATA?.Application?.Description || "-",
-  LABEL: window.SERVER_DATA?.Application?.Label || "MOV.AI"
+  VERSION: APPLICATION_DATA?.Version || "0.0.1",
+  LAST_UPDATE: APPLICATION_DATA?.LastUpdate || "-",
+  CONFIGURATION_FILE: APPLICATION_DATA?.Configuration || "-",
+  CUSTOM_CONFIGURATION_FILE: APPLICATION_DATA?.CustomConfiguration || "-",
+  DESCRIPTION: APPLICATION_DATA?.Description || "-",
+  LABEL: APPLICATION_DATA?.Label || BRANDING.NAME
 };
 
 export const APP_LINKS = {
   DOCUMENTATION: "https://movai-flow.readme.io/docs",
   FORUM: "https://discourse.aws.cloud.mov.ai/"
-};
-
-export const BRANDING = {
-  NAME: "Mov.ai Flow™"
 };
 
 export const DEFAULT_VALUE = undefined;
