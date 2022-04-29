@@ -3,6 +3,7 @@ import ReactResizeDetector from "react-resize-detector";
 import PropTypes from "prop-types";
 import { Rest } from "@mov-ai/mov-fe-lib-core";
 import { Backdrop, CircularProgress } from "@material-ui/core";
+import { SCOPES, GLOBAL_WORKSPACE } from "../../../../../utils/Constants";
 import { randomId, defaultFunction } from "../../../../../utils/Utils";
 import MainInterface from "../Components/interface/MainInterface";
 import GraphTreeView from "../Core/Graph/GraphTreeView";
@@ -239,9 +240,9 @@ Monitoring.defaultProps = {
   onDblClick: () => defaultFunction("onDblClick"),
   updateRMainMenu: () => defaultFunction("updateRMainMenu"),
   masterComponent: { alert: window.alert, ALERTS: { error: 1 } },
-  model: "Flow",
+  model: SCOPES.FLOW,
   readOnly: false,
-  workspace: "global",
+  workspace: GLOBAL_WORKSPACE,
   version: "__UNVERSIONED__"
 };
 

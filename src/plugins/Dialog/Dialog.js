@@ -212,6 +212,9 @@ class Dialog extends IDEPlugin {
   custom(data, Component) {
     const { title, actions, onSubmit, submitText, ...props } = data;
     const targetElement = this._handleDialogOpen();
+    const closeModal = () =>
+      this._handleDialogClose(targetElement, data.onClose);
+
     // Show dialog
     ReactDOM.render(
       <AppDialog
@@ -219,9 +222,9 @@ class Dialog extends IDEPlugin {
         actions={actions}
         submitText={submitText}
         onSubmit={onSubmit}
-        onClose={() => this._handleDialogClose(targetElement, data.onClose)}
+        onClose={closeModal}
       >
-        <Component {...props} />
+        <Component {...props} closeModal={closeModal} />
       </AppDialog>,
       targetElement
     );

@@ -25,6 +25,8 @@ export const APP_LINKS = {
   FORUM: "https://forum.flow.mov.ai/"
 };
 
+export const GLOBAL_WORKSPACE = "global";
+
 export const DEFAULT_VALUE = undefined;
 export const DISABLED_VALUE = "None";
 

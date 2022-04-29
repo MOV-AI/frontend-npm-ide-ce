@@ -2,6 +2,7 @@ import { Document } from "@mov-ai/mov-fe-lib-core";
 import i18n from "../../i18n/i18n";
 import {
   PLUGINS,
+  GLOBAL_WORKSPACE,
   ALERT_SEVERITIES,
   SAVE_OUTDATED_DOC_ACTIONS
 } from "../../utils/Constants";
@@ -45,7 +46,7 @@ class DocManager extends IDEPlugin {
       onDocumentDeleted: (store, name) => this.onDocumentDeleted(store, name)
     };
 
-    this.docsMap = docsFactory("global", observer, this);
+    this.docsMap = docsFactory(GLOBAL_WORKSPACE, observer, this);
   }
 
   onDocumentUpdate(doc) {

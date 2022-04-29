@@ -8,6 +8,7 @@ import KeyboardIcon from "@material-ui/icons/Keyboard";
 import { Utils } from "@mov-ai/mov-fe-lib-core";
 import movaiIcon from "../plugins/views/editors/_shared/Branding/movai-logo-white.png";
 import { ERROR_MESSAGES } from "./Messages";
+import { GLOBAL_WORKSPACE } from "./Constants";
 
 /**
  * Export a non implemented empty function
@@ -149,7 +150,8 @@ export function validateDocumentName(name) {
  * @returns
  */
 export function buildDocPath(doc) {
-  const { workspace, scope, name } = doc;
+  const { scope, name } = doc;
+  const workspace = doc.workspace ?? GLOBAL_WORKSPACE;
   return `${workspace}/${scope}/${name}`;
 }
 
