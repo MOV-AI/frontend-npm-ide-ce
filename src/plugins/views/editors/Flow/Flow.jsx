@@ -12,7 +12,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from "@material-ui/icons/Info";
 import Add from "@material-ui/icons/Add";
 import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
-import FlowModel from "../../../../models/Flow/Flow";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { FLOW_EXPLORER_PROFILE, PLUGINS } from "../../../../utils/Constants";
@@ -898,8 +897,6 @@ const Flow = (props, ref) => {
    */
   const handleCopyNode = useCallback(
     evt => {
-      if (!document.activeElement.classList.contains(FlowModel.CLASSNAME))
-        return;
       evt && evt.preventDefault();
       const selectedNodes = getSelectedNodes();
       const nodesPos = selectedNodes.map(n =>
@@ -924,8 +921,6 @@ const Flow = (props, ref) => {
    */
   const handlePasteNodes = useCallback(
     async evt => {
-      if (!document.activeElement.classList.contains(FlowModel.CLASSNAME))
-        return;
       evt && evt.preventDefault();
       const { args: position = getMainInterface().canvas.mousePosition } =
         contextMenuOptions || {};
