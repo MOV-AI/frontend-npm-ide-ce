@@ -15,8 +15,8 @@ export const APP_INFORMATION = {
 };
 
 export const APP_LINKS = {
-  DOCUMENTATION: "https://movai-flow.readme.io/docs",
-  FORUM: "https://discourse.aws.cloud.mov.ai/"
+  DOCUMENTATION: "https://flow.mov.ai/",
+  FORUM: "https://forum.flow.mov.ai/"
 };
 
 export const BRANDING = {

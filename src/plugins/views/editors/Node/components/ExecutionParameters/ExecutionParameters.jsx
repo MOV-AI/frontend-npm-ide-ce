@@ -75,7 +75,7 @@ const ExecutionParameters = props => {
    * @param {string} keyName : Property key name
    * @param {string} title : Checkbox label
    * @param {boolean} checkboxValue : Checkbox checked state
-   * @param {{id: string, title: string, description: string}} tooltip : Tooltip data
+   * @param {{id: number, title: string, description: string}} tooltip : Tooltip data
    * @returns {ReactElement} Checkbox with custom HTML tooltip
    */
   const renderCheckbox = (keyName, title, checkboxValue, tooltip) => (
