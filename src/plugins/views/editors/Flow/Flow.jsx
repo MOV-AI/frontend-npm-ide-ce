@@ -12,7 +12,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from "@material-ui/icons/Info";
 import Add from "@material-ui/icons/Add";
 import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
-import FlowModel from "../../../../models/Flow/Flow";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { FLOW_EXPLORER_PROFILE, PLUGINS } from "../../../../utils/Constants";
