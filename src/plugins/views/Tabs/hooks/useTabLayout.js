@@ -23,6 +23,7 @@ const useTabLayout = (props, dockRef) => {
   const { emit, call, on, off } = props;
   const workspaceManager = useMemo(() => new Workspace(), []);
   const activeTabId = useRef(null);
+  const firstLoad = useRef(true);
   const tabsById = useRef(new Map());
   const [layout, setLayout] = useState({ ...DEFAULT_LAYOUT });
   const { addTabToStack, removeTabFromStack, getNextTabFromStack } =
@@ -624,7 +625,9 @@ const useTabLayout = (props, dockRef) => {
         // Update layout
         applyLayout(newLayout);
 
-        !isNew && addTabToStack(tabId, dock);
+        !firstLoad.current && !isNew && addTabToStack(tabId, dock);
+
+        firstLoad.current = false;
       }
       // Emit new active tab id
       if (!tabId) return;
