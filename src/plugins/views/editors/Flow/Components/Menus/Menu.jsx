@@ -15,6 +15,7 @@ import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import Add from "@material-ui/icons/Add";
 import { Utils } from "@mov-ai/mov-fe-lib-core";
+import Model from "../../../../../../models/Flow/Flow";
 import useDataSubscriber from "../../../../../DocManager/useDataSubscriber";
 import {
   DEFAULT_KEY_VALUE_DATA,
@@ -47,7 +48,8 @@ const Menu = ({
   const [activeItem, setActiveItem] = useState(0);
   const { data } = useDataSubscriber({
     instance: model,
-    propsData: detailsProp
+    propsData: detailsProp,
+    keysToDisconsider: Model.KEYS_TO_DISCONSIDER
   });
   // Other hooks
   const classes = menuStyles();
@@ -96,7 +98,7 @@ const Menu = ({
    * @param {String} prevName : previous name (used to discern if is new or edit)
    * @param {Function} submitCallback : Callback to be called on Submit
    */
-  const editGroupName = useCallback(
+  const openGroupModal = useCallback(
     (submitCallback, prevName = "") => {
       const args = {
         size: "sm",
@@ -278,8 +280,8 @@ const Menu = ({
    * Handle Add group click
    */
   const handleAddGroupClick = useCallback(() => {
-    editGroupName(groupName => model.current.addGroup(groupName));
-  }, [editGroupName, model]);
+    openGroupModal(groupName => model.current.addGroup(groupName));
+  }, [openGroupModal, model]);
 
   /**
    * Handle Description Edit
@@ -368,7 +370,7 @@ const Menu = ({
           key={group.id}
           item={group}
           model={model}
-          editGroupName={editGroupName}
+          editGroupName={openGroupModal}
           editable={editable}
           handleGroupVisibility={handleGroupVisibility}
         />
@@ -383,7 +385,7 @@ const Menu = ({
     data.groups,
     model,
     editable,
-    editGroupName,
+    openGroupModal,
     handleGroupVisibility,
     t
   ]);
