@@ -14,7 +14,7 @@ import { DialogTitle } from "../../../../Dialog/components/AppDialog/AppDialog";
 import Loader from "../../_shared/Loader/Loader";
 import MaterialTree from "../../_shared/MaterialTree/MaterialTree";
 import Search from "../../_shared/Search/Search";
-import { searchImports } from "./utils";
+import { EXCLUDED_PATHS, searchImports } from "./utils";
 import { ERROR_MESSAGES } from "../../../../../utils/Messages";
 
 const useStyles = makeStyles(_theme => ({
@@ -73,12 +73,12 @@ const AddImportDialog = props => {
     const pyLibSelected = {};
     _selectedLibs.forEach(libPath => {
       const path = libPath.split(".");
-      const moduleName = path[0];
-      const name = path[path.length - 1];
-      if (name === libPath || path.length === 2) {
-        pyLibSelected[moduleName] = { module: moduleName, libClass: false };
+      const modulePath = path.filter(_path => !EXCLUDED_PATHS.includes(_path));
+      const name = modulePath.pop();
+      if (name === libPath || modulePath.length === 0) {
+        pyLibSelected[name] = { module: name, libClass: false };
       } else {
-        pyLibSelected[name] = { module: moduleName, libClass: name };
+        pyLibSelected[name] = { module: modulePath.join("."), libClass: name };
       }
     });
     // Return pyLibSelected
