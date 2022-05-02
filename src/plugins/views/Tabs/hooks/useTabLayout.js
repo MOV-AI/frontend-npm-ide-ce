@@ -13,12 +13,7 @@ import {
   DOCK_MODES,
   PLUGINS
 } from "../../../../utils/Constants";
-import {
-  getIconByScope,
-  getNameFromURL,
-  getScopeFromURL,
-  buildDocPath
-} from "../../../../utils/Utils";
+import { getIconByScope, buildDocPath } from "../../../../utils/Utils";
 import PluginManagerIDE from "../../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Workspace from "../../../../utils/Workspace";
 import { getHomeTab } from "../../HomeTab/HomeTab";
@@ -29,7 +24,6 @@ const useTabLayout = (props, dockRef) => {
   const workspaceManager = useMemo(() => new Workspace(), []);
   const activeTabId = useRef(null);
   const tabsById = useRef(new Map());
-  const firstLoad = useRef(true);
   const [layout, setLayout] = useState({ ...DEFAULT_LAYOUT });
   const { addTabToStack, removeTabFromStack, getNextTabFromStack } =
     useTabStack(workspaceManager);
@@ -480,7 +474,7 @@ const useTabLayout = (props, dockRef) => {
    * @param {TabData} tabData : Set Tab data in Layout
    */
   const open = useCallback(
-    (tabData, preventFocus) => {
+    tabData => {
       const tabPosition = tabData.dockPosition ?? getDefaultTabPosition();
       const position = tabData.position ?? {
         h: 500,
@@ -490,13 +484,13 @@ const useTabLayout = (props, dockRef) => {
         z: 1
       };
 
-      !preventFocus && !tabData.isNew && addTabToStack(tabData.id, tabPosition);
+      !tabData.isNew && addTabToStack(tabData.id, tabPosition);
       tabsById.current.set(tabData.id, tabData);
       workspaceManager.setTabs(tabsById.current);
 
       const existingTab = findTab(tabData.id);
       if (existingTab) {
-        focusExistingTab(tabData.id, preventFocus);
+        focusExistingTab(tabData.id);
         return;
       }
 
@@ -613,34 +607,24 @@ const useTabLayout = (props, dockRef) => {
    * @param {String} direction : (one of: "left" | "right" | "bottom" | "top" | "middle" | "remove" | "before-tab" | "after-tab" | "float" | "front" | "maximize" | "new-window")
    */
   const onLayoutChange = useCallback(
-    async (newLayout, tabId, direction) => {
+    (newLayout, tabId, direction) => {
       const dock = getDockFromTabId(tabId);
+      const { isNew, isDirty } = tabsById.current.get(tabId);
       let newActiveTabId = tabId;
 
       // Attempt to close tab
       if (direction === DOCK_MODES.REMOVE) {
         _closeTab(tabId);
-        newActiveTabId =
-          getNextTabFromStack(dock) ||
-          _getFirstContainer(newLayout.dockbox).activeId;
+        if (!isDirty) {
+          newActiveTabId =
+            getNextTabFromStack(dock) ||
+            _getFirstContainer(newLayout.dockbox).activeId;
+        }
       } else {
         // Update layout
         applyLayout(newLayout);
-        const doc =
-          tabId === HOMETAB_PROFILE.name
-            ? {}
-            : await call(
-                PLUGINS.DOC_MANAGER.NAME,
-                PLUGINS.DOC_MANAGER.CALL.READ,
-                {
-                  name: getNameFromURL(tabId),
-                  scope: getScopeFromURL(tabId)
-                }
-              );
 
-        !firstLoad.current && !doc?.isNew && addTabToStack(tabId, dock);
-
-        firstLoad.current = false;
+        !isNew && addTabToStack(tabId, dock);
       }
       // Emit new active tab id
       if (!tabId) return;
