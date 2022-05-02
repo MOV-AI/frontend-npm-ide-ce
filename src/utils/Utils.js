@@ -13,7 +13,9 @@ import { ERROR_MESSAGES } from "./Messages";
  * @param {String} name : function name
  * @returns console.warn call with the function name
  */
-export const defaultFunction = name => console.warn(`${name} not implemented`);
+export const defaultFunction = (name, logToConsole = true) => {
+  if (logToConsole) console.warn(`${name} not implemented`);
+};
 
 /**
  * Checks if it's a React Component or Functional Component to return it's ref
