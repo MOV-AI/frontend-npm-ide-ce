@@ -25,7 +25,7 @@ const withKeyBinds = Component => {
 
   return (props, ref) => {
     // Props
-    const { name } = props;
+    const { id } = props;
     // Refs
     const scopeRef = useRef();
 
@@ -70,12 +70,12 @@ const withKeyBinds = Component => {
      * Component initialization : set scope id
      */
     useEffect(() => {
-      scopeRef.current = `${name}-${Math.random()}`;
+      scopeRef.current = id;
       // Delete scope to unbind keys when component is unmounted
       return () => {
         hotkeys.deleteScope(scopeRef.current);
       };
-    }, [name]);
+    }, [id]);
 
     return (
       <RefComponent

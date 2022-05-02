@@ -33,8 +33,7 @@ const MainMenu = props => {
   const classes = mainMenuStyles();
   const theme = useTheme();
   const { t } = useTranslation();
-  const { isDarkTheme, handleLogOut, handleToggleTheme } =
-    useContext(MainContext);
+  const { isDarkTheme, handleLogOut } = useContext(MainContext);
   // Refs
   const MENUS = useRef([
     {
@@ -133,7 +132,6 @@ const MainMenu = props => {
             userName={Authentication.getTokenData().message.name ?? ""}
             isDarkTheme={isDarkTheme}
             handleLogout={handleLogoutClick}
-            handleToggleTheme={handleToggleTheme}
           />,
           <img
             key={"movaiIcon"}
