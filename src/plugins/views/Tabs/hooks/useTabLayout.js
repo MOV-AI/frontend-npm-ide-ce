@@ -390,7 +390,7 @@ const useTabLayout = (props, dockRef) => {
       // Trigger tab update
       if (!dockRef.current) return;
       const currentTab = findTab(tabId);
-      dockRef.current.updateTab(tabId, currentTab);
+      dockRef.current.updateTab(tabId, currentTab, false);
     },
     [dockRef, findTab]
   );
