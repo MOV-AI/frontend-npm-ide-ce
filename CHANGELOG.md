@@ -3,6 +3,7 @@
 **IDE**
 
 - [FP-1085 - Add Shortcuts helper with all keybind shortcuts](https://movai.atlassian.net/browse/FP-1085)
+- [FP-1768 - Grey out other links when creating a new link](https://movai.atlassian.net/browse/FP-1768)
 
 **FLOW**
 

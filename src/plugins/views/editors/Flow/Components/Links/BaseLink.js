@@ -234,7 +234,8 @@ export default class BaseLink extends BaseLinkStruct {
       this.styleMouseOver();
     }
     // Fade out other links
-    if (!this.canvas.selectedLink) this.fadeOtherLinks();
+    if (!this.canvas.selectedLink && !this.canvas.mode.linking.activelyLinking)
+      this.fadeOtherLinks();
     // show error tooltip (if any)
     if (this.error) {
       const message = this.error.message;
@@ -257,7 +258,8 @@ export default class BaseLink extends BaseLinkStruct {
       this.styleMouseOut();
     }
     // Remove fade out from other links
-    if (!this.canvas.selectedLink) this.removeLinksFade();
+    if (!this.canvas.selectedLink && !this.canvas.mode.linking.activelyLinking)
+      this.removeLinksFade();
     // hide tooltip
     if (this.error)
       this.onLinkErrorMouseOver({ link: this.data, mouseover: false }, "Link");
