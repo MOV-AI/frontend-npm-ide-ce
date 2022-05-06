@@ -553,6 +553,13 @@ class Flow extends Model {
 
   static EXTENSION = ".flo";
 
+  static KEYS_TO_DISCONSIDER = [
+    "subFlows",
+    "exposedPorts",
+    "links",
+    "nodeInstances"
+  ];
+
   static OBSERVABLE_KEYS = {
     NAME: "name",
     DETAILS: "details",

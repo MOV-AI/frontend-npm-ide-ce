@@ -33,15 +33,16 @@ export const virtualizedTreeStyles = theme => ({
   iconSpace: {
     flex: 1,
     textAlign: "right",
-    maxWidth: 38,
+    marginRight: "15px",
+    maxWidth: "38px",
     "& button": {
       position: "relative",
-      bottom: 7,
-      padding: 7
+      bottom: "7px",
+      padding: "7px"
     }
   },
   contextMenuIcon: {
     color: "white",
-    fontSize: 18
+    fontSize: "18px"
   }
 });

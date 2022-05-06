@@ -13,6 +13,8 @@ import { withTheme } from "../../../../decorators/withTheme";
 
 import { appDialogStyles } from "./styles";
 
+const DEFAULT_VALIDATION = () => ({ result: true, error: "" });
+
 const FormDialog = props => {
   // Translation hook
   const { t } = useTranslation();
@@ -23,13 +25,13 @@ const FormDialog = props => {
     title,
     message,
     onSubmit,
-    onValidation,
     onPostValidation,
     placeholder,
     multiline,
     loadingMessage,
     defaultValue,
     maxLength,
+    onValidation = DEFAULT_VALIDATION,
     inputLabel = t("Name"),
     submitText = t("Submit")
   } = props;
@@ -145,15 +147,24 @@ const FormDialog = props => {
    */
   const handlePaste = event => {
     event.preventDefault();
+    // Get current value and current cursor position
+    const oldValue = event.target.value;
+    const position = event.target.selectionStart;
     // Trim pasted text
     const pastedText = event.clipboardData
       .getData("text/plain")
       .trim()
       .replace(/(\r\n|\n|\r)/gm, "");
+    // Set new value
+    const newValue = [
+      oldValue.slice(0, position),
+      pastedText,
+      oldValue.slice(position)
+    ].join("");
     // Validate pasted text
-    validateValue(pastedText);
+    validateValue(newValue);
     // Set text in input field
-    event.target.value = pastedText;
+    event.target.value = newValue;
   };
 
   return (
