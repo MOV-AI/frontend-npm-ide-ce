@@ -3,6 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 export const bookmarkStyles = (side, oppositeSide) =>
   makeStyles(theme => ({
     bookmarksContainer: { position: "relative" },
+    bookmarkHolder: { height: "100%" },
     panel: {
       position: "absolute",
       [oppositeSide]: -40,
