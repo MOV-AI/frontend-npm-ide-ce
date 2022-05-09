@@ -3,6 +3,7 @@
 **IDE**
 
 - [FP-1085 - Add Shortcuts helper with all keybind shortcuts](https://movai.atlassian.net/browse/FP-1085)
+- [FP-1523 - Replaced old virtualize tree with react-window](https://movai.atlassian.net/browse/FP-1523)
 
 **FLOW**
 
