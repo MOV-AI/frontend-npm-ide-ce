@@ -44,6 +44,7 @@
   "DeleteGroup": "Apagar Grupo",
   "DeleteDocConfirmationTitle": "Confirme para Apagar",
   "DeleteDocConfirmationMessage": "Tem a certeza que quer apagar o documento '{{docName}}'?",
+  "DeleteKeyConfirmationMessage": "Tem a certeza que quer apagar a chave '{{key}}'?",
   "DependenciesLevel": "Nível de Dependências",
   "Description": "Descrição",
   "DisableParamType": "Desabilitar {{paramType}}",
