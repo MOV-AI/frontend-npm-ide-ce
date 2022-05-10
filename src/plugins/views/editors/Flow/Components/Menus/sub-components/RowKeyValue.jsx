@@ -22,7 +22,7 @@ const RowKeyValue = ({
   handleParameterDeleteModal
 }) => {
   const classes = rowKeyValueStyles();
-  const viewOnly = !allowEdit && !allowDelete;
+  const viewOnly = !allowEdit;
 
   //========================================================================================
   /*                                                                                      *
@@ -50,8 +50,8 @@ const RowKeyValue = ({
    * Handle Key Value Edit Dialog
    */
   const handleKeyValueEditModal = useCallback(() => {
-    handleParameterEditModal(item, type);
-  }, [item, type, handleParameterEditModal]);
+    handleParameterEditModal(item, type, viewOnly);
+  }, [item, type, handleParameterEditModal, viewOnly]);
 
   /**
    * Handle Key Value Delete Dialog
@@ -119,7 +119,7 @@ const RowKeyValue = ({
           onClick={handleKeyValueEditModal}
           size="small"
         >
-          {viewOnly ? <VisibilityIcon /> : <Edit></Edit>}
+          {viewOnly ? <VisibilityIcon /> : <Edit />}
         </IconButton>
       )}
       {allowDelete && (

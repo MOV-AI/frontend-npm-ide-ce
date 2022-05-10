@@ -10,7 +10,9 @@ import { keyValueSectionStyles } from "../../styles";
 const KeyValuesSection = props => {
   const {
     editable,
+    deletable,
     handleTableKeyEdit,
+    handleTableKeyDelete,
     instanceValues,
     templateValues,
     varName
@@ -44,11 +46,13 @@ const KeyValuesSection = props => {
       const type = templateValues[key]?.type;
       const defaultValue = templateValues[key]?.value;
       const description = templateValues[key]?.description || "";
+      const invalid = key in instanceValues && !(key in templateValues);
       output.push({
         key,
         value,
         description,
         defaultValue,
+        invalid,
         type
       });
     });
@@ -78,7 +82,9 @@ const KeyValuesSection = props => {
       <TableKeyValue
         list={keyValues}
         allowEdit={editable}
+        allowDelete={deletable}
         handleParameterEditModal={handleTableKeyEdit}
+        handleParameterDeleteModal={handleTableKeyDelete}
         type={varName}
         allowSearch
       />
@@ -94,12 +100,15 @@ KeyValuesSection.propTypes = {
   varName: PropTypes.string.isRequired,
   handleTableKeyEdit: PropTypes.func.isRequired,
   instanceValues: PropTypes.object.isRequired,
+  handleTableKeyDelete: PropTypes.func,
   templateValues: PropTypes.object,
-  editable: PropTypes.bool
+  editable: PropTypes.bool,
+  deletable: PropTypes.bool
 };
 
 KeyValuesSection.defaultProps = {
-  editable: false
+  editable: false,
+  deletable: false
 };
 
 export default KeyValuesSection;
