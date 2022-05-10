@@ -33,6 +33,7 @@ const VALUE_OPTIONS = {
 const ParameterEditorDialog = props => {
   const {
     isNew,
+    disabled,
     disableType,
     customValidation,
     preventRenderType,
@@ -259,7 +260,7 @@ const ParameterEditorDialog = props => {
           fullWidth
           value={data.type || DATA_TYPES.ANY}
           onChange={handleTypeChange}
-          disabled={disableType}
+          disabled={disableType || disabled}
           inputProps={{ "data-testid": "input_type" }}
         >
           {getDataTypes().map(key => (
@@ -271,6 +272,7 @@ const ParameterEditorDialog = props => {
       </FormControl>
     );
   }, [
+    disabled,
     classes,
     data,
     preventRenderType,
@@ -292,16 +294,19 @@ const ParameterEditorDialog = props => {
         >
           <FormControlLabel
             value={VALUE_OPTIONS.CUSTOM}
+            disabled={disabled}
             control={<Radio inputProps={{ "data-testid": "input_custom" }} />}
             label={t("UseCustomValue")}
           />
           <FormControlLabel
             value={VALUE_OPTIONS.DEFAULT}
+            disabled={disabled}
             control={<Radio inputProps={{ "data-testid": "input_default" }} />}
             label={t("UseDefaultValue")}
           />
           <FormControlLabel
             value={VALUE_OPTIONS.DISABLED}
+            disabled={disabled}
             control={<Radio inputProps={{ "data-testid": "input_disabled" }} />}
             label={t("DisableParamType", {
               paramType: data.paramType || t("Value")
@@ -310,7 +315,14 @@ const ParameterEditorDialog = props => {
         </RadioGroup>
       </FormControl>
     );
-  }, [data.paramType, valueOption, classes, handleChangeValueOption, t]);
+  }, [
+    data.paramType,
+    valueOption,
+    classes,
+    handleChangeValueOption,
+    t,
+    disabled
+  ]);
 
   /**
    * Render Value Editor Component
@@ -347,7 +359,7 @@ const ParameterEditorDialog = props => {
                     return { ...prevState, value: _value };
                   });
                 },
-                disabled: options.disabled,
+                disabled: options.disabled || disabled,
                 isNew: options.isNew ?? isNew
               },
               "dialog"
@@ -359,6 +371,7 @@ const ParameterEditorDialog = props => {
     [
       valueOption,
       showValueOptions,
+      disabled,
       data,
       isNew,
       classes,
@@ -383,6 +396,8 @@ ParameterEditorDialog.propTypes = {
   data: PropTypes.object.isRequired,
   isNew: PropTypes.bool,
   disableType: PropTypes.bool,
+  disabled: PropTypes.bool,
+  showDescription: PropTypes.bool,
   preventRenderType: PropTypes.bool,
   showValueOptions: PropTypes.bool,
   customValidation: PropTypes.func,

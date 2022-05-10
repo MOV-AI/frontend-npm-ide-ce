@@ -39,6 +39,7 @@ const KeyValueEditorDialog = props => {
     disabled,
     disableName,
     disableDescription,
+    showDescription,
     renderCustomContent,
     renderValueEditor,
     showDefault
@@ -196,24 +197,26 @@ const KeyValueEditorDialog = props => {
               }
               value={data.name}
               autoFocus={isNew}
-              disabled={disableName}
+              disabled={disableName || disabled}
               className={classes.input}
               onChange={onChangeName}
               inputProps={{ "data-testid": "input_name" }}
             />
-            <FormControl className={classes.marginTop}>
-              <TextField
-                label={t("Description")}
-                value={data.description}
-                className={classes.input}
-                multiline
-                minRows={3}
-                maxRows={10}
-                disabled={disableDescription}
-                onChange={onChangeDescription}
-                inputProps={{ "data-testid": "input_description" }}
-              />
-            </FormControl>
+            {showDescription && (
+              <FormControl className={classes.marginTop}>
+                <TextField
+                  label={t("Description")}
+                  value={data.description}
+                  className={classes.input}
+                  multiline
+                  minRows={3}
+                  maxRows={10}
+                  disabled={disableDescription || disabled}
+                  onChange={onChangeDescription}
+                  inputProps={{ "data-testid": "input_description" }}
+                />
+              </FormControl>
+            )}
             {renderCustomContent && renderCustomContent()}
             <InputLabel className={classes.label}>{t("Value")}</InputLabel>
             <FormControl className={classes.marginTop}>
@@ -261,7 +264,8 @@ const KeyValueEditorDialog = props => {
             onClick={onSave}
             // Let's only disable the save button if we are doing a name validation (which is validated on change)
             disabled={
-              getValidationComponent(COMPONENTS.NAME) && validation.error
+              (getValidationComponent(COMPONENTS.NAME) && validation.error) ||
+              disabled
             }
           >
             {t("Save")}
@@ -279,6 +283,7 @@ KeyValueEditorDialog.propTypes = {
   disableName: PropTypes.bool,
   disableDescription: PropTypes.bool,
   showDefault: PropTypes.bool,
+  showDescription: PropTypes.bool,
   defaultValue: PropTypes.string,
   onClose: PropTypes.func,
   validate: PropTypes.func,
@@ -292,6 +297,7 @@ KeyValueEditorDialog.propTypes = {
 KeyValueEditorDialog.defaultProps = {
   disableName: false,
   disableDescription: false,
+  showDescription: true,
   showDefault: false,
   validate: data => Promise.resolve({ success: true, data })
 };

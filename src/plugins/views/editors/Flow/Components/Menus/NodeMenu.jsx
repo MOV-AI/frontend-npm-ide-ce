@@ -86,7 +86,7 @@ const NodeMenu = memo(
     //========================================================================================
 
     /**
-     * Get the node instance item
+     * @private Get the node instance item
      * @param {string} id : Node instance Item Id
      * @returns {NodeInstance}
      */
@@ -96,6 +96,7 @@ const NodeMenu = memo(
     );
 
     /**
+     * @private Submit parameter change
      * @param {Object} formData : Data to Save
      */
     const handleSubmitParameter = useCallback(
@@ -113,6 +114,20 @@ const NodeMenu = memo(
           nodeInstance.addKeyValue(varName, formData);
         }
 
+        setNodeData(getNodeData());
+      },
+      [data.id, flowModel, getNodeData]
+    );
+
+    /**
+     * @private Handle Delete invalid parameters
+     * @param {string} paramName : Parameter name
+     * @param {string} varName : keyValue type (parameters, envVars or cmdLine)
+     */
+    const handleDeleteParameter = useCallback(
+      (keyName, varName) => {
+        const nodeInstance = flowModel.current.getNodeInstanceItem(data.id);
+        nodeInstance.deleteKeyValue(varName, keyName);
         setNodeData(getNodeData());
       },
       [data.id, flowModel, getNodeData]
@@ -174,10 +189,11 @@ const NodeMenu = memo(
     /**
      * Open dialog to edit/add new Parameter
      * @param {object} objData : data to construct the object
-     * @param {ReactComponent} DialogComponent : Dialog component to render
+     * @param {string} param : varName ("parameters", "envVars" or "cmdLine")
+     * @param {boolean} viewOnly : Disable all inputs if True
      */
     const handleKeyValueDialog = useCallback(
-      (objData, param) => {
+      (objData, param, viewOnly) => {
         const paramType = t(DIALOG_TITLE[param.toUpperCase()]);
         const obj = {
           ...objData,
@@ -191,12 +207,14 @@ const NodeMenu = memo(
           onSubmit: handleSubmitParameter,
           title: t("EditParamType", { paramType }),
           data: obj,
-          showDefault: true,
+          showDefault: !viewOnly,
           showValueOptions: true,
+          showDescription: !viewOnly,
           disableName: true,
           disableType: true,
           disableDescription: true,
           preventRenderType: param !== TABLE_KEYS_NAMES.PARAMETERS,
+          disabled: viewOnly,
           call
         };
 
@@ -208,6 +226,24 @@ const NodeMenu = memo(
         );
       },
       [call, handleSubmitParameter, t]
+    );
+
+    /**
+     * Show confirmation dialog before deleting parameter
+     * @param {{key: string}} item : Object containing a key holding the param name
+     * @param {string} varName : keyValue type (parameters, envVars or cmdLine)
+     */
+    const handleKeyValueDelete = useCallback(
+      (item, varName) => {
+        const paramName = item.key;
+        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
+          submitText: t("Delete"),
+          title: t("DeleteDocConfirmationTitle"),
+          onSubmit: () => handleDeleteParameter(paramName, varName),
+          message: t("DeleteKeyConfirmationMessage", { key: paramName })
+        });
+      },
+      [call, handleDeleteParameter, t]
     );
 
     /**
@@ -301,6 +337,7 @@ const NodeMenu = memo(
             instanceValues={nodeData[TABLE_KEYS_NAMES.PARAMETERS] || {}}
             templateValues={templateData.parameters}
             handleTableKeyEdit={handleKeyValueDialog}
+            handleTableKeyDelete={handleKeyValueDelete}
           />
           <Divider />
         </Collapse>
@@ -321,6 +358,7 @@ const NodeMenu = memo(
             instanceValues={nodeData[TABLE_KEYS_NAMES.ENVVARS] || {}}
             templateValues={templateData.envVars}
             handleTableKeyEdit={handleKeyValueDialog}
+            handleTableKeyDelete={handleKeyValueDelete}
           />
           <Divider />
         </Collapse>
@@ -341,6 +379,7 @@ const NodeMenu = memo(
             instanceValues={nodeData[TABLE_KEYS_NAMES.CMDLINE] || {}}
             templateValues={templateData.commands}
             handleTableKeyEdit={handleKeyValueDialog}
+            handleTableKeyDelete={handleKeyValueDelete}
           />
           <Divider />
         </Collapse>
