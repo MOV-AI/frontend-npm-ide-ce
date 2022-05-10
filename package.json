@@ -36,7 +36,8 @@
     "react-dom": "^16.14.0",
     "react-i18next": "^11.13.0",
     "react-scripts": "^5.0.1",
-    "react-virtualized-tree": "^3.4.1",
+    "react-virtualized-auto-sizer": "^1.0.6",
+    "react-window": "^1.8.7",
     "rxjs": "^6.6.7",
     "web-vitals": "^1.1.2"
   },

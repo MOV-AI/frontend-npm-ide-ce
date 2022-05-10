@@ -205,9 +205,9 @@ export function parseKeybinds(shortcuts, sep = ",") {
  * Simple Event to Stop Propagation
  * @param e: event to stop the propagation
  */
-export const stopPropagation = e => {
+export function stopPropagation(e) {
   e?.stopPropagation();
-};
+}
 
 /**
  * Trigger a simulated mouse click (react element)

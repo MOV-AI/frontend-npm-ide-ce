@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import Button from "@material-ui/core/Button";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import { getScopeFromURL } from "../../../utils/Utils";
 import SystemMenu from "./Components/SystemMenu";
 import buildMenus from "./builder/buildMenus";
 
@@ -84,7 +83,7 @@ const SystemBar = props => {
    */
   useEffect(() => {
     on(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE, tab => {
-      buildMenus(call, dialogClasses, getScopeFromURL(tab.id)).then(data => {
+      buildMenus(call, dialogClasses).then(data => {
         setSystemMenus(data);
       });
     });

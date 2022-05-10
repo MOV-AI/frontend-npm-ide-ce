@@ -242,6 +242,8 @@ export const ALERT_SEVERITIES = {
  *                                                                                      */
 //========================================================================================
 
+export const DEFAULT_EXPLORER_ROW_HEIGHT = 40;
+
 export const DOCK_POSITIONS = {
   DOCK: "dockbox",
   WINDOW: "windowbox",
