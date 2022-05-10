@@ -33,7 +33,13 @@ const KeyValuesSection = props => {
    */
   const getTableValues = useCallback(() => {
     const output = [];
-    Object.keys(templateValues).forEach(key => {
+    const allValues = [
+      ...new Set([
+        ...Object.keys(templateValues),
+        ...Object.keys(instanceValues)
+      ])
+    ];
+    allValues.forEach(key => {
       const value = instanceValues[key]?.value;
       const type = templateValues[key]?.type;
       const defaultValue = templateValues[key]?.value;
