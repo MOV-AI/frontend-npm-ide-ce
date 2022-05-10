@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { ContextMenu } from "@mov-ai/mov-fe-lib-react";
@@ -18,11 +18,30 @@ import { itemRowStyles } from "./styles";
 const ItemRow = props => {
   const { showIcons, style, node } = props;
 
+  const textElementRef = useRef();
+  // Define state and function to update the value
+  const [hoverStatus, setHover] = useState(false);
+
   // Style hook
   const classes = itemRowStyles();
 
   // Translation hook
   const { t } = useTranslation();
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Compare size of the text element
+   */
+  const compareSize = () => {
+    const compare =
+      textElementRef.current.scrollWidth > textElementRef.current.clientWidth;
+    setHover(compare);
+  };
 
   //========================================================================================
   /*                                                                                      *
@@ -60,6 +79,21 @@ const ItemRow = props => {
 
   //========================================================================================
   /*                                                                                      *
+   *                                    React Lifecycle                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  // Component did mount
+  useEffect(() => {
+    compareSize();
+    window.addEventListener("resize", compareSize);
+    return () => {
+      window.removeEventListener("resize", compareSize);
+    };
+  }, []);
+
+  //========================================================================================
+  /*                                                                                      *
    *                                        Renders                                       *
    *                                                                                      */
   //========================================================================================
@@ -88,10 +122,16 @@ const ItemRow = props => {
             }
           >
             <Tooltip
-              title={!node.children ? node.name : ""}
-              placement="bottom-start"
+              arrow
+              title={node.title}
+              disableFocusListener={!hoverStatus}
+              disableHoverListener={!hoverStatus}
+              disableTouchListener={!hoverStatus}
+              placement="right-start"
             >
-              <div className={classes.ellipsis}>{node.title}</div>
+              <div ref={textElementRef} className={classes.ellipsis}>
+                {node.title}
+              </div>
             </Tooltip>
             {showIcons && !node.children && (
               <div className={classes.iconSpace}>
