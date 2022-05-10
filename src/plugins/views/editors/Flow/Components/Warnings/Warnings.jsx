@@ -37,17 +37,23 @@ const Warnings = props => {
    */
   const createSnacks = useCallback(() => {
     return warnings.map((warning, index) => {
-      const { type, message } = warning;
+      const { type, message, onClick } = warning;
       const Icon = variantIcon[type];
       const html = warning.html
         ? warning.html
         : () => {
             /* empty */
           };
+      const handleOnSnackClick = () => {
+        onClick && onClick(warning);
+      };
       return (
         <SnackbarContent
           key={index}
-          className={`${clsx(classes[type])} ${classes.snackbar}`}
+          className={`${clsx(classes[type])} ${classes.snackbar} ${
+            onClick ? classes.clickableSnack : ""
+          }`}
+          onClick={handleOnSnackClick}
           message={
             <span className={classes.message}>
               <Icon className={clsx(classes.icon, classes.iconVariant)} />

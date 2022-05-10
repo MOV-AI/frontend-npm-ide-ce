@@ -683,9 +683,19 @@ const Flow = (props, ref) => {
       // Subscribe to flow validations
       mainInterface.graph.onFlowValidated.subscribe(evtData => {
         const persistentWarns = evtData.warnings.filter(el => el.isPersistent);
+
+        if (persistentWarns.length) {
+          persistentWarns.forEach(warn => {
+            if (warn.invalidContainersParam) {
+              warn.onClick = () =>
+                invalidContainersParamAlert(warn.invalidContainersParam);
+              warn.message = t("InvalidSubFlowParameters");
+            }
+          });
+        }
+
         groupsVisibilities();
         onFlowValidated({ warnings: persistentWarns });
-        invalidContainersParamAlert(evtData.invalidContainersParam);
       });
 
       // Subscribe to invalid links validation

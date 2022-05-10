@@ -309,7 +309,17 @@ export default class GraphBase {
    */
   validateFlow = () => {
     const { warnings, invalidContainersParam } = this.validator.validateFlow();
-    this.onFlowValidated.next({ warnings: warnings, invalidContainersParam });
+
+    if (invalidContainersParam?.length) {
+      warnings.push({
+        invalidContainersParam,
+        isPersistent: true,
+        isRuntime: false,
+        type: "warning"
+      });
+    }
+
+    this.onFlowValidated.next({ warnings: warnings });
     this.warnings = warnings;
   };
 
