@@ -60,6 +60,7 @@
   "DeleteGroup": "Delete Group",
   "DeleteDocConfirmationTitle": "Confirm Delete",
   "DeleteDocConfirmationMessage": "Are you sure you want to delete the document '{{docName}}'?",
+  "DeleteKeyConfirmationMessage": "Are you sure you want to delete the key '{{key}}'?",
   "DependenciesLevel": "Dependencies level",
   "Description": "Description",
   "DisableParamType": "Disable {{paramType}}",
