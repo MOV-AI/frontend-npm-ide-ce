@@ -104,8 +104,9 @@ export default class GraphValidator {
    *
    * @returns {Array} List of container id that has invalid params
    */
-  validateContainerParams = () => {
+  validateContainerParams = invalidParameterType => {
     const invalidContainers = [];
+    const invalidParamsWarning = [];
     const containers = new Map(
       [...this.graph.nodes].filter(
         ([_, node]) => node.obj.data.type === "Container"
@@ -131,8 +132,14 @@ export default class GraphValidator {
         });
     });
 
+    invalidContainers.length &&
+      invalidParamsWarning.push({
+        ...invalidParameterType,
+        onClick: () => invalidParameterType.onClick(invalidContainers)
+      });
+
     // return containers id
-    return invalidContainers;
+    return invalidParamsWarning;
   };
 
   /**
@@ -142,10 +149,12 @@ export default class GraphValidator {
    *  warnings: array with warning messages
    *  invalidContainers: array with containers id with invalid params
    */
-  validateFlow = () => {
+  validateFlow = warningTypes => {
     const warnings = this.validateLinks();
-    const invalidContainersParam = this.validateContainerParams();
-    return { warnings, invalidContainersParam };
+    warnings.push(
+      ...this.validateContainerParams(warningTypes.INVALID_PARAMETERS)
+    );
+    return { warnings };
   };
 
   /**

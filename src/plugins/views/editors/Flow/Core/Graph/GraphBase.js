@@ -49,6 +49,7 @@ export default class GraphBase {
   onFlowValidated = new Subject();
   onLinksValidated = new Subject();
   invalidLinks = [];
+  warningTypes = {};
 
   //========================================================================================
   /*                                                                                      *
@@ -191,6 +192,14 @@ export default class GraphBase {
     return FLOW_VIEW_MODE.default;
   }
 
+  get typesOfWarning() {
+    return this.warningTypes;
+  }
+
+  set typesOfWarning(warningTypes) {
+    this.warningTypes = warningTypes;
+  }
+
   /**
    * @private
    */
@@ -252,6 +261,8 @@ export default class GraphBase {
     this.updateLinks(data.Links || {});
     // Update exposed ports
     this.updateExposedPorts(data.ExposedPorts || {});
+    // Let's re-validate the flow
+    this.validateFlow();
   };
 
   /**
@@ -308,16 +319,7 @@ export default class GraphBase {
    * Validate flow : get warnings
    */
   validateFlow = () => {
-    const { warnings, invalidContainersParam } = this.validator.validateFlow();
-
-    if (invalidContainersParam?.length) {
-      warnings.push({
-        invalidContainersParam,
-        isPersistent: true,
-        isRuntime: false,
-        type: "warning"
-      });
-    }
+    const { warnings } = this.validator.validateFlow(this.warningTypes);
 
     this.onFlowValidated.next({ warnings: warnings });
     this.warnings = warnings;

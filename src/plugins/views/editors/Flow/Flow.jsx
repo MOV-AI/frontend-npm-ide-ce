@@ -8,7 +8,6 @@ import React, {
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { filter } from "rxjs/operators";
-import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from "@material-ui/icons/Info";
 import Add from "@material-ui/icons/Add";
 import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
@@ -35,14 +34,7 @@ import { EVT_NAMES, EVT_TYPES } from "./events";
 import { FLOW_VIEW_MODE } from "./Constants/constants";
 
 import "./Resources/css/Flow.css";
-
-const useStyles = makeStyles(_theme => ({
-  root: {
-    width: "100%",
-    height: "100%",
-    flexGrow: 1
-  }
-}));
+import { flowStyles } from "./styles";
 
 let activeBookmark = null;
 
@@ -95,7 +87,7 @@ const Flow = (props, ref) => {
   });
 
   // Other Hooks
-  const classes = useStyles();
+  const classes = flowStyles();
   const { t } = useTranslation();
   const clipboard = useMemo(() => new Clipboard(), []);
   // Refs
@@ -549,12 +541,12 @@ const Flow = (props, ref) => {
    * On flow validation
    * @param {*} validationWarnings
    */
-  const onFlowValidated = useCallback(validationWarnings => {
+  const onFlowValidated = validationWarnings => {
     const persistentWarns = validationWarnings.warnings.filter(
       el => el.isPersistent
     );
     setWarnings(persistentWarns);
-  }, []);
+  };
 
   /**
    * Remove Node Bookmark and set selectedNode to null
@@ -667,6 +659,19 @@ const Flow = (props, ref) => {
    */
   const onReady = useCallback(
     mainInterface => {
+      const WARNING_TYPES = {
+        INVALID_PARAMETERS: {
+          onClick: invalidContainersParamAlert,
+          message: t("InvalidSubFlowParameters"),
+          isPersistent: true,
+          isRuntime: false,
+          type: "warning"
+        }
+      };
+
+      // Set the warning types to be used in the validations
+      mainInterface.graph.typesOfWarning = WARNING_TYPES;
+
       // subscribe to on enter default mode
       // When enter default mode remove other node/sub-flow bookmarks
       mainInterface.mode.default.onEnter.subscribe(() => {
@@ -683,16 +688,6 @@ const Flow = (props, ref) => {
       // Subscribe to flow validations
       mainInterface.graph.onFlowValidated.subscribe(evtData => {
         const persistentWarns = evtData.warnings.filter(el => el.isPersistent);
-
-        if (persistentWarns.length) {
-          persistentWarns.forEach(warn => {
-            if (warn.invalidContainersParam) {
-              warn.onClick = () =>
-                invalidContainersParamAlert(warn.invalidContainersParam);
-              warn.message = t("InvalidSubFlowParameters");
-            }
-          });
-        }
 
         groupsVisibilities();
         onFlowValidated({ warnings: persistentWarns });
@@ -882,7 +877,6 @@ const Flow = (props, ref) => {
       onLinkSelected,
       setFlowsToDefault,
       groupsVisibilities,
-      onFlowValidated,
       invalidContainersParamAlert,
       openDoc,
       handleContextClose,
@@ -1059,7 +1053,6 @@ const Flow = (props, ref) => {
           alert={alert}
           confirmationAlert={confirmationAlert}
           scope={scope}
-          warnings={warnings}
           defaultViewMode={viewMode}
           version={instance.current?.version}
           mainInterface={mainInterfaceRef}
