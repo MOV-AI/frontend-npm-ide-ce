@@ -667,7 +667,7 @@ class BaseNode extends BaseNodeStruct {
    */
   updateTemplate = () => {
     this.object.select("rect").attr("class", convertTypeCss(this._template));
-    this.update();
+    this.update().updateSize();
 
     return this;
   };
