@@ -105,7 +105,6 @@ class Workspace {
    * @param {Object} tabStack
    */
   setTabStack(tabStack) {
-    // if(tabStack.length === 0)
     this.storage.set(this.TAB_STACK_KEY, tabStack);
   }
 
@@ -114,7 +113,16 @@ class Workspace {
    * @returns {Object} tabStack
    */
   getTabStack(defaultTabStack = this.defaultTabStack) {
-    return this.storage.get(this.TAB_STACK_KEY) ?? defaultTabStack;
+    const tabStack = this.storage.get(this.TAB_STACK_KEY) ?? defaultTabStack;
+    // Convert tabStack to new format
+    for (const dock in tabStack) {
+      tabStack[dock] = tabStack[dock].map(tab => ({
+        id: tab.id || tab,
+        isNew: tab.isNew
+      }));
+    }
+    // Return formatted tabStack
+    return tabStack;
   }
 
   //========================================================================================
