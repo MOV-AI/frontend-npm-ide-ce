@@ -13,24 +13,44 @@ import { defaultFunction } from "../../../../../../utils/Utils";
 import { MisMatchMessageLink } from "../../Components/Links/Errors";
 import { isLinkeable } from "../../Components/Nodes/BaseNode/PortValidator";
 
-const messages = {
-  startLink: {
+export const WARNING_TYPES = {
+  START_LINK: "startLink",
+  LINK_MISMATCH: "linkMismatchMessage",
+  INVALID_PARAMETERS: "invalidParameters"
+};
+
+const WARNINGS = {
+  [WARNING_TYPES.START_LINK]: {
     message: i18n.t("StartLinkNotFound"),
     type: "warning",
     isRuntime: true,
     isPersistent: false
   },
-  linkMismatchMessage: {
+  [WARNING_TYPES.LINK_MISMATCH]: {
     message: i18n.t("MessageMismatchedLinks"),
     type: "warning",
     isRuntime: false,
     isPersistent: true
+  },
+  [WARNING_TYPES.INVALID_PARAMETERS]: {
+    message: i18n.t("InvalidSubFlowParameters"),
+    isPersistent: true,
+    isRuntime: false,
+    type: "warning"
   }
 };
 
 export default class GraphValidator {
   constructor(graph) {
     this.graph = graph;
+  }
+
+  setWarningActions(warningType, action) {
+    if (WARNINGS[warningType]) WARNINGS[warningType].onClick = action;
+  }
+
+  removeWarningAction(warningType) {
+    if (WARNINGS[warningType]) delete WARNINGS[warningType].onClick;
   }
 
   /**
@@ -78,9 +98,9 @@ export default class GraphValidator {
     });
 
     // Check rule nr. 1 : Missing start link
-    if (!linksStart) warnings.push(messages.startLink);
+    if (!linksStart) warnings.push(WARNINGS[WARNING_TYPES.START_LINK]);
     // Check rule nr. 2 : Links between ports with different message types
-    if (linksMismatches) warnings.push(messages.linkMismatchMessage);
+    if (linksMismatches) warnings.push(WARNINGS[WARNING_TYPES.LINK_MISMATCH]);
 
     this.addDeletedLinks();
 
@@ -149,10 +169,12 @@ export default class GraphValidator {
    *  warnings: array with warning messages
    *  invalidContainers: array with containers id with invalid params
    */
-  validateFlow = warningTypes => {
+  validateFlow = () => {
     const warnings = this.validateLinks();
     warnings.push(
-      ...this.validateContainerParams(warningTypes.INVALID_PARAMETERS)
+      ...this.validateContainerParams(
+        WARNINGS[WARNING_TYPES.INVALID_PARAMETERS]
+      )
     );
     return { warnings };
   };

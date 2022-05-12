@@ -18,6 +18,7 @@ import { KEYBINDINGS } from "../../Keybinding/shortcuts";
 import Clipboard, { KEYS } from "./Utils/Clipboard";
 import Vec2 from "./Utils/Vec2";
 import BaseFlow from "./Views/BaseFlow";
+import { WARNING_TYPES } from "./Core/Graph/GraphValidator";
 import Menu from "./Components/Menus/Menu";
 import NodeMenu from "./Components/Menus/NodeMenu";
 import FlowTopBar from "./Components/FlowTopBar/FlowTopBar";
@@ -659,18 +660,11 @@ const Flow = (props, ref) => {
    */
   const onReady = useCallback(
     mainInterface => {
-      const WARNING_TYPES = {
-        INVALID_PARAMETERS: {
-          onClick: invalidContainersParamAlert,
-          message: t("InvalidSubFlowParameters"),
-          isPersistent: true,
-          isRuntime: false,
-          type: "warning"
-        }
-      };
-
       // Set the warning types to be used in the validations
-      mainInterface.graph.typesOfWarning = WARNING_TYPES;
+      mainInterface.graph.validator.setWarningActions(
+        WARNING_TYPES.INVALID_PARAMETERS,
+        invalidContainersParamAlert
+      );
 
       // subscribe to on enter default mode
       // When enter default mode remove other node/sub-flow bookmarks
