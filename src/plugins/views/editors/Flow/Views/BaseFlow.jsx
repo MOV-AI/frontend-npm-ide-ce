@@ -38,7 +38,6 @@ const BaseFlow = forwardRef((props, ref) => {
   // State Hooks
   const [loading, setLoading] = useState(true);
   // Refs
-  const containerRef = useRef();
   const isMountedRef = useRef(false);
   // Other hooks
   const classes = baseFlowStyles();
@@ -118,17 +117,10 @@ const BaseFlow = forwardRef((props, ref) => {
           <Loader />
         </Backdrop>
       )}
-      <div
-        className={classes.flowCanvas}
-        ref={containerRef}
-        id={containerId}
-        tagindex="0"
-      >
-        <Warnings
-          warnings={warnings}
-          isVisible={warningsVisibility}
-          domNode={containerRef}
-        />
+      <div className={classes.flowCanvas} id={containerId} tagindex="0">
+        {warnings.length > 0 && (
+          <Warnings warnings={warnings} isVisible={warningsVisibility} />
+        )}
       </div>
     </div>
   );

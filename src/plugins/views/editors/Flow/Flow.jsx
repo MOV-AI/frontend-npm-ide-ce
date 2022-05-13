@@ -8,7 +8,6 @@ import React, {
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { filter } from "rxjs/operators";
-import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from "@material-ui/icons/Info";
 import Add from "@material-ui/icons/Add";
 import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
@@ -19,6 +18,7 @@ import { KEYBINDINGS } from "../../Keybinding/shortcuts";
 import Clipboard, { KEYS } from "./Utils/Clipboard";
 import Vec2 from "./Utils/Vec2";
 import BaseFlow from "./Views/BaseFlow";
+import { WARNING_TYPES } from "./Core/Graph/GraphValidator";
 import Menu from "./Components/Menus/Menu";
 import NodeMenu from "./Components/Menus/NodeMenu";
 import FlowTopBar from "./Components/FlowTopBar/FlowTopBar";
@@ -35,14 +35,7 @@ import { EVT_NAMES, EVT_TYPES } from "./events";
 import { FLOW_VIEW_MODE } from "./Constants/constants";
 
 import "./Resources/css/Flow.css";
-
-const useStyles = makeStyles(_theme => ({
-  root: {
-    width: "100%",
-    height: "100%",
-    flexGrow: 1
-  }
-}));
+import { flowStyles } from "./styles";
 
 let activeBookmark = null;
 
@@ -95,7 +88,7 @@ const Flow = (props, ref) => {
   });
 
   // Other Hooks
-  const classes = useStyles();
+  const classes = flowStyles();
   const { t } = useTranslation();
   const clipboard = useMemo(() => new Clipboard(), []);
   // Refs
@@ -243,9 +236,10 @@ const Flow = (props, ref) => {
    * @param {*} invalidContainersParam
    */
   const invalidContainersParamAlert = useCallback(
-    invalidContainerParams => {
+    warning => {
+      const invalidContainers = warning?.data;
       // Don't show dialog if no invalid params found
-      if (!invalidContainerParams || !invalidContainerParams.length) return;
+      if (!invalidContainers?.length) return;
 
       // Show alert dialog
       call(
@@ -253,7 +247,7 @@ const Flow = (props, ref) => {
         PLUGINS.DIALOG.CALL.CUSTOM,
         {
           title: t("InvalidContainersParamTitle"),
-          invalidContainerParams,
+          invalidContainerParams: invalidContainers,
           call
         },
         InvalidParametersWarning
@@ -549,12 +543,12 @@ const Flow = (props, ref) => {
    * On flow validation
    * @param {*} validationWarnings
    */
-  const onFlowValidated = useCallback(validationWarnings => {
+  const onFlowValidated = validationWarnings => {
     const persistentWarns = validationWarnings.warnings.filter(
       el => el.isPersistent
     );
     setWarnings(persistentWarns);
-  }, []);
+  };
 
   /**
    * Remove Node Bookmark and set selectedNode to null
@@ -667,6 +661,12 @@ const Flow = (props, ref) => {
    */
   const onReady = useCallback(
     mainInterface => {
+      // Set the warning types to be used in the validations
+      mainInterface.graph.validator.setWarningActions(
+        WARNING_TYPES.INVALID_PARAMETERS,
+        invalidContainersParamAlert
+      );
+
       // subscribe to on enter default mode
       // When enter default mode remove other node/sub-flow bookmarks
       mainInterface.mode.default.onEnter.subscribe(() => {
@@ -683,9 +683,9 @@ const Flow = (props, ref) => {
       // Subscribe to flow validations
       mainInterface.graph.onFlowValidated.subscribe(evtData => {
         const persistentWarns = evtData.warnings.filter(el => el.isPersistent);
+
         groupsVisibilities();
         onFlowValidated({ warnings: persistentWarns });
-        invalidContainersParamAlert(evtData.invalidContainersParam);
       });
 
       // Subscribe to invalid links validation
@@ -872,7 +872,6 @@ const Flow = (props, ref) => {
       onLinkSelected,
       setFlowsToDefault,
       groupsVisibilities,
-      onFlowValidated,
       invalidContainersParamAlert,
       openDoc,
       handleContextClose,
@@ -1049,7 +1048,6 @@ const Flow = (props, ref) => {
           alert={alert}
           confirmationAlert={confirmationAlert}
           scope={scope}
-          warnings={warnings}
           defaultViewMode={viewMode}
           version={instance.current?.version}
           mainInterface={mainInterfaceRef}

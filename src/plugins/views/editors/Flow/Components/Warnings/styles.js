@@ -64,6 +64,14 @@ export const warningsStyles = makeStyles(theme => ({
   warning: {
     backgroundColor: amber[700]
   },
+  clickableSnack: {
+    border: "2px solid #666",
+    cursor: "pointer",
+    transition: "border-color .5s",
+    "&:hover": {
+      borderColor: "#000"
+    }
+  },
   icon: {
     fontSize: "20px"
   },

@@ -252,6 +252,8 @@ export default class GraphBase {
     this.updateLinks(data.Links || {});
     // Update exposed ports
     this.updateExposedPorts(data.ExposedPorts || {});
+    // Let's re-validate the flow
+    this.validateFlow();
   };
 
   /**
@@ -308,8 +310,9 @@ export default class GraphBase {
    * Validate flow : get warnings
    */
   validateFlow = () => {
-    const { warnings, invalidContainersParam } = this.validator.validateFlow();
-    this.onFlowValidated.next({ warnings: warnings, invalidContainersParam });
+    const { warnings } = this.validator.validateFlow();
+
+    this.onFlowValidated.next({ warnings: warnings });
     this.warnings = warnings;
   };
 
