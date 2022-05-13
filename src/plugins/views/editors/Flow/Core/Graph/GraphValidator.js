@@ -16,7 +16,8 @@ import { isLinkeable } from "../../Components/Nodes/BaseNode/PortValidator";
 export const WARNING_TYPES = {
   START_LINK: "startLink",
   LINK_MISMATCH: "linkMismatchMessage",
-  INVALID_PARAMETERS: "invalidParameters"
+  INVALID_PARAMETERS: "invalidParameters",
+  INVALID_LINKS: "invalidLinks"
 };
 
 const WARNINGS = {
@@ -34,6 +35,12 @@ const WARNINGS = {
   },
   [WARNING_TYPES.INVALID_PARAMETERS]: {
     message: i18n.t("InvalidSubFlowParameters"),
+    isPersistent: true,
+    isRuntime: false,
+    type: "warning"
+  },
+  [WARNING_TYPES.INVALID_LINKS]: {
+    message: i18n.t("InvalidLinksFoundTitle"),
     isPersistent: true,
     isRuntime: false,
     type: "warning"
@@ -68,12 +75,14 @@ export default class GraphValidator {
    * Validate links in graph
    *  Rule nr. 1 : Missing start link
    *  Rule nr. 2 : Links between ports with different message types
+   *  Rule nr. 3 : Links that don't have start or end port
    * @returns {Array} warnings objects
    */
   validateLinks = () => {
     const warnings = [];
     const links = this.graph.links;
     const nodes = this.graph.nodes;
+    const invalidLinks = this.graph.invalidLinks;
     let linksStart = false;
     let linksMismatches = false;
 
@@ -101,6 +110,13 @@ export default class GraphValidator {
     if (!linksStart) warnings.push(WARNINGS[WARNING_TYPES.START_LINK]);
     // Check rule nr. 2 : Links between ports with different message types
     if (linksMismatches) warnings.push(WARNINGS[WARNING_TYPES.LINK_MISMATCH]);
+    // Check rule nr. 3 : Links that don't have start or end port
+    if (invalidLinks.length)
+      warnings.push({
+        ...WARNINGS[WARNING_TYPES.INVALID_LINKS],
+        data: this.graph.invalidLinks,
+        callback: this.graph.clearInvalidLinks
+      });
 
     this.addDeletedLinks();
 

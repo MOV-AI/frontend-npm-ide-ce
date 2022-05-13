@@ -11,6 +11,7 @@
 - [FP-1669 - Add More information to missing parameters](https://movai.atlassian.net/browse/FP-1669)
 - [FP-1741 - Push flow parameter errors to Warnings, and make warnings clickable](https://movai.atlassian.net/browse/FP-1741)
 - [FP-1768 - Grey out other links when creating a new link](https://movai.atlassian.net/browse/FP-1768)
+- [FP-1794 - Add invalid links to warnings](https://movai.atlassian.net/browse/FP-1794)
 
 # 3.0.0
 

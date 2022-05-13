@@ -47,7 +47,6 @@ export default class GraphBase {
   warningsVisibility = true;
   validator = new GraphValidator(this);
   onFlowValidated = new Subject();
-  onLinksValidated = new Subject();
   invalidLinks = [];
 
   //========================================================================================
@@ -147,11 +146,6 @@ export default class GraphBase {
   loadLinks(links = {}) {
     Object.entries(links).forEach(([id, value]) => {
       this.addLink({ id, ...value });
-    });
-    // Emits result of links validation
-    this.onLinksValidated.next({
-      invalidLinks: this.invalidLinks,
-      callback: this.clearInvalidLinks
     });
     return this;
   }
