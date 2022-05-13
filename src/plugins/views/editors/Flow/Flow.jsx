@@ -236,9 +236,10 @@ const Flow = (props, ref) => {
    * @param {*} invalidContainersParam
    */
   const invalidContainersParamAlert = useCallback(
-    invalidContainerParams => {
+    warning => {
+      const invalidContainers = warning?.data;
       // Don't show dialog if no invalid params found
-      if (!invalidContainerParams || !invalidContainerParams.length) return;
+      if (!invalidContainers?.length) return;
 
       // Show alert dialog
       call(
@@ -246,7 +247,7 @@ const Flow = (props, ref) => {
         PLUGINS.DIALOG.CALL.CUSTOM,
         {
           title: t("InvalidContainersParamTitle"),
-          invalidContainerParams,
+          invalidContainerParams: invalidContainers,
           call
         },
         InvalidParametersWarning

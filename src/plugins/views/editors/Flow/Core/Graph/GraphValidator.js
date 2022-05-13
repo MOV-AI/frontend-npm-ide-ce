@@ -124,7 +124,7 @@ export default class GraphValidator {
    *
    * @returns {Array} List of container id that has invalid params
    */
-  validateContainerParams = invalidParameterType => {
+  validateContainerParams = () => {
     const invalidContainers = [];
     const invalidParamsWarning = [];
     const containers = new Map(
@@ -154,8 +154,8 @@ export default class GraphValidator {
 
     invalidContainers.length &&
       invalidParamsWarning.push({
-        ...invalidParameterType,
-        onClick: () => invalidParameterType.onClick(invalidContainers)
+        ...WARNINGS[WARNING_TYPES.INVALID_PARAMETERS],
+        data: invalidContainers
       });
 
     // return containers id
@@ -170,12 +170,11 @@ export default class GraphValidator {
    *  invalidContainers: array with containers id with invalid params
    */
   validateFlow = () => {
-    const warnings = this.validateLinks();
-    warnings.push(
-      ...this.validateContainerParams(
-        WARNINGS[WARNING_TYPES.INVALID_PARAMETERS]
-      )
-    );
+    // Gather all warnings
+    const invalidLinks = this.validateLinks();
+    const invalidParams = this.validateContainerParams();
+    // Merge warnings and return them
+    const warnings = [...invalidLinks, ...invalidParams];
     return { warnings };
   };
 
