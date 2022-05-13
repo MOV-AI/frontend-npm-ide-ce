@@ -618,9 +618,10 @@ const Flow = (props, ref) => {
    * On Links validation
    * @param {{invalidLinks: Array, callback: Function}} eventData
    */
-  const onLinksValidated = useCallback(
-    eventData => {
-      const { invalidLinks, callback } = eventData;
+  const invalidLinksAlert = useCallback(
+    warning => {
+      const { data: invalidLinks, callback } = warning;
+
       if (invalidLinks.length) {
         call(
           PLUGINS.DIALOG.NAME,
@@ -666,6 +667,10 @@ const Flow = (props, ref) => {
         WARNING_TYPES.INVALID_PARAMETERS,
         invalidContainersParamAlert
       );
+      mainInterface.graph.validator.setWarningActions(
+        WARNING_TYPES.INVALID_LINKS,
+        invalidLinksAlert
+      );
 
       // subscribe to on enter default mode
       // When enter default mode remove other node/sub-flow bookmarks
@@ -687,9 +692,6 @@ const Flow = (props, ref) => {
         groupsVisibilities();
         onFlowValidated({ warnings: persistentWarns });
       });
-
-      // Subscribe to invalid links validation
-      mainInterface.graph.onLinksValidated.subscribe(onLinksValidated);
 
       // Subscribe to double click event in a node
       mainInterface.mode.onDblClick.onEnter.subscribe(evtData => {
@@ -867,11 +869,11 @@ const Flow = (props, ref) => {
         .subscribe(evtData => console.log("onLinkErrorMouseOver", evtData));
     },
     [
-      onLinksValidated,
       onNodeSelected,
       onLinkSelected,
       setFlowsToDefault,
       groupsVisibilities,
+      invalidLinksAlert,
       invalidContainersParamAlert,
       openDoc,
       handleContextClose,
