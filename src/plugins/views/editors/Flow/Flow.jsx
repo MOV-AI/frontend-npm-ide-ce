@@ -14,6 +14,7 @@ import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { FLOW_EXPLORER_PROFILE, PLUGINS } from "../../../../utils/Constants";
+import Workspace from "../../../../utils/Workspace";
 import { KEYBINDINGS } from "../../Keybinding/shortcuts";
 import Clipboard, { KEYS } from "./Utils/Clipboard";
 import Vec2 from "./Utils/Vec2";
@@ -79,6 +80,7 @@ const Flow = (props, ref) => {
   const [robotSelected, setRobotSelected] = useState("");
   const [runningFlow, setRunningFlow] = useState("");
   const [warnings, setWarnings] = useState([]);
+  const [flowDebugging, setFlowDebugging] = useState();
   const [warningsVisibility, setWarningsVisibility] = useState(true);
   const [viewMode, setViewMode] = useState(FLOW_VIEW_MODE.default);
   const [tooltipConfig, setTooltipConfig] = useState(null);
@@ -98,6 +100,7 @@ const Flow = (props, ref) => {
   const selectedNodeRef = useRef();
   const selectedLinkRef = useRef();
   const isEditableComponentRef = useRef(true);
+  const workspaceManager = useMemo(() => new Workspace(), []);
 
   //========================================================================================
   /*                                                                                      *
@@ -119,6 +122,17 @@ const Flow = (props, ref) => {
     if (!instance.current) return;
     getMainInterface().onGroupsChange(instance.current.getGroups()?.data);
   }, [instance]);
+
+  /**
+   * Updates the status of flow debugging variable on graph
+   * And then re strokes the links (to add or remove the debug colors)
+   */
+  const updateLinkStroke = useCallback(() => {
+    if (getMainInterface()) {
+      getMainInterface().graph.isFlowDebugging = flowDebugging;
+      getMainInterface().graph.reStrokeLinks();
+    }
+  }, [flowDebugging]);
 
   //========================================================================================
   /*                                                                                      *
@@ -144,7 +158,9 @@ const Flow = (props, ref) => {
       const { action, value } = evt;
       getMainInterface()?.[action](value);
     });
-  }, [on]);
+
+    setFlowDebugging(workspaceManager.getFlowIsDebugging());
+  }, [on, workspaceManager]);
 
   /**
    * Initialize data
@@ -163,6 +179,13 @@ const Flow = (props, ref) => {
   useEffect(() => {
     mainInterfaceRef.current = baseFlowRef.current?.mainInterface;
   }, [baseFlowRef.current?.mainInterface]);
+
+  /**
+   * Should update everything related to flowDebugging here
+   */
+  useEffect(() => {
+    updateLinkStroke();
+  }, [flowDebugging, updateLinkStroke]);
 
   //========================================================================================
   /*                                                                                      *
@@ -889,6 +912,18 @@ const Flow = (props, ref) => {
   //========================================================================================
 
   /**
+   * Handler for the Flow Debug Switch
+   * @param {*} e : event
+   */
+  const handleFlowDebugChange = useCallback(
+    e => {
+      workspaceManager.setFlowIsDebugging(e.target.checked);
+      setFlowDebugging(e.target.checked);
+    },
+    [workspaceManager]
+  );
+
+  /**
    * Handle Delete : Show confirmation dialog before performing delete action
    * @param {{nodeId: string, callback: function}} data
    */
@@ -1057,6 +1092,8 @@ const Flow = (props, ref) => {
           onStartStopFlow={onStartStopFlow}
           nodeStatusUpdated={onNodeStatusUpdate}
           onViewModeChange={onViewModeChange}
+          toggleFlowDebug={handleFlowDebugChange}
+          flowDebugging={flowDebugging}
           // nodeCompleteStatusUpdated={this.onMonitoringNodeStatusUpdate}
         ></FlowTopBar>
       </div>
@@ -1066,6 +1103,7 @@ const Flow = (props, ref) => {
         dataFromDB={dataFromDB}
         warnings={warnings}
         warningsVisibility={warningsVisibility}
+        flowDebugging={flowDebugging}
         onReady={onReady}
       />
       <FlowBottomBar

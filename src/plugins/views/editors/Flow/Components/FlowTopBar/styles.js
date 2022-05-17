@@ -32,5 +32,13 @@ export const flowTopBarStyles = makeStyles(theme => ({
   },
   grow: {
     flexGrow: 1
+  },
+  debugToggle: {
+    "&>label": {
+      margin: "0px",
+      "&>span": {
+        fontSize: "12px"
+      }
+    }
   }
 }));

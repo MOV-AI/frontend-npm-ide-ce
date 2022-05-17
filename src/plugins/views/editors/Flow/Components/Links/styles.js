@@ -1,3 +1,9 @@
+import { LINK_DEPENDENCY } from "../../../../../../utils/Constants";
+
+const ONLY_FROM = `dependency_${LINK_DEPENDENCY.ONLY_FROM.VALUE}`;
+const ONLY_TO = `dependency_${LINK_DEPENDENCY.ONLY_TO.VALUE}`;
+const NO_DEPENDENCIES = `dependency_${LINK_DEPENDENCY.NO_DEPENDENCIES.VALUE}`;
+
 export const baseLinkStyles = {
   _default: {
     stroke: {
@@ -12,5 +18,14 @@ export const baseLinkStyles = {
   },
   get "movai_msgs/Nodelet"() {
     return { ...this._default };
+  },
+  get [ONLY_FROM]() {
+    return { color: LINK_DEPENDENCY.ONLY_FROM.COLOR };
+  },
+  get [ONLY_TO]() {
+    return { color: LINK_DEPENDENCY.ONLY_TO.COLOR };
+  },
+  get [NO_DEPENDENCIES]() {
+    return { color: LINK_DEPENDENCY.NO_DEPENDENCIES.COLOR };
   }
 };

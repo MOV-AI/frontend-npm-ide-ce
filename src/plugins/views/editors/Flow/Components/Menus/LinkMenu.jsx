@@ -15,6 +15,7 @@ import {
   Tooltip
 } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
+import { LINK_DEPENDENCY } from "../../../../../../utils/Constants";
 import { TRANSITION_LINK } from "../../Constants/constants";
 import BasePort from "../Nodes/BaseNode/BasePort";
 
@@ -145,11 +146,22 @@ const LinkMenu = props => {
                     value={dependencyLevel}
                     onChange={onChangeDependency}
                     disabled={!editable}
+                    className={classes.selectHolder}
                   >
-                    <MenuItem value={0}>{t("AllDependencies")}</MenuItem>
-                    <MenuItem value={1}>{t("OnlyFrom")}</MenuItem>
-                    <MenuItem value={2}>{t("OnlyTo")}</MenuItem>
-                    <MenuItem value={3}>{t("NoDependencies")}</MenuItem>
+                    {Object.values(LINK_DEPENDENCY).map(dep => {
+                      return (
+                        <MenuItem
+                          value={dep.VALUE}
+                          className={classes.infoContainer}
+                        >
+                          <p>{t(dep.LABEL)}</p>
+                          <div
+                            className={classes.colorChip}
+                            style={{ backgroundColor: dep.COLOR }}
+                          ></div>
+                        </MenuItem>
+                      );
+                    })}
                   </Select>
                   <FormHelperText>
                     {t("LinkDependenciesHelperText")}

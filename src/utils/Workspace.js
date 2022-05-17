@@ -16,6 +16,7 @@ class Workspace {
     this.LAYOUT_KEY = `movai.${USER_NAME}.${APP_NAME}.layout`;
     this.SELECTED_ROBOT_KEY = `movai.${USER_NAME}.${APP_NAME}.selectedRobot`;
     this.RECENT_DOCUMENTS_KEY = `movai.${USER_NAME}.${APP_NAME}.recentDocuments`;
+    this.DEBUGGING_FLOW_KEY = `movai.${USER_NAME}.${APP_NAME}.flowIsDebugging`;
     this.layoutAndTabs = this.getLayoutAndTabs();
     this.layout = this.layoutAndTabs[0];
     this.tabs = this.layoutAndTabs[1];
@@ -123,6 +124,28 @@ class Workspace {
     }
     // Return formatted tabStack
     return tabStack;
+  }
+
+  //========================================================================================
+  /*                                                                                      *
+   *                               Flow Debug : Used in Flow                              *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Attempts to get the stored flowDebugging value, false is default
+   * @returns {Boolean} : Is the flow debugging?
+   */
+  getFlowIsDebugging() {
+    return this.storage.get(this.DEBUGGING_FLOW_KEY) ?? false;
+  }
+
+  /**
+   * Attempts to set the stored flowDebugging value, sets false if nothing is passed
+   * @param {Boolean} isFlowDebugging : Is the flow debugging?
+   */
+  setFlowIsDebugging(isFlowDebugging) {
+    this.storage.set(this.DEBUGGING_FLOW_KEY, isFlowDebugging ?? false);
   }
 
   //========================================================================================

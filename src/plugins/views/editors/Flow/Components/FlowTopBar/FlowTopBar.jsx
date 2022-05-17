@@ -12,7 +12,9 @@ import {
   Typography,
   Tooltip,
   Button,
-  CircularProgress
+  CircularProgress,
+  FormControlLabel,
+  Switch
 } from "@material-ui/core";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
@@ -69,7 +71,9 @@ const FlowTopBar = props => {
     name,
     onRobotChange,
     defaultViewMode,
-    confirmationAlert
+    confirmationAlert,
+    flowDebugging = false,
+    toggleFlowDebug
     // onViewModeChange
   } = props;
   // State hooks
@@ -560,6 +564,26 @@ const FlowTopBar = props => {
               </Tooltip>
             </ToggleButton>
           </ToggleButtonGroup> */}
+        </Typography>
+        <Typography
+          component="div"
+          className={classes.debugToggle}
+          data-testid="section_flow-toggle-debug"
+        >
+          <Tooltip title={t("ToggleFlowDebugDescription")}>
+            <FormControlLabel
+              control={
+                <Switch
+                  inputProps={{ "data-testid": "input_toggle-debug" }}
+                  checked={flowDebugging}
+                  onChange={toggleFlowDebug}
+                  name="toggleFlowDebug"
+                  color="primary"
+                />
+              }
+              label={t("ToggleFlowDebug")}
+            />
+          </Tooltip>
         </Typography>
       </Toolbar>
     </AppBar>
