@@ -8,17 +8,15 @@ module.exports = function (app) {
         "/api/**",
         "/token-verify/**",
         "/token-refresh/**",
-        "/domain/**",
         "/ws/**",
         "/static/maps/**",
         "/static/meshes/**",
         "/static/point_clouds/**"
       ],
       {
-        target: "https://localhost",
+        target: "http://localhost",
         ws: true,
-        logLevel: "debug",
-        secure: false
+        logLevel: "debug"
       }
     )
   );
