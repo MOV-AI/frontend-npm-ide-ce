@@ -53,13 +53,35 @@ const useStyles = debugMode =>
   }));
 
 function App(props) {
+  // Style hook
   const classes = useStyles(DEBUG_MODE)();
-  writeMovaiLogo();
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    React Lifecycle                                   *
+   *                                                                                      */
+  //========================================================================================
 
   React.useEffect(() => {
     installAppPlugins();
     installViewPlugins();
+    // Write log in consle
+    writeMovaiLogo();
   }, []);
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                       Handlers                                       *
+   *                                                                                      */
+  //========================================================================================
+
+  const onContextMenu = event => event.preventDefault();
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Render                                        *
+   *                                                                                      */
+  //========================================================================================
 
   return (
     <MainContext.Provider
@@ -71,7 +93,9 @@ function App(props) {
       }}
     >
       <Style />
-      <div className="App">{getHostedPlugins(classes)}</div>
+      <div className="App" onContextMenu={onContextMenu}>
+        {getHostedPlugins(classes)}
+      </div>
     </MainContext.Provider>
   );
 }
