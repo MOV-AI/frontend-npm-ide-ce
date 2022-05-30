@@ -8,8 +8,8 @@ export const baseLinkStyles = {
   _default: {
     stroke: {
       default: "white",
-      over: "red",
       warning: "#ffc107",
+      overWidth: 5,
       width: 3
     }
   },

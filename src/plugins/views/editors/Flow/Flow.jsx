@@ -1092,8 +1092,6 @@ const Flow = (props, ref) => {
           onStartStopFlow={onStartStopFlow}
           nodeStatusUpdated={onNodeStatusUpdate}
           onViewModeChange={onViewModeChange}
-          toggleFlowDebug={handleFlowDebugChange}
-          flowDebugging={flowDebugging}
           // nodeCompleteStatusUpdated={this.onMonitoringNodeStatusUpdate}
         ></FlowTopBar>
       </div>
@@ -1112,6 +1110,8 @@ const Flow = (props, ref) => {
         robotSelected={robotSelected}
         runningFlow={runningFlow}
         warnings={warnings}
+        toggleFlowDebug={handleFlowDebugChange}
+        flowDebugging={flowDebugging}
       />
       {contextMenuOptions && (
         <FlowContextMenu

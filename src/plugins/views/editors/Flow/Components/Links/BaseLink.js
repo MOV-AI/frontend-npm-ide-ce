@@ -208,8 +208,8 @@ export default class BaseLink extends BaseLinkStruct {
    * @private
    */
   styleMouseOver = () => {
-    this.path
-      .attr("stroke", this.style.stroke.over)
+    this.changeStrokeColor()
+      .path.attr("stroke-width", this.style.stroke.overWidth)
       .attr("marker-mid", `url(#${this.canvas.containerId}-markerselected)`);
   };
 
@@ -217,7 +217,9 @@ export default class BaseLink extends BaseLinkStruct {
    * @private
    */
   styleMouseOut = () => {
-    this.changeStrokeColor().path.attr("marker-mid", null);
+    this.changeStrokeColor()
+      .path.attr("stroke-width", this.style.stroke.width)
+      .attr("marker-mid", null);
   };
 
   /**
