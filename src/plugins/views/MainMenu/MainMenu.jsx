@@ -12,7 +12,6 @@ import {
   ProfileMenu,
   ContextMenu
 } from "@mov-ai/mov-fe-lib-react";
-import { Authentication } from "@mov-ai/mov-fe-lib-core";
 import TextSnippetIcon from "@material-ui/icons/Description";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 import { Tooltip } from "@material-ui/core";
@@ -129,7 +128,6 @@ const MainMenu = props => {
           <ProfileMenu
             key={"profileMenu"}
             version={APP_INFORMATION.VERSION}
-            userName={Authentication.getTokenData().message.name ?? ""}
             isDarkTheme={isDarkTheme}
             handleLogout={handleLogoutClick}
           />,
