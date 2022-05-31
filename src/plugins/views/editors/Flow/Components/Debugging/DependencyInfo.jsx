@@ -31,9 +31,9 @@ const DependencyInfo = () => {
             : t("DependencyInfoTitle")}
           <ArrowDropDownIcon />
         </h3>
-        {Object.values(LINK_DEPENDENCY).map(dep => {
+        {Object.values(LINK_DEPENDENCY).map((dep, i) => {
           return (
-            <div className={classes.infoContainer}>
+            <div key={`${dep.LABEL}_${i}`} className={classes.infoContainer}>
               <p>{t(dep.LABEL)}</p>
               <div
                 className={classes.colorChip}

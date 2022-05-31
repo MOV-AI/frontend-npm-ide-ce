@@ -24,8 +24,11 @@ import { linkMenuStyles } from "./styles";
 const LinkMenu = props => {
   // Props
   const { link, editable, sourceMessage, flowModel } = props;
+  const linkData = link.data;
+
   // State Hooks
   const [dependencyLevel, setDependencyLevel] = useState(0);
+
   // Other Hooks
   const { t } = useTranslation();
   const classes = linkMenuStyles();
@@ -58,8 +61,10 @@ const LinkMenu = props => {
   const onChangeDependency = useCallback(
     evt => {
       const value = evt.target.value;
-      flowModel.current.setLinkDependency(link.id, value);
+      flowModel.current.setLinkDependency(link.data.id, value);
       setDependencyLevel(value);
+      // Let's change the link color temporarily
+      link.setTemporaryDependency(value).changeStrokeColor();
     },
     [flowModel, link]
   );
@@ -72,9 +77,9 @@ const LinkMenu = props => {
 
   // On component mount or change Link prop
   useEffect(() => {
-    const dependency = flowModel.current.getLinkDependency(link.id);
+    const dependency = flowModel.current.getLinkDependency(linkData.id);
     setDependencyLevel(dependency);
-  }, [link, flowModel]);
+  }, [linkData, flowModel]);
 
   //========================================================================================
   /*                                                                                      *
@@ -94,15 +99,15 @@ const LinkMenu = props => {
           <Typography component="div" className={classes.directionContainer}>
             <ListItem>
               <ListItemText primary={t("Node-Colon")} />
-              <Tooltip title={link.sourceNode}>
-                <Typography>{link.sourceNode}</Typography>
+              <Tooltip title={linkData.sourceNode}>
+                <Typography>{linkData.sourceNode}</Typography>
               </Tooltip>
             </ListItem>
             <Divider />
             <ListItem>
               <ListItemText primary={t("Port-Colon")} />
-              <Tooltip title={parsePortName(link.sourcePort)}>
-                <Typography>{parsePortName(link.sourcePort)}</Typography>
+              <Tooltip title={parsePortName(linkData.sourcePort)}>
+                <Typography>{parsePortName(linkData.sourcePort)}</Typography>
               </Tooltip>
             </ListItem>
           </Typography>
@@ -116,15 +121,15 @@ const LinkMenu = props => {
           <Typography component="div" className={classes.directionContainer}>
             <ListItem>
               <ListItemText primary={t("Node-Colon")} />
-              <Tooltip title={link.targetNode}>
-                <Typography>{link.targetNode}</Typography>
+              <Tooltip title={linkData.targetNode}>
+                <Typography>{linkData.targetNode}</Typography>
               </Tooltip>
             </ListItem>
             <Divider />
             <ListItem>
               <ListItemText primary={t("Port-Colon")} />
-              <Tooltip title={parsePortName(link.targetPort)}>
-                <Typography>{parsePortName(link.targetPort)}</Typography>
+              <Tooltip title={parsePortName(linkData.targetPort)}>
+                <Typography>{parsePortName(linkData.targetPort)}</Typography>
               </Tooltip>
             </ListItem>
           </Typography>
@@ -151,6 +156,7 @@ const LinkMenu = props => {
                     {Object.values(LINK_DEPENDENCY).map(dep => {
                       return (
                         <MenuItem
+                          key={dep.VALUE}
                           value={dep.VALUE}
                           className={classes.infoContainer}
                         >

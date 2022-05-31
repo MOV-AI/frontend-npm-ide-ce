@@ -97,6 +97,7 @@ export default class BaseLink extends BaseLinkStruct {
     super(canvas, src, trg, data);
     this.object = null;
     this.flowDebugging = flowDebugging;
+    this.temporaryDependency = data.Dependency;
     this.onLinkErrorMouseOver = onLinkErrorMouseOver;
 
     this.initialize();
@@ -323,8 +324,15 @@ export default class BaseLink extends BaseLinkStruct {
     this.object.attr("visibility", this.visible ? "visible" : "hidden");
   }
 
+  setTemporaryDependency(dependecy) {
+    this.temporaryDependency = dependecy;
+    return this;
+  }
+
   getStrokeColor() {
-    const type = `dependency_${this.data.Dependency}`;
+    const type = `dependency_${
+      this.temporaryDependency ?? this.data.Dependency
+    }`;
     const strokeColor = this.style.stroke.default;
 
     if (this.flowDebugging && baseLinkStyles[type])

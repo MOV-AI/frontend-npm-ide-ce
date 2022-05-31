@@ -397,7 +397,7 @@ const Flow = (props, ref) => {
           <LinkMenu
             id={id}
             call={call}
-            link={link.data}
+            link={link}
             flowModel={instance}
             sourceMessage={link?.src?.data?.message}
           />
