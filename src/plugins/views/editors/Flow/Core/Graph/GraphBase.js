@@ -9,6 +9,7 @@ import { FLOW_VIEW_MODE, NODE_TYPES } from "../../Constants/constants";
 import Factory from "../../Components/Nodes/Factory";
 import { shouldUpdateExposedPorts } from "./Utils";
 import GraphValidator from "./GraphValidator";
+import Workspace from "../../../../../../utils/Workspace";
 
 const NODE_DATA = {
   NODE: {
@@ -48,6 +49,21 @@ export default class GraphBase {
   validator = new GraphValidator(this);
   onFlowValidated = new Subject();
   invalidLinks = [];
+  flowDebugging = new Workspace().getFlowIsDebugging();
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                   Getters / Setters                                  *
+   *                                                                                      */
+  //========================================================================================
+
+  get isFlowDebugging() {
+    return this.flowDebugging;
+  }
+
+  set isFlowDebugging(isDebugging) {
+    this.flowDebugging = isDebugging;
+  }
 
   //========================================================================================
   /*                                                                                      *
@@ -449,6 +465,7 @@ export default class GraphBase {
         sourcePortPos,
         targetPortPos,
         parsedLink,
+        this.flowDebugging,
         this.toggleTooltip
       );
 
@@ -551,4 +568,12 @@ export default class GraphBase {
       this.selectedLink = null;
     }
   }
+
+  reStrokeLinks = () => {
+    this.links?.forEach(linkData => {
+      linkData.flowDebugging = this.flowDebugging;
+      linkData.changeStrokeColor();
+    });
+    return this;
+  };
 }

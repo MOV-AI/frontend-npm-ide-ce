@@ -1,8 +1,14 @@
 import React, { useEffect, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import WarningIcon from "@material-ui/icons/Warning";
 import { makeStyles } from "@material-ui/styles";
-import { Typography, Tooltip } from "@material-ui/core";
+import {
+  Typography,
+  Tooltip,
+  FormControlLabel,
+  Switch
+} from "@material-ui/core";
 import { RobotManager, Document } from "@mov-ai/mov-fe-lib-core";
 import { defaultFunction } from "../../../../../../utils/Utils";
 import styles from "./styles";
@@ -16,8 +22,18 @@ const FlowBottomBar = props => {
   const [selectedRobotName, setSelectedRobotName] = useState("");
   const [warningVisibility, setWarningVisibility] = useState(true);
 
+  // Translation hook
+  const { t } = useTranslation();
+
   // Prop(s)
-  const { onToggleWarnings, robotSelected, runningFlow, warnings } = props;
+  const {
+    onToggleWarnings,
+    robotSelected,
+    runningFlow,
+    warnings,
+    flowDebugging = false,
+    toggleFlowDebug
+  } = props;
 
   // Hook(s)
   const classes = useStyles();
@@ -108,6 +124,26 @@ const FlowBottomBar = props => {
       component="div"
       className={`${classes.bar} ${classes[barStatus]}`}
     >
+      <Typography
+        component="div"
+        className={classes.debugToggle}
+        data-testid="section_flow-toggle-debug"
+      >
+        <Tooltip title={t("ToggleFlowDebugDescription")}>
+          <FormControlLabel
+            control={
+              <Switch
+                inputProps={{ "data-testid": "input_toggle-debug" }}
+                checked={flowDebugging}
+                onChange={toggleFlowDebug}
+                name="toggleFlowDebug"
+                color="primary"
+              />
+            }
+            label={t("ToggleFlowDebug")}
+          />
+        </Tooltip>
+      </Typography>
       <Typography component="div">
         {runningFlow && (
           <Tooltip
@@ -146,8 +182,10 @@ const FlowBottomBar = props => {
 
 FlowBottomBar.propTypes = {
   openFlow: PropTypes.func,
+  toggleFlowDebug: PropTypes.func,
   robotSelected: PropTypes.string,
-  runningFlow: PropTypes.string
+  runningFlow: PropTypes.string,
+  flowDebugging: PropTypes.bool
 };
 
 FlowBottomBar.defaultProps = {

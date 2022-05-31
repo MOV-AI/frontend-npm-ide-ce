@@ -9,12 +9,13 @@ import React, {
 import PropTypes from "prop-types";
 import Backdrop from "@material-ui/core/Backdrop";
 import { usePluginMethods } from "../../../../../engine/ReactPlugin/ViewReactPlugin";
+import { PLUGINS, SCOPES } from "../../../../../utils/Constants";
 import { generateContainerId } from "../Constants/constants";
 import { EVT_NAMES } from "../events";
 import Loader from "../../_shared/Loader/Loader";
 import Warnings from "../Components/Warnings/Warnings";
+import DependencyInfo from "../Components/Debugging/DependencyInfo";
 import useMainInterface from "./hooks/useMainInterface";
-import { PLUGINS, SCOPES } from "../../../../../utils/Constants";
 
 import { baseFlowStyles } from "./styles";
 
@@ -31,7 +32,8 @@ const BaseFlow = forwardRef((props, ref) => {
     on,
     warnings,
     warningsVisibility,
-    onReady
+    onReady,
+    flowDebugging
   } = props;
   const readOnly = false;
 
@@ -122,6 +124,7 @@ const BaseFlow = forwardRef((props, ref) => {
           <Warnings warnings={warnings} isVisible={warningsVisibility} />
         )}
       </div>
+      {flowDebugging && <DependencyInfo />}
     </div>
   );
 });

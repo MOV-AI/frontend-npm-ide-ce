@@ -236,6 +236,29 @@ export const ALERT_SEVERITIES = {
   WARNING: "warning"
 };
 
+export const LINK_DEPENDENCY = {
+  ALL_DEPENDENCIES: {
+    LABEL: "AllDependenciesLabel",
+    VALUE: 0,
+    COLOR: "white"
+  },
+  ONLY_FROM: {
+    LABEL: "OnlyFromLabel",
+    VALUE: 1,
+    COLOR: "violet"
+  },
+  ONLY_TO: {
+    LABEL: "OnlyToLabel",
+    VALUE: 2,
+    COLOR: "steelblue"
+  },
+  NO_DEPENDENCIES: {
+    LABEL: "NoDependenciesLabel",
+    VALUE: 3,
+    COLOR: "darkseagreen"
+  }
+};
+
 //========================================================================================
 /*                                                                                      *
  *                                   Layout Constants                                   *
