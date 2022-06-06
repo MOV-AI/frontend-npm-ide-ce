@@ -152,7 +152,7 @@ const FlowTopBar = props => {
    * @param {String} currentRobot : current selected robot id
    */
   const getRunningRobot = useCallback(
-    currentRobot => {
+    (currentRobot, robots) => {
       // If there's a currently selected robot in local storage
       if (currentRobot) initSelectedRobot(currentRobot);
       // Call callback to get default robot
@@ -169,10 +169,14 @@ const FlowTopBar = props => {
               };
             });
             // Update Flow selected robot if none is selected yet
-            if (!currentRobot) {
+            let robotToSelect = currentRobot;
+            if (!currentRobot || !(currentRobot in robots)) {
               workspaceManager.setSelectedRobot(robotId);
               initSelectedRobot(robotId);
+              robotToSelect = robotId;
             }
+            // Set selected robot
+            setRobotSelected(robotToSelect);
           }
         })
         .catch(err => {
@@ -208,9 +212,8 @@ const FlowTopBar = props => {
       });
       // Update state hooks
       setRobotList(robots);
-      setRobotSelected(currentSelected);
       // Get running Robot
-      getRunningRobot(currentSelected);
+      getRunningRobot(currentSelected, robots);
     },
     [getRunningRobot, workspaceManager]
   );

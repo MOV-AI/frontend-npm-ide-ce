@@ -90,9 +90,9 @@ class VirtualizedTree extends Component {
     const hasOverflow = target.offsetWidth < target.scrollWidth;
     const nodeUrl = node.url ?? node.name;
     if (hasOverflow && nodeTooltip !== nodeUrl) {
-      setImmediate(() => {
+      setTimeout(() => {
         this.setState({ nodeTooltip: nodeUrl });
-      });
+      }, 0);
     }
   }, 500);
 
@@ -272,8 +272,8 @@ VirtualizedTree.defaultProps = {
   data: [],
   showIcons: false,
   onClickNode: () => defaultFunction("onClickNode"),
-  onMouseEnter: () => defaultFunction("onMouseEnter"),
-  onMouseLeave: () => defaultFunction("onMouseLeave"),
+  onMouseEnter: () => defaultFunction("onMouseEnter", false),
+  onMouseLeave: () => defaultFunction("onMouseLeave", false),
   onDoubleClickNode: () => defaultFunction("onDoubleClickNode"),
   handleChange: () => defaultFunction("handleChange"),
   handleCopyClick: () => defaultFunction("handleCopyClick"),

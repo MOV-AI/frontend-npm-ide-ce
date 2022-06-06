@@ -14,7 +14,7 @@ import { EVT_NAMES } from "../events";
 import Loader from "../../_shared/Loader/Loader";
 import Warnings from "../Components/Warnings/Warnings";
 import useMainInterface from "./hooks/useMainInterface";
-import { PLUGINS } from "../../../../../utils/Constants";
+import { PLUGINS, SCOPES } from "../../../../../utils/Constants";
 
 import { baseFlowStyles } from "./styles";
 
@@ -71,13 +71,14 @@ const BaseFlow = forwardRef((props, ref) => {
       if (currMode === EVT_NAMES.LOADING) return;
 
       const scopes = {
-        Node: "addNode",
-        Flow: "addFlow"
+        [SCOPES.NODE]: EVT_NAMES.ADD_NODE,
+        [SCOPES.FLOW]: EVT_NAMES.ADD_FLOW
       };
       const templateId = node.name;
+      const isSubFlow = node.scope === SCOPES.FLOW;
       // If user tries to add the flow as a sub-flow to itself,
       //  it's considered a forbidden operation
-      if (dataFromDB.Label === templateId) return;
+      if (dataFromDB.Label === templateId && isSubFlow) return;
       // Add interface mode to add node/sub-flow
       getMainInterface()?.setMode(scopes[node.scope], { templateId }, true);
     });

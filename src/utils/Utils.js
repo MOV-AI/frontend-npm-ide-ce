@@ -14,7 +14,9 @@ import { ERROR_MESSAGES } from "./Messages";
  * @param {String} name : function name
  * @returns console.warn call with the function name
  */
-export const defaultFunction = name => console.warn(`${name} not implemented`);
+export const defaultFunction = (name, logToConsole = true) => {
+  if (logToConsole) console.warn(`${name} not implemented`);
+};
 
 /**
  * Checks if it's a React Component or Functional Component to return it's ref
@@ -220,4 +222,18 @@ export function simulateMouseClick(element) {
       })
     )
   );
+}
+
+/**
+ * Trigger callback before unload app
+ * @param {function} callback
+ */
+export function runBeforeUnload(callback) {
+  // Previous beforeunload method
+  const onAppUnload = window.onbeforeunload;
+  // Set new beforeunload method with given callback
+  window.onbeforeunload = event => {
+    callback && callback(event);
+    return onAppUnload(event);
+  };
 }

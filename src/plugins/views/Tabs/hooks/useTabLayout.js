@@ -14,12 +14,7 @@ import {
   DOCK_MODES,
   PLUGINS
 } from "../../../../utils/Constants";
-import {
-  getIconByScope,
-  getNameFromURL,
-  getScopeFromURL,
-  buildDocPath
-} from "../../../../utils/Utils";
+import { getIconByScope, buildDocPath } from "../../../../utils/Utils";
 import PluginManagerIDE from "../../../../engine/PluginManagerIDE/PluginManagerIDE";
 import Workspace from "../../../../utils/Workspace";
 import { getHomeTab } from "../../HomeTab/HomeTab";
@@ -32,8 +27,8 @@ const useTabLayout = (props, dockRef) => {
   const { emit, call, on, off } = props;
   const workspaceManager = useMemo(() => new Workspace(), []);
   const activeTabId = useRef(null);
-  const tabsById = useRef(new Map());
   const firstLoad = useRef(true);
+  const tabsById = useRef(new Map());
   const [layout, setLayout] = useState({ ...DEFAULT_LAYOUT });
   const { addTabToStack, removeTabFromStack, getNextTabFromStack } =
     useTabStack(workspaceManager);
@@ -115,9 +110,10 @@ const useTabLayout = (props, dockRef) => {
     tabId => {
       const dockLayout = dockRef.current.state.layout;
       const tabData = findTab(tabId);
-      const panelId = tabData.parent.parent.id;
+      const panelId = tabData?.parent?.parent?.id;
 
-      const index = Object.values(dockLayout).findIndex(v => v.id === panelId);
+      const index =
+        Object.values(dockLayout).findIndex(v => v.id === panelId) ?? 0;
       return Object.keys(dockLayout)[index];
     },
     [dockRef, findTab]
@@ -215,7 +211,7 @@ const useTabLayout = (props, dockRef) => {
         box.activeId = tabData.id;
         tabsById.current.delete(prevTabId);
         tabsById.current.set(tabData.id, tabData);
-        !tabData.isNew && addTabToStack(tabData.id, location);
+        addTabToStack(tabData, location);
         workspaceManager.setTabs(tabsById.current);
         workspaceManager.setLayout(newLayout);
       }
@@ -326,16 +322,17 @@ const useTabLayout = (props, dockRef) => {
    * On dock layout remove tab
    * @param {LayoutData} newLayout : New layout data
    * @param {string} tabId : Tab id
+   * @param {boolean} forceClose : Force tab to close
    */
   const _onLayoutRemoveTab = useCallback(
-    (newLayout, tabId) => {
+    (newLayout, tabId, forceClose) => {
       const { name, scope, isNew, isDirty } = tabsById.current.get(tabId);
-      if (isDirty) {
+      if (isDirty && !forceClose) {
         const document = { id: tabId, name, scope, isNew };
         _closeDirtyTab(document, newLayout);
       } else {
         // Remove doc locally if is new and not dirty
-        if (isNew)
+        if (isNew && !isDirty)
           call(
             PLUGINS.DOC_MANAGER.NAME,
             PLUGINS.DOC_MANAGER.CALL.DISCARD_DOC_CHANGES,
@@ -368,10 +365,11 @@ const useTabLayout = (props, dockRef) => {
   /**
    * Close tab : Remove from layout
    * @param {string} tabId : Tab ID (document URL)
+   * @param {boolean} forceClose : Force document to close
    * @returns {LayoutData} : Layout without tab
    */
   const _closeTab = useCallback(
-    async tabId => {
+    async (tabId, forceClose) => {
       const tabData = findTab(tabId);
       if (!tabData) return;
       const currentLayout = dockRef.current.saveLayout();
@@ -397,7 +395,7 @@ const useTabLayout = (props, dockRef) => {
           box.tabs = box.tabs.filter(_el => _el.id !== tabId);
 
           // And update the Layout
-          return _onLayoutRemoveTab(currentLayout, tabId);
+          return _onLayoutRemoveTab(currentLayout, tabId, forceClose);
         }
       }
     },
@@ -422,7 +420,7 @@ const useTabLayout = (props, dockRef) => {
       // Trigger tab update
       if (!dockRef.current) return;
       const currentTab = findTab(tabId);
-      dockRef.current.updateTab(tabId, currentTab);
+      dockRef.current.updateTab(tabId, currentTab, false);
     },
     [dockRef, findTab]
   );
@@ -461,10 +459,10 @@ const useTabLayout = (props, dockRef) => {
         PLUGINS.DOC_MANAGER.CALL.GET_DOC_FACTORY,
         docData.scope
       ).then(docFactory => {
-        try {
-          if (!docFactory) return docData;
+        if (!docFactory) return docData;
 
-          return installTabPlugin(docFactory, docData).then(viewPlugin => {
+        return installTabPlugin(docFactory, docData)
+          .then(viewPlugin => {
             // Create and return tab data
             const extension = docFactory.store.model.EXTENSION ?? "";
             // Return TabData
@@ -478,11 +476,11 @@ const useTabLayout = (props, dockRef) => {
               scope: docData.scope,
               content: viewPlugin.render()
             };
+          })
+          .catch(err => {
+            console.warn("debug can't open tab", err);
+            return docData;
           });
-        } catch (err) {
-          console.warn("debug can't open tab", err);
-          return docData;
-        }
       });
     },
     [call, _getCustomTab, _closeTab, installTabPlugin]
@@ -511,7 +509,7 @@ const useTabLayout = (props, dockRef) => {
    * @param {TabData} tabData : Set Tab data in Layout
    */
   const open = useCallback(
-    (tabData, preventFocus) => {
+    tabData => {
       const tabPosition = tabData.dockPosition ?? getDefaultTabPosition();
       const position = tabData.position ?? {
         h: 500,
@@ -521,17 +519,19 @@ const useTabLayout = (props, dockRef) => {
         z: 1
       };
 
-      emit(PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE, { id: tabData.id });
-      !preventFocus && !tabData.isNew && addTabToStack(tabData.id, tabPosition);
+      addTabToStack(tabData, tabPosition);
       tabsById.current.set(tabData.id, tabData);
       workspaceManager.setTabs(tabsById.current);
 
       const existingTab = findTab(tabData.id);
       if (existingTab) {
-        focusExistingTab(tabData.id, preventFocus);
+        focusExistingTab(tabData.id);
         return;
       }
 
+      // Update new open tab id
+      activeTabId.current = tabData.id;
+      // Set new layout
       setLayout(prevState => {
         const newState = { ...prevState };
         if (newState[tabPosition].children.length === 0) {
@@ -650,32 +650,24 @@ const useTabLayout = (props, dockRef) => {
    * @param {String} direction : (one of: "left" | "right" | "bottom" | "top" | "middle" | "remove" | "before-tab" | "after-tab" | "float" | "front" | "maximize" | "new-window")
    */
   const onLayoutChange = useCallback(
-    async (newLayout, tabId, direction) => {
+    (newLayout, tabId, direction) => {
       const dock = getDockFromTabId(tabId);
+      const tabData = tabsById.current.get(tabId);
       let newActiveTabId = tabId;
 
       // Attempt to close tab
       if (direction === DOCK_MODES.REMOVE) {
         _closeTab(tabId);
-        newActiveTabId =
-          getNextTabFromStack(dock) ||
-          _getFirstContainer(newLayout.dockbox).activeId;
+        if (!tabData.isDirty) {
+          newActiveTabId =
+            getNextTabFromStack(dock) ||
+            _getFirstContainer(newLayout.dockbox).activeId;
+        }
       } else {
         // Update layout
         applyLayout(newLayout);
         try {
-          const doc = NON_EDITOR_TABS.includes(tabId)
-            ? {}
-            : await call(
-                PLUGINS.DOC_MANAGER.NAME,
-                PLUGINS.DOC_MANAGER.CALL.READ,
-                {
-                  name: getNameFromURL(tabId),
-                  scope: getScopeFromURL(tabId)
-                }
-              );
-
-          !firstLoad.current && !doc?.isNew && addTabToStack(tabId, dock);
+          !firstLoad.current && addTabToStack(tabData, dock);
 
           firstLoad.current = false;
         } catch (e) {
@@ -714,6 +706,9 @@ const useTabLayout = (props, dockRef) => {
   const updateTabId = useCallback(
     (prevTabId, newTabData) => {
       _getTabData(newTabData).then(tabData => {
+        // Update new open tab id
+        activeTabId.current = tabData.id;
+        // Set new layout
         setLayout(prevState => {
           // look for tab in windowbox
           const locations = Object.values(DOCK_POSITIONS);
@@ -761,7 +756,7 @@ const useTabLayout = (props, dockRef) => {
     );
     // On delete document
     on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.DELETE_DOC, data =>
-      _closeTab(data.url)
+      _closeTab(data.url, true)
     );
 
     // We want to reload the tabData if it was a new tab

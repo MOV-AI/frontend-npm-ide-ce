@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import { DOCK_POSITIONS } from "../../../../utils/Constants";
+import { runBeforeUnload } from "../../../../utils/Utils";
 
 const useTabStack = workspaceManager => {
   const tabStack = React.useRef({});
+
   //========================================================================================
   /*                                                                                      *
    *                                    Private Methods                                   *
@@ -10,35 +12,52 @@ const useTabStack = workspaceManager => {
   //========================================================================================
 
   /**
+   * @private Remove all untitled tabs (not created in Redis)
+   */
+  const removeNewTabsFromStack = useCallback(() => {
+    const thisStack = tabStack.current;
+    const newStack = {};
+    for (const dock in thisStack) {
+      const dockStack = thisStack[dock];
+      newStack[dock] = dockStack.filter(tab => !tab.isNew);
+    }
+    workspaceManager.setTabStack(newStack);
+  }, [workspaceManager]);
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Public Methods                                    *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
    * Removes a tab from the stack for given dock
-   * @private function
    * @param {String} dock : the dock to look for the tab, defaults to 'dockbox'
    * @param {String} tabId : the tabId to remove from the stack
    */
-  const removeTabFromStack = React.useCallback(
+  const removeTabFromStack = useCallback(
     (tabId, dock = DOCK_POSITIONS.DOCK) => {
       const thisStack = tabStack.current[dock] || [];
-      if (thisStack.includes(tabId)) {
-        thisStack.splice(thisStack.indexOf(tabId), 1);
-        workspaceManager.setTabStack(tabStack.current);
-      }
+      const newStack = thisStack.filter(tab => tab.id !== tabId);
+      tabStack.current[dock] = newStack;
+      workspaceManager.setTabStack(tabStack.current);
     },
     [workspaceManager]
   );
 
   /**
    * Adds a tab to the stack of given dock
-   * @private function
    * @param {String} dock : the dock to look for the tab, defaults to 'dockbox'
    * @param {String} tabId : the tabId to add to the stack
    */
-  const addTabToStack = React.useCallback(
-    (tabId, dock = DOCK_POSITIONS.DOCK) => {
+  const addTabToStack = useCallback(
+    (tabData, dock = DOCK_POSITIONS.DOCK) => {
+      const { id, isNew } = tabData;
+      removeTabFromStack(id, dock);
       const thisStack = tabStack.current[dock] || [];
 
-      removeTabFromStack(tabId, dock);
-
-      thisStack.push(tabId);
+      thisStack.push({ id, isNew });
+      tabStack.current[dock] = thisStack;
       workspaceManager.setTabStack(tabStack.current);
     },
     [workspaceManager, removeTabFromStack]
@@ -46,15 +65,11 @@ const useTabStack = workspaceManager => {
 
   /**
    * Get next tab from stack
-   * @private function
    */
-  const getNextTabFromStack = React.useCallback(
-    (dock = DOCK_POSITIONS.DOCK) => {
-      const thisStack = tabStack.current[dock] || [];
-      return thisStack[thisStack.length - 1];
-    },
-    []
-  );
+  const getNextTabFromStack = useCallback((dock = DOCK_POSITIONS.DOCK) => {
+    const thisStack = tabStack.current[dock] || [];
+    return thisStack[thisStack.length - 1]?.id;
+  }, []);
 
   //========================================================================================
   /*                                                                                      *
@@ -62,9 +77,11 @@ const useTabStack = workspaceManager => {
    *                                                                                      */
   //========================================================================================
 
-  React.useEffect(() => {
+  useEffect(() => {
     tabStack.current = workspaceManager.getTabStack();
-  }, [workspaceManager]);
+    // Before unload app, remove all "untitled" tabs from stack
+    runBeforeUnload(removeNewTabsFromStack);
+  }, [workspaceManager, removeNewTabsFromStack]);
 
   //========================================================================================
   /*                                                                                      *

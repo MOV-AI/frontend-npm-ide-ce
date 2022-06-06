@@ -1,4 +1,4 @@
-import { Authentication } from "@mov-ai/mov-fe-lib-core";
+import { User } from "@mov-ai/mov-fe-lib-core";
 import { DOCK_POSITIONS, DEFAULT_LAYOUT, DEFAULT_TABS } from "./Constants";
 import LocalStorage from "./LocalStorage";
 
@@ -6,9 +6,10 @@ class Workspace {
   constructor() {
     if (instance) return instance;
     instance = this;
+    this.user = new User();
 
     const APP_NAME = "movai-ide-ce";
-    const USER_NAME = Authentication.getTokenData().message.name ?? "";
+    const USER_NAME = this.user.getUsername() ?? "";
 
     this.storage = new LocalStorage();
     this.TABS_KEY = `movai.${USER_NAME}.${APP_NAME}.tabs`;
@@ -105,7 +106,6 @@ class Workspace {
    * @param {Object} tabStack
    */
   setTabStack(tabStack) {
-    // if(tabStack.length === 0)
     this.storage.set(this.TAB_STACK_KEY, tabStack);
   }
 
@@ -114,7 +114,16 @@ class Workspace {
    * @returns {Object} tabStack
    */
   getTabStack(defaultTabStack = this.defaultTabStack) {
-    return this.storage.get(this.TAB_STACK_KEY) ?? defaultTabStack;
+    const tabStack = this.storage.get(this.TAB_STACK_KEY) ?? defaultTabStack;
+    // Convert tabStack to new format
+    for (const dock in tabStack) {
+      tabStack[dock] = tabStack[dock].map(tab => ({
+        id: tab.id || tab,
+        isNew: tab.isNew
+      }));
+    }
+    // Return formatted tabStack
+    return tabStack;
   }
 
   //========================================================================================

@@ -11,7 +11,7 @@ import { tableKeyValueStyles } from "../styles";
  * @param {array} list { key: "bla", value: "bla", defaultValue: "place" }
  */
 const TableKeyValue = props => {
-  const { list, allowSearch } = props;
+  const { list, allowSearch, allowDelete } = props;
   const [searchValue, setSearchValue] = useState("");
   const classes = tableKeyValueStyles();
 
@@ -30,6 +30,8 @@ const TableKeyValue = props => {
             {...props}
             key={index}
             item={item}
+            allowEdit={!item.invalid}
+            allowDelete={item.invalid || allowDelete}
           />
         ))}
     </Typography>
@@ -38,11 +40,13 @@ const TableKeyValue = props => {
 
 TableKeyValue.propTypes = {
   list: PropTypes.array.isRequired, //[{ key: "bla", value: "bla", defaultValue: "place" }]
-  allowSearch: PropTypes.bool
+  allowSearch: PropTypes.bool,
+  allowDelete: PropTypes.bool
 };
 
 TableKeyValue.defaultProps = {
-  allowSearch: false
+  allowSearch: false,
+  allowDelete: false
 };
 
 export default TableKeyValue;
