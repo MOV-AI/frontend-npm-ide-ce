@@ -1,5 +1,5 @@
 import React from "react";
-import { withAuthentication, Style } from "@mov-ai/mov-fe-lib-react";
+import { Style } from "@mov-ai/mov-fe-lib-react";
 import { Typography } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
@@ -218,4 +218,4 @@ const MOVAI_LOGO = `
 ██║ ╚═╝ ██║ ╚██████═╝   ╚███═╝         ██║  ██║██║
 `;
 
-export default withTheme(withAuthentication(App));
+export default withTheme(App);
