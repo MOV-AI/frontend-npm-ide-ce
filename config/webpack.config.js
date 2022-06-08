@@ -1,5 +1,3 @@
-"use strict";
-
 const fs = require("fs");
 const path = require("path");
 const webpack = require("webpack");
@@ -462,7 +460,8 @@ module.exports = function (webpackEnv) {
         filename: "remoteEntry.js",
         exposes: {
           "./Main": `${paths.appSrc}/bootstrap`
-        }
+        },
+        shared: packageJson.dependencies
       }),
       // Generates an `index.html` file with the <script> injected.
       new HtmlWebpackPlugin({
