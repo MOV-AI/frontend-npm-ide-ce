@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import lodash from "lodash";
+import _omit from "lodash/omit";
 import { convertVisualization, convertTypeCss } from "../Utils";
 
 import { flattenObject } from "../../../Utils/utils";
@@ -257,7 +257,7 @@ class BaseNode extends BaseNodeStruct {
         // check In and Out ports
         ["In", "Out"].forEach(type => {
           // get port data
-          const data = lodash.get(ports[portInstName], `${type}`, {});
+          const data = ports[portInstName]?.[type] ?? {};
 
           Object.keys(data).forEach(portName => {
             // customize port data for the instance
@@ -626,13 +626,14 @@ class BaseNode extends BaseNodeStruct {
 
     // trigger the onDrag event
     if ("onDrag" in this.events) this.events.onDrag(this, d3.event);
-    lodash
-      .get(this.canvas.mode.current, "onDrag", {
-        next: () => {
-          /* empty method */
-        }
-      })
-      .next(this);
+
+    const _onDrag = this.canvas.mode.current?.onDrag ?? {
+      next: () => {
+        /* empty method */
+      }
+    };
+
+    _onDrag.next(this);
   };
 
   /**
@@ -648,10 +649,12 @@ class BaseNode extends BaseNodeStruct {
     const updatedPos = { ...this.data.Visualization, ...data.Visualization };
 
     // convert format
-    const _data = { Visualization: convertVisualization(updatedPos) };
+    const visualizationData = {
+      Visualization: convertVisualization(updatedPos)
+    };
 
     // set object new position
-    this.data = lodash.merge(this.data, _data);
+    this.data = { ...this.data, ...visualizationData };
 
     // set svg new posistion
     this.object.attr("x", this.posX).attr("y", this.posY);
@@ -689,8 +692,9 @@ class BaseNode extends BaseNodeStruct {
   updateNode = data => {
     const fn = {
       Visualization: _data => this.updatePosition(_data), // Position changes when dragging or when adding a new node
-      default: () => {
-        lodash.merge(this.data, data);
+      default: _data => {
+        this.data = { ...this.data, ...data };
+        this.updatePosition(_data);
         this.data.name = this.name;
       }
     };
@@ -742,12 +746,14 @@ class BaseNode extends BaseNodeStruct {
       }
     };
 
+    const defaultAction = () => {
+      console.debug("Default mode required to start linking");
+    };
+
     // call an action
-    lodash
-      .get(actions, currMode.id, () => {
-        console.debug("Default mode required to start linking");
-      })
-      .call();
+    const actualAction = actions?.[currMode.id] ?? defaultAction;
+
+    actualAction.call();
   };
 
   /**
@@ -847,7 +853,7 @@ class BaseNode extends BaseNodeStruct {
   deleteKey = data => {
     const path = flattenObject(data);
     Object.keys(path).forEach(pkey => {
-      this.data = lodash.omit(this.data, pkey);
+      this.data = _omit(this.data, pkey);
     });
     return this.isValid();
   };

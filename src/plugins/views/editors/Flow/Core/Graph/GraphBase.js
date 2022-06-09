@@ -9,6 +9,7 @@ import { FLOW_VIEW_MODE, NODE_TYPES } from "../../Constants/constants";
 import Factory from "../../Components/Nodes/Factory";
 import { shouldUpdateExposedPorts } from "./Utils";
 import GraphValidator from "./GraphValidator";
+import Workspace from "../../../../../../utils/Workspace";
 
 const NODE_DATA = {
   NODE: {
@@ -47,8 +48,22 @@ export default class GraphBase {
   warningsVisibility = true;
   validator = new GraphValidator(this);
   onFlowValidated = new Subject();
-  onLinksValidated = new Subject();
   invalidLinks = [];
+  flowDebugging = new Workspace().getFlowIsDebugging();
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                   Getters / Setters                                  *
+   *                                                                                      */
+  //========================================================================================
+
+  get isFlowDebugging() {
+    return this.flowDebugging;
+  }
+
+  set isFlowDebugging(isDebugging) {
+    this.flowDebugging = isDebugging;
+  }
 
   //========================================================================================
   /*                                                                                      *
@@ -147,11 +162,6 @@ export default class GraphBase {
   loadLinks(links = {}) {
     Object.entries(links).forEach(([id, value]) => {
       this.addLink({ id, ...value });
-    });
-    // Emits result of links validation
-    this.onLinksValidated.next({
-      invalidLinks: this.invalidLinks,
-      callback: this.clearInvalidLinks
     });
     return this;
   }
@@ -252,6 +262,8 @@ export default class GraphBase {
     this.updateLinks(data.Links || {});
     // Update exposed ports
     this.updateExposedPorts(data.ExposedPorts || {});
+    // Let's re-validate the flow
+    this.validateFlow();
   };
 
   /**
@@ -308,8 +320,9 @@ export default class GraphBase {
    * Validate flow : get warnings
    */
   validateFlow = () => {
-    const { warnings, invalidContainersParam } = this.validator.validateFlow();
-    this.onFlowValidated.next({ warnings: warnings, invalidContainersParam });
+    const { warnings } = this.validator.validateFlow();
+
+    this.onFlowValidated.next({ warnings: warnings });
     this.warnings = warnings;
   };
 
@@ -452,6 +465,7 @@ export default class GraphBase {
         sourcePortPos,
         targetPortPos,
         parsedLink,
+        this.flowDebugging,
         this.toggleTooltip
       );
 
@@ -554,4 +568,12 @@ export default class GraphBase {
       this.selectedLink = null;
     }
   }
+
+  reStrokeLinks = () => {
+    this.links?.forEach(linkData => {
+      linkData.flowDebugging = this.flowDebugging;
+      linkData.changeStrokeColor();
+    });
+    return this;
+  };
 }

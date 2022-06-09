@@ -12,7 +12,7 @@ import {
   openShortcutsTab
 } from "./buildFunctions";
 
-const buildMenus = async (call, classes, _activeEditorScope) => {
+const buildMenus = async (call, classes) => {
   const buildFileMenu = async () => {
     return {
       id: "fileMenu",

@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import SearchIcon from "@material-ui/icons/Search";
-import { TextField, InputAdornment } from "@material-ui/core";
+import ClearIcon from "@material-ui/icons/Clear";
+import { TextField, IconButton, Tooltip } from "@material-ui/core";
 import { DATA_TYPES } from "../../../../../utils/Constants";
+
+import { searchStyles } from "./styles";
 
 /**
  * Normalize string
@@ -22,7 +25,7 @@ const normalizeString = str => {
  * @param {*} subject
  * @returns
  */
-const filter = (searchQuery, subject) => {
+function filter(searchQuery, subject) {
   // Normalize search query
   searchQuery = normalizeString(searchQuery);
 
@@ -66,12 +69,45 @@ const filter = (searchQuery, subject) => {
     default:
       return subject;
   }
-};
+}
 
 const Search = props => {
   const { onSearch } = props;
 
+  // State hooks
+  const [searchInput, setSearchInput] = useState("");
+
+  // Translation hook
   const { t } = useTranslation();
+  // Style hook
+  const classes = searchStyles();
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Resets the search value
+   */
+  const resetValue = () => {
+    setSearchInput("");
+    onSearch("");
+  };
+
+  /**
+   * Simple check to see if there's any value on searchInput
+   * @returns {Boolean} true if there's any value on the search
+   */
+  const isEmpty = () => {
+    return searchInput === null || searchInput.trim() === "";
+  };
+
+  const doSearch = value => {
+    setSearchInput(value);
+    onSearch(value);
+  };
 
   //========================================================================================
   /*                                                                                      *
@@ -85,20 +121,33 @@ const Search = props => {
    */
   const onChangeSearch = event => {
     const value = event.target.value;
-    onSearch(value);
+    doSearch(value);
   };
 
   return (
     <TextField
       fullWidth
       placeholder={t("Search")}
-      defaultValue={""}
+      value={searchInput}
       onChange={onChangeSearch}
+      inputProps={{ "data-testid": "input_search" }}
       InputProps={{
         endAdornment: (
-          <InputAdornment position="end">
-            <SearchIcon />
-          </InputAdornment>
+          <IconButton
+            data-testid="input_reset-search"
+            className={classes.iconButton}
+            onClick={resetValue}
+          >
+            {isEmpty() ? (
+              <Tooltip title={t("SearchSomething")}>
+                <SearchIcon className={classes.icon} />
+              </Tooltip>
+            ) : (
+              <Tooltip title={t("ResetSearch")}>
+                <ClearIcon className={classes.icon} />
+              </Tooltip>
+            )}
+          </IconButton>
         )
       }}
     />

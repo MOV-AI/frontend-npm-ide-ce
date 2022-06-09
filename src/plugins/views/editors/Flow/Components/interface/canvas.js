@@ -649,11 +649,15 @@ class Canvas {
     this.append(() => {
       return this.mode.linking.props.link.el;
     }, "links");
+    this.mode.linking.activelyLinking = true;
+    this.mode.linking.props.link.fadeOtherLinks();
   };
 
   onLinkingExit = () => {
     const { link } = this.mode.linking.props;
     if (link) link.destroy();
+    this.mode.linking.activelyLinking = false;
+    this.mode.linking.props.link.removeLinksFade();
   };
 
   onLinkingMouseMove = () => {

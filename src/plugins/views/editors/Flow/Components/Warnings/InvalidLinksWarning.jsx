@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import Tooltip from "@material-ui/core/Tooltip";
+import Typography from "@material-ui/core/Typography";
 
 import { invalidLinksWarningStyles } from "./styles";
 
@@ -42,35 +43,43 @@ const InvalidLinksWarning = props => {
   //========================================================================================
 
   return (
-    <div className={classes.invalidLinksMessageHolder}>
+    <div testid="section_invalid-links-warning">
       <div className={classes.invalidLinksHeader}>
-        <h3>{t("Link Source")}</h3>
-        <h3>{t("Link Target")}</h3>
+        <Typography variant="h6">{t("SourcePort")}</Typography>
+        <Typography variant="h6">{t("TargetPort")}</Typography>
       </div>
-      {invalidLinks.map(linkInfo => (
-        <div key={linkInfo.id} className={classes.invalidLinkHolder}>
-          <Tooltip
-            title={buildTooltipTitle(linkInfo.sourceNode, linkInfo.sourcePort)}
-          >
-            <div>
-              <p>
-                <strong>{linkInfo.sourceNode}</strong>:
-              </p>
-              {linkInfo.sourcePort}
-            </div>
-          </Tooltip>
-          <Tooltip
-            title={buildTooltipTitle(linkInfo.targetNode, linkInfo.targetPort)}
-          >
-            <div>
-              <p>
-                <strong>{linkInfo.targetNode}</strong>:
-              </p>
-              {linkInfo.targetPort}
-            </div>
-          </Tooltip>
-        </div>
-      ))}
+      <div className={classes.invalidLinksMessageHolder}>
+        {invalidLinks.map(linkInfo => (
+          <div key={linkInfo.id} className={classes.invalidLinkHolder}>
+            <Tooltip
+              title={buildTooltipTitle(
+                linkInfo.sourceNode,
+                linkInfo.sourcePort
+              )}
+            >
+              <div>
+                <p>
+                  <strong>{linkInfo.sourceNode}</strong>:
+                </p>
+                {linkInfo.sourcePort}
+              </div>
+            </Tooltip>
+            <Tooltip
+              title={buildTooltipTitle(
+                linkInfo.targetNode,
+                linkInfo.targetPort
+              )}
+            >
+              <div>
+                <p>
+                  <strong>{linkInfo.targetNode}</strong>:
+                </p>
+                {linkInfo.targetPort}
+              </div>
+            </Tooltip>
+          </div>
+        ))}
+      </div>
       <p className={classes.fixMessage}>{t("InvalidLinksFoundMessage")}</p>
     </div>
   );

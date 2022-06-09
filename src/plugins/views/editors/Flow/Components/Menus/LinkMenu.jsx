@@ -15,6 +15,7 @@ import {
   Tooltip
 } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
+import { LINK_DEPENDENCY } from "../../../../../../utils/Constants";
 import { TRANSITION_LINK } from "../../Constants/constants";
 import BasePort from "../Nodes/BaseNode/BasePort";
 
@@ -23,8 +24,11 @@ import { linkMenuStyles } from "./styles";
 const LinkMenu = props => {
   // Props
   const { link, editable, sourceMessage, flowModel } = props;
+  const linkData = link.data;
+
   // State Hooks
   const [dependencyLevel, setDependencyLevel] = useState(0);
+
   // Other Hooks
   const { t } = useTranslation();
   const classes = linkMenuStyles();
@@ -57,8 +61,10 @@ const LinkMenu = props => {
   const onChangeDependency = useCallback(
     evt => {
       const value = evt.target.value;
-      flowModel.current.setLinkDependency(link.id, value);
+      flowModel.current.setLinkDependency(link.data.id, value);
       setDependencyLevel(value);
+      // Let's change the link color temporarily
+      link.setTemporaryDependency(value).changeStrokeColor();
     },
     [flowModel, link]
   );
@@ -71,9 +77,9 @@ const LinkMenu = props => {
 
   // On component mount or change Link prop
   useEffect(() => {
-    const dependency = flowModel.current.getLinkDependency(link.id);
+    const dependency = flowModel.current.getLinkDependency(linkData.id);
     setDependencyLevel(dependency);
-  }, [link, flowModel]);
+  }, [linkData, flowModel]);
 
   //========================================================================================
   /*                                                                                      *
@@ -93,15 +99,15 @@ const LinkMenu = props => {
           <Typography component="div" className={classes.directionContainer}>
             <ListItem>
               <ListItemText primary={t("Node-Colon")} />
-              <Tooltip title={link.sourceNode}>
-                <Typography>{link.sourceNode}</Typography>
+              <Tooltip title={linkData.sourceNode}>
+                <Typography>{linkData.sourceNode}</Typography>
               </Tooltip>
             </ListItem>
             <Divider />
             <ListItem>
               <ListItemText primary={t("Port-Colon")} />
-              <Tooltip title={parsePortName(link.sourcePort)}>
-                <Typography>{parsePortName(link.sourcePort)}</Typography>
+              <Tooltip title={parsePortName(linkData.sourcePort)}>
+                <Typography>{parsePortName(linkData.sourcePort)}</Typography>
               </Tooltip>
             </ListItem>
           </Typography>
@@ -115,15 +121,15 @@ const LinkMenu = props => {
           <Typography component="div" className={classes.directionContainer}>
             <ListItem>
               <ListItemText primary={t("Node-Colon")} />
-              <Tooltip title={link.targetNode}>
-                <Typography>{link.targetNode}</Typography>
+              <Tooltip title={linkData.targetNode}>
+                <Typography>{linkData.targetNode}</Typography>
               </Tooltip>
             </ListItem>
             <Divider />
             <ListItem>
               <ListItemText primary={t("Port-Colon")} />
-              <Tooltip title={parsePortName(link.targetPort)}>
-                <Typography>{parsePortName(link.targetPort)}</Typography>
+              <Tooltip title={parsePortName(linkData.targetPort)}>
+                <Typography>{parsePortName(linkData.targetPort)}</Typography>
               </Tooltip>
             </ListItem>
           </Typography>
@@ -145,11 +151,23 @@ const LinkMenu = props => {
                     value={dependencyLevel}
                     onChange={onChangeDependency}
                     disabled={!editable}
+                    className={classes.selectHolder}
                   >
-                    <MenuItem value={0}>{t("AllDependencies")}</MenuItem>
-                    <MenuItem value={1}>{t("OnlyFrom")}</MenuItem>
-                    <MenuItem value={2}>{t("OnlyTo")}</MenuItem>
-                    <MenuItem value={3}>{t("NoDependencies")}</MenuItem>
+                    {Object.values(LINK_DEPENDENCY).map(dep => {
+                      return (
+                        <MenuItem
+                          key={dep.VALUE}
+                          value={dep.VALUE}
+                          className={classes.infoContainer}
+                        >
+                          <p>{t(dep.LABEL)}</p>
+                          <div
+                            className={classes.colorChip}
+                            style={{ backgroundColor: dep.COLOR }}
+                          ></div>
+                        </MenuItem>
+                      );
+                    })}
                   </Select>
                   <FormHelperText>
                     {t("LinkDependenciesHelperText")}

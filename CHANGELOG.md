@@ -3,10 +3,16 @@
 **IDE**
 
 - [FP-1085 - Add Shortcuts helper with all keybind shortcuts](https://movai.atlassian.net/browse/FP-1085)
+- [FP-1523 - Replaced old virtualize tree with react-window](https://movai.atlassian.net/browse/FP-1523)
 
 **FLOW**
 
+- [FP-1084 - Add debug colors to links](https://movai.atlassian.net/browse/FP-1084)
 - [FP-1667 - Add More information to missing links](https://movai.atlassian.net/browse/FP-1667)
+- [FP-1669 - Add More information to missing parameters](https://movai.atlassian.net/browse/FP-1669)
+- [FP-1741 - Push flow parameter errors to Warnings, and make warnings clickable](https://movai.atlassian.net/browse/FP-1741)
+- [FP-1768 - Grey out other links when creating a new link](https://movai.atlassian.net/browse/FP-1768)
+- [FP-1794 - Add invalid links to warnings](https://movai.atlassian.net/browse/FP-1794)
 
 # 3.0.0
 
@@ -20,10 +26,10 @@
 - [FP-1297 - Stay in app on logout](https://movai.atlassian.net/browse/FP-1297)
 - [FP-1509 - Saving a new document will now reload the doc](https://movai.atlassian.net/browse/FP-1509)
 - [FP-1538 - Color between tabs now, more clearer](https://movai.atlassian.net/browse/FP-1538)
+- [FP-1548 - Added testids to help QA](https://movai.atlassian.net/browse/FP-1548)
 - [FP-1560 - Saving an untitled file will now always prompt for a name](https://movai.atlassian.net/browse/FP-1560)
 - [FP-1595 - Removed unused function that contained vulnerabilities](https://movai.atlassian.net/browse/FP-1595)
 - [FP-1610 - Remove editor keybinds when editor is blurred](https://movai.atlassian.net/browse/FP-1610)
-- [FP-1548 - Added testids to help QA](https://movai.atlassian.net/browse/FP-1548)
 
 **Callback Editor**
 

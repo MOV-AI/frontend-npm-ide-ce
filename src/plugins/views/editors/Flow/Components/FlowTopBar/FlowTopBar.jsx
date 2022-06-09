@@ -25,7 +25,12 @@ import StopIcon from "@material-ui/icons/Stop";
 import { RobotManager } from "@mov-ai/mov-fe-lib-core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import Workspace from "../../../../../../utils/Workspace";
-import { PLUGINS, ALERT_SEVERITIES } from "../../../../../../utils/Constants";
+import {
+  SCOPES,
+  PLUGINS,
+  GLOBAL_WORKSPACE,
+  ALERT_SEVERITIES
+} from "../../../../../../utils/Constants";
 import { ERROR_MESSAGES } from "../../../../../../utils/Messages";
 import { defaultFunction } from "../../../../../../utils/Utils";
 import { FLOW_VIEW_MODE, ROBOT_BLACKLIST } from "../../Constants/constants";
@@ -585,8 +590,8 @@ FlowTopBar.defaultProps = {
   onStartStopFlow: () => defaultFunction("onStartStopFlow"),
   nodeStatusUpdated: () => defaultFunction("nodeStatusUpdated"),
   nodeCompleteStatusUpdated: () => defaultFunction("completeStatusUpdated"),
-  workspace: "global",
-  type: "Flow",
+  workspace: GLOBAL_WORKSPACE,
+  type: SCOPES.FLOW,
   version: "__UNVERSIONED__"
 };
 

@@ -8,18 +8,19 @@ import React, {
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { filter } from "rxjs/operators";
-import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from "@material-ui/icons/Info";
 import Add from "@material-ui/icons/Add";
 import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
 import { FLOW_EXPLORER_PROFILE, PLUGINS } from "../../../../utils/Constants";
+import Workspace from "../../../../utils/Workspace";
 import { KEYBINDINGS } from "../../Keybinding/shortcuts";
 import Clipboard, { KEYS } from "./Utils/Clipboard";
 import Vec2 from "./Utils/Vec2";
 import BaseFlow from "./Views/BaseFlow";
 import TreeView from "./Views/TreeView";
+import { WARNING_TYPES } from "./Core/Graph/GraphValidator";
 import Menu from "./Components/Menus/Menu";
 import NodeMenu from "./Components/Menus/NodeMenu";
 import FlowTopBar from "./Components/FlowTopBar/FlowTopBar";
@@ -31,18 +32,12 @@ import Explorer from "./Components/Explorer/Explorer";
 import LinkMenu from "./Components/Menus/LinkMenu";
 import PortTooltip from "./Components/Tooltips/PortTooltip";
 import InvalidLinksWarning from "./Components/Warnings/InvalidLinksWarning";
+import InvalidParametersWarning from "./Components/Warnings/InvalidParametersWarning";
 import { EVT_NAMES, EVT_TYPES } from "./events";
 import { FLOW_VIEW_MODE } from "./Constants/constants";
 
 import "./Resources/css/Flow.css";
-
-const useStyles = makeStyles(_theme => ({
-  root: {
-    width: "100%",
-    height: "100%",
-    flexGrow: 1
-  }
-}));
+import { flowStyles } from "./styles";
 
 let activeBookmark = null;
 
@@ -86,6 +81,7 @@ const Flow = (props, ref) => {
   const [robotSelected, setRobotSelected] = useState("");
   const [runningFlow, setRunningFlow] = useState("");
   const [warnings, setWarnings] = useState([]);
+  const [flowDebugging, setFlowDebugging] = useState();
   const [warningsVisibility, setWarningsVisibility] = useState(true);
   const [viewMode, setViewMode] = useState(FLOW_VIEW_MODE.default);
   const [tooltipConfig, setTooltipConfig] = useState(null);
@@ -95,7 +91,7 @@ const Flow = (props, ref) => {
   });
 
   // Other Hooks
-  const classes = useStyles();
+  const classes = flowStyles();
   const { t } = useTranslation();
   const clipboard = useMemo(() => new Clipboard(), []);
   // Refs
@@ -105,6 +101,7 @@ const Flow = (props, ref) => {
   const selectedNodeRef = useRef();
   const selectedLinkRef = useRef();
   const isEditableComponentRef = useRef(true);
+  const workspaceManager = useMemo(() => new Workspace(), []);
 
   //========================================================================================
   /*                                                                                      *
@@ -126,6 +123,17 @@ const Flow = (props, ref) => {
     if (!instance.current) return;
     getMainInterface().onGroupsChange(instance.current.getGroups()?.data);
   }, [instance]);
+
+  /**
+   * Updates the status of flow debugging variable on graph
+   * And then re strokes the links (to add or remove the debug colors)
+   */
+  const updateLinkStroke = useCallback(() => {
+    if (getMainInterface()) {
+      getMainInterface().graph.isFlowDebugging = flowDebugging;
+      getMainInterface().graph.reStrokeLinks();
+    }
+  }, [flowDebugging]);
 
   //========================================================================================
   /*                                                                                      *
@@ -151,7 +159,9 @@ const Flow = (props, ref) => {
       const { action, value } = evt;
       getMainInterface()?.[action](value);
     });
-  }, [on]);
+
+    setFlowDebugging(workspaceManager.getFlowIsDebugging());
+  }, [on, workspaceManager]);
 
   /**
    * Initialize data
@@ -170,6 +180,13 @@ const Flow = (props, ref) => {
   useEffect(() => {
     mainInterfaceRef.current = baseFlowRef.current?.mainInterface;
   }, [baseFlowRef.current?.mainInterface]);
+
+  /**
+   * Should update everything related to flowDebugging here
+   */
+  useEffect(() => {
+    updateLinkStroke();
+  }, [flowDebugging, updateLinkStroke]);
 
   //========================================================================================
   /*                                                                                      *
@@ -243,19 +260,24 @@ const Flow = (props, ref) => {
    * @param {*} invalidContainersParam
    */
   const invalidContainersParamAlert = useCallback(
-    invalidContainerParams => {
+    warning => {
+      const invalidContainers = warning?.data;
       // Don't show dialog if no invalid params found
-      if (!invalidContainerParams || !invalidContainerParams.length) return;
-      // Set title and message for alert
-      const title = t("InvalidContainersParamTitle");
-      // Add containers name to message
-      const invalidContainers = invalidContainerParams.join("\n ");
-      const message = t("InvalidContainersParamMessage", { invalidContainers });
+      if (!invalidContainers?.length) return;
 
       // Show alert dialog
-      alert({ message, title, location: "modal" });
+      call(
+        PLUGINS.DIALOG.NAME,
+        PLUGINS.DIALOG.CALL.CUSTOM,
+        {
+          title: t("InvalidContainersParamTitle"),
+          invalidContainerParams: invalidContainers,
+          call
+        },
+        InvalidParametersWarning
+      );
     },
-    [t, alert]
+    [t, call]
   );
 
   /**
@@ -376,7 +398,7 @@ const Flow = (props, ref) => {
           <LinkMenu
             id={id}
             call={call}
-            link={link.data}
+            link={link}
             flowModel={instance}
             sourceMessage={link?.src?.data?.message}
           />
@@ -545,12 +567,12 @@ const Flow = (props, ref) => {
    * On flow validation
    * @param {*} validationWarnings
    */
-  const onFlowValidated = useCallback(validationWarnings => {
+  const onFlowValidated = validationWarnings => {
     const persistentWarns = validationWarnings.warnings.filter(
       el => el.isPersistent
     );
     setWarnings(persistentWarns);
-  }, []);
+  };
 
   /**
    * Remove Node Bookmark and set selectedNode to null
@@ -620,9 +642,10 @@ const Flow = (props, ref) => {
    * On Links validation
    * @param {{invalidLinks: Array, callback: Function}} eventData
    */
-  const onLinksValidated = useCallback(
-    eventData => {
-      const { invalidLinks, callback } = eventData;
+  const invalidLinksAlert = useCallback(
+    warning => {
+      const { data: invalidLinks, callback } = warning;
+
       if (invalidLinks.length) {
         call(
           PLUGINS.DIALOG.NAME,
@@ -663,6 +686,16 @@ const Flow = (props, ref) => {
    */
   const onReady = useCallback(
     mainInterface => {
+      // Set the warning types to be used in the validations
+      mainInterface.graph.validator.setWarningActions(
+        WARNING_TYPES.INVALID_PARAMETERS,
+        invalidContainersParamAlert
+      );
+      mainInterface.graph.validator.setWarningActions(
+        WARNING_TYPES.INVALID_LINKS,
+        invalidLinksAlert
+      );
+
       // subscribe to on enter default mode
       // When enter default mode remove other node/sub-flow bookmarks
       mainInterface.mode.default.onEnter.subscribe(() => {
@@ -679,13 +712,10 @@ const Flow = (props, ref) => {
       // Subscribe to flow validations
       mainInterface.graph.onFlowValidated.subscribe(evtData => {
         const persistentWarns = evtData.warnings.filter(el => el.isPersistent);
+
         groupsVisibilities();
         onFlowValidated({ warnings: persistentWarns });
-        invalidContainersParamAlert(evtData.invalidContainersParam);
       });
-
-      // Subscribe to invalid links validation
-      mainInterface.graph.onLinksValidated.subscribe(onLinksValidated);
 
       // Subscribe to double click event in a node
       mainInterface.mode.onDblClick.onEnter.subscribe(evtData => {
@@ -863,12 +893,11 @@ const Flow = (props, ref) => {
         .subscribe(evtData => console.log("onLinkErrorMouseOver", evtData));
     },
     [
-      onLinksValidated,
       onNodeSelected,
       onLinkSelected,
       setFlowsToDefault,
       groupsVisibilities,
-      onFlowValidated,
+      invalidLinksAlert,
       invalidContainersParamAlert,
       openDoc,
       handleContextClose,
@@ -882,6 +911,18 @@ const Flow = (props, ref) => {
    *                                       Handlers                                       *
    *                                                                                      */
   //========================================================================================
+
+  /**
+   * Handler for the Flow Debug Switch
+   * @param {*} e : event
+   */
+  const handleFlowDebugChange = useCallback(
+    e => {
+      workspaceManager.setFlowIsDebugging(e.target.checked);
+      setFlowDebugging(e.target.checked);
+    },
+    [workspaceManager]
+  );
 
   /**
    * Handle Delete : Show confirmation dialog before performing delete action
@@ -1068,7 +1109,6 @@ const Flow = (props, ref) => {
           alert={alert}
           confirmationAlert={confirmationAlert}
           scope={scope}
-          warnings={warnings}
           defaultViewMode={viewMode}
           version={instance.current?.version}
           mainInterface={mainInterfaceRef}
@@ -1088,6 +1128,8 @@ const Flow = (props, ref) => {
         robotSelected={robotSelected}
         runningFlow={runningFlow}
         warnings={warnings}
+        toggleFlowDebug={handleFlowDebugChange}
+        flowDebugging={flowDebugging}
       />
       {contextMenuOptions && (
         <FlowContextMenu

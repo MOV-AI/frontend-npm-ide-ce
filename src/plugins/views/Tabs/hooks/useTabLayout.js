@@ -21,8 +21,6 @@ import { getHomeTab } from "../../HomeTab/HomeTab";
 import { getShortcutsTab } from "../../Keybinding/Shortcuts";
 import useTabStack from "./useTabStack";
 
-const NON_EDITOR_TABS = [HOMETAB_PROFILE.name, SHORTCUTS_PROFILE.name];
-
 const useTabLayout = (props, dockRef) => {
   const { emit, call, on, off } = props;
   const workspaceManager = useMemo(() => new Workspace(), []);
@@ -519,6 +517,7 @@ const useTabLayout = (props, dockRef) => {
         z: 1
       };
 
+      emit(PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE, { id: tabData.id });
       addTabToStack(tabData, tabPosition);
       tabsById.current.set(tabData.id, tabData);
       workspaceManager.setTabs(tabsById.current);
@@ -666,13 +665,9 @@ const useTabLayout = (props, dockRef) => {
       } else {
         // Update layout
         applyLayout(newLayout);
-        try {
-          !firstLoad.current && addTabToStack(tabData, dock);
 
-          firstLoad.current = false;
-        } catch (e) {
-          console.warn(e);
-        }
+        !firstLoad.current && addTabToStack(tabData, dock);
+        firstLoad.current = false;
       }
       // Emit new active tab id
       if (!tabId) return;

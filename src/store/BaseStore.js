@@ -1,6 +1,7 @@
 import { Document } from "@mov-ai/mov-fe-lib-core";
 import { StorePluginManager } from "./plugins";
 import Subscriber from "../subscriber/Subscriber";
+import { GLOBAL_WORKSPACE } from "../utils/Constants";
 
 class BaseStore extends StorePluginManager {
   constructor(args) {
@@ -18,7 +19,7 @@ class BaseStore extends StorePluginManager {
 
     super(plugins);
 
-    this._workspace = workspace || "global";
+    this._workspace = workspace || GLOBAL_WORKSPACE;
     this._plugin = plugin;
     this._model = model;
     this._scope = model.SCOPE;
