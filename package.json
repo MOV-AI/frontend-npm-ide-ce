@@ -41,7 +41,9 @@
     "web-vitals": "^1.1.2"
   },
   "scripts": {
-    "start": "GENERATE_SOURCEMAP=false react-scripts start",
+    "start": "craco start",
+    "craco:build": "craco build",
+    "craco:start": "craco start",
     "build": "react-scripts --max_old_space_size=4096 build && python3 ./scripts/detach_manifest.py",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
@@ -68,6 +70,7 @@
     ]
   },
   "devDependencies": {
+    "craco-module-federation": "^1.1.0",
     "http-proxy-middleware": "^2.0.4"
   },
   "jest": {
