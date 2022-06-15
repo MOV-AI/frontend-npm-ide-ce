@@ -990,7 +990,7 @@ const Flow = (props, ref) => {
   /**
    * Handle zoom reset
    */
-  const handleZoomReset = useCallback(_e => {
+  const handleResetZoom = useCallback(_e => {
     const { canvas } = getMainInterface();
     canvas
       .getSvg()
@@ -1014,9 +1014,6 @@ const Flow = (props, ref) => {
     };
     const [dx, dy] = delta[event.code];
     const [x, y] = [50, 50]; // skip boundaries validation used when dragging a node
-    console.log("delta: ", delta);
-    console.log("dx: ", dx);
-    console.log("dy: ", dy);
     mainInterface.graph.onNodeDrag(null, { x, y, dx, dy });
     mainInterface.onDragEnd();
   }, []);
@@ -1030,7 +1027,7 @@ const Flow = (props, ref) => {
   useEffect(() => {
     addKeyBind(KEYBINDINGS.COPY, handleCopyNode);
     addKeyBind(KEYBINDINGS.PASTE, handlePasteNodes);
-    addKeyBind(KEYBINDINGS.RESET_ZOOM, handleZoomReset);
+    addKeyBind(KEYBINDINGS.RESET_ZOOM, handleResetZoom);
     addKeyBind(KEYBINDINGS.MOVE_NODE, handleMoveNode);
     addKeyBind("esc", setFlowsToDefault);
     addKeyBind(["del", "backspace"], handleDeleteNode);
@@ -1051,7 +1048,7 @@ const Flow = (props, ref) => {
     handlePasteNodes,
     handleDeleteNode,
     handleMoveNode,
-    handleZoomReset
+    handleResetZoom
   ]);
 
   //========================================================================================
