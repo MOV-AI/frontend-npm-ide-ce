@@ -5,7 +5,7 @@ export const KEYBINDINGS = {
   // Editing
   COPY: "ctrl+c",
   PASTE: "ctrl+v",
-  RESET_ZOOM: "ctrl+i",
-  MOVE_NODE: ["left", "right", "up", "down"]
+  MOVE_NODE: ["left", "right", "up", "down"],
+  // Zoom
+  RESET_ZOOM: "ctrl+i"
 };
-//["a", "right", "down", "left"]
