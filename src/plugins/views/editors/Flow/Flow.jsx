@@ -31,6 +31,7 @@ import LinkMenu from "./Components/Menus/LinkMenu";
 import PortTooltip from "./Components/Tooltips/PortTooltip";
 import { EVT_NAMES, EVT_TYPES } from "./events";
 import { FLOW_VIEW_MODE } from "./Constants/constants";
+import * as d3 from "d3";
 
 import "./Resources/css/Flow.css";
 
@@ -986,6 +987,40 @@ const Flow = (props, ref) => {
     getMainInterface().toggleExposedPort(port);
   }, [contextMenuOptions]);
 
+  /**
+   * Handle zoom reset
+   */
+  const handleZoomReset = useCallback(_e => {
+    const { canvas } = getMainInterface();
+    canvas
+      .getSvg()
+      .transition()
+      .duration(750)
+      .call(canvas.zoomBehavior.transform, d3.zoomIdentity);
+  }, []);
+
+  /**
+   * Handle Move Node
+   */
+  const handleMoveNode = useCallback(event => {
+    const mainInterface = getMainInterface();
+    const currentZoom = mainInterface.canvas.currentZoom?.k ?? 1;
+    const step = 2 / currentZoom + 1;
+    const delta = {
+      ArrowRight: [1 * step, 0],
+      ArrowLeft: [-1 * step, 0],
+      ArrowUp: [0, -1 * step],
+      ArrowDown: [0, 1 * step]
+    };
+    const [dx, dy] = delta[event.code];
+    const [x, y] = [50, 50]; // skip boundaries validation used when dragging a node
+    console.log("delta: ", delta);
+    console.log("dx: ", dx);
+    console.log("dy: ", dy);
+    mainInterface.graph.onNodeDrag(null, { x, y, dx, dy });
+    mainInterface.onDragEnd();
+  }, []);
+
   //========================================================================================
   /*                                                                                      *
    *                                       Shortcuts                                      *
@@ -995,12 +1030,16 @@ const Flow = (props, ref) => {
   useEffect(() => {
     addKeyBind(KEYBINDINGS.COPY, handleCopyNode);
     addKeyBind(KEYBINDINGS.PASTE, handlePasteNodes);
+    addKeyBind(KEYBINDINGS.RESET_ZOOM, handleZoomReset);
+    addKeyBind(KEYBINDINGS.MOVE_NODE, handleMoveNode);
     addKeyBind("esc", setFlowsToDefault);
     addKeyBind(["del", "backspace"], handleDeleteNode);
     // remove keyBind on unmount
     return () => {
       removeKeyBind(KEYBINDINGS.COPY);
       removeKeyBind(KEYBINDINGS.PASTE);
+      removeKeyBind(KEYBINDINGS.RESET_ZOOM);
+      removeKeyBind(KEYBINDINGS.MOVE_NODE);
       removeKeyBind("esc");
       removeKeyBind(["del", "backspace"]);
     };
@@ -1010,7 +1049,9 @@ const Flow = (props, ref) => {
     setFlowsToDefault,
     handleCopyNode,
     handlePasteNodes,
-    handleDeleteNode
+    handleDeleteNode,
+    handleMoveNode,
+    handleZoomReset
   ]);
 
   //========================================================================================
@@ -1037,7 +1078,7 @@ const Flow = (props, ref) => {
           onStartStopFlow={onStartStopFlow}
           nodeStatusUpdated={onNodeStatusUpdate}
           onViewModeChange={onViewModeChange}
-          // nodeCompleteStatusUpdated={this.onMonitoringNodeStatusUpdate}
+          // nodeCompleteStatusUpdated={onMonitoringNodeStatusUpdate}
         ></FlowTopBar>
       </div>
       <BaseFlow
