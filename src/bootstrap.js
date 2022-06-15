@@ -4,17 +4,10 @@ import "./index.css";
 import App from "./App/App";
 import reportWebVitals from "./reportWebVitals";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById("root")
-);
-
 const mount = el => {
   ReactDOM.render(
     <React.StrictMode>
-      <div>teste</div>
+      <App />
     </React.StrictMode>,
     el
   );
@@ -29,7 +22,7 @@ const mount = el => {
 };
 
 if (process.env.NODE_ENV === "development") {
-  const devRoot = document.querySelector("#ide-ce");
+  const devRoot = document.body; // document.querySelector("#ide-ce");
   if (devRoot) {
     mount(devRoot);
   }
