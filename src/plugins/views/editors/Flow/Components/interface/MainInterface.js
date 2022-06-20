@@ -269,6 +269,10 @@ export default class MainInterface {
     );
   };
 
+  searchNode = node => {
+    return node.name && this.graph.nodes.get(node.name)?.obj;
+  };
+
   //========================================================================================
   /*                                                                                      *
    *                                      Subscribers                                     *
@@ -370,9 +374,7 @@ export default class MainInterface {
   onSelectNode = data => {
     const { nodes, shiftKey } = data;
     const { selectedNodes } = this;
-    const filterNodes = nodes.filter(
-      n => n.data.model !== StartNode.model
-    );
+    const filterNodes = nodes.filter(n => n.data.model !== StartNode.model);
 
     this.selectedLink = null;
 

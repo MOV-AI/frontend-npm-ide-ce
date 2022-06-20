@@ -12,7 +12,10 @@ import {
   Typography,
   Tooltip,
   Button,
-  CircularProgress
+  CircularProgress,
+  TextField,
+  InputAdornment,
+  IconButton
 } from "@material-ui/core";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
@@ -21,6 +24,8 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import StopIcon from "@material-ui/icons/Stop";
+import SearchIcon from "@material-ui/icons/Search";
+import { Autocomplete } from "@material-ui/lab";
 import { RobotManager } from "@mov-ai/mov-fe-lib-core";
 import Workspace from "../../../../../../utils/Workspace";
 import { PLUGINS, ALERT_SEVERITIES } from "../../../../../../utils/Constants";
@@ -30,6 +35,7 @@ import { ROBOT_BLACKLIST } from "../../Constants/constants";
 import useNodeStatusUpdate from "./hooks/useNodeStatusUpdate";
 
 import { buttonStyles, flowTopBarStyles } from "./styles";
+import { NodeInstance } from "../../../../../../models/Flow/subModels";
 
 const BACKEND_CALLBACK_NAME = "backend.FlowTopBar";
 const FEEDBACK_TIMEOUT = 10000;
@@ -63,8 +69,10 @@ const FlowTopBar = props => {
     id,
     name,
     onRobotChange,
+    onSearchNode,
     defaultViewMode,
-    confirmationAlert
+    confirmationAlert,
+    searchOptions
     // onViewModeChange
   } = props;
   // State hooks
@@ -72,6 +80,7 @@ const FlowTopBar = props => {
   const [robotSelected, setRobotSelected] = useState("");
   const [robotList, setRobotList] = useState({});
   const [viewMode, setViewMode] = useState(defaultViewMode);
+  const [searchVisible, setSearchOpen] = useState(false);
   // Other hooks
   const classes = flowTopBarStyles();
   const { t } = useTranslation();
@@ -445,6 +454,23 @@ const FlowTopBar = props => {
   //   [onViewModeChange]
   // );
 
+  /**
+   * Handle search node
+   */
+  const handleSearchNode = useCallback(
+    (_e, node) => {
+      return onSearchNode(node);
+    },
+    [onSearchNode]
+  );
+
+  /**
+   * Handle Search icon click
+   */
+  const handleSearchToggle = useCallback(() => {
+    setSearchOpen(!searchVisible);
+  }, [searchVisible]);
+
   //========================================================================================
   /*                                                                                      *
    *                                        Render                                        *
@@ -482,6 +508,60 @@ const FlowTopBar = props => {
       </Tooltip>
     );
   }, [loading, t]);
+
+  /**
+   * Render Search button content
+   * @returns {ReactElement} search text input or search icon button
+   */
+  const renderSearch = useCallback(() => {
+    if (!searchVisible) {
+      return (
+        <IconButton
+          testId="input_search-icon"
+          onClick={handleSearchToggle}
+          size="small"
+          variant="contained"
+        >
+          <SearchIcon color="action" />
+        </IconButton>
+      );
+    }
+    return (
+      <Autocomplete
+        data-testid="input_search-flow-text"
+        options={searchOptions}
+        getOptionLabel={option => option.name}
+        onChange={handleSearchNode}
+        onBlur={handleSearchToggle}
+        groupBy={option =>
+          option instanceof NodeInstance ? t("Node") : t("SubFlow")
+        }
+        style={{ width: "200px" }}
+        renderInput={params => {
+          return (
+            <TextField
+              {...params}
+              variant="standard"
+              placeholder={t("SearchFlowEntities")}
+              fullWidth
+              autoFocus
+              InputProps={{
+                ...params.InputProps,
+                startAdornment: (
+                  <>
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                    {params.InputProps.startAdornment}
+                  </>
+                )
+              }}
+            />
+          );
+        }}
+      />
+    );
+  }, [handleSearchToggle, handleSearchNode, t, searchVisible, searchOptions]);
 
   return (
     <AppBar
@@ -534,6 +614,13 @@ const FlowTopBar = props => {
           )}
         </Typography>
         <Typography
+          data-testid="section_view-search"
+          component="div"
+          className={classes.searchFlowArea}
+        >
+          {renderSearch()}
+        </Typography>
+        <Typography
           data-testid="section_view-mode-toggle"
           component="div"
           className={classes.visualizationToggle}
@@ -568,10 +655,12 @@ FlowTopBar.propTypes = {
   onViewModeChange: PropTypes.func,
   onStartStopFlow: PropTypes.func,
   onRobotChange: PropTypes.func,
+  onSearchNode: PropTypes.func,
   openFlow: PropTypes.func,
   workspace: PropTypes.string,
   type: PropTypes.string,
-  version: PropTypes.string
+  version: PropTypes.string,
+  searchOptions: PropTypes.arrayOf(PropTypes.string)
 };
 
 FlowTopBar.defaultProps = {

@@ -167,6 +167,9 @@ const Flow = (props, ref) => {
    * Initialize main interface
    */
   useEffect(() => {
+    window.mainInterface = baseFlowRef.current?.mainInterface?.current;
+    window.canvas = window.mainInterface?.canvas;
+
     mainInterfaceRef.current = baseFlowRef.current?.mainInterface;
   }, [baseFlowRef.current?.mainInterface]);
 
@@ -1018,6 +1021,48 @@ const Flow = (props, ref) => {
     mainInterface.onDragEnd();
   }, []);
 
+  /*
+   * Handle focus node
+   */
+  const onFocusNode = useCallback(node => {
+    const { canvas, setMode: setInterfaceMode } = getMainInterface();
+    const { xCenter, yCenter } = node.center;
+    setInterfaceMode(EVT_NAMES.DEFAULT, null, true);
+    node.selected = true;
+
+    if (node.data.id !== "start") {
+      setInterfaceMode(
+        EVT_NAMES.SELECT_NODE,
+        { nodes: [node], shiftKey: false },
+        true
+      );
+    }
+    const { width, height } = canvas.el.getBoundingClientRect();
+    canvas
+      .getSvg()
+      .transition()
+      .duration(750)
+      .call(
+        canvas.zoomBehavior.transform,
+        d3.zoomIdentity
+          .translate(width * 0.5 - 2 * xCenter, height * 0.5 - 2 * yCenter)
+          .scale(2)
+      );
+  }, []);
+
+  /*
+   * Handle search nodes
+   */
+  const onSearchNode = useCallback(
+    node => {
+      const nodeInstance = node && getMainInterface().searchNode(node);
+      if (!nodeInstance) return;
+      nodeInstance.handleSelectionChange();
+      onFocusNode(nodeInstance);
+    },
+    [onFocusNode]
+  );
+
   //========================================================================================
   /*                                                                                      *
    *                                       Shortcuts                                      *
@@ -1075,6 +1120,8 @@ const Flow = (props, ref) => {
           onStartStopFlow={onStartStopFlow}
           nodeStatusUpdated={onNodeStatusUpdate}
           onViewModeChange={onViewModeChange}
+          onSearchNode={onSearchNode}
+          searchOptions={instance.current?.getSearchOptions()}
           // nodeCompleteStatusUpdated={onMonitoringNodeStatusUpdate}
         ></FlowTopBar>
       </div>

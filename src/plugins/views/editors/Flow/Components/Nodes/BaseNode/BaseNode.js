@@ -8,6 +8,7 @@ import BaseNodeStruct from "./BaseNodeStruct";
 import BasePort from "./BasePort";
 import BaseNodeHeader from "./BaseNodeHeader";
 import BaseNodeStatus from "./BaseNodeStatus";
+import { EVT_NAMES } from "../../../events";
 
 const STYLE = {
   stroke: {
@@ -534,23 +535,7 @@ class BaseNode extends BaseNodeStruct {
 
     // shift key pressed
     const { shiftKey } = d3.event;
-
-    // debounce timeout
-    clearTimeout(this.dbClickTimeout);
-
-    this.dbClickTimeout = setTimeout(() => {
-      // toggle node selection
-      const selection = !this.selected;
-
-      // shift key not pressed, set mode to default
-      if (!shiftKey) this.canvas.setMode("default", null);
-
-      // set the node selection
-      this.selected = selection;
-
-      // node selected mode
-      this.canvas.setMode("selectNode", { nodes: [this], shiftKey }, true);
-    }, 100);
+    this.handleSelectionChange(shiftKey);
   };
 
   /**
@@ -634,6 +619,27 @@ class BaseNode extends BaseNodeStruct {
       })
       .next(this);
   };
+
+  handleSelectionChange(shiftKey) {
+    clearTimeout(this.dbClickTimeout);
+    this.dbClickTimeout = setTimeout(() => {
+      // toggle node selection
+      const selection = !this.selected;
+
+      // shift key not pressed, set mode to default
+      if (!shiftKey) this.canvas.setMode(EVT_NAMES.DEFAULT, null);
+
+      // set the node selection
+      this.selected = selection;
+
+      // node selected mode
+      this.canvas.setMode(
+        EVT_NAMES.SELECT_NODE,
+        { nodes: [this], shiftKey },
+        true
+      );
+    }, 100);
+  }
 
   /**
    * @private

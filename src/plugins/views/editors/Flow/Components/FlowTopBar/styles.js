@@ -27,6 +27,9 @@ export const flowTopBarStyles = makeStyles(theme => ({
     fontSize: "15px",
     flexGrow: 1
   },
+  searchFlowArea: {
+    marginRight: "30px"
+  },
   visualizationToggle: {
     marginRight: "10px"
   },
