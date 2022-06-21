@@ -167,9 +167,6 @@ const Flow = (props, ref) => {
    * Initialize main interface
    */
   useEffect(() => {
-    window.mainInterface = baseFlowRef.current?.mainInterface?.current;
-    window.canvas = window.mainInterface?.canvas;
-
     mainInterfaceRef.current = baseFlowRef.current?.mainInterface;
   }, [baseFlowRef.current?.mainInterface]);
 

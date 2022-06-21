@@ -452,12 +452,6 @@ class Flow extends Model {
     return this.getExposedPorts().serializeToDB();
   }
 
-  searchNode(node) {
-    const searchableEntities = this.getSearchOptions();
-    const foundNode = searchableEntities.find(n => n.name === node.name);
-    foundNode && foundNode.handleSelectionChange();
-  }
-
   //========================================================================================
   /*                                                                                      *
    *                                    Event Handlers                                    *
