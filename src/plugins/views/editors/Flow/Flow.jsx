@@ -38,6 +38,9 @@ import { FLOW_VIEW_MODE } from "./Constants/constants";
 
 import "./Resources/css/Flow.css";
 import { flowStyles } from "./styles";
+import { useDeferredValue } from "react";
+import GraphBase from "./Core/Graph/GraphBase";
+import GraphTreeView from "./Core/Graph/GraphTreeView";
 
 let activeBookmark = null;
 
@@ -1080,9 +1083,44 @@ const Flow = (props, ref) => {
    * Render Base flow with default visualization mode
    */
   const renderBaseFlow = useCallback(() => {
+    const idPrefix = viewMode;
+    let graphClass = GraphBase;
+
+    if (viewMode === FLOW_VIEW_MODE.treeView) {
+      graphClass = GraphTreeView;
+    }
+
     return (
       <BaseFlow
         {...props}
+        ref={baseFlowRef}
+        graphClass={graphClass}
+        idPrefix={idPrefix}
+        dataFromDB={dataFromDB}
+        warnings={warnings}
+        warningsVisibility={warningsVisibility}
+        flowDebugging={flowDebugging}
+        onReady={onReady}
+      />
+    );
+  }, [
+    props,
+    viewMode,
+    dataFromDB,
+    flowDebugging,
+    warnings,
+    warningsVisibility,
+    onReady
+  ]);
+
+  /**
+   * Render flow in tree view
+   */
+  const renderTreeView = useCallback(() => {
+    return (
+      <TreeView
+        {...props}
+        name={`${FLOW_VIEW_MODE.treeView}-${props.name}`}
         ref={baseFlowRef}
         dataFromDB={dataFromDB}
         warnings={warnings}
@@ -1090,14 +1128,7 @@ const Flow = (props, ref) => {
         onReady={onReady}
       />
     );
-  }, [dataFromDB, onReady, props, warnings, warningsVisibility]);
-
-  /**
-   * Render flow in tree view
-   */
-  const renderTreeView = useCallback(() => {
-    return <TreeView {...props} ref={baseFlowRef} dataFromDB={dataFromDB} />;
-  }, [dataFromDB, props]);
+  }, [props, dataFromDB, warnings, warningsVisibility, onReady]);
 
   return (
     <div data-testid="section_flow-editor" className={classes.root}>
@@ -1119,9 +1150,10 @@ const Flow = (props, ref) => {
           // nodeCompleteStatusUpdated={this.onMonitoringNodeStatusUpdate}
         ></FlowTopBar>
       </div>
-      {viewMode === FLOW_VIEW_MODE.default
+      {/* {viewMode === FLOW_VIEW_MODE.default
         ? renderBaseFlow()
-        : renderTreeView()}
+        : renderTreeView()} */}
+      {renderBaseFlow()}
       <FlowBottomBar
         openFlow={openDoc}
         onToggleWarnings={onToggleWarnings}

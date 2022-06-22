@@ -10,7 +10,7 @@ export const bookmarkStyles = (side, oppositeSide) =>
       background: "#fff0",
       top: "60px",
       width: "40px",
-      zIndex: 999
+      zIndex: theme.zIndex.drawer
     },
     bookmark: {
       width: "40px",

@@ -8,8 +8,8 @@ import { belongLineBuilder } from "../../Utils";
 import BaseNodeStatus from "../BaseNodeStatus";
 
 class TreeNode extends BaseNode {
-  constructor(canvas, node, events, _type, template, parent) {
-    super(canvas, node, events, _type, template);
+  constructor({ canvas, node, events, _type, template, parent }) {
+    super({ canvas, node, events, _type, template });
     this.parent = parent;
     this.children = new Map();
     this._links = new Map();

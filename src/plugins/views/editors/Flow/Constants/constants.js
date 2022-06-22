@@ -14,7 +14,9 @@ const TRANSITION_LINK = "movai_msgs/Transition";
 
 const NODE_TYPES = {
   NODE: "NODE",
-  CONTAINER: "CONTAINER"
+  CONTAINER: "CONTAINER",
+  TREE_NODE: "TREE_NODE",
+  TREE_CONTAINER: "TREE_CONTAINER"
 };
 
 const generateContainerId = flowId => {

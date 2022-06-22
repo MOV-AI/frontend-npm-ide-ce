@@ -1,12 +1,21 @@
-import GraphBase from "./GraphBase";
+import StartNode from "../../Components/Nodes/StartNode";
 import BaseLink from "../../Components/Links/BaseLink";
-import TreeClassicNode from "../../Components/Nodes/TreeView/TreeClassicNode";
-import TreeContainerNode from "../../Components/Nodes/TreeView/TreeContainerNode";
-import { FLOW_VIEW_MODE } from "../../Constants/constants";
+import Factory from "../../Components/Nodes/Factory";
+import { FLOW_VIEW_MODE, NODE_TYPES } from "../../Constants/constants";
+import { InvalidLink } from "../../Components/Links/Errors";
+import GraphBase from "./GraphBase";
+import GraphValidator from "./GraphValidator";
 
-class GraphTreeView extends GraphBase {
-  constructor() {
-    super(arguments);
+export default class GraphTreeView extends GraphBase {
+  constructor({ mInterface, canvas, id, docManager }) {
+    super({ mInterface, canvas, id, docManager });
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                      Properties                                      *
+     *                                                                                      */
+    //========================================================================================
+
     this.tree = { root: null };
   }
 
@@ -45,13 +54,12 @@ class GraphTreeView extends GraphBase {
    *
    * @param {Object} flow
    */
-  loadData(flow) {
-    this._destroy();
+  async loadData(flow) {
     // Add root container node
     const rootNodeData = {
       id: flow.Label,
       ContainerLabel: flow.Label,
-      ContainerFlow: flow.url,
+      ContainerFlow: flow.url ?? flow.Label,
       NodeInst: flow.NodeInst,
       State: flow.state,
       Container: flow.Container
@@ -59,9 +67,22 @@ class GraphTreeView extends GraphBase {
     // Move belong lines behind nodes in flow
     this.canvas.canvas.raise();
     // Add root node to canvas
-    this._addRootNode(rootNodeData).then(() => {
+    try {
+      // Let's add the start node to the list (so links know where to start)
+      this.addStartNode();
+      await this._addRootNode(rootNodeData);
       this.rootNode.addToCanvas();
-    });
+    } catch (e) {
+      console.warn("Error trying to add root node", e);
+    }
+
+    try {
+      await this.loadNodes(flow);
+    } catch (e) {
+      console.warn("Error trying to load all nodes", e);
+    }
+
+    return this;
   }
 
   /**
@@ -71,26 +92,39 @@ class GraphTreeView extends GraphBase {
    * @param {Object} flow : Flow data
    * @param {TreeContainerNode} parent : Parent node
    */
-  loadNodes(flow, parent = this.rootNode) {
-    Promise.all([
-      this._loadNodes(flow.NodeInst, "NodeInst", parent),
-      this._loadNodes(flow.State, "State", parent),
-      this._loadNodes(flow.Container, "Container", parent)
-    ]).then(() => {
+  async loadNodes(flow, parent = this.rootNode) {
+    try {
+      await this._loadNodes(flow.NodeInst, NODE_TYPES.TREE_NODE, parent);
+      await this._loadNodes(flow.Container, NODE_TYPES.TREE_CONTAINER, parent);
+
       // Add parent children to canvas
-      this._loadLinks(flow.Links, parent).update(parent);
-      // Update children position
-      if (!flow.Container || Object.keys(flow.Container).length === 0) {
-        setTimeout(() => {
-          parent.updateChildrenPosition();
-          setTimeout(() => {
-            // Set mode to default
-            this.mode.setMode("default");
-            this.onFlowValidated.next({ warnings: [] });
-          }, 500);
-        }, 500);
+      // this.update(parent);
+      this.update(parent);
+
+      if (flow.Container) {
+        const subFlows = Object.values(flow.Container);
+
+        for (let i = 0, n = subFlows.length; i < n; i++) {
+          const subFlow = subFlows[i];
+          const subFlowInst = this.nodes.get(subFlow.ContainerLabel).obj;
+          const subFlowTemplate = subFlowInst.template;
+
+          await this.loadNodes(subFlowTemplate, subFlowInst);
+        }
+
+        // Update children position
+        parent.updateChildrenPosition();
       }
-    });
+    } catch (error) {
+      console.warn("Error has ocurred loading children", flow, error);
+    }
+
+    try {
+      this._loadLinks(flow.Links, parent);
+      this.onFlowValidated.next({ warnings: [] });
+    } catch (error) {
+      console.warn("Error has ocurred loading links", flow, error);
+    }
   }
 
   /**
@@ -103,21 +137,22 @@ class GraphTreeView extends GraphBase {
    *
    * @returns {TreeNode} Node instance based on _type
    */
-  async addNode(node, _type, parent) {
-    const cls = {
-      NodeInst: TreeClassicNode,
-      Container: TreeContainerNode
-    };
-    let inst;
+  async addNode(node, nodeType, parent) {
     try {
-      inst = await cls[_type].builder(this.canvas, node, parent, this);
+      const inst = await Factory.create(
+        this.docManager,
+        Factory.OUTPUT[nodeType],
+        { canvas: this.canvas, node, parent }
+      );
+
       this.nodes.set(node.id, { obj: inst, links: [] });
+
       parent.addChild(inst);
+
+      return inst;
     } catch (error) {
-      console.log("error creating node", error);
+      console.warn("Error creating node", error);
     }
-    // Return created instance
-    return inst;
   }
 
   /**
@@ -180,55 +215,59 @@ class GraphTreeView extends GraphBase {
   };
 
   /**
-   * Find node by id recursively
-   *
-   * @param {String} name : Node instance ID
-   * @param {TreeNode} node : Node to search
-   * @returns {TreeNode} The searched node
-   */
-  findNodeById = (name, node = this.rootNode) => {
-    if (node.data.id === name) return node;
-    node.children.forEach(child => {
-      this.findNodeById(name, child);
-    });
-  };
-
-  /**
    * @override addLink from GraphBase class
    * @param {Object} link : Link info
    * @param {String} nodeId : Parent node ID
    */
-  addLink = (link, nodeId) => {
-    const parent = this.findNodeById(nodeId);
-    const parsedLink = BaseLink.parseLink(link);
-    if (!this.links.has(parsedLink.id)) {
+  addLink = (link, parent) => {
+    // link already exists, update
+    const _link = this.links.get(link.name);
+
+    if (_link) {
+      link.updateData({ Dependency: link.Dependency });
+      return;
+    }
+
+    try {
+      const parsedLink = BaseLink.parseLink(link);
+
+      const { sourcePortPos, targetPortPos } =
+        GraphValidator.extractLinkPortsPos(parsedLink, this.nodes);
+
+      if (!sourcePortPos || !targetPortPos) {
+        throw new InvalidLink(parsedLink);
+      }
+
+      // create link instance
+      const obj = new BaseLink(
+        this.canvas,
+        sourcePortPos,
+        targetPortPos,
+        parsedLink,
+        this.flowDebugging,
+        this.toggleTooltip
+      );
+
       parent.children.forEach(child => {
-        this._addLinkToNode(child, parsedLink);
+        this._addLinkToNode(child, obj);
       });
       // add links to target children
-      if (parsedLink.targetFullPath.length > 1) {
-        this._addLinksToChildren(parent, parsedLink);
+      if (obj.data.targetFullPath.length > 1) {
+        this._addLinksToChildren(parent, obj);
       }
-      this.links.set(parsedLink.id, { data: parsedLink });
-    }
-  };
+      // update local link list
+      this.links.set(link.name, obj);
 
-  /**
-   * @override deleteLinks from GraphBase class
-   * @param {Array} linksToKeep : Array of link ids that should keep
-   * @param {String} nodeId : Parent node ID
-   */
-  deleteLinks = (linksToKeep, nodeId) => {
-    const parent = this.findNodeById(nodeId);
-    const deletedLinks = new Map([...parent.childrenLinks]);
-    parent.childrenLinks.forEach(link => {
-      if (linksToKeep.includes(link.id)) deletedLinks.delete(link.id);
-    });
-    deletedLinks.forEach(deletedLink => {
-      parent.children.forEach(child => {
-        if (child.links.has(deletedLink.id)) child.removeLink(deletedLink);
-      });
-    });
+      this.invalidLinks = this.invalidLinks.filter(l => l.id !== parsedLink.id);
+    } catch (error) {
+      if (
+        error instanceof InvalidLink &&
+        !this.invalidLinks.find(l => l.id === error.link.id)
+      ) {
+        this.invalidLinks.push(error.link);
+      }
+      console.error(error.message);
+    }
   };
 
   /**
@@ -286,25 +325,6 @@ class GraphTreeView extends GraphBase {
   };
 
   /**
-   * @override _addNode : Add node
-   *  - Use TreeClassicNode/TreeContainerNode/TreeStateNode to create node instances
-   *
-   * @param {Object} node : data
-   * @param {string} _type : one of NodeInst, Container, State used to get the respective class
-   *
-   * @returns {TreeNode} Node instance based on _type
-   */
-  _addNode(node, _type = "NodeInst") {
-    const cls = {
-      NodeInst: TreeClassicNode,
-      Container: TreeContainerNode
-    };
-    const inst = new cls[_type](this.canvas, node, {});
-    this.nodes.set(node.id, { obj: inst, links: [] });
-    return inst;
-  }
-
-  /**
    * @override _loadLinks : parse each link and add it to port
    *
    * @param {Object} links
@@ -315,17 +335,8 @@ class GraphTreeView extends GraphBase {
   _loadLinks(links, parent) {
     const _links = links || {};
     Object.keys(_links).forEach(linkId => {
-      const linksData = { name: linkId, ..._links[linkId] };
-      const parsedLink = BaseLink.parseLink(linksData);
-      parent.children.forEach(child => {
-        this._addLinkToNode(child, parsedLink);
-      });
-      // add links to target children
-      if (parsedLink.targetFullPath.length > 1) {
-        this._addLinksToChildren(parent, parsedLink);
-      }
-      // update local link list
-      this.links.set(linkId, { data: parsedLink });
+      const linksData = { id: linkId, name: linkId, ..._links[linkId] };
+      this.addLink(linksData, parent);
     });
     return this;
   }
@@ -338,13 +349,13 @@ class GraphTreeView extends GraphBase {
    * @param {Integer} level : Iteration level
    */
   _addLinksToChildren(node, link, level = 0) {
-    const parentId = link.targetFullPath[level];
+    const parentId = link.data.targetFullPath[level];
     const container = node.children.get(parentId);
     if (container?.children) {
       container.children.forEach(child => {
         this._addLinkToNode(child, link);
       });
-      if (link.targetFullPath[level + 1])
+      if (link.data.targetFullPath[level + 1])
         this._addLinksToChildren(container, link, level + 1);
     }
   }
@@ -358,16 +369,16 @@ class GraphTreeView extends GraphBase {
   _addLinkToNode(child, link) {
     const childId = child.data.id;
     if (
-      link.targetFullPath.includes(childId) ||
-      link.sourceFullPath.includes(childId)
+      link.data.targetFullPath.includes(childId) ||
+      link.data.sourceFullPath.includes(childId)
     ) {
-      link.sourceTemplatePath = link.sourceFullPath.map(
+      link.data.sourceTemplatePath = link.data.sourceFullPath.map(
         nodeName => this.nodes.get(nodeName)?.obj?.templateName || nodeName
       );
-      link.targetTemplatePath = link.targetFullPath.map(
+      link.data.targetTemplatePath = link.data.targetFullPath.map(
         nodeName => this.nodes.get(nodeName)?.obj?.templateName || nodeName
       );
-      child.addLink(link);
+      child.addLink(link.data);
     }
   }
 
@@ -383,13 +394,17 @@ class GraphTreeView extends GraphBase {
    */
   async _loadNodes(nodes, _type, parent) {
     const _nodes = nodes || {};
-    const pNodes = [];
-    // Gather nodes
-    Object.keys(_nodes).forEach(node => {
-      const _node = { ..._nodes[node], id: node };
-      pNodes.push(this.addNode(_node, _type, parent));
-    });
-    await Promise.all(pNodes);
+    const keys = Object.keys(_nodes);
+
+    for (let i = 0, n = keys.length; i < n; i++) {
+      const _node = { ..._nodes[keys[i]], id: keys[i] };
+
+      try {
+        await this.addNode(_node, _type, parent);
+      } catch (error) {
+        console.warn("Error has ocurred loading node", _node, error);
+      }
+    }
     // Return graph instance
     return this;
   }
@@ -400,9 +415,30 @@ class GraphTreeView extends GraphBase {
    * @param {Object} node : data about root node
    */
   async _addRootNode(node) {
-    const inst = await TreeContainerNode.builder(this.canvas, node, null, this);
-    this.tree.root = inst;
+    try {
+      const inst = await Factory.create(
+        this.docManager,
+        Factory.OUTPUT[NODE_TYPES.TREE_CONTAINER],
+        { canvas: this.canvas, node }
+      );
+
+      this.nodes.set(node.id, { obj: inst, links: [] });
+
+      this.tree.root = inst;
+    } catch (error) {
+      console.warn("Error creating node", error);
+    }
   }
+
+  /**
+   * Add Start Node
+   */
+  addStartNode = () => {
+    const { canvas } = this;
+    const inst = new StartNode({ canvas });
+    const value = { obj: inst, links: [] };
+    this.nodes.set(inst.data.id, value);
+  };
 
   /**
    * @private
@@ -422,6 +458,8 @@ class GraphTreeView extends GraphBase {
       node.addToCanvas();
     });
   }
-}
 
-export default GraphTreeView;
+  reStrokeLinks = () => {
+    /* empty on purpose */
+  };
+}

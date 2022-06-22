@@ -4,18 +4,17 @@ import React, {
   useEffect,
   useState,
   useMemo,
-  useRef
+  useRef,
+  memo
 } from "react";
 import PropTypes from "prop-types";
 import Backdrop from "@material-ui/core/Backdrop";
 import { usePluginMethods } from "../../../../../engine/ReactPlugin/ViewReactPlugin";
-import { generateContainerId } from "../Constants/constants";
-import { EVT_NAMES } from "../events";
 import Loader from "../../_shared/Loader/Loader";
+import { FLOW_VIEW_MODE, generateContainerId } from "../Constants/constants";
 import Warnings from "../Components/Warnings/Warnings";
+import GraphTreeView from "../Core/Graph/GraphTreeView";
 import useMainInterface from "./hooks/useMainInterface";
-import { PLUGINS } from "../../../../../utils/Constants";
-// import GraphTreeView from "../Core/Graph/GraphTreeView";
 
 import { baseFlowStyles } from "./styles";
 
@@ -28,8 +27,6 @@ const TreeView = forwardRef((props, ref) => {
     type,
     model,
     dataFromDB,
-    off,
-    on,
     warnings,
     warningsVisibility,
     onReady
@@ -43,26 +40,32 @@ const TreeView = forwardRef((props, ref) => {
   const isMountedRef = useRef(false);
   // Other hooks
   const classes = baseFlowStyles();
-  const containerId = useMemo(() => generateContainerId(id), [id]);
+  const containerId = useMemo(
+    () => `${FLOW_VIEW_MODE.treeView}-${generateContainerId(id)}`,
+    [id]
+  );
 
-  const { mainInterface } = useMainInterface({
-    classes,
-    instance,
-    name,
-    data: dataFromDB,
-    // graphCls: GraphTreeView,
-    type,
-    width: "400px",
-    height: "200px",
-    containerId,
-    model,
-    readOnly,
-    call
-  });
+  // const { mainInterface } = useMainInterface({
+  //   classes,
+  //   instance,
+  //   name,
+  //   data: dataFromDB,
+  //   graphCls: GraphTreeView,
+  //   type,
+  //   width: "400px",
+  //   height: "200px",
+  //   containerId,
+  //   model,
+  //   readOnly,
+  //   call
+  // });
 
-  const getMainInterface = useCallback(() => {
-    return mainInterface.current;
-  }, [mainInterface]);
+  console.log("tree view loading", loading);
+
+  // const getMainInterface = useCallback(
+  //   () => mainInterface.current,
+  //   [mainInterface]
+  // );
 
   //========================================================================================
   /*                                                                                      *
@@ -70,12 +73,34 @@ const TreeView = forwardRef((props, ref) => {
    *                                                                                      */
   //========================================================================================
 
-  useEffect(() => {
-    const mInterface = getMainInterface();
-    console.log("debug getMainInterface", mInterface);
-  }, [getMainInterface]);
+  // useEffect(() => {
+  //   const mInt = getMainInterface();
+  //   console.log("here 1");
 
-  usePluginMethods(ref, { mainInterface });
+  //   if (!mInt || isMountedRef.current) return;
+  //   isMountedRef.current = true;
+  //   console.log("here 2");
+
+  //   // Subscribe to on loading exit (finish) event
+  //   mInt.mode.loading.onExit.subscribe(() => {
+  //     console.log("Subscribe to on loading exit (finish) event");
+  //     setLoading(false);
+  //   });
+
+  //   // Dispatch on ready event
+  //   onReady(mInt);
+
+  //   return () => {
+  //     getMainInterface().graph.destroy();
+  //     isMountedRef.current = false;
+  //   };
+  // }, [getMainInterface, dataFromDB, onReady]);
+
+  useEffect(() => {
+    setLoading(false);
+  }, [dataFromDB]);
+
+  // usePluginMethods(ref, { mainInterface });
 
   //========================================================================================
   /*                                                                                      *
@@ -84,7 +109,10 @@ const TreeView = forwardRef((props, ref) => {
   //========================================================================================
 
   return (
-    <div id={`flow-main-${id}`} className={classes.flowContainer}>
+    <div
+      id={`${FLOW_VIEW_MODE.treeView}-${id}`}
+      className={classes.flowContainer}
+    >
       {loading && (
         <Backdrop className={classes.backdrop} open={loading}>
           <Loader />
@@ -117,7 +145,7 @@ TreeView.propTypes = {
 };
 
 TreeView.defaultProps = {
-  onReady: () => console.warning("On ready prop not received")
+  onReady: () => console.warn("On ready prop not received")
 };
 
-export default TreeView;
+export default memo(TreeView);

@@ -17,7 +17,17 @@ class BaseLinkStruct {
     canvas,
     src,
     trg,
-    { id, sourceNode, sourcePort, targetNode, targetPort, dependency, error }
+    {
+      id,
+      sourceNode,
+      sourcePort,
+      targetNode,
+      targetPort,
+      dependency,
+      error,
+      sourceFullPath,
+      targetFullPath
+    }
   ) {
     this.canvas = canvas;
     this.src = src; // {x, y, nodeSize {height, width}, type}
@@ -25,11 +35,13 @@ class BaseLinkStruct {
     this.error = error; // null or { message, fixError() }
     this.maxMovingPixels = canvas.maxMovingPixels;
     this.data = {
-      id: id,
-      sourceNode: sourceNode,
-      sourcePort: sourcePort,
-      targetNode: targetNode,
-      targetPort: targetPort,
+      id,
+      sourceNode,
+      sourcePort,
+      targetNode,
+      targetPort,
+      sourceFullPath,
+      targetFullPath,
       Dependency: dependency
     };
     this._visible = true;
@@ -455,12 +467,13 @@ export default class BaseLink extends BaseLinkStruct {
     });
   }
 
-  static parseLink({
-    id,
-    From,
-    To,
-    Dependency = LINK_DEPENDENCY.ALL_DEPENDENCIES.VALUE
-  }) {
+  static parseLink(linksData) {
+    const {
+      id,
+      From,
+      To,
+      Dependency = LINK_DEPENDENCY.ALL_DEPENDENCIES.VALUE
+    } = linksData;
     const [sourceNode, sourcePort, sourceFullPath] = BaseLink.getNodePort(From);
     const [targetNode, targetPort, targetFullPath] = BaseLink.getNodePort(To);
 

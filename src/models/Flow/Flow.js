@@ -109,7 +109,7 @@ class Flow extends Model {
    * @returns {Manager}
    */
   getSubFlowItem(flowId) {
-    return this.subFlows.getItem(flowId);
+    return this.subFlows.getItem(flowId) ?? this;
   }
 
   /**

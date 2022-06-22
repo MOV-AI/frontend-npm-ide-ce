@@ -4,13 +4,14 @@ import React, {
   useEffect,
   useState,
   useMemo,
-  useRef
+  useRef,
+  memo
 } from "react";
 import PropTypes from "prop-types";
 import Backdrop from "@material-ui/core/Backdrop";
 import { usePluginMethods } from "../../../../../engine/ReactPlugin/ViewReactPlugin";
 import { PLUGINS, SCOPES } from "../../../../../utils/Constants";
-import { generateContainerId } from "../Constants/constants";
+import { FLOW_VIEW_MODE, generateContainerId } from "../Constants/constants";
 import { EVT_NAMES } from "../events";
 import Loader from "../../_shared/Loader/Loader";
 import Warnings from "../Components/Warnings/Warnings";
@@ -33,7 +34,9 @@ const BaseFlow = forwardRef((props, ref) => {
     warnings,
     warningsVisibility,
     onReady,
-    flowDebugging
+    flowDebugging,
+    idPrefix,
+    graphClass
   } = props;
   const readOnly = false;
 
@@ -43,13 +46,17 @@ const BaseFlow = forwardRef((props, ref) => {
   const isMountedRef = useRef(false);
   // Other hooks
   const classes = baseFlowStyles();
-  const containerId = useMemo(() => generateContainerId(id), [id]);
+  const containerId = useMemo(
+    () => `${idPrefix}-${generateContainerId(id)}`,
+    [idPrefix, id]
+  );
 
   const { mainInterface } = useMainInterface({
     classes,
     instance,
     name,
     data: dataFromDB,
+    graphCls: graphClass,
     type,
     width: "400px",
     height: "200px",
@@ -59,9 +66,10 @@ const BaseFlow = forwardRef((props, ref) => {
     call
   });
 
-  const getMainInterface = useCallback(() => {
-    return mainInterface.current;
-  }, [mainInterface]);
+  const getMainInterface = useCallback(
+    () => mainInterface.current,
+    [mainInterface]
+  );
 
   // Enter in add node/sub-flow mode
   useEffect(() => {
@@ -95,25 +103,23 @@ const BaseFlow = forwardRef((props, ref) => {
 
     // Subscribe to on loading exit (finish) event
     mInt.mode.loading.onExit.subscribe(() => {
+      console.log("mInt", mInt);
+      mInt.canvas.appendDocumentFragment();
       setLoading(false);
     });
 
     // Dispatch on ready event
     onReady(mInt);
-  }, [getMainInterface, dataFromDB, onReady]);
-
-  // On before unmount
-  useEffect(() => {
     return () => {
       getMainInterface().graph.destroy();
       isMountedRef.current = false;
     };
-  }, [getMainInterface]);
+  }, [graphClass, dataFromDB, onReady, getMainInterface]);
 
   usePluginMethods(ref, { mainInterface });
 
   return (
-    <div id={`flow-main-${id}`} className={classes.flowContainer}>
+    <div id={`${idPrefix}-${id}`} className={classes.flowContainer}>
       {loading && (
         <Backdrop className={classes.backdrop} open={loading}>
           <Loader />
@@ -143,4 +149,4 @@ BaseFlow.defaultProps = {
   onReady: () => console.warning("On ready prop not received")
 };
 
-export default BaseFlow;
+export default memo(BaseFlow);

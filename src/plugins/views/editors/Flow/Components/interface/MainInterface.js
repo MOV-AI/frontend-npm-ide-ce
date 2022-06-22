@@ -41,6 +41,11 @@ export default class MainInterface {
     call,
     graphCls
   }) {
+    //========================================================================================
+    /*                                                                                      *
+     *                                      Properties                                      *
+     *                                                                                      */
+    //========================================================================================
     this.id = id;
     this.containerId = containerId;
     this.width = width;
@@ -50,23 +55,16 @@ export default class MainInterface {
     this.graphCls = graphCls ?? Graph;
     this.classes = classes;
     this.docManager = call;
+    this.stateSub = new BehaviorSubject(0);
+    this.events = new Events();
+    this.mode = new InterfaceModes(this);
+    this.api = null;
+    this.canvas = null;
+    this.graph = null;
+    this.shortcuts = null;
 
     this.initialize();
   }
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                      Properties                                      *
-   *                                                                                      */
-  //========================================================================================
-
-  stateSub = new BehaviorSubject(0);
-  events = new Events();
-  mode = new InterfaceModes(this);
-  api = null;
-  canvas = null;
-  graph = null;
-  shortcuts = null;
 
   //========================================================================================
   /*                                                                                      *
@@ -75,9 +73,12 @@ export default class MainInterface {
   //========================================================================================
 
   initialize = () => {
-    this.mode.setMode(EVT_NAMES.LOADING);
-
     const { classes, containerId, docManager, height, id, width } = this;
+
+    console.log("initialize main interface");
+
+    // Set initial mode as loading
+    this.setMode(EVT_NAMES.LOADING);
 
     this.canvas = new Canvas({
       mInterface: this,
@@ -95,23 +96,15 @@ export default class MainInterface {
       docManager
     });
 
-    // Set initial mode as loading
-    this.setMode(EVT_NAMES.LOADING);
-
     // Load document and add subscribers
     this.addSubscribers()
       .loadDoc()
       .then(() => {
-        this.canvas.el.focus();
-
-        this.mode.setMode(EVT_NAMES.DEFAULT);
+        //this.canvas.el.focus();
+        console.log("this.canvas", this.canvas);
+        console.log("this.canvas.el", this.canvas.el);
+        this.setMode(EVT_NAMES.DEFAULT);
       });
-  };
-
-  reload = () => {
-    this.canvas.reload();
-    this.destroy();
-    this.loadDoc();
   };
 
   /**
@@ -119,8 +112,8 @@ export default class MainInterface {
    * Loads the document in the graph
    * @returns {MainInterface} : The instance
    */
-  loadDoc = () => {
-    return this.graph.loadData(this.data);
+  loadDoc = async () => {
+    await this.graph.loadData(this.modelView.current.serializeToDB());
   };
 
   //========================================================================================
@@ -370,9 +363,7 @@ export default class MainInterface {
   onSelectNode = data => {
     const { nodes, shiftKey } = data;
     const { selectedNodes } = this;
-    const filterNodes = nodes.filter(
-      n => n.data.model !== StartNode.model
-    );
+    const filterNodes = nodes.filter(n => n.data.model !== StartNode.model);
 
     this.selectedLink = null;
 

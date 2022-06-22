@@ -6,6 +6,7 @@ import TemporaryNode from "./TemporaryNode";
 import TreeClassicNode from "./TreeView/TreeClassicNode";
 import PreviewClassicNode from "./Preview/PreviewClassicNode";
 import PreviewContainerNode from "./Preview/PreviewContainerNode";
+import TreeContainerNode from "./TreeView/TreeContainerNode";
 
 /**
  * Factory class to produce Nodes and Containers (aka Sub-Flows)
@@ -22,6 +23,7 @@ class Factory {
    * @returns {object} : The template data
    */
   async getTemplate(name) {
+    const templateType = "MovAI/Flow";
     const { scope } = this.output;
     const obj = await this.docManager(
       PLUGINS.DOC_MANAGER.NAME,
@@ -31,8 +33,11 @@ class Factory {
         name
       }
     );
+    const finalObject = obj.serializeToDB();
 
-    return obj.serializeToDB();
+    if (!obj.isNew) finalObject.Type = finalObject.Type ?? templateType;
+
+    return finalObject;
   }
 
   /**
@@ -75,7 +80,7 @@ class Factory {
     TREE_NODE: { cls: TreeClassicNode, scope: "Node" },
     CONTAINER: { cls: ContainerNode, scope: "Flow" },
     TMP_CONTAINER: { cls: TemporaryContainerNode, scope: "Flow" },
-    TREE_CONTAINER: { cls: TreeClassicNode, scope: "Flow" }
+    TREE_CONTAINER: { cls: TreeContainerNode, scope: "Flow" }
   };
 }
 

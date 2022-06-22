@@ -546,7 +546,7 @@ class BaseNode extends BaseNodeStruct {
       if (!shiftKey) this.canvas.setMode("default", null);
 
       // set the node selection
-      this.selected = selection;
+      this.selected = this.parent && selection;
 
       // node selected mode
       this.canvas.setMode("selectNode", { nodes: [this], shiftKey }, true);
