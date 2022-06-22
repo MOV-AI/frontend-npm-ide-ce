@@ -1,3 +1,10 @@
+# 3.1.0
+
+**Flow Editor**
+
+- [FP-897 - Ability to search node instances](https://movai.atlassian.net/browse/FP-897)
+- [FP-1853 - Migrate Flow shortcuts - Reset Zoom and move nodes with arrow keys](https://movai.atlassian.net/browse/FP-1853)
+
 # 3.0.0
 
 **System Bar**
