@@ -1,9 +1,9 @@
 import React, { useCallback, useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
-import _get from "lodash/get";
-import _set from "lodash/set";
 import { Typography } from "@material-ui/core";
-import VirtualizedTree from "./../../../../Explorer/components/VirtualizedTree/VirtualizedTree";
+import ListItemsTreeWithSearch, {
+  toggleExpandRow
+} from "./../../../../Explorer/components/ListItemTree/ListItemsTreeWithSearch";
 import { withViewPlugin } from "../../../../../../engine/ReactPlugin/ViewReactPlugin";
 import { PLUGINS } from "../../../../../../utils/Constants";
 import Preview from "./Preview";
@@ -11,7 +11,7 @@ import Preview from "./Preview";
 import { explorerStyles } from "./styles";
 
 const Explorer = props => {
-  const { flowId, call, on, emit, height, mainInterface } = props;
+  const { flowId, call, on, emit, mainInterface } = props;
   const classes = explorerStyles();
   const [data, setData] = useState([]);
   const [selectedNode, setSelectedNode] = useState({});
@@ -39,42 +39,15 @@ const Explorer = props => {
    */
   const requestScopeVersions = useCallback(
     node => {
-      const deepnessToAction = {
-        0: () => {
-          // Toggle the expansion of the clicked panel
-          setData(prevData => {
-            const nextData = [...prevData];
-            const isExpanded = _get(
-              prevData,
-              [node.id, "state", "expanded"],
-              false
-            );
-            _set(nextData, [node.id, "state"], {
-              expanded: !isExpanded
-            });
-
-            // Close other panels
-            prevData
-              .filter(elem => elem.id !== node.id)
-              .forEach(panel => {
-                _set(nextData, [panel.id, "state"], {
-                  expanded: false
-                });
-              });
-            return nextData;
-          });
-        },
-        1: () => {
-          shouldUpdatePreview.current = false;
-          setSelectedNode(node);
-          emit(PLUGINS.FLOW_EXPLORER.ON.ADD_NODE, node);
-        }
-      };
-      _get(deepnessToAction, node.deepness, () => {
-        console.warn("action not implemented");
-      })();
+      if (node.children?.length) {
+        setData(toggleExpandRow(node, data));
+      } else {
+        shouldUpdatePreview.current = false;
+        setSelectedNode(node);
+        emit(PLUGINS.FLOW_EXPLORER.ON.ADD_NODE, node);
+      }
     },
-    [emit]
+    [data, emit]
   );
 
   //========================================================================================
@@ -155,18 +128,23 @@ const Explorer = props => {
   //========================================================================================
 
   return (
-    <Typography data-testid="section_flow-explorer-menu" component="div">
-      <Typography component="div" className={classes.typography}>
+    <Typography
+      className={classes.flowExplorerHolder}
+      data-testid="section_flow-explorer-menu"
+      component="div"
+    >
+      <Typography component="div">
         <Preview node={selectedNode} flowId={flowId} call={call} />
       </Typography>
       <Typography component="div" className={classes.typography}>
-        <VirtualizedTree
-          data={data}
-          onClickNode={requestScopeVersions}
-          onMouseEnter={handleMouseEnterNode}
-          onMouseLeave={handleMouseLeaveNode}
-          height={height}
-        ></VirtualizedTree>
+        {data && (
+          <ListItemsTreeWithSearch
+            data={data}
+            onClickNode={requestScopeVersions}
+            onMouseEnter={handleMouseEnterNode}
+            onMouseLeave={handleMouseLeaveNode}
+          ></ListItemsTreeWithSearch>
+        )}
       </Typography>
     </Typography>
   );
@@ -176,10 +154,5 @@ export default withViewPlugin(Explorer);
 
 Explorer.propTypes = {
   call: PropTypes.func.isRequired,
-  on: PropTypes.func.isRequired,
-  height: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-};
-
-Explorer.defaultProps = {
-  height: 700
+  on: PropTypes.func.isRequired
 };

@@ -13,24 +13,51 @@ import { defaultFunction } from "../../../../../../utils/Utils";
 import { MisMatchMessageLink } from "../../Components/Links/Errors";
 import { isLinkeable } from "../../Components/Nodes/BaseNode/PortValidator";
 
-const messages = {
-  startLink: {
+export const WARNING_TYPES = {
+  START_LINK: "startLink",
+  LINK_MISMATCH: "linkMismatchMessage",
+  INVALID_PARAMETERS: "invalidParameters",
+  INVALID_LINKS: "invalidLinks"
+};
+
+const WARNINGS = {
+  [WARNING_TYPES.START_LINK]: {
     message: i18n.t("StartLinkNotFound"),
     type: "warning",
     isRuntime: true,
     isPersistent: false
   },
-  linkMismatchMessage: {
+  [WARNING_TYPES.LINK_MISMATCH]: {
     message: i18n.t("MessageMismatchedLinks"),
     type: "warning",
     isRuntime: false,
     isPersistent: true
+  },
+  [WARNING_TYPES.INVALID_PARAMETERS]: {
+    message: i18n.t("InvalidSubFlowParameters"),
+    isPersistent: true,
+    isRuntime: false,
+    type: "warning"
+  },
+  [WARNING_TYPES.INVALID_LINKS]: {
+    message: i18n.t("InvalidLinksFoundTitle"),
+    isPersistent: true,
+    isRuntime: false,
+    type: "warning"
   }
 };
 
 export default class GraphValidator {
   constructor(graph) {
     this.graph = graph;
+  }
+
+  setWarningActions(warningType, action) {
+    if (WARNINGS[warningType]) WARNINGS[warningType].onClick = action;
+  }
+
+  removeWarningAction(warningType) {
+    if (WARNINGS[warningType]) delete WARNINGS[warningType].onClick;
   }
 
   /**
@@ -48,12 +75,14 @@ export default class GraphValidator {
    * Validate links in graph
    *  Rule nr. 1 : Missing start link
    *  Rule nr. 2 : Links between ports with different message types
+   *  Rule nr. 3 : Links that don't have start or end port
    * @returns {Array} warnings objects
    */
   validateLinks = () => {
     const warnings = [];
     const links = this.graph.links;
     const nodes = this.graph.nodes;
+    const invalidLinks = this.graph.invalidLinks;
     let linksStart = false;
     let linksMismatches = false;
 
@@ -78,9 +107,16 @@ export default class GraphValidator {
     });
 
     // Check rule nr. 1 : Missing start link
-    if (!linksStart) warnings.push(messages.startLink);
+    if (!linksStart) warnings.push(WARNINGS[WARNING_TYPES.START_LINK]);
     // Check rule nr. 2 : Links between ports with different message types
-    if (linksMismatches) warnings.push(messages.linkMismatchMessage);
+    if (linksMismatches) warnings.push(WARNINGS[WARNING_TYPES.LINK_MISMATCH]);
+    // Check rule nr. 3 : Links that don't have start or end port
+    if (invalidLinks.length)
+      warnings.push({
+        ...WARNINGS[WARNING_TYPES.INVALID_LINKS],
+        data: this.graph.invalidLinks,
+        callback: this.graph.clearInvalidLinks
+      });
 
     this.addDeletedLinks();
 
@@ -105,7 +141,8 @@ export default class GraphValidator {
    * @returns {Array} List of container id that has invalid params
    */
   validateContainerParams = () => {
-    const invalidContainers = new Map();
+    const invalidContainers = [];
+    const invalidParamsWarning = [];
     const containers = new Map(
       [...this.graph.nodes].filter(
         ([_, node]) => node.obj.data.type === "Container"
@@ -115,14 +152,30 @@ export default class GraphValidator {
       const containerNode = container.obj;
       const instanceParams = containerNode?.data?.Parameter ?? {};
       const templateParams = containerNode?._template?.Parameter ?? {};
+      const invalidParams = [];
+
       for (const param in instanceParams) {
         if (!Object.hasOwnProperty.call(templateParams, param)) {
-          invalidContainers.set(containerNode.data.id, containerNode);
+          invalidParams.push(param);
         }
       }
+      invalidParams.length &&
+        invalidContainers.push({
+          id: containerNode.data.id,
+          name: containerNode.data.name,
+          containerNode,
+          invalidParams
+        });
     });
+
+    invalidContainers.length &&
+      invalidParamsWarning.push({
+        ...WARNINGS[WARNING_TYPES.INVALID_PARAMETERS],
+        data: invalidContainers
+      });
+
     // return containers id
-    return [...invalidContainers.keys()];
+    return invalidParamsWarning;
   };
 
   /**
@@ -133,9 +186,12 @@ export default class GraphValidator {
    *  invalidContainers: array with containers id with invalid params
    */
   validateFlow = () => {
-    const warnings = this.validateLinks();
-    const invalidContainersParam = this.validateContainerParams();
-    return { warnings, invalidContainersParam };
+    // Gather all warnings
+    const invalidLinks = this.validateLinks();
+    const invalidParams = this.validateContainerParams();
+    // Merge warnings and return them
+    const warnings = [...invalidLinks, ...invalidParams];
+    return { warnings };
   };
 
   /**

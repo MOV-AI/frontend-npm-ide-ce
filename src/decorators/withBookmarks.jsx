@@ -204,7 +204,7 @@ const withBookmarks = Component => {
       <div className={classes.bookmarksContainer}>
         {renderBookmarks("left")}
         <Component {...props} ref={drawerRef}>
-          <div id="custom-drawer-view">{renderedView}</div>
+          <div className={classes.bookmarkHolder}>{renderedView}</div>
         </Component>
         {renderBookmarks("right")}
       </div>

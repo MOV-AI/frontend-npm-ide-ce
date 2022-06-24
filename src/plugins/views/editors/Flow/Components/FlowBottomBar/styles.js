@@ -1,7 +1,9 @@
 const styles = theme => ({
   bar: {
     height: "25px",
-    width: "100%"
+    width: "100%",
+    display: "flex",
+    justifyContent: "space-between"
   },
   grow: {
     flexGrow: 1
@@ -33,8 +35,19 @@ const styles = theme => ({
     filter: `drop-shadow(2px 4px 6px gray)`
   },
   alignRight: {
-    float: "right",
+    display: "flex",
+    alignItems: "center",
+    height: "100%",
     borderLeft: `solid 1px ${theme.palette.background.secondary}`
+  },
+  debugToggle: {
+    "&>label": {
+      margin: "0px",
+      height: "27px",
+      "&>span": {
+        fontSize: "12px"
+      }
+    }
   }
 });
 
