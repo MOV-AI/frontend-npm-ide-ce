@@ -34,7 +34,6 @@ import InvalidLinksWarning from "./Components/Warnings/InvalidLinksWarning";
 import InvalidParametersWarning from "./Components/Warnings/InvalidParametersWarning";
 import { EVT_NAMES, EVT_TYPES } from "./events";
 import { FLOW_VIEW_MODE } from "./Constants/constants";
-import * as d3 from "d3";
 
 import "./Resources/css/Flow.css";
 import { flowStyles } from "./styles";
@@ -1038,74 +1037,26 @@ const Flow = (props, ref) => {
    * Handle zoom reset
    */
   const handleResetZoom = useCallback(_e => {
-    const { canvas } = getMainInterface();
-    canvas
-      .getSvg()
-      .transition()
-      .duration(750)
-      .call(canvas.zoomBehavior.transform, d3.zoomIdentity);
+    getMainInterface()?.onResetZoom();
   }, []);
 
   /**
    * Handle Move Node
    */
-  const handleMoveNode = useCallback(event => {
-    const mainInterface = getMainInterface();
-    const currentZoom = mainInterface.canvas.currentZoom?.k ?? 1;
-    const step = 2 / currentZoom + 1;
-    const delta = {
-      ArrowRight: [1 * step, 0],
-      ArrowLeft: [-1 * step, 0],
-      ArrowUp: [0, -1 * step],
-      ArrowDown: [0, 1 * step]
-    };
-    const [dx, dy] = delta[event.code];
-    const [x, y] = [50, 50]; // skip boundaries validation used when dragging a node
-    mainInterface.graph.onNodeDrag(null, { x, y, dx, dy });
-    mainInterface.onDragEnd();
-  }, []);
-
-  /*
-   * Handle focus node
-   */
-  const onFocusNode = useCallback(node => {
-    const { canvas, setMode: setInterfaceMode } = getMainInterface();
-    const { xCenter, yCenter } = node.center;
-    setInterfaceMode(EVT_NAMES.DEFAULT, null, true);
-    node.selected = true;
-
-    if (node.data.id !== "start") {
-      setInterfaceMode(
-        EVT_NAMES.SELECT_NODE,
-        { nodes: [node], shiftKey: false },
-        true
-      );
-    }
-    const { width, height } = canvas.el.getBoundingClientRect();
-    canvas
-      .getSvg()
-      .transition()
-      .duration(750)
-      .call(
-        canvas.zoomBehavior.transform,
-        d3.zoomIdentity
-          .translate(width * 0.5 - 2 * xCenter, height * 0.5 - 2 * yCenter)
-          .scale(2)
-      );
+  const handleMoveNode = useCallback(e => {
+    getMainInterface()?.onMoveNode(e);
   }, []);
 
   /*
    * Handle search nodes
    */
-  const onSearchNode = useCallback(
-    node => {
-      const nodeInstance = node && getMainInterface().searchNode(node);
-      if (!nodeInstance) return;
-      nodeInstance.handleSelectionChange();
-      onFocusNode(nodeInstance);
-    },
-    [onFocusNode]
-  );
+  const onSearchNode = useCallback(node => {
+    const mainInterface = getMainInterface();
+    const nodeInstance = node && mainInterface.searchNode(node);
+    if (!nodeInstance) return;
+    nodeInstance.handleSelectionChange();
+    mainInterface.onFocusNode(nodeInstance);
+  }, []);
 
   //========================================================================================
   /*                                                                                      *
@@ -1119,8 +1070,8 @@ const Flow = (props, ref) => {
       KEYBINDINGS.FLOW.KEYBINDS.PASTE_NODE.SHORTCUTS,
       handlePasteNodes
     );
-    addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.MOVE_NODE, handleMoveNode);
-    addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.RESET_ZOOM, handleResetZoom);
+    addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.MOVE_NODE.SHORTCUTS, handleMoveNode);
+    addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.RESET_ZOOM.SHORTCUTS, handleResetZoom);
     addKeyBind(
       KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.CANCEL.SHORTCUTS,
       setFlowsToDefault
