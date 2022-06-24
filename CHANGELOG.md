@@ -8,6 +8,7 @@
 **FLOW**
 
 - [FP-1084 - Add debug colors to links](https://movai.atlassian.net/browse/FP-1084)
+- [FP-1441 - Add Tree view mode to Flow Editor](https://movai.atlassian.net/browse/FP-1441)
 - [FP-1667 - Add More information to missing links](https://movai.atlassian.net/browse/FP-1667)
 - [FP-1669 - Add More information to missing parameters](https://movai.atlassian.net/browse/FP-1669)
 - [FP-1741 - Push flow parameter errors to Warnings, and make warnings clickable](https://movai.atlassian.net/browse/FP-1741)
