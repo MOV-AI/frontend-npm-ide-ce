@@ -1159,7 +1159,6 @@ const Flow = (props, ref) => {
           onStartStopFlow={onStartStopFlow}
           nodeStatusUpdated={onNodeStatusUpdate}
           onViewModeChange={onViewModeChange}
-          searchOptions={instance.current?.getSearchOptions()}
           // nodeCompleteStatusUpdated={onMonitoringNodeStatusUpdate}
         ></FlowTopBar>
       </div>
