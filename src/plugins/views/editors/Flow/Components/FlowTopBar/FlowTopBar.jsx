@@ -582,14 +582,16 @@ FlowTopBar.propTypes = {
   onViewModeChange: PropTypes.func,
   onStartStopFlow: PropTypes.func,
   onRobotChange: PropTypes.func,
-  onSearchDisabled: PropTypes.func,
-  onSearchFocus: PropTypes.func,
-  onSearchNode: PropTypes.func,
   openFlow: PropTypes.func,
   workspace: PropTypes.string,
   type: PropTypes.string,
   version: PropTypes.string,
-  searchOptions: PropTypes.arrayOf(PropTypes.string)
+  searchProps: PropTypes.shape({
+    onSearchDisabled: PropTypes.func,
+    onSearchFocus: PropTypes.func,
+    onSearchNode: PropTypes.func,
+    searchOptions: PropTypes.arrayOf(PropTypes.string)
+  })
 };
 
 FlowTopBar.defaultProps = {
