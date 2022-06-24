@@ -1064,7 +1064,7 @@ const Flow = (props, ref) => {
     [deactivateKeyBind]
   );
 
-  const handleSearchFocus = useCallback(
+  const handleSearchEnabled = useCallback(
     _e => {
       if (!searchVisible) setSearchVisible(true);
     },
@@ -1163,8 +1163,8 @@ const Flow = (props, ref) => {
             visible: searchVisible,
             options: instance.current?.getSearchOptions(),
             onChange: handleSearchNode,
-            onFocus: handleSearchFocus,
-            onBlur: handleSearchDisabled
+            onEnabled: handleSearchEnabled,
+            onDisabled: handleSearchDisabled
           }}
           // nodeCompleteStatusUpdated={onMonitoringNodeStatusUpdate}
         ></FlowTopBar>

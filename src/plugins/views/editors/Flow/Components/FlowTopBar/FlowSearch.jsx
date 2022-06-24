@@ -13,7 +13,7 @@ import { NodeInstance } from "../../../../../../models/Flow/subModels";
 import { useTranslation } from "react-i18next";
 
 const FlowSearch = props => {
-  const { options, onChange, onFocus, onBlur, visible } = props;
+  const { options, onChange, onEnabled, onDisabled, visible } = props;
   const classes = flowTopBarStyles();
   const { t } = useTranslation();
 
@@ -33,10 +33,10 @@ const FlowSearch = props => {
   const handleSearchToggle = useCallback(() => {
     const searchWillBeVisible = !visible;
     if (searchWillBeVisible) {
-      return onFocus();
+      return onEnabled();
     }
-    onBlur();
-  }, [visible, onFocus, onBlur]);
+    onDisabled();
+  }, [visible, onEnabled, onDisabled]);
 
   //========================================================================================
   /*                                                                                      *
@@ -101,7 +101,7 @@ const FlowSearch = props => {
       getOptionLabel={option => option.name}
       onChange={handleSearchNode}
       onBlur={handleSearchToggle}
-      onFocus={onFocus}
+      onFocus={onEnabled}
       groupBy={option =>
         option instanceof NodeInstance ? t("Node") : t("SubFlow")
       }
@@ -112,10 +112,11 @@ const FlowSearch = props => {
 };
 
 FlowSearch.propTypes = {
-  onSearchDisabled: PropTypes.func,
-  onSearchFocus: PropTypes.func,
-  onSearchNode: PropTypes.func,
-  searchOptions: PropTypes.arrayOf(PropTypes.string)
+  visible: PropTypes.bool,
+  options: PropTypes.arrayOf(PropTypes.string),
+  onChange: PropTypes.func,
+  onEnabled: PropTypes.func,
+  onDisabled: PropTypes.func
 };
 
 export default FlowSearch;

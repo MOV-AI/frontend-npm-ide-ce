@@ -587,10 +587,11 @@ FlowTopBar.propTypes = {
   type: PropTypes.string,
   version: PropTypes.string,
   searchProps: PropTypes.shape({
-    onSearchDisabled: PropTypes.func,
-    onSearchFocus: PropTypes.func,
-    onSearchNode: PropTypes.func,
-    searchOptions: PropTypes.arrayOf(PropTypes.string)
+    visible: PropTypes.bool,
+    options: PropTypes.arrayOf(PropTypes.string),
+    onChange: PropTypes.func,
+    onEnabled: PropTypes.func,
+    onDisabled: PropTypes.func
   })
 };
 
