@@ -1,18 +1,13 @@
 import lodash from "lodash";
 import { BehaviorSubject } from "rxjs";
 import { filter } from "rxjs/operators";
-import { NODE_TYPES } from "../../Constants/constants";
+import { NODE_TYPES, TYPES } from "../../Constants/constants";
 import Graph from "../../Core/Graph/GraphBase";
 import { EVT_NAMES } from "../../events";
 import StartNode from "../Nodes/StartNode";
 import InterfaceModes from "./InterfaceModes";
 import Events from "./Events";
 import Canvas from "./canvas";
-
-const TYPES = {
-  NODE: "NodeInst",
-  CONTAINER: "Container"
-};
 
 const NODE_PROPS = {
   Node: {
@@ -75,8 +70,6 @@ export default class MainInterface {
   initialize = () => {
     const { classes, containerId, docManager, height, id, width } = this;
 
-    console.log("initialize main interface");
-
     // Set initial mode as loading
     this.setMode(EVT_NAMES.LOADING);
 
@@ -100,9 +93,7 @@ export default class MainInterface {
     this.addSubscribers()
       .loadDoc()
       .then(() => {
-        //this.canvas.el.focus();
-        console.log("this.canvas", this.canvas);
-        console.log("this.canvas.el", this.canvas.el);
+        this.canvas.el.focus();
         this.setMode(EVT_NAMES.DEFAULT);
       });
   };
@@ -401,6 +392,10 @@ export default class MainInterface {
         this.hideLinks(node, visitedLinks);
       }
     });
+  };
+
+  resetAllNodeStatus = () => {
+    this.graph.resetStatus && this.graph.resetStatus();
   };
 
   destroy = () => {

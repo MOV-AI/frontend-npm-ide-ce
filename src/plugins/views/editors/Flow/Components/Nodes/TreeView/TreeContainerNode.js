@@ -133,8 +133,7 @@ class TreeContainerNode extends TreeNode {
     const positioner = {
       [RENDERING_MODE.tree]: () => {
         let childrenHeightSum = 0;
-        Array.from(this.children.keys()).forEach(index => {
-          const node = this.children.get(index);
+        this.children.forEach(node => {
           node.updatePortsPosition();
           node.object.attr("y", childrenHeightSum);
           childrenHeightSum += node.el.getBBox().height + 20;
@@ -143,8 +142,7 @@ class TreeContainerNode extends TreeNode {
       [RENDERING_MODE.spread]: () => {
         let childrenHeightSum = 0;
         let maxWidthNode = 0;
-        Array.from(this.children.keys()).forEach(index => {
-          const node = this.children.get(index);
+        this.children.forEach(node => {
           node.updatePortsPosition();
           const nodeWidth = node.el.getBBox().width;
           const nodeHeight = node.el.getBBox().height;
@@ -200,8 +198,7 @@ class TreeContainerNode extends TreeNode {
    */
   addChild(node) {
     // Add node to child list
-    this.children.set(node.data.id, node);
-    this.children = new Map([...this.children.entries()].sort());
+    this.children.push(node);
     // Render nodes collapsable header
     this.renderNodesHeader();
   }

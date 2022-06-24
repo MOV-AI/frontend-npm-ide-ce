@@ -19,6 +19,11 @@ const NODE_TYPES = {
   TREE_CONTAINER: "TREE_CONTAINER"
 };
 
+const TYPES = {
+  NODE: "NodeInst",
+  CONTAINER: "Container"
+};
+
 const generateContainerId = flowId => {
   return `base-${flowId?.replace(/\//g, "-")}`;
 };
@@ -30,5 +35,6 @@ export {
   FLOW_VIEW_MODE,
   TRANSITION_LINK,
   ROBOT_BLACKLIST,
-  NODE_TYPES
+  NODE_TYPES,
+  TYPES
 };

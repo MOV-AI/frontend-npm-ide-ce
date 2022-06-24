@@ -17,6 +17,7 @@ export default class GraphTreeView extends GraphBase {
     //========================================================================================
 
     this.tree = { root: null };
+    this.subFlows = [];
   }
 
   //========================================================================================
@@ -82,6 +83,13 @@ export default class GraphTreeView extends GraphBase {
       console.warn("Error trying to load all nodes", e);
     }
 
+    try {
+      this._loadLinks(flow.Links, this.rootNode);
+      this.onFlowValidated.next({ warnings: [] });
+    } catch (error) {
+      console.warn("Error has ocurred loading links", flow, error);
+    }
+
     return this;
   }
 
@@ -97,10 +105,6 @@ export default class GraphTreeView extends GraphBase {
       await this._loadNodes(flow.NodeInst, NODE_TYPES.TREE_NODE, parent);
       await this._loadNodes(flow.Container, NODE_TYPES.TREE_CONTAINER, parent);
 
-      // Add parent children to canvas
-      // this.update(parent);
-      this.update(parent);
-
       if (flow.Container) {
         const subFlows = Object.values(flow.Container);
 
@@ -112,20 +116,21 @@ export default class GraphTreeView extends GraphBase {
           await this.loadNodes(subFlowTemplate, subFlowInst);
         }
 
-        // Update children position
-        parent.updateChildrenPosition();
+        // Add parent children to canvas
+        this.update(parent);
+        this.subFlows.push(parent);
       }
     } catch (error) {
       console.warn("Error has ocurred loading children", flow, error);
     }
-
-    try {
-      this._loadLinks(flow.Links, parent);
-      this.onFlowValidated.next({ warnings: [] });
-    } catch (error) {
-      console.warn("Error has ocurred loading links", flow, error);
-    }
   }
+
+  updateAllPositions = async () => {
+    for (let i = 0, n = this.subFlows.length; i < n; i++) {
+      const parent = this.subFlows[i];
+      await parent.updateChildrenPosition();
+    }
+  };
 
   /**
    * @override addNode: Add a new node supporting async loading
@@ -204,17 +209,6 @@ export default class GraphTreeView extends GraphBase {
   };
 
   /**
-   * Update node position in canvas
-   * @param {TreeContainerNode} parent : Root node
-   */
-  updateNodePositions = (parent = this.rootNode) => {
-    parent.children.forEach(child => {
-      if (child._type === "container") this.updateNodePositions(child);
-    });
-    parent.updateChildrenPosition();
-  };
-
-  /**
    * @override addLink from GraphBase class
    * @param {Object} link : Link info
    * @param {String} nodeId : Parent node ID
@@ -257,15 +251,7 @@ export default class GraphTreeView extends GraphBase {
       }
       // update local link list
       this.links.set(link.name, obj);
-
-      this.invalidLinks = this.invalidLinks.filter(l => l.id !== parsedLink.id);
     } catch (error) {
-      if (
-        error instanceof InvalidLink &&
-        !this.invalidLinks.find(l => l.id === error.link.id)
-      ) {
-        this.invalidLinks.push(error.link);
-      }
       console.error(error.message);
     }
   };
@@ -298,14 +284,19 @@ export default class GraphTreeView extends GraphBase {
    */
   _updateNodeStatus = (nodeName, status, parent = this.rootNode) => {
     if (!parent) return;
-    // Look for node in main flow
-    const nodePath = nodeName.split("__");
-    const node = parent.children.get(nodePath.splice(0, 1)[0]);
-    if (node && nodePath.length) {
-      this._updateNodeStatus(nodePath.join("__"), status, node);
-    } else if (node) {
-      node.status = [1, true, "true"].includes(status) ? true : false;
+
+    // is this a subflow node?
+    if (nodeName.indexOf("__") >= 0) {
+      const nodePath = nodeName.split("__");
+      const nodeParent = parent.children.find(n => n.data.id === nodePath[0]);
+      const newNodeName = nodePath.splice(1).join("__");
+      // let's call this function again with the newNodeName (child) and the parent is the node
+      return this._updateNodeStatus(newNodeName, status, nodeParent);
     }
+
+    const node = parent.children.find(n => n.data.id === nodeName);
+
+    node.status = [1, true, "true"].includes(status);
   };
 
   /**
@@ -447,12 +438,6 @@ export default class GraphTreeView extends GraphBase {
    * @param {TreeContainerNode} parent
    */
   update(parent) {
-    // Order children
-    parent.children = new Map(
-      [...parent.children.entries()].sort(([_aKey, a], [_bKey, b]) => {
-        return b.data.type.localeCompare(a.data.type);
-      })
-    );
     // Render parent children
     parent.children.forEach(node => {
       node.addToCanvas();

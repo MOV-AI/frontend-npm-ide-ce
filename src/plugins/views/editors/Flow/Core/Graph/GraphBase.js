@@ -101,11 +101,15 @@ export default class GraphBase {
     return this;
   };
 
+  updateAllPositions = () => {
+    /* Empty on Purpose */
+  };
+
   /**
    * @private
    */
   addEvents = () => {
-    // this.canvas.el.addEventListener("onEnterDefault", this.reset);
+    this.canvas.el.addEventListener("onEnterDefault", this.reset);
     return this;
   };
 

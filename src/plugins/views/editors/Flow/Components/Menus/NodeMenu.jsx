@@ -94,7 +94,7 @@ const NodeMenu = memo(
       async (flowInst = flowModel.current) => {
         const nodeInstanceItem = flowInst.getNodeInstanceItem(data.id);
         if (nodeInstanceItem) {
-          return nodeInstanceItem.serialize();
+          return nodeInstanceItem;
         }
 
         const subFlowsArr = Array.from(flowInst.subFlows.data.values());
@@ -125,9 +125,9 @@ const NodeMenu = memo(
      * @param {Object} formData : Data to Save
      */
     const handleSubmitParameter = useCallback(
-      formData => {
+      async formData => {
         const varName = formData.varName;
-        const nodeInstance = getNodeData();
+        const nodeInstance = await getNodeData();
 
         if (nodeInstance.getKeyValue(varName, formData.name)) {
           if (formData.value === DEFAULT_VALUE) {
@@ -139,7 +139,7 @@ const NodeMenu = memo(
           nodeInstance.addKeyValue(varName, formData);
         }
 
-        setNodeData(nodeInstance);
+        setNodeData(nodeInstance.serialize());
       },
       [getNodeData]
     );
@@ -150,10 +150,10 @@ const NodeMenu = memo(
      * @param {string} varName : keyValue type (parameters, envVars or cmdLine)
      */
     const handleDeleteParameter = useCallback(
-      (keyName, varName) => {
-        const nodeInstance = getNodeData();
+      async (keyName, varName) => {
+        const nodeInstance = await getNodeData();
         nodeInstance.deleteKeyValue(varName, keyName);
-        setNodeData(nodeInstance);
+        setNodeData(nodeInstance.serialize());
       },
       [getNodeData]
     );
@@ -166,13 +166,12 @@ const NodeMenu = memo(
 
     useEffect(() => {
       // Get node data
-      // setNodeData(getNodeData());
       const fetchData = async () => {
         // get the data from the api
         const nodeInstance = await getNodeData();
 
         // set state with the result
-        setNodeData(nodeInstance);
+        setNodeData(nodeInstance.serialize());
       };
 
       fetchData();
@@ -211,11 +210,11 @@ const NodeMenu = memo(
      * @param {boolean} value : property value to update
      */
     const onChangeProperties = useCallback(
-      (prop, value) => {
-        const nodeInstance = getNodeData();
+      async (prop, value) => {
+        const nodeInstance = await getNodeData();
         nodeInstance.updateKeyValueProp(prop, value);
 
-        setNodeData(nodeInstance);
+        setNodeData(nodeInstance.serialize());
       },
       [getNodeData]
     );
@@ -286,13 +285,13 @@ const NodeMenu = memo(
      * @param {boolean} checked : The flag controling if we should add or remove
      */
     const handleBelongGroup = useCallback(
-      (groupId, checked) => {
-        const nodeInstance = getNodeData();
+      async (groupId, checked) => {
+        const nodeInstance = await getNodeData();
         if (checked) nodeInstance.addGroup(groupId);
         else nodeInstance.removeGroup(groupId);
 
         groupsVisibilities();
-        setNodeData(nodeInstance);
+        setNodeData(nodeInstance.serialize());
       },
       [groupsVisibilities, getNodeData]
     );
