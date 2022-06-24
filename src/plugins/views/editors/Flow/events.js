@@ -14,7 +14,8 @@ const EVT_NAMES = {
   ON_NODE_CTX_MENU: "onNodeCtxMenu",
   ON_PORT_CTX_MENU: "onPortCtxMenu",
   ON_PORT_MOUSE_OVER: "onPortMouseOver",
-  ON_TOGGLE_WARNINGS: "onToggleWarnings"
+  ON_TOGGLE_WARNINGS: "onToggleWarnings",
+  SELECT_NODE: "selectNode"
 };
 
 const EVT_TYPES = {

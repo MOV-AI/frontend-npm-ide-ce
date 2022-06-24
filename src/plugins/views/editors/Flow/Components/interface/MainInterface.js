@@ -269,6 +269,10 @@ export default class MainInterface {
     );
   };
 
+  searchNode = node => {
+    return node.name && this.graph.nodes.get(node.name)?.obj;
+  };
+
   //========================================================================================
   /*                                                                                      *
    *                                      Subscribers                                     *
@@ -427,6 +431,20 @@ export default class MainInterface {
     const [x, y] = [50, 50]; // skip boundaries validation used when dragging a node
     this.graph.onNodeDrag(null, { x, y, dx, dy });
     this.onDragEnd();
+  };
+
+  onFocusNode = node => {
+    const { xCenter, yCenter } = node.center;
+    this.setMode(EVT_NAMES.DEFAULT, null, true);
+    node.selected = true;
+    if (node.data.id !== "start") {
+      this.setMode(
+        EVT_NAMES.SELECT_NODE,
+        { nodes: [node], shiftKey: false },
+        true
+      );
+    }
+    this.canvas.zoomToCoordinates(xCenter, yCenter);
   };
 
   destroy = () => {

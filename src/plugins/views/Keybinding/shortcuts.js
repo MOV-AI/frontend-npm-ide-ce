@@ -148,6 +148,12 @@ export const KEYBINDINGS = {
         DESCRIPTION: i18n.t("MoveNodeKeybindDescription"),
         SHORTCUTS: ["left", "right", "up", "down"]
       },
+      SEARCH_NODE: {
+        NAME: "searchNode",
+        LABEL: i18n.t("SearchNode"),
+        DESCRIPTION: i18n.t("SearchNodeKeybindDescription"),
+        SHORTCUTS: "ctrl+f"
+      },
       RESET_ZOOM: {
         NAME: "resetZoom",
         LABEL: i18n.t("ResetZoom"),
