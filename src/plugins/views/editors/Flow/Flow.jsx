@@ -1067,9 +1067,8 @@ const Flow = (props, ref) => {
   const handleSearchFocus = useCallback(
     _e => {
       if (!searchVisible) setSearchVisible(true);
-      deactivateKeyBind();
     },
-    [deactivateKeyBind, searchVisible]
+    [searchVisible]
   );
 
   const handleSearchEnable = useCallback(e => {
@@ -1078,9 +1077,15 @@ const Flow = (props, ref) => {
   }, []);
 
   const handleSearchDisabled = useCallback(() => {
-    activateKeyBind();
     setSearchVisible(false);
-  }, [activateKeyBind]);
+  }, []);
+
+  useEffect(() => {
+    if (searchVisible) {
+      return deactivateKeyBind();
+    }
+    activateKeyBind();
+  }, [searchVisible, deactivateKeyBind, activateKeyBind]);
 
   //========================================================================================
   /*                                                                                      *
