@@ -69,10 +69,9 @@ const FlowTopBar = props => {
     id,
     name,
     onRobotChange,
-    onSearchNode,
+    searchProps,
     defaultViewMode,
-    confirmationAlert,
-    searchOptions
+    confirmationAlert
     // onViewModeChange
   } = props;
   // State hooks
@@ -546,10 +545,7 @@ const FlowTopBar = props => {
           component="div"
           className={classes.searchFlowArea}
         >
-          <FlowSearch
-            searchOptions={searchOptions}
-            onSearchNode={onSearchNode}
-          />
+          <FlowSearch {...searchProps} />
         </Typography>
         <Typography
           data-testid="section_view-mode-toggle"
@@ -586,6 +582,8 @@ FlowTopBar.propTypes = {
   onViewModeChange: PropTypes.func,
   onStartStopFlow: PropTypes.func,
   onRobotChange: PropTypes.func,
+  onSearchDisabled: PropTypes.func,
+  onSearchFocus: PropTypes.func,
   onSearchNode: PropTypes.func,
   openFlow: PropTypes.func,
   workspace: PropTypes.string,

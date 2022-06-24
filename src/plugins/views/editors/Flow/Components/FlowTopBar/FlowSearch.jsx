@@ -13,10 +13,9 @@ import { NodeInstance } from "../../../../../../models/Flow/subModels";
 import { useTranslation } from "react-i18next";
 
 const FlowSearch = props => {
-  const { searchOptions, onSearchNode } = props;
+  const { options, onChange, onFocus, onBlur, visible } = props;
   const classes = flowTopBarStyles();
   const { t } = useTranslation();
-  const [searchVisible, setSearchOpen] = useState(false);
 
   //========================================================================================
   /*                                                                                      *
@@ -26,14 +25,18 @@ const FlowSearch = props => {
 
   const handleSearchNode = useCallback(
     (_e, node) => {
-      return onSearchNode(node);
+      return onChange(node);
     },
-    [onSearchNode]
+    [onChange]
   );
 
   const handleSearchToggle = useCallback(() => {
-    setSearchOpen(!searchVisible);
-  }, [searchVisible]);
+    const searchWillBeVisible = !visible;
+    if (searchWillBeVisible) {
+      return onFocus();
+    }
+    onBlur();
+  }, [visible, onFocus, onBlur]);
 
   //========================================================================================
   /*                                                                                      *
@@ -58,7 +61,7 @@ const FlowSearch = props => {
         <TextField
           {...params}
           variant="standard"
-          placeholder={t("SearchFlowEntities")}
+          placeholder={t("SearchNode")}
           className={classes.searchInputText}
           autoFocus
           InputProps={{
@@ -78,7 +81,7 @@ const FlowSearch = props => {
     [classes.searchInputText, t]
   );
 
-  if (!searchVisible) {
+  if (!visible) {
     return (
       <IconButton
         testId="input_search-icon"
@@ -94,10 +97,11 @@ const FlowSearch = props => {
   return (
     <Autocomplete
       data-testid="input_search-flow-text"
-      options={searchOptions}
+      options={options}
       getOptionLabel={option => option.name}
       onChange={handleSearchNode}
       onBlur={handleSearchToggle}
+      onFocus={onFocus}
       groupBy={option =>
         option instanceof NodeInstance ? t("Node") : t("SubFlow")
       }
@@ -108,6 +112,8 @@ const FlowSearch = props => {
 };
 
 FlowSearch.propTypes = {
+  onSearchDisabled: PropTypes.func,
+  onSearchFocus: PropTypes.func,
   onSearchNode: PropTypes.func,
   searchOptions: PropTypes.arrayOf(PropTypes.string)
 };
