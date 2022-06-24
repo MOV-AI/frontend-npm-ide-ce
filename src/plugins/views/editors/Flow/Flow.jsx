@@ -1065,35 +1065,6 @@ const Flow = (props, ref) => {
     mainInterface.onDragEnd();
   }, []);
 
-  /*
-   * Handle focus node
-   */
-  const onFocusNode = useCallback(node => {
-    const { canvas, setMode: setInterfaceMode } = getMainInterface();
-    const { xCenter, yCenter } = node.center;
-    setInterfaceMode(EVT_NAMES.DEFAULT, null, true);
-    node.selected = true;
-
-    if (node.data.id !== "start") {
-      setInterfaceMode(
-        EVT_NAMES.SELECT_NODE,
-        { nodes: [node], shiftKey: false },
-        true
-      );
-    }
-    const { width, height } = canvas.el.getBoundingClientRect();
-    canvas
-      .getSvg()
-      .transition()
-      .duration(750)
-      .call(
-        canvas.zoomBehavior.transform,
-        d3.zoomIdentity
-          .translate(width * 0.5 - 2 * xCenter, height * 0.5 - 2 * yCenter)
-          .scale(2)
-      );
-  }, []);
-
   //========================================================================================
   /*                                                                                      *
    *                                       Shortcuts                                      *
@@ -1106,8 +1077,8 @@ const Flow = (props, ref) => {
       KEYBINDINGS.FLOW.KEYBINDS.PASTE_NODE.SHORTCUTS,
       handlePasteNodes
     );
-    addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.MOVE_NODE, handleMoveNode);
-    addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.RESET_ZOOM, handleResetZoom);
+    addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.MOVE_NODE.SHORTCUTS, handleMoveNode);
+    addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.RESET_ZOOM.SHORTCUTS, handleResetZoom);
     addKeyBind(
       KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.CANCEL.SHORTCUTS,
       setFlowsToDefault
