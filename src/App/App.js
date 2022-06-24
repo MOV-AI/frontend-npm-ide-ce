@@ -1,7 +1,8 @@
 import React from "react";
-import { withAuthentication, Style } from "@mov-ai/mov-fe-lib-react";
+import { Style, withDefaults } from "@mov-ai/mov-fe-lib-react";
 import { Typography } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
+import { ThemeProvider } from "@material-ui/core/styles";
 import DocManager from "../plugins/DocManager/DocManager";
 import FlowExplorer from "../plugins/views/editors/Flow/Components/Explorer/Explorer";
 import Dialog from "../plugins/Dialog/Dialog";
@@ -22,7 +23,6 @@ import AppKeybindings from "../plugins/views/Keybinding/AppKeybindings";
 import Tabs from "../plugins/views/Tabs/Tabs";
 import PluginManagerIDE from "../engine/PluginManagerIDE/PluginManagerIDE";
 import Placeholder from "../plugins/views/Placeholder/Placeholder";
-import { withTheme } from "../decorators/withTheme";
 import {
   HOMETAB_PROFILE,
   FLOW_EXPLORER_PROFILE,
@@ -33,6 +33,7 @@ import {
 import { MainContext } from "../main-context";
 
 import "./App.css";
+import { ApplicationTheme } from "../themes";
 import { appStyles } from "./styles";
 
 const DEBUG_MODE = false;
@@ -215,4 +216,12 @@ const MOVAI_LOGO = `
 ██║ ╚═╝ ██║ ╚██████═╝   ╚███═╝         ██║  ██║██║
 `;
 
-export default withTheme(withAuthentication(App));
+export default withDefaults({
+  name: "mov-fe-app-ide-ce",
+  component: App,
+  offlineValidation: false,
+  theme: {
+    provider: ThemeProvider,
+    props: ApplicationTheme
+  }
+});

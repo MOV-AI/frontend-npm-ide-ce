@@ -1033,6 +1033,20 @@ const Flow = (props, ref) => {
     getMainInterface().toggleExposedPort(port);
   }, [contextMenuOptions]);
 
+  /**
+   * Handle zoom reset
+   */
+  const handleResetZoom = useCallback(_e => {
+    getMainInterface()?.onResetZoom();
+  }, []);
+
+  /**
+   * Handle Move Node
+   */
+  const handleMoveNode = useCallback(e => {
+    getMainInterface()?.onMoveNode(e);
+  }, []);
+
   //========================================================================================
   /*                                                                                      *
    *                                       Shortcuts                                      *
@@ -1045,6 +1059,8 @@ const Flow = (props, ref) => {
       KEYBINDINGS.FLOW.KEYBINDS.PASTE_NODE.SHORTCUTS,
       handlePasteNodes
     );
+    addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.MOVE_NODE.SHORTCUTS, handleMoveNode);
+    addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.RESET_ZOOM.SHORTCUTS, handleResetZoom);
     addKeyBind(
       KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.CANCEL.SHORTCUTS,
       setFlowsToDefault
@@ -1057,6 +1073,8 @@ const Flow = (props, ref) => {
     return () => {
       removeKeyBind(KEYBINDINGS.FLOW.KEYBINDS.COPY_NODE.SHORTCUTS);
       removeKeyBind(KEYBINDINGS.FLOW.KEYBINDS.PASTE_NODE.SHORTCUTS);
+      removeKeyBind(KEYBINDINGS.FLOW.KEYBINDS.MOVE_NODE.SHORTCUTS);
+      removeKeyBind(KEYBINDINGS.FLOW.KEYBINDS.RESET_ZOOM.SHORTCUTS);
       removeKeyBind(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.CANCEL.SHORTCUTS);
       removeKeyBind(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.DELETE.SHORTCUTS);
     };
@@ -1066,7 +1084,9 @@ const Flow = (props, ref) => {
     setFlowsToDefault,
     handleCopyNode,
     handlePasteNodes,
-    handleDeleteNode
+    handleDeleteNode,
+    handleMoveNode,
+    handleResetZoom
   ]);
 
   //========================================================================================
