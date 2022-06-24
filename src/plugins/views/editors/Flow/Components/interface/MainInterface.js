@@ -394,8 +394,30 @@ export default class MainInterface {
     });
   };
 
+  /**
+   * Resets all Node status (Turns of the center)
+   */
   resetAllNodeStatus = () => {
     this.graph.resetStatus && this.graph.resetStatus();
+  };
+
+  onResetZoom = () => {
+    this.canvas.onResetZoom();
+  };
+
+  onMoveNode = event => {
+    const currentZoom = this.canvas.currentZoom?.k ?? 1;
+    const step = 2 / currentZoom + 1;
+    const delta = {
+      ArrowRight: [1 * step, 0],
+      ArrowLeft: [-1 * step, 0],
+      ArrowUp: [0, -1 * step],
+      ArrowDown: [0, 1 * step]
+    };
+    const [dx, dy] = delta[event.code];
+    const [x, y] = [50, 50]; // skip boundaries validation used when dragging a node
+    this.graph.onNodeDrag(null, { x, y, dx, dy });
+    this.onDragEnd();
   };
 
   destroy = () => {

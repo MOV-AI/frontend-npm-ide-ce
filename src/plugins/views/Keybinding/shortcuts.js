@@ -141,6 +141,18 @@ export const KEYBINDINGS = {
         LABEL: i18n.t("PasteNode"),
         DESCRIPTION: i18n.t("PasteNodeKeybindDescription"),
         SHORTCUTS: "ctrl+v"
+      },
+      MOVE_NODE: {
+        NAME: "moveNode",
+        LABEL: i18n.t("MoveNode"),
+        DESCRIPTION: i18n.t("MoveNodeKeybindDescription"),
+        SHORTCUTS: ["left", "right", "up", "down"]
+      },
+      RESET_ZOOM: {
+        NAME: "resetZoom",
+        LABEL: i18n.t("ResetZoom"),
+        DESCRIPTION: i18n.t("ResetZoomKeybindDescription"),
+        SHORTCUTS: "ctrl+i"
       }
     }
   }

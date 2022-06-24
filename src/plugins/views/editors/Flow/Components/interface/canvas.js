@@ -688,6 +688,13 @@ class Canvas {
     };
     this.mode.linking.props.link.update(null, trg);
   };
+
+  onResetZoom = () => {
+    this.getSvg()
+      .transition()
+      .duration(750)
+      .call(this.zoomBehavior.transform, d3.zoomIdentity);
+  };
 }
 
 export default Canvas;

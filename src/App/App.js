@@ -33,8 +33,8 @@ import {
 import { MainContext } from "../main-context";
 
 import "./App.css";
-import { appStyles } from "./styles";
 import { ApplicationTheme } from "../themes";
+import { appStyles } from "./styles";
 
 const DEBUG_MODE = false;
 
