@@ -34,7 +34,6 @@ import InvalidLinksWarning from "./Components/Warnings/InvalidLinksWarning";
 import InvalidParametersWarning from "./Components/Warnings/InvalidParametersWarning";
 import { EVT_NAMES, EVT_TYPES } from "./events";
 import { FLOW_VIEW_MODE } from "./Constants/constants";
-import * as d3 from "d3";
 
 import "./Resources/css/Flow.css";
 import { flowStyles } from "./styles";
@@ -1038,31 +1037,14 @@ const Flow = (props, ref) => {
    * Handle zoom reset
    */
   const handleResetZoom = useCallback(_e => {
-    const { canvas } = getMainInterface();
-    canvas
-      .getSvg()
-      .transition()
-      .duration(750)
-      .call(canvas.zoomBehavior.transform, d3.zoomIdentity);
+    getMainInterface()?.onResetZoom();
   }, []);
 
   /**
    * Handle Move Node
    */
-  const handleMoveNode = useCallback(event => {
-    const mainInterface = getMainInterface();
-    const currentZoom = mainInterface.canvas.currentZoom?.k ?? 1;
-    const step = 2 / currentZoom + 1;
-    const delta = {
-      ArrowRight: [1 * step, 0],
-      ArrowLeft: [-1 * step, 0],
-      ArrowUp: [0, -1 * step],
-      ArrowDown: [0, 1 * step]
-    };
-    const [dx, dy] = delta[event.code];
-    const [x, y] = [50, 50]; // skip boundaries validation used when dragging a node
-    mainInterface.graph.onNodeDrag(null, { x, y, dx, dy });
-    mainInterface.onDragEnd();
+  const handleMoveNode = useCallback(e => {
+    getMainInterface()?.onMoveNode(e);
   }, []);
 
   //========================================================================================
