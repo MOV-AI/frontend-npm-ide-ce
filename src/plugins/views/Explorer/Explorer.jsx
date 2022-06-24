@@ -1,18 +1,17 @@
 import React, { useCallback, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
-import _get from "lodash/get";
-import _set from "lodash/set";
-import { Maybe } from "monet";
 import { Typography } from "@material-ui/core";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import { PLUGINS, APP_INFORMATION } from "../../../utils/Constants";
 import movaiLogo from "../editors/_shared/Branding/movai-flow-logo-red.png";
-import VirtualizedTree from "./components/VirtualizedTree/VirtualizedTree";
+import ListItemsTreeWithSearch, {
+  toggleExpandRow
+} from "./components/ListItemTree/ListItemsTreeWithSearch";
 import { explorerStyles } from "./styles";
 
 const Explorer = props => {
-  const { call, on, height } = props;
+  const { call, on } = props;
   const classes = explorerStyles();
   const [data, setData] = useState([]);
 
@@ -26,10 +25,11 @@ const Explorer = props => {
 
   /**
    * Push element into list in correct position
+   * @private function
    * @param {Array} list
    * @param {TreeNode} element
    */
-  const _pushSorted = useCallback((list, element) => {
+  const pushSorted = useCallback((list, element) => {
     /**
      * Compare objects' name property to sort
      * @param {*} a
@@ -51,9 +51,10 @@ const Explorer = props => {
 
   /**
    * Delete document from local list
+   * @private function
    * @param {{documentName: String, documentType: String}} docData
    */
-  const _deleteDocument = useCallback(docData => {
+  const deleteDocument = useCallback(docData => {
     const { documentName, documentType } = docData;
     setData(prevState => {
       const newData = [...prevState];
@@ -73,10 +74,11 @@ const Explorer = props => {
 
   /**
    * Insert newly created document
+   * @private function
    * @param {DocManager} docManager
    * @param {{documentName: String, documentType: String}} docData
    */
-  const _addDocument = useCallback(
+  const addDocument = useCallback(
     (_, docData) => {
       const { documentName, documentType, document } = docData;
       setData(prevState => {
@@ -88,7 +90,7 @@ const Explorer = props => {
             doc => doc.name === documentName
           );
           if (documentIndex < 0) {
-            _pushSorted(newData[typeIndex].children, {
+            pushSorted(newData[typeIndex].children, {
               name: document.getName(),
               title: document.getName(),
               scope: document.getScope(),
@@ -99,7 +101,7 @@ const Explorer = props => {
         return newData;
       });
     },
-    [_pushSorted]
+    [pushSorted]
   );
 
   //========================================================================================
@@ -109,51 +111,22 @@ const Explorer = props => {
   //========================================================================================
 
   /**
-   * Expand tree or open document depending on the node deepness
-   *  0 : collapse others and expand tree node
-   *  1 : open document node
+   * Expand tree or open document depending on have children or not
    * @param {{id: String, deepness: String, url: String, name: String, scope: String}} node : Clicked node
    */
   const requestScopeVersions = useCallback(
     node => {
-      const deepnessToAction = {
-        0: () => {
-          // Toggle the expansion of the clicked panel
-          setData(prevData => {
-            const nextData = [...prevData];
-            const isExpanded = _get(
-              prevData,
-              [node.id, "state", "expanded"],
-              false
-            );
-            _set(nextData, [node.id, "state"], {
-              expanded: !isExpanded
-            });
-
-            // Close other panels
-            prevData
-              .filter(elem => elem.id !== node.id)
-              .forEach(panel => {
-                _set(nextData, [panel.id, "state"], {
-                  expanded: false
-                });
-              });
-            return nextData;
-          });
-        },
-        1: () => {
-          call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, {
-            id: node.url,
-            name: node.name,
-            scope: node.scope
-          });
-        }
-      };
-      _get(deepnessToAction, node.deepness, () => {
-        console.log("action not implemented");
-      })();
+      if (node.children?.length) {
+        setData(toggleExpandRow(node, data));
+      } else {
+        call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, {
+          id: node.url,
+          name: node.name,
+          scope: node.scope
+        });
+      }
     },
-    [call]
+    [data, call]
   );
 
   /**
@@ -255,14 +228,12 @@ const Explorer = props => {
     (docManager, docData) => {
       const { action } = docData;
       const updateByActionMap = {
-        del: () => _deleteDocument(docData),
-        set: () => _addDocument(docManager, docData)
+        del: () => deleteDocument(docData),
+        set: () => addDocument(docManager, docData)
       };
-      Maybe.fromNull(updateByActionMap[action]).forEach(updateAction =>
-        updateAction()
-      );
+      updateByActionMap[action] && updateByActionMap[action]();
     },
-    [_deleteDocument, _addDocument]
+    [deleteDocument, addDocument]
   );
 
   //========================================================================================
@@ -287,21 +258,26 @@ const Explorer = props => {
   //========================================================================================
 
   return (
-    <Typography component="div">
+    <>
       <h1 className={classes.header}>
         <img src={movaiLogo} alt={APP_INFORMATION.LABEL} />
       </h1>
-      <Typography component="div" className={classes.typography}>
-        <VirtualizedTree
-          data={data}
-          onClickNode={requestScopeVersions}
-          handleCopyClick={handleCopy}
-          handleDeleteClick={handleDelete}
-          showIcons={true}
-          height={height}
-        ></VirtualizedTree>
+      <Typography
+        data-testid="section_explorer"
+        component="div"
+        className={classes.typography}
+      >
+        {data && (
+          <ListItemsTreeWithSearch
+            data={data}
+            onClickNode={requestScopeVersions}
+            handleCopyClick={handleCopy}
+            handleDeleteClick={handleDelete}
+            showIcons={true}
+          ></ListItemsTreeWithSearch>
+        )}
       </Typography>
-    </Typography>
+    </>
   );
 };
 
@@ -309,10 +285,5 @@ export default withViewPlugin(Explorer);
 
 Explorer.propTypes = {
   call: PropTypes.func.isRequired,
-  on: PropTypes.func.isRequired,
-  height: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-};
-
-Explorer.defaultProps = {
-  height: 700
+  on: PropTypes.func.isRequired
 };

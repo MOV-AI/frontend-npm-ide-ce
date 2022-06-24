@@ -25,6 +25,8 @@ export const APP_LINKS = {
   FORUM: "https://forum.flow.mov.ai/"
 };
 
+export const GLOBAL_WORKSPACE = "global";
+
 export const DEFAULT_VALUE = undefined;
 export const DISABLED_VALUE = "None";
 
@@ -45,6 +47,9 @@ export const SCOPES = {
 };
 
 export const HOSTS = {
+  ABSTRACT_HOST: {
+    NAME: "abstractHost"
+  },
   TOP_BAR: {
     NAME: "topBar"
   },
@@ -68,6 +73,9 @@ export const HOSTS = {
 };
 
 export const PLUGINS = {
+  APP_KEYBINDINGS: {
+    NAME: "appKeybindings"
+  },
   DOC_MANAGER: {
     NAME: "docManager",
     CALL: {
@@ -165,6 +173,10 @@ export const PLUGINS = {
   }
 };
 
+export const KEYBIND_SCOPES = {
+  APP: "all"
+};
+
 export const TABLE_KEYS_NAMES = {
   PARAMETERS: "parameters",
   ENVVARS: "envVars",
@@ -224,11 +236,36 @@ export const ALERT_SEVERITIES = {
   WARNING: "warning"
 };
 
+export const LINK_DEPENDENCY = {
+  ALL_DEPENDENCIES: {
+    LABEL: "AllDependenciesLabel",
+    VALUE: 0,
+    COLOR: "white"
+  },
+  ONLY_FROM: {
+    LABEL: "OnlyFromLabel",
+    VALUE: 1,
+    COLOR: "violet"
+  },
+  ONLY_TO: {
+    LABEL: "OnlyToLabel",
+    VALUE: 2,
+    COLOR: "steelblue"
+  },
+  NO_DEPENDENCIES: {
+    LABEL: "NoDependenciesLabel",
+    VALUE: 3,
+    COLOR: "darkseagreen"
+  }
+};
+
 //========================================================================================
 /*                                                                                      *
  *                                   Layout Constants                                   *
  *                                                                                      */
 //========================================================================================
+
+export const DEFAULT_EXPLORER_ROW_HEIGHT = 40;
 
 export const DOCK_POSITIONS = {
   DOCK: "dockbox",
@@ -250,6 +287,11 @@ export const FLOW_EXPLORER_PROFILE = {
 export const HOMETAB_PROFILE = {
   name: "HomeTab",
   title: i18n.t("HomeTabTitle")
+};
+
+export const SHORTCUTS_PROFILE = {
+  name: "ShortcutsTab",
+  title: i18n.t("ShortcutsTabTitle")
 };
 
 export const DEFAULT_TABS = new Map(
