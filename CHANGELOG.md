@@ -7,12 +7,14 @@
 
 **FLOW**
 
+- [FP-897 - Ability to search node instances](https://movai.atlassian.net/browse/FP-897)
 - [FP-1084 - Add debug colors to links](https://movai.atlassian.net/browse/FP-1084)
 - [FP-1667 - Add More information to missing links](https://movai.atlassian.net/browse/FP-1667)
 - [FP-1669 - Add More information to missing parameters](https://movai.atlassian.net/browse/FP-1669)
 - [FP-1741 - Push flow parameter errors to Warnings, and make warnings clickable](https://movai.atlassian.net/browse/FP-1741)
 - [FP-1768 - Grey out other links when creating a new link](https://movai.atlassian.net/browse/FP-1768)
 - [FP-1794 - Add invalid links to warnings](https://movai.atlassian.net/browse/FP-1794)
+- [FP-1853 - Migrate Flow shortcuts - Reset Zoom and move nodes with arrow keys](https://movai.atlassian.net/browse/FP-1853)
 
 # 3.0.0
 
