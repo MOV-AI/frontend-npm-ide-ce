@@ -55,7 +55,8 @@ const Flow = (props, ref) => {
     removeKeyBind,
     confirmationAlert,
     saveDocument,
-    on
+    on,
+    off
   } = props;
 
   // Global consts
@@ -312,7 +313,7 @@ const Flow = (props, ref) => {
             nodeInst={node}
             flowModel={instance}
             openDoc={openDoc}
-            editable={isEditableComponentRef.current}
+            editable={true}
             groupsVisibilities={groupsVisibilities}
           />
         )
@@ -408,7 +409,7 @@ const Flow = (props, ref) => {
             details={details}
             model={instance}
             handleGroupVisibility={handleGroupVisibility}
-            editable={isEditableComponentRef.current}
+            editable={true}
           ></Menu>
         )
       }
@@ -1067,7 +1068,12 @@ const Flow = (props, ref) => {
     });
 
     setFlowDebugging(workspaceManager.getFlowIsDebugging());
-  }, [on, workspaceManager]);
+
+    return () => {
+      off(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.ON.CHANGE_BOOKMARK);
+      off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR);
+    };
+  }, [on, off, workspaceManager]);
 
   /**
    * Initialize data
@@ -1079,6 +1085,36 @@ const Flow = (props, ref) => {
       setDataFromDB(model.serializeToDB());
     }
   }, [instance, data]);
+
+  useEffect(() => {
+    on(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.ON.BEFORE_SAVE_DOC,
+      async docData => {
+        if (viewMode === FLOW_VIEW_MODE.treeView && docData.doc.name === name) {
+          const subFlows = mainInterfaceRef.current.graph.subFlows;
+
+          for (let i = 0, n = subFlows.length; i < n; i++) {
+            if (subFlows[i].templateName !== docData.doc.name) {
+              await call(
+                PLUGINS.DOC_MANAGER.NAME,
+                PLUGINS.DOC_MANAGER.CALL.SAVE,
+                {
+                  scope,
+                  name: subFlows[i].templateName
+                },
+                null,
+                { ignoreNew: true, preventAlert: i > 1 }
+              );
+            }
+          }
+        }
+      }
+    );
+    return () => {
+      off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.BEFORE_SAVE_DOC);
+    };
+  }, [name, scope, viewMode, on, off, call]);
 
   useEffect(() => {
     addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.COPY_NODE.SHORTCUTS, handleCopyNode);
@@ -1133,7 +1169,7 @@ const Flow = (props, ref) => {
           confirmationAlert={confirmationAlert}
           scope={scope}
           loading={loading}
-          defaultViewMode={viewMode}
+          viewMode={viewMode}
           version={instance.current?.version}
           mainInterface={mainInterfaceRef}
           onRobotChange={onRobotChange}
