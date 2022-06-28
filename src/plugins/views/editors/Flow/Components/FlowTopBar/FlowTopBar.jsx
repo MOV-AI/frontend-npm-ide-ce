@@ -37,6 +37,7 @@ import { FLOW_VIEW_MODE, ROBOT_BLACKLIST } from "../../Constants/constants";
 import useNodeStatusUpdate from "./hooks/useNodeStatusUpdate";
 
 import { buttonStyles, flowTopBarStyles } from "./styles";
+import FlowSearch from "./FlowSearch";
 
 const BACKEND_CALLBACK_NAME = "backend.FlowTopBar";
 const FEEDBACK_TIMEOUT = 10000;
@@ -73,6 +74,7 @@ const FlowTopBar = props => {
     onRobotChange,
     onViewModeChange,
     viewMode,
+    searchProps,
     confirmationAlert
   } = props;
   // State hooks
@@ -532,6 +534,13 @@ const FlowTopBar = props => {
           )}
         </Typography>
         <Typography
+          data-testid="section_view-search"
+          component="div"
+          className={classes.searchFlowArea}
+        >
+          <FlowSearch {...searchProps} />
+        </Typography>
+        <Typography
           data-testid="section_view-mode-toggle"
           component="div"
           className={classes.visualizationToggle}
@@ -576,7 +585,14 @@ FlowTopBar.propTypes = {
   openFlow: PropTypes.func,
   workspace: PropTypes.string,
   type: PropTypes.string,
-  version: PropTypes.string
+  version: PropTypes.string,
+  searchProps: PropTypes.shape({
+    visible: PropTypes.bool,
+    options: PropTypes.arrayOf(PropTypes.string),
+    onChange: PropTypes.func,
+    onEnabled: PropTypes.func,
+    onDisabled: PropTypes.func
+  })
 };
 
 FlowTopBar.defaultProps = {

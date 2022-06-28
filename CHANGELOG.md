@@ -7,6 +7,7 @@
 
 **FLOW**
 
+- [FP-897 - Ability to search node instances](https://movai.atlassian.net/browse/FP-897)
 - [FP-1084 - Add debug colors to links](https://movai.atlassian.net/browse/FP-1084)
 - [FP-1441 - Add Tree view mode to Flow Editor](https://movai.atlassian.net/browse/FP-1441)
 - [FP-1667 - Add More information to missing links](https://movai.atlassian.net/browse/FP-1667)

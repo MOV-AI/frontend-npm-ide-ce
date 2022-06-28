@@ -98,6 +98,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
           {...props}
           activateEditor={activateEditor}
           saveDocument={save}
+          deactivateKeyBind={deactivateKeyBind}
           ref={ref}
         />
       </div>

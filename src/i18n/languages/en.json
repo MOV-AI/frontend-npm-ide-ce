@@ -217,6 +217,8 @@
   "Scope": "Scope",
   "Scope-Colon": "Scope:",
   "Search": "Search",
+  "SearchNode": "Search node...",
+  "SearchNodeKeybindDescription": "Search for nodes visible in the current flow",
   "SearchSomething": "Write something to Search",
   "SelectCallback": "Select a callback",
   "Shortcut": "Shortcut",
