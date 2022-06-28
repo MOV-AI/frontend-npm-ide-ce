@@ -16,6 +16,7 @@
 - [FP-1794 - Add invalid links to warnings](https://movai.atlassian.net/browse/FP-1794)
 - [FP-1839 - New snackbar is crashing in all apps](https://movai.atlassian.net/browse/FP-1839)
 - [FP-1853 - Migrate Flow shortcuts - Reset Zoom and move nodes with arrow keys](https://movai.atlassian.net/browse/FP-1853)
+- [FP-1913 - Add editing capabilities to Tree View Editor](https://movai.atlassian.net/browse/FP-1913)
 
 # 3.0.0
 
