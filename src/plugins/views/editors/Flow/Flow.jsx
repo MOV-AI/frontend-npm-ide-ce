@@ -53,11 +53,12 @@ const Flow = (props, ref) => {
     alert,
     addKeyBind,
     removeKeyBind,
+    activateKeyBind,
+    deactivateKeyBind,
     confirmationAlert,
     saveDocument,
     on
   } = props;
-
   // Global consts
   const MENUS = useRef(
     Object.freeze({
@@ -90,6 +91,7 @@ const Flow = (props, ref) => {
     open: false,
     position: { x: 0, y: 0 }
   });
+  const [searchVisible, setSearchVisible] = useState(false);
 
   // Other Hooks
   const classes = flowStyles();
@@ -1041,6 +1043,44 @@ const Flow = (props, ref) => {
     getMainInterface()?.onMoveNode(e);
   }, []);
 
+  /*
+   * Handle search nodes
+   */
+  const handleSearchNode = useCallback(
+    node => {
+      const mainInterface = getMainInterface();
+      const nodeInstance = node && mainInterface.searchNode(node);
+      if (!nodeInstance) return;
+      nodeInstance.handleSelectionChange();
+      mainInterface.onFocusNode(nodeInstance);
+      deactivateKeyBind();
+    },
+    [deactivateKeyBind]
+  );
+
+  const handleSearchEnabled = useCallback(
+    _e => {
+      if (!searchVisible) setSearchVisible(true);
+    },
+    [searchVisible]
+  );
+
+  const handleSearchEnable = useCallback(e => {
+    e.preventDefault();
+    setSearchVisible(true);
+  }, []);
+
+  const handleSearchDisabled = useCallback(() => {
+    setSearchVisible(false);
+  }, []);
+
+  useEffect(() => {
+    if (searchVisible) {
+      return deactivateKeyBind();
+    }
+    activateKeyBind();
+  }, [searchVisible, deactivateKeyBind, activateKeyBind]);
+
   //========================================================================================
   /*                                                                                      *
    *                                    React Lifecycle                                   *
@@ -1087,7 +1127,12 @@ const Flow = (props, ref) => {
       handlePasteNodes
     );
     addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.MOVE_NODE.SHORTCUTS, handleMoveNode);
+    addKeyBind(
+      KEYBINDINGS.FLOW.KEYBINDS.SEARCH_NODE.SHORTCUTS,
+      handleSearchEnable
+    );
     addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.RESET_ZOOM.SHORTCUTS, handleResetZoom);
+
     addKeyBind(
       KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.CANCEL.SHORTCUTS,
       setFlowsToDefault
@@ -1101,6 +1146,7 @@ const Flow = (props, ref) => {
       removeKeyBind(KEYBINDINGS.FLOW.KEYBINDS.COPY_NODE.SHORTCUTS);
       removeKeyBind(KEYBINDINGS.FLOW.KEYBINDS.PASTE_NODE.SHORTCUTS);
       removeKeyBind(KEYBINDINGS.FLOW.KEYBINDS.MOVE_NODE.SHORTCUTS);
+      removeKeyBind(KEYBINDINGS.FLOW.KEYBINDS.SEARCH_NODE.SHORTCUTS);
       removeKeyBind(KEYBINDINGS.FLOW.KEYBINDS.RESET_ZOOM.SHORTCUTS);
       removeKeyBind(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.CANCEL.SHORTCUTS);
       removeKeyBind(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.DELETE.SHORTCUTS);
@@ -1113,6 +1159,7 @@ const Flow = (props, ref) => {
     handlePasteNodes,
     handleDeleteNode,
     handleMoveNode,
+    handleSearchEnable,
     handleResetZoom
   ]);
 
@@ -1141,6 +1188,13 @@ const Flow = (props, ref) => {
           nodeStatusUpdated={onNodeStatusUpdate}
           nodeCompleteStatusUpdated={onNodeCompleteStatusUpdated}
           onViewModeChange={onViewModeChange}
+          searchProps={{
+            visible: searchVisible,
+            options: instance.current?.getSearchOptions(),
+            onChange: handleSearchNode,
+            onEnabled: handleSearchEnabled,
+            onDisabled: handleSearchDisabled
+          }}
         ></FlowTopBar>
       </div>
       <BaseFlow

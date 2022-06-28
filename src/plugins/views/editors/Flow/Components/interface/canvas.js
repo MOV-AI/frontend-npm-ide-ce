@@ -695,6 +695,22 @@ class Canvas {
       .duration(750)
       .call(this.zoomBehavior.transform, d3.zoomIdentity);
   };
+
+  zoomToCoordinates = (xCoordinate, yCoordinate) => {
+    const { width, height } = this.el.getBoundingClientRect();
+    this.getSvg()
+      .transition()
+      .duration(750)
+      .call(
+        this.zoomBehavior.transform,
+        d3.zoomIdentity
+          .translate(
+            width * 0.5 - 2 * xCoordinate,
+            height * 0.5 - 2 * yCoordinate
+          )
+          .scale(2)
+      );
+  };
 }
 
 export default Canvas;

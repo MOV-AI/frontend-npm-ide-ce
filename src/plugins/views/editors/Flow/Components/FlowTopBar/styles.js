@@ -27,6 +27,15 @@ export const flowTopBarStyles = makeStyles(theme => ({
     fontSize: "15px",
     flexGrow: 1
   },
+  searchFlowArea: {
+    marginRight: theme.spacing(3)
+  },
+  searchInputText: {
+    width: "200px"
+  },
+  searchPopup: {
+    width: "fit-content"
+  },
   visualizationToggle: {
     marginRight: "10px"
   },

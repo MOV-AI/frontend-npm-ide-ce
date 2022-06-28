@@ -146,6 +146,16 @@ class Flow extends Model {
   }
 
   /**
+   * Returns the node instances manager
+   * @returns {Manager}
+   */
+  getSearchOptions() {
+    const nodes = Array.from(this.getNodeInstances().data.values());
+    const subFlows = Array.from(this.getSubFlows().data.values());
+    return nodes.concat(subFlows);
+  }
+
+  /**
    * Adds a new Group
    * @param {String} groupName : The name of the group to be added
    * @returns {Flow}
