@@ -17,7 +17,7 @@ export const baseLinkStyles = {
   get [MOVAI_FLOW_TYPES.LINKS.TRANSITION]() {
     return { stroke: { ...this._default.stroke, default: "#a74165" } };
   },
-  get "movai_msgs/Nodelet"() {
+  get [MOVAI_FLOW_TYPES.LINKS.NODELET]() {
     return { ...this._default };
   },
   get [ONLY_FROM]() {
