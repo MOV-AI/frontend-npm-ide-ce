@@ -1,4 +1,5 @@
 import { PLUGINS } from "../../../../../../utils/Constants";
+import { MOVAI_FLOW_TYPES } from "../../Constants/constants";
 import ClassicNode from "./ClassicNode";
 import ContainerNode from "./ContainerNode";
 import TemporaryContainerNode from "./TemporaryContainerNode";
@@ -23,7 +24,6 @@ class Factory {
    * @returns {object} : The template data
    */
   async getTemplate(name) {
-    const templateType = "MovAI/Flow";
     const { scope } = this.output;
     const obj = await this.docManager(
       PLUGINS.DOC_MANAGER.NAME,
@@ -35,7 +35,8 @@ class Factory {
     );
     const finalObject = obj.serializeToDB();
 
-    if (!obj.isNew) finalObject.Type = finalObject.Type ?? templateType;
+    if (!obj.isNew)
+      finalObject.Type = finalObject.Type ?? MOVAI_FLOW_TYPES.NODES.MOVAI_FLOW;
 
     return finalObject;
   }

@@ -90,35 +90,27 @@ const NodeMenu = memo(
      * @param {string} id : Node instance Item Id
      * @returns {NodeInstance}
      */
-    const getNodeData = useCallback(
-      async (flowInst = flowModel.current) => {
-        const nodeInstanceItem = flowInst.getNodeInstanceItem(data.id);
-        if (nodeInstanceItem) {
-          return nodeInstanceItem;
+    const getNodeData = useCallback(async () => {
+      const nodeInstanceItem = flowModel.current.getNodeInstanceItem(data.id);
+      if (nodeInstanceItem) {
+        return nodeInstanceItem;
+      }
+
+      const subFlowInst = await call(
+        PLUGINS.DOC_MANAGER.NAME,
+        PLUGINS.DOC_MANAGER.CALL.READ,
+        {
+          scope: "Flow",
+          name: nodeInst.parent.data.ContainerFlow
         }
+      );
 
-        const subFlowsArr = Array.from(flowInst.subFlows.data.values());
+      return subFlowInst.getNodeInstanceItem(data.id);
+    }, [data.id, nodeInst, flowModel, call]);
 
-        for (let i = 0, n = subFlowsArr.length; i < n; i++) {
-          const subFlow = subFlowsArr[i];
-          const subFlowInst = await call(
-            PLUGINS.DOC_MANAGER.NAME,
-            PLUGINS.DOC_MANAGER.CALL.READ,
-            {
-              scope: "Flow",
-              name: subFlow.template
-            }
-          );
-
-          const finalNode = await getNodeData(subFlowInst);
-
-          if (finalNode) {
-            return finalNode;
-          }
-        }
-      },
-      [data.id, flowModel, call]
-    );
+    const setNodeDataInst = nodeInstance => {
+      setNodeData(nodeInstance.serialize());
+    };
 
     /**
      * @private Submit parameter change
@@ -139,7 +131,7 @@ const NodeMenu = memo(
           nodeInstance.addKeyValue(varName, formData);
         }
 
-        setNodeData(nodeInstance.serialize());
+        setNodeDataInst(nodeInstance);
       },
       [getNodeData]
     );
@@ -153,7 +145,7 @@ const NodeMenu = memo(
       async (keyName, varName) => {
         const nodeInstance = await getNodeData();
         nodeInstance.deleteKeyValue(varName, keyName);
-        setNodeData(nodeInstance.serialize());
+        setNodeDataInst(nodeInstance);
       },
       [getNodeData]
     );
@@ -171,7 +163,7 @@ const NodeMenu = memo(
         const nodeInstance = await getNodeData();
 
         // set state with the result
-        setNodeData(nodeInstance.serialize());
+        setNodeDataInst(nodeInstance);
       };
 
       fetchData();
@@ -214,7 +206,7 @@ const NodeMenu = memo(
         const nodeInstance = await getNodeData();
         nodeInstance.updateKeyValueProp(prop, value);
 
-        setNodeData(nodeInstance.serialize());
+        setNodeDataInst(nodeInstance);
       },
       [getNodeData]
     );
@@ -291,7 +283,7 @@ const NodeMenu = memo(
         else nodeInstance.removeGroup(groupId);
 
         groupsVisibilities();
-        setNodeData(nodeInstance.serialize());
+        setNodeDataInst(nodeInstance);
       },
       [groupsVisibilities, getNodeData]
     );

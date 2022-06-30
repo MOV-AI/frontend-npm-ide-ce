@@ -10,7 +10,24 @@ const FLOW_VIEW_MODE = {
 
 const ROBOT_BLACKLIST = window.SERVER_DATA?.RobotBlackList ?? [];
 
-const TRANSITION_LINK = "movai_msgs/Transition";
+const MOVAI_FLOW_TYPES = {
+  NODES: {
+    ROS1_NODELETE: "ROS1/Nodelet",
+    ROS1_NODE: "ROS1/Node",
+    ROS1_PLUGIN: "ROS1/Plugin",
+    ROS1_STATEM: "ROS1/StateM",
+    MOVAI_NODE: "MovAI/Node",
+    MOVAI_STATE: "MovAI/State",
+    MOVAI_SERVER: "MovAI/Server",
+    MOVAI_FLOW: "MovAI/Flow",
+    ROS2_NODE: "ROS2/Node",
+    ROS2_LIFECYCLENODE: "ROS2/LifecycleNode"
+  },
+  LINKS: {
+    TRANSITION: "movai_msgs/Transition",
+    NODELET: "movai_msgs/Nodelet"
+  }
+};
 
 const NODE_TYPES = {
   NODE: "NODE",
@@ -33,7 +50,7 @@ export {
   CANVAS_LIMITS,
   generateContainerId,
   FLOW_VIEW_MODE,
-  TRANSITION_LINK,
+  MOVAI_FLOW_TYPES,
   ROBOT_BLACKLIST,
   NODE_TYPES,
   TYPES
