@@ -667,7 +667,6 @@ const useTabLayout = (props, dockRef) => {
         applyLayout(newLayout);
 
         !firstLoad.current && addTabToStack(tabData, dock);
-
         firstLoad.current = false;
       }
       // Emit new active tab id

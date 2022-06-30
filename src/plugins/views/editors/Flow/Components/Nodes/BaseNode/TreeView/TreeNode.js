@@ -8,10 +8,10 @@ import { belongLineBuilder } from "../../Utils";
 import BaseNodeStatus from "../BaseNodeStatus";
 
 class TreeNode extends BaseNode {
-  constructor(canvas, node, events, _type, template, parent) {
-    super(canvas, node, events, _type, template);
+  constructor({ canvas, node, events, _type, template, parent }) {
+    super({ canvas, node, events, _type, template });
     this.parent = parent;
-    this.children = new Map();
+    this.children = [];
     this._links = new Map();
     this._displayPorts = false;
     this._collapsablePorts = null;
@@ -38,6 +38,21 @@ class TreeNode extends BaseNode {
 
     return this;
   }
+
+  /**
+   * @private
+   * addEvents - add events to the svg element
+   */
+  addEvents = () => {
+    // node event listeners
+    this.object.on("click", () => {
+      if (!this.parent) return;
+      this.eventsOn(this.onClick);
+    });
+    this.object.on("dblclick", () => this.eventsOn(this.onDblClick));
+
+    return this;
+  };
 
   /**
    * @override renderHeader - render the node header
@@ -198,18 +213,11 @@ class TreeNode extends BaseNode {
    * @returns {TreeNode} Tree node object right before this node
    */
   getPreviousBrother() {
-    let previousBrother = this.parent;
-    const siblings = [...this.parent.children.keys()];
-    siblings.forEach((sibling, index) => {
-      const nextSibling = siblings[index + 1];
-      const siblingNode = this.parent.children.get(sibling);
-      if (
-        nextSibling === this.data.id &&
-        siblingNode.data.type === this.data.type
-      )
-        previousBrother = siblingNode;
-    });
-    return previousBrother;
+    const thisIndex = this.parent.children.findIndex(
+      n => n.data.id === this.data.id
+    );
+    const previousBrother = thisIndex - 1;
+    return this.parent.children[previousBrother] ?? this.parent;
   }
 
   /**
@@ -417,9 +425,11 @@ class TreeNode extends BaseNode {
    * @override addToCanvas - append node element to canvas
    */
   addToCanvas() {
+    // render children (meaning this is a node)
     if (this.parent) {
       this.parent.renderChild(this);
     } else {
+      // render itself (meaning this is a container)
       this.canvas.append(() => {
         this.object.attr("x", 50).attr("y", 50);
         return this.el;

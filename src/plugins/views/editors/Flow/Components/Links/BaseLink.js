@@ -1,12 +1,12 @@
 import * as d3 from "d3";
 import { LINK_DEPENDENCY } from "../../../../../../utils/Constants";
 import { defaultFunction } from "../../../../../../utils/Utils";
+import { MOVAI_FLOW_TYPES } from "../../Constants/constants";
 import { isLinkeable } from "../Nodes/BaseNode/PortValidator";
 import { generatePathPoints } from "./generatePathPoints";
 
 import { baseLinkStyles } from "./styles";
 
-const SUBFLOW_TYPE = "MovAI/Flow";
 const SEPARATOR = {
   SUBFLOW: "__",
   NODE: "/"
@@ -17,7 +17,17 @@ class BaseLinkStruct {
     canvas,
     src,
     trg,
-    { id, sourceNode, sourcePort, targetNode, targetPort, dependency, error }
+    {
+      id,
+      sourceNode,
+      sourcePort,
+      targetNode,
+      targetPort,
+      dependency,
+      error,
+      sourceFullPath,
+      targetFullPath
+    }
   ) {
     this.canvas = canvas;
     this.src = src; // {x, y, nodeSize {height, width}, type}
@@ -25,11 +35,13 @@ class BaseLinkStruct {
     this.error = error; // null or { message, fixError() }
     this.maxMovingPixels = canvas.maxMovingPixels;
     this.data = {
-      id: id,
-      sourceNode: sourceNode,
-      sourcePort: sourcePort,
-      targetNode: targetNode,
-      targetPort: targetPort,
+      id,
+      sourceNode,
+      sourcePort,
+      targetNode,
+      targetPort,
+      sourceFullPath,
+      targetFullPath,
       Dependency: dependency
     };
     this._visible = true;
@@ -449,18 +461,21 @@ export default class BaseLink extends BaseLinkStruct {
       const type = item.node._template?.Type ?? "";
       const port = item.data.name;
       const separator =
-        type === SUBFLOW_TYPE ? SEPARATOR.SUBFLOW : SEPARATOR.NODE;
+        type === MOVAI_FLOW_TYPES.NODES.MOVAI_FLOW
+          ? SEPARATOR.SUBFLOW
+          : SEPARATOR.NODE;
 
       return [node, port].join(separator);
     });
   }
 
-  static parseLink({
-    id,
-    From,
-    To,
-    Dependency = LINK_DEPENDENCY.ALL_DEPENDENCIES.VALUE
-  }) {
+  static parseLink(linksData) {
+    const {
+      id,
+      From,
+      To,
+      Dependency = LINK_DEPENDENCY.ALL_DEPENDENCIES.VALUE
+    } = linksData;
     const [sourceNode, sourcePort, sourceFullPath] = BaseLink.getNodePort(From);
     const [targetNode, targetPort, targetFullPath] = BaseLink.getNodePort(To);
 

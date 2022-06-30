@@ -14,6 +14,7 @@ import {
   Button,
   CircularProgress
 } from "@material-ui/core";
+import GrainIcon from "@material-ui/icons/Grain";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -22,6 +23,7 @@ import Toolbar from "@material-ui/core/Toolbar";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import StopIcon from "@material-ui/icons/Stop";
 import { RobotManager } from "@mov-ai/mov-fe-lib-core";
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import Workspace from "../../../../../../utils/Workspace";
 import {
   SCOPES,
@@ -31,7 +33,7 @@ import {
 } from "../../../../../../utils/Constants";
 import { ERROR_MESSAGES } from "../../../../../../utils/Messages";
 import { defaultFunction } from "../../../../../../utils/Utils";
-import { ROBOT_BLACKLIST } from "../../Constants/constants";
+import { FLOW_VIEW_MODE, ROBOT_BLACKLIST } from "../../Constants/constants";
 import useNodeStatusUpdate from "./hooks/useNodeStatusUpdate";
 
 import { buttonStyles, flowTopBarStyles } from "./styles";
@@ -65,17 +67,18 @@ const FlowTopBar = props => {
     call,
     alert,
     scope,
+    loading,
     mainInterface,
     id,
     name,
     onRobotChange,
+    onViewModeChange,
     searchProps,
     defaultViewMode,
     confirmationAlert
-    // onViewModeChange
   } = props;
   // State hooks
-  const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   const [robotSelected, setRobotSelected] = useState("");
   const [robotList, setRobotList] = useState({});
   const [viewMode, setViewMode] = useState(defaultViewMode);
@@ -240,9 +243,6 @@ const FlowTopBar = props => {
      * On component unmount
      */
     return () => {
-      // TEMPORARY HACK: Added log to remove warning of unused
-      // Once that handleViewModeChange method is uncommented, this should be removed
-      console.log(setViewMode);
       robotUnsubscribe();
       // Unmount
       isMounted.current = false;
@@ -256,12 +256,12 @@ const FlowTopBar = props => {
   ]);
 
   /**
-   * Finish loading when there's an update on activeFlow
+   * Finish actionLoading when there's an update on activeFlow
    */
   useEffect(() => {
-    setLoading(false);
+    setActionLoading(false);
     clearTimeout(commandRobotTimeoutRef.current);
-  }, [robotStatus.activeFlow, setLoading]);
+  }, [robotStatus.activeFlow, setActionLoading]);
 
   //========================================================================================
   /*                                                                                      *
@@ -276,11 +276,11 @@ const FlowTopBar = props => {
    */
   const canRunFlow = useCallback(
     action => {
-      const graph = mainInterface.current?.current?.graph;
+      const graph = mainInterface.current?.graph;
       // let's validate flow before continuing
       graph?.validateFlow();
 
-      const warnings = graph?.warnings || [];
+      const warnings = graph.warnings || [];
       const warningsVisibility = graph.warningsVisibility;
       const runtimeWarnings = warnings.filter(wn => wn.isRuntime);
       runtimeWarnings.forEach(warning => {
@@ -333,7 +333,7 @@ const FlowTopBar = props => {
     (action, flowPath) => {
       const canStart = canRunFlow(action);
       if (!canStart) return;
-      setLoading(true);
+      setActionLoading(true);
       // Send action to robot
       helperRef.current
         .sendToRobot({
@@ -346,8 +346,8 @@ const FlowTopBar = props => {
           commandRobotTimeoutRef.current = setTimeout(() => {
             // If flow reloads (creation of a new) the old is unmounted
             if (!isMounted.current) return;
-            // Set loading false and show error message
-            setLoading(false);
+            // Set actionLoading false and show error message
+            setActionLoading(false);
             alert({
               message: t("FailedFlowAction", {
                 action: t(action.toLowerCase())
@@ -367,7 +367,7 @@ const FlowTopBar = props => {
         });
       if (buttonDOMRef.current) buttonDOMRef.current.blur();
     },
-    [alert, canRunFlow, getFlowPath, robotSelected, setLoading, t]
+    [alert, canRunFlow, getFlowPath, robotSelected, setActionLoading, t]
   );
 
   /**
@@ -439,18 +439,17 @@ const FlowTopBar = props => {
    * @param {string} newViewMode : New value
    * @returns
    */
-  // Commented out for posterity
-  // const handleViewModeChange = useCallback(
-  //   (_event, newViewMode) => {
-  //     if (!newViewMode) return;
-  //     setViewMode(prevState => {
-  //       if (prevState === newViewMode) return prevState;
-  //       onViewModeChange(newViewMode);
-  //       return newViewMode;
-  //     });
-  //   },
-  //   [onViewModeChange]
-  // );
+  const handleViewModeChange = useCallback(
+    (_event, newViewMode) => {
+      if (!newViewMode) return;
+      setViewMode(prevState => {
+        if (prevState === newViewMode) return prevState;
+        onViewModeChange(newViewMode);
+        return newViewMode;
+      });
+    },
+    [onViewModeChange]
+  );
 
   //========================================================================================
   /*                                                                                      *
@@ -460,11 +459,11 @@ const FlowTopBar = props => {
 
   /**
    * Render Start button content
-   * @returns {ReactElement} CircularProgress to indicate loading or play icon with tooltip
+   * @returns {ReactElement} CircularProgress to indicate actionLoading or play icon with tooltip
    */
   const renderStartButton = useCallback(() => {
-    // Render circular progress if loading
-    return loading ? (
+    // Render circular progress if actionLoading
+    return actionLoading ? (
       <CircularProgress size={25} color="inherit" />
     ) : (
       <Tooltip title={t("StartFlow")}>
@@ -473,22 +472,22 @@ const FlowTopBar = props => {
         </>
       </Tooltip>
     );
-  }, [loading, t]);
+  }, [actionLoading, t]);
 
   /**
    * Render Stop button content
-   * @returns {ReactElement} CircularProgress to indicate loading or Stop icon with tooltip
+   * @returns {ReactElement} CircularProgress to indicate actionLoading or Stop icon with tooltip
    */
   const renderStopButton = useCallback(() => {
-    // Render circular progress if loading
-    return loading ? (
+    // Render circular progress if actionLoading
+    return actionLoading ? (
       <CircularProgress size={25} color="inherit" />
     ) : (
       <Tooltip title={t("StopFlow")}>
         <StopIcon />
       </Tooltip>
     );
-  }, [loading, t]);
+  }, [actionLoading, t]);
 
   return (
     <AppBar
@@ -524,7 +523,7 @@ const FlowTopBar = props => {
             <ButtonTopBar
               testId="input_stop-flow"
               ref={buttonDOMRef}
-              disabled={loading}
+              disabled={actionLoading}
               onClick={handleStopFlow}
             >
               {renderStopButton()}
@@ -533,7 +532,7 @@ const FlowTopBar = props => {
             <ButtonTopBar
               testId="input_save-before-start"
               ref={buttonDOMRef}
-              disabled={!robotStatus.isOnline || loading}
+              disabled={!robotStatus.isOnline || actionLoading}
               onClick={handleSaveBeforeStart}
             >
               {renderStartButton()}
@@ -552,23 +551,31 @@ const FlowTopBar = props => {
           component="div"
           className={classes.visualizationToggle}
         >
-          {/* <ToggleButtonGroup
+          <ToggleButtonGroup
             exclusive
             size="small"
             value={viewMode}
             onChange={handleViewModeChange}
           >
-            <ToggleButton data-testid="input_default-flow" value={FLOW_VIEW_MODE.default}>
+            <ToggleButton
+              data-testid="input_default-flow"
+              value={FLOW_VIEW_MODE.default}
+              disabled={loading}
+            >
               <Tooltip title={t("DefaultFlowView")}>
                 <GrainIcon fontSize="small" />
               </Tooltip>
             </ToggleButton>
-            <ToggleButton data-testid="input_tree-view-flow" value={FLOW_VIEW_MODE.treeView} disabled>
+            <ToggleButton
+              data-testid="input_tree-view-flow"
+              value={FLOW_VIEW_MODE.treeView}
+              disabled={loading}
+            >
               <Tooltip title={t("TreeView")}>
-                <i className="icon-tree" style={{ fontSize: "1.2rem" }}></i>
+                <i className={`icon-tree ${classes.treeIcon}`}></i>
               </Tooltip>
             </ToggleButton>
-          </ToggleButtonGroup> */}
+          </ToggleButtonGroup>
         </Typography>
       </Toolbar>
     </AppBar>
@@ -578,7 +585,6 @@ const FlowTopBar = props => {
 FlowTopBar.propTypes = {
   id: PropTypes.string,
   nodeStatusUpdated: PropTypes.func,
-  nodeCompleteStatusUpdated: PropTypes.func,
   onViewModeChange: PropTypes.func,
   onStartStopFlow: PropTypes.func,
   onRobotChange: PropTypes.func,
@@ -601,7 +607,6 @@ FlowTopBar.defaultProps = {
   onViewModeChange: () => defaultFunction("onViewModeChange"),
   onStartStopFlow: () => defaultFunction("onStartStopFlow"),
   nodeStatusUpdated: () => defaultFunction("nodeStatusUpdated"),
-  nodeCompleteStatusUpdated: () => defaultFunction("completeStatusUpdated"),
   workspace: GLOBAL_WORKSPACE,
   type: SCOPES.FLOW,
   version: "__UNVERSIONED__"

@@ -16,7 +16,7 @@ import {
 } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 import { LINK_DEPENDENCY } from "../../../../../../utils/Constants";
-import { TRANSITION_LINK } from "../../Constants/constants";
+import { MOVAI_FLOW_TYPES } from "../../Constants/constants";
 import BasePort from "../Nodes/BaseNode/BasePort";
 
 import { linkMenuStyles } from "./styles";
@@ -134,7 +134,7 @@ const LinkMenu = props => {
             </ListItem>
           </Typography>
         </Collapse>
-        {sourceMessage !== TRANSITION_LINK && (
+        {sourceMessage !== MOVAI_FLOW_TYPES.LINKS.TRANSITION && (
           <>
             <Divider />
             <ListItem>

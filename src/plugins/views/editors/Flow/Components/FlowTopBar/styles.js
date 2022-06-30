@@ -41,5 +41,8 @@ export const flowTopBarStyles = makeStyles(theme => ({
   },
   grow: {
     flexGrow: 1
+  },
+  treeIcon: {
+    fontSize: "1.2rem"
   }
 }));

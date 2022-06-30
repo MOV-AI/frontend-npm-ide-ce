@@ -79,7 +79,10 @@ class BaseNode extends BaseNodeStruct {
     // create the svg element
     this.object = d3
       .create("svg")
-      .attr("id", `${this.canvas.containerId}-${this.data.id}`)
+      .attr(
+        "id",
+        `${this.canvas.containerId}-${this.data.id || this.data.Template}`
+      )
       .style("overflow", "visible")
       .attr("width", this.width + maxPadding)
       .attr("height", this.height + maxPadding)
@@ -89,7 +92,7 @@ class BaseNode extends BaseNodeStruct {
     // add a rect to the svg element
     // this is the body of the node
     this.object
-      .append("rect")
+      .append("svg:rect")
       .attr("x", padding.x / 2)
       .attr("y", padding.y)
       .attr("rx", 6)

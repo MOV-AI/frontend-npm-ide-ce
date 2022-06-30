@@ -1,3 +1,4 @@
+import { MOVAI_FLOW_TYPES } from "../../Constants/constants";
 import BaseNode from "./BaseNode/BaseNode";
 
 const START_NAME = "start";
@@ -20,7 +21,7 @@ class StartNode extends BaseNode {
         start: {
           Out: {
             start: {
-              Message: "movai_msgs/Transition"
+              Message: MOVAI_FLOW_TYPES.LINKS.TRANSITION
             }
           },
           Template: "MovAI/TransitionFor",
@@ -73,7 +74,7 @@ class StartNode extends BaseNode {
     };
   }
 
-  static model = START_NAME
+  static model = START_NAME;
 }
 
 export default StartNode;

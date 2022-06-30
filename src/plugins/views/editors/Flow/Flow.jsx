@@ -34,10 +34,11 @@ import InvalidLinksWarning from "./Components/Warnings/InvalidLinksWarning";
 import InvalidParametersWarning from "./Components/Warnings/InvalidParametersWarning";
 import { EVT_NAMES, EVT_TYPES } from "./events";
 import { FLOW_VIEW_MODE } from "./Constants/constants";
+import GraphBase from "./Core/Graph/GraphBase";
+import GraphTreeView from "./Core/Graph/GraphTreeView";
 
 import "./Resources/css/Flow.css";
 import { flowStyles } from "./styles";
-
 let activeBookmark = null;
 
 const Flow = (props, ref) => {
@@ -77,6 +78,7 @@ const Flow = (props, ref) => {
   );
 
   // State Hooks
+  const [loading, setLoading] = useState(true);
   const [dataFromDB, setDataFromDB] = useState();
   const [robotSelected, setRobotSelected] = useState("");
   const [runningFlow, setRunningFlow] = useState("");
@@ -96,7 +98,6 @@ const Flow = (props, ref) => {
   const { t } = useTranslation();
   const clipboard = useMemo(() => new Clipboard(), []);
   // Refs
-  const baseFlowRef = useRef();
   const mainInterfaceRef = useRef();
   const debounceSelection = useRef();
   const selectedNodeRef = useRef();
@@ -109,6 +110,18 @@ const Flow = (props, ref) => {
    *                                    Private Methods                                   *
    *                                                                                      */
   //========================================================================================
+
+  /**
+   * Returns flow base class from viewMode defaults to GraphBase
+   * @returns {Class} flow base class based on the viewMode
+   */
+  const getBaseFlowClass = () => {
+    const flowClasses = {
+      [FLOW_VIEW_MODE.default]: GraphBase,
+      [FLOW_VIEW_MODE.treeView]: GraphTreeView
+    };
+    return flowClasses[viewMode] ?? GraphBase;
+  };
 
   /**
    * Used to handle group visibility
@@ -136,52 +149,6 @@ const Flow = (props, ref) => {
     }
   }, [flowDebugging]);
 
-  //========================================================================================
-  /*                                                                                      *
-   *                                    React Lifecycle                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  /**
-   * Component did mount
-   */
-  useEffect(() => {
-    on(
-      PLUGINS.RIGHT_DRAWER.NAME,
-      PLUGINS.RIGHT_DRAWER.ON.CHANGE_BOOKMARK,
-      bookmark => {
-        activeBookmark = bookmark.name;
-      }
-    );
-
-    // Subscribe to docManager broadcast for flowEditor (global events)
-    on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR, evt => {
-      // evt ex.: {action: "setMode", value: "default"}
-      const { action, value } = evt;
-      getMainInterface()?.[action](value);
-    });
-
-    setFlowDebugging(workspaceManager.getFlowIsDebugging());
-  }, [on, workspaceManager]);
-
-  /**
-   * Initialize data
-   */
-  useEffect(() => {
-    const model = instance.current;
-
-    if (model) {
-      setDataFromDB(model.serializeToDB());
-    }
-  }, [instance, data]);
-
-  /**
-   * Initialize main interface
-   */
-  useEffect(() => {
-    mainInterfaceRef.current = baseFlowRef.current?.mainInterface;
-  }, [baseFlowRef.current?.mainInterface]);
-
   /**
    * Should update everything related to flowDebugging here
    */
@@ -199,7 +166,7 @@ const Flow = (props, ref) => {
    * @private Get main interface instance
    */
   const getMainInterface = () => {
-    return mainInterfaceRef.current?.current;
+    return mainInterfaceRef.current;
   };
 
   /**
@@ -429,7 +396,6 @@ const Flow = (props, ref) => {
   );
 
   const renderRightMenu = useCallback(() => {
-    const explorerView = new Explorer(FLOW_EXPLORER_PROFILE);
     const details = props.data?.details || {};
     const bookmarks = {
       [MENUS.current.DETAIL.NAME]: {
@@ -447,8 +413,13 @@ const Flow = (props, ref) => {
             editable={isEditableComponentRef.current}
           ></Menu>
         )
-      },
-      FlowExplorer: {
+      }
+    };
+
+    if (isEditableComponentRef.current) {
+      const explorerView = new Explorer(FLOW_EXPLORER_PROFILE);
+
+      bookmarks[FLOW_EXPLORER_PROFILE.name] = {
         icon: <Add />,
         name: FLOW_EXPLORER_PROFILE.name,
         title: t(FLOW_EXPLORER_PROFILE.title),
@@ -456,8 +427,8 @@ const Flow = (props, ref) => {
           flowId: id,
           mainInterface: getMainInterface()
         })
-      }
-    };
+      };
+    }
 
     // Add node menu if any is selected
     if (selectedNodeRef.current) {
@@ -529,15 +500,20 @@ const Flow = (props, ref) => {
    */
   const onViewModeChange = useCallback(
     newViewMode => {
-      setViewMode(prevState => {
-        if (prevState === newViewMode) return prevState;
-        isEditableComponentRef.current = newViewMode === FLOW_VIEW_MODE.default;
-        // Set mode loading after changing view mode
-        setMode(EVT_NAMES.LOADING);
-        return newViewMode;
-      });
+      if (viewMode === newViewMode) return;
+      isEditableComponentRef.current = newViewMode === FLOW_VIEW_MODE.default;
+
+      setLoading(true);
+
+      // Set mode loading after changing view mode
+      setMode(EVT_NAMES.LOADING);
+
+      // Temporary fix to show loading (even though UI still freezes)
+      setTimeout(() => {
+        setViewMode(newViewMode);
+      }, 100);
     },
-    [setMode]
+    [viewMode, setMode]
   );
 
   /**
@@ -556,6 +532,13 @@ const Flow = (props, ref) => {
    */
   const onNodeStatusUpdate = useCallback((nodeStatus, robotStatus) => {
     getMainInterface()?.nodeStatusUpdated(nodeStatus, robotStatus);
+  }, []);
+
+  /**
+   * Resets all node status
+   */
+  const onNodeCompleteStatusUpdated = useCallback(() => {
+    getMainInterface()?.resetAllNodeStatus();
   }, []);
 
   //========================================================================================
@@ -687,6 +670,17 @@ const Flow = (props, ref) => {
    */
   const onReady = useCallback(
     mainInterface => {
+      mainInterfaceRef.current = mainInterface;
+
+      // Subscribe to on loading exit (finish) event
+      mainInterface.mode.loading.onExit.subscribe(() => {
+        // Append the document frame to the canvas
+        mainInterface.canvas.appendDocumentFragment();
+        // Reposition all nodes and subflows
+        mainInterface.graph.updateAllPositions();
+        setLoading(false);
+      });
+
       // Set the warning types to be used in the validations
       mainInterface.graph.validator.setWarningActions(
         WARNING_TYPES.INVALID_PARAMETERS,
@@ -1089,9 +1083,42 @@ const Flow = (props, ref) => {
 
   //========================================================================================
   /*                                                                                      *
-   *                                       Shortcuts                                      *
+   *                                    React Lifecycle                                   *
    *                                                                                      */
   //========================================================================================
+
+  /**
+   * Component did mount
+   */
+  useEffect(() => {
+    on(
+      PLUGINS.RIGHT_DRAWER.NAME,
+      PLUGINS.RIGHT_DRAWER.ON.CHANGE_BOOKMARK,
+      bookmark => {
+        activeBookmark = bookmark.name;
+      }
+    );
+
+    // Subscribe to docManager broadcast for flowEditor (global events)
+    on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR, evt => {
+      // evt ex.: {action: "setMode", value: "default"}
+      const { action, value } = evt;
+      getMainInterface()?.[action](value);
+    });
+
+    setFlowDebugging(workspaceManager.getFlowIsDebugging());
+  }, [on, workspaceManager]);
+
+  /**
+   * Initialize data
+   */
+  useEffect(() => {
+    const model = instance.current;
+
+    if (model) {
+      setDataFromDB(model.serializeToDB());
+    }
+  }, [instance, data]);
 
   useEffect(() => {
     addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.COPY_NODE.SHORTCUTS, handleCopyNode);
@@ -1152,12 +1179,14 @@ const Flow = (props, ref) => {
           alert={alert}
           confirmationAlert={confirmationAlert}
           scope={scope}
+          loading={loading}
           defaultViewMode={viewMode}
           version={instance.current?.version}
           mainInterface={mainInterfaceRef}
           onRobotChange={onRobotChange}
           onStartStopFlow={onStartStopFlow}
           nodeStatusUpdated={onNodeStatusUpdate}
+          nodeCompleteStatusUpdated={onNodeCompleteStatusUpdated}
           onViewModeChange={onViewModeChange}
           searchProps={{
             visible: searchVisible,
@@ -1166,12 +1195,13 @@ const Flow = (props, ref) => {
             onEnabled: handleSearchEnabled,
             onDisabled: handleSearchDisabled
           }}
-          // nodeCompleteStatusUpdated={onMonitoringNodeStatusUpdate}
         ></FlowTopBar>
       </div>
       <BaseFlow
         {...props}
-        ref={baseFlowRef}
+        graphClass={getBaseFlowClass()}
+        loading={loading}
+        viewMode={viewMode}
         dataFromDB={dataFromDB}
         warnings={warnings}
         warningsVisibility={warningsVisibility}
@@ -1187,7 +1217,7 @@ const Flow = (props, ref) => {
         toggleFlowDebug={handleFlowDebugChange}
         flowDebugging={flowDebugging}
       />
-      {contextMenuOptions && (
+      {contextMenuOptions && isEditableComponentRef.current && (
         <FlowContextMenu
           onClose={handleContextClose}
           onNodeCopy={handleCopyNode}
