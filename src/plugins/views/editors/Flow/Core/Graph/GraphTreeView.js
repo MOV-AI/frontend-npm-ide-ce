@@ -108,8 +108,7 @@ export default class GraphTreeView extends GraphBase {
       if (flow.Container) {
         const subFlows = Object.values(flow.Container);
 
-        for (let i = 0, n = subFlows.length; i < n; i++) {
-          const subFlow = subFlows[i];
+        for (const subFlow of subFlows) {
           const subFlowInst = this.nodes.get(subFlow.ContainerLabel).obj;
           const subFlowTemplate = subFlowInst.template;
 
@@ -126,8 +125,7 @@ export default class GraphTreeView extends GraphBase {
   }
 
   updateAllPositions = async () => {
-    for (let i = 0, n = this.subFlows.length; i < n; i++) {
-      const parent = this.subFlows[i];
+    for (const parent of this.subFlows) {
       await parent.updateChildrenPosition();
     }
   };
@@ -359,17 +357,19 @@ export default class GraphTreeView extends GraphBase {
    */
   _addLinkToNode(child, link) {
     const childId = child.data.id;
+    const linkData = link.data;
+
     if (
-      link.data.targetFullPath.includes(childId) ||
-      link.data.sourceFullPath.includes(childId)
+      linkData.targetFullPath.includes(childId) ||
+      linkData.sourceFullPath.includes(childId)
     ) {
-      link.data.sourceTemplatePath = link.data.sourceFullPath.map(
+      linkData.sourceTemplatePath = linkData.sourceFullPath.map(
         nodeName => this.nodes.get(nodeName)?.obj?.templateName || nodeName
       );
-      link.data.targetTemplatePath = link.data.targetFullPath.map(
+      linkData.targetTemplatePath = linkData.targetFullPath.map(
         nodeName => this.nodes.get(nodeName)?.obj?.templateName || nodeName
       );
-      child.addLink(link.data);
+      child.addLink(linkData);
     }
   }
 
@@ -387,8 +387,8 @@ export default class GraphTreeView extends GraphBase {
     const _nodes = nodes || {};
     const keys = Object.keys(_nodes);
 
-    for (let i = 0, n = keys.length; i < n; i++) {
-      const _node = { ..._nodes[keys[i]], id: keys[i] };
+    for (const nodeKey of keys) {
+      const _node = { ..._nodes[nodeKey], id: nodeKey };
 
       try {
         await this.addNode(_node, _type, parent);

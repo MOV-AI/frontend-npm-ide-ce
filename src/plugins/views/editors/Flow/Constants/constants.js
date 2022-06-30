@@ -10,7 +10,14 @@ const FLOW_VIEW_MODE = {
 
 const ROBOT_BLACKLIST = window.SERVER_DATA?.RobotBlackList ?? [];
 
-const TRANSITION_LINK = "movai_msgs/Transition";
+const MOVAI_FLOW_TYPES = {
+  NODES: {
+    MOVAI_FLOW: "MovAI/Flow"
+  },
+  LINKS: {
+    TRANSITION: "movai_msgs/Transition"
+  }
+};
 
 const NODE_TYPES = {
   NODE: "NODE",
@@ -33,7 +40,7 @@ export {
   CANVAS_LIMITS,
   generateContainerId,
   FLOW_VIEW_MODE,
-  TRANSITION_LINK,
+  MOVAI_FLOW_TYPES,
   ROBOT_BLACKLIST,
   NODE_TYPES,
   TYPES

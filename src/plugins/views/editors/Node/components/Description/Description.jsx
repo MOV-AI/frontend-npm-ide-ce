@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
+import { MOVAI_FLOW_TYPES } from "../../../Flow/Constants/constants";
 import CollapsibleHeader from "../../../_shared/CollapsibleHeader/CollapsibleHeader";
 
 import { descriptionStyles } from "./styles";
@@ -16,7 +17,7 @@ const NODE_COLORS = {
   "MovAI/Node": "#be2424",
   "MovAI/State": "#52528c",
   "MovAI/Server": "#dec5e3",
-  "MovAI/Flow": "#252125",
+  [MOVAI_FLOW_TYPES.NODES.MOVAI_FLOW]: "#252125",
   "ROS2/Node": "#f7b05b",
   "ROS2/LifecycleNode": "#a5907e"
 };

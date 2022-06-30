@@ -1,4 +1,5 @@
 import { LINK_DEPENDENCY } from "../../../../../../utils/Constants";
+import { MOVAI_FLOW_TYPES } from "../../Constants/constants";
 
 const ONLY_FROM = `dependency_${LINK_DEPENDENCY.ONLY_FROM.VALUE}`;
 const ONLY_TO = `dependency_${LINK_DEPENDENCY.ONLY_TO.VALUE}`;
@@ -13,7 +14,7 @@ export const baseLinkStyles = {
       width: 3
     }
   },
-  get "movai_msgs/Transition"() {
+  get [MOVAI_FLOW_TYPES.LINKS.TRANSITION]() {
     return { stroke: { ...this._default.stroke, default: "#a74165" } };
   },
   get "movai_msgs/Nodelet"() {

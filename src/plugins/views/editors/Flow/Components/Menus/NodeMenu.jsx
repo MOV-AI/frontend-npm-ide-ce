@@ -99,8 +99,7 @@ const NodeMenu = memo(
 
         const subFlowsArr = Array.from(flowInst.subFlows.data.values());
 
-        for (let i = 0, n = subFlowsArr.length; i < n; i++) {
-          const subFlow = subFlowsArr[i];
+        for (const subFlow of subFlowsArr) {
           const subFlowInst = await call(
             PLUGINS.DOC_MANAGER.NAME,
             PLUGINS.DOC_MANAGER.CALL.READ,
