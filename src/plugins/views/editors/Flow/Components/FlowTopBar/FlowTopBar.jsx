@@ -73,15 +73,14 @@ const FlowTopBar = props => {
     name,
     onRobotChange,
     onViewModeChange,
+    viewMode,
     searchProps,
-    defaultViewMode,
     confirmationAlert
   } = props;
   // State hooks
   const [actionLoading, setActionLoading] = useState(false);
   const [robotSelected, setRobotSelected] = useState("");
   const [robotList, setRobotList] = useState({});
-  const [viewMode, setViewMode] = useState(defaultViewMode);
   // Other hooks
   const classes = flowTopBarStyles();
   const { t } = useTranslation();
@@ -441,12 +440,7 @@ const FlowTopBar = props => {
    */
   const handleViewModeChange = useCallback(
     (_event, newViewMode) => {
-      if (!newViewMode) return;
-      setViewMode(prevState => {
-        if (prevState === newViewMode) return prevState;
-        onViewModeChange(newViewMode);
-        return newViewMode;
-      });
+      onViewModeChange(newViewMode);
     },
     [onViewModeChange]
   );

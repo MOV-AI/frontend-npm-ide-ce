@@ -165,9 +165,12 @@ class DocManager extends IDEPlugin {
    * Update existing document
    * @param {{name: String, scope: String}} modelKey
    * @param {Function} callback : Used to call said function after all is done (more reliable than a .then)
+   * @param {Object} opts : Send extra options to save - currently we have:
+   *                       {ignoreNew} to prevent showing the new doc popup
+   *                       {preventAlert} to prevent showing the save alert
    * @returns {Promise<Model>}
    */
-  async save(modelKey, callback) {
+  async save(modelKey, callback, opts) {
     const { name, scope, data } = modelKey;
 
     const thisDoc = await this.read(modelKey);
@@ -176,8 +179,15 @@ class DocManager extends IDEPlugin {
     // let's replace some data locally before saving if it was passed in
     if (data) thisDoc.setData(data);
 
+    this.emit(PLUGINS.DOC_MANAGER.ON.BEFORE_SAVE_DOC, {
+      docManager: this,
+      doc: Document.parsePath(name, scope),
+      thisDoc
+    });
+
     if (!isDirty) return;
-    if (!isNew && !isOutdated) return this.doSave(modelKey, callback);
+    if (!isNew && !isOutdated)
+      return this.doSave(modelKey, callback, undefined, opts);
 
     if (this.saveStack.has(`${name}_${scope}`)) return;
     this.saveStack.set(`${name}_${scope}`, { name, scope });
@@ -197,7 +207,7 @@ class DocManager extends IDEPlugin {
                 this.saveStack.delete(`${name}_${scope}`);
                 break;
               case SAVE_OUTDATED_DOC_ACTIONS.OVERWRITE_DOC:
-                this.doSave(modelKey, callback);
+                this.doSave(modelKey, callback, undefined, opts);
                 break;
               case SAVE_OUTDATED_DOC_ACTIONS.CANCEL:
               default:
@@ -209,10 +219,12 @@ class DocManager extends IDEPlugin {
       );
     }
 
+    if (opts?.ignoreNew) return;
+
     return this.call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.NEW_DOC, {
       scope,
       placeholder: name,
-      onSubmit: newName => this.doSave(modelKey, callback, newName),
+      onSubmit: newName => this.doSave(modelKey, callback, newName, opts),
       onClose: () => this.saveStack.delete(`${name}_${scope}`)
     });
   }
@@ -224,7 +236,7 @@ class DocManager extends IDEPlugin {
    * @param {Function} callback : Used to call said function after all is done (more reliable than a .then)
    * @returns {Promise<Model>}
    */
-  async doSave(modelKey, callback, newName) {
+  async doSave(modelKey, callback, newName, opts) {
     const { name, scope } = modelKey;
     let returnMessage = { success: false };
 
@@ -237,10 +249,12 @@ class DocManager extends IDEPlugin {
         newName
       });
 
-      this.call(PLUGINS.ALERT.NAME, PLUGINS.ALERT.CALL.SHOW, {
-        message: i18n.t(SUCCESS_MESSAGES.SAVED_SUCCESSFULLY),
-        severity: ALERT_SEVERITIES.SUCCESS
-      });
+      if (!opts?.preventAlert) {
+        this.call(PLUGINS.ALERT.NAME, PLUGINS.ALERT.CALL.SHOW, {
+          message: i18n.t(SUCCESS_MESSAGES.SAVED_SUCCESSFULLY),
+          severity: ALERT_SEVERITIES.SUCCESS
+        });
+      }
 
       returnMessage = model;
     } catch (error) {
