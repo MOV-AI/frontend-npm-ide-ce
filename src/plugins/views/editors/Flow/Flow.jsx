@@ -1135,18 +1135,18 @@ const Flow = (props, ref) => {
           const subFlows = mainInterfaceRef.current.graph.subFlows;
 
           for (let i = 0, n = subFlows.length; i < n; i++) {
-            if (subFlows[i].templateName !== docData.doc.name) {
-              await call(
-                PLUGINS.DOC_MANAGER.NAME,
-                PLUGINS.DOC_MANAGER.CALL.SAVE,
-                {
-                  scope,
-                  name: subFlows[i].templateName
-                },
-                null,
-                { ignoreNew: true, preventAlert: i > 1 }
-              );
-            }
+            await call(
+              PLUGINS.DOC_MANAGER.NAME,
+              PLUGINS.DOC_MANAGER.CALL.SAVE,
+              {
+                scope,
+                name: subFlows[i].templateName
+              },
+              null,
+              // {{ignoreNew: true}} Because we don't want to show the new doc popup on missing subflows
+              // {{preventAlert: i > 1}} Because independently of how many saves we do we just to want to show the snackbar once
+              { ignoreNew: true, preventAlert: i > 1 }
+            );
           }
         }
       }

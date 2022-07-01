@@ -117,7 +117,7 @@ export default class GraphTreeView extends GraphBase {
 
         // Add parent children to canvas
         this.update(parent);
-        this.subFlows.push(parent);
+        parent !== this.rootNode && this.subFlows.push(parent);
       }
     } catch (error) {
       console.warn("Error has ocurred loading children", flow, error);

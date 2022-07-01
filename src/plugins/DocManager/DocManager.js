@@ -165,6 +165,9 @@ class DocManager extends IDEPlugin {
    * Update existing document
    * @param {{name: String, scope: String}} modelKey
    * @param {Function} callback : Used to call said function after all is done (more reliable than a .then)
+   * @param {Object} opts : Send extra options to save - currently we have:
+   *                       {ignoreNew} to prevent showing the new doc popup
+   *                       {preventAlert} to prevent showing the save alert
    * @returns {Promise<Model>}
    */
   async save(modelKey, callback, opts) {
