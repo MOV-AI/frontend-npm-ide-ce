@@ -1,6 +1,7 @@
 import TreeNode from "../BaseNode/TreeView/TreeNode";
 import BaseContainerNode from "../BaseNode/BaseContainerNode";
 import CollapsableItem from "../BaseNode/TreeView/CollapsableItem";
+import { TYPES } from "../../../Constants/constants";
 
 const RENDERING_MODE = {
   tree: 0,
@@ -9,7 +10,7 @@ const RENDERING_MODE = {
 
 class TreeContainerNode extends TreeNode {
   constructor({ canvas, node, events, template, parent }) {
-    super({ canvas, node, events, _type: "container", template, parent });
+    super({ canvas, node, events, _type: TYPES.CONTAINER, template, parent });
     this.childrenLinks = new Map();
     this._collapsableItem = null;
     this._displayChildren = true;
@@ -146,7 +147,7 @@ class TreeContainerNode extends TreeNode {
           node.updatePortsPosition();
           const nodeWidth = node.el.getBBox().width;
           const nodeHeight = node.el.getBBox().height;
-          if (node.data.type !== "Container") {
+          if (node.data.type !== TYPES.CONTAINER) {
             if (maxWidthNode < nodeWidth) maxWidthNode = nodeWidth;
             node.object.attr("y", childrenHeightSum);
           } else {

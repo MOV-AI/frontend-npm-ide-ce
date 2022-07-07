@@ -270,7 +270,7 @@ export default class GraphBase {
     // Update links
     this.updateLinks(data.Links || {});
     // Update exposed ports
-    this.updateExposedPorts(data.ExposedPorts || {});
+    this.loadExposedPorts(data.ExposedPorts || {}, true);
     // Let's re-validate the flow
     this.validateFlow();
   };
@@ -282,9 +282,15 @@ export default class GraphBase {
   onTemplateUpdate = data => {
     if (data.Label === this.id) this.onFlowUpdate(data);
     else {
-      this.nodes.forEach(node => node.obj.onTemplateUpdate(data));
-      this.loadExposedPorts(this.exposedPorts, true);
-      this.debounceToValidateFlow();
+      const nodesArray = [...this.nodes.values()];
+      const templateUpdatePromises = nodesArray.map(node =>
+        node.obj.onTemplateUpdate(data)
+      );
+
+      Promise.all(templateUpdatePromises).then(() => {
+        this.loadExposedPorts(this.exposedPorts, true);
+        this.debounceToValidateFlow();
+      });
     }
   };
 

@@ -1,4 +1,3 @@
-import lodash from "lodash";
 import BasePort from "./BaseNode/BasePort";
 import BaseContainerNode from "./BaseNode/BaseContainerNode";
 
@@ -58,6 +57,16 @@ class ContainerNode extends BaseContainerNode {
     // add port events
     const events = this.portEvents();
 
+    /**
+     * Simple extract fuction to aliviate the cognitive complexity
+     * @param {Any} cond : Used to check if it's a valid value
+     * @param {Any} def : Used to return if cond is not valid
+     * @return {Any} : Either the value if it's valid, or the default
+     */
+    function failSafe(cond, def) {
+      return cond ?? def;
+    }
+
     // node already has ports; probably an update request
     if (this._ports.size > 0) {
       this._ports.forEach(port => {
@@ -68,7 +77,7 @@ class ContainerNode extends BaseContainerNode {
 
     try {
       // ExposedPorts {<node template>: {<node name>: <[ports]>}, }
-      const expTemplates = lodash.get(this._template, "ExposedPorts", {}) || {};
+      const expTemplates = failSafe(this._template?.ExposedPorts, {});
 
       const flattenData = [];
       // flatten data
@@ -112,19 +121,19 @@ class ContainerNode extends BaseContainerNode {
           Object.keys(portsInst).forEach(type => {
             if (!["in", "out"].includes(type.toLocaleLowerCase())) return;
 
-            const portObj = lodash.get(portsInst, type, {});
+            const portObj = failSafe(portsInst?.[type], {});
 
             Object.keys(portObj).forEach(port => {
               if (portInstName.search(`${portsInst.PortsLabel}/${port}`) < 0)
                 return;
 
-              const data = lodash.get(portsInst, `${type}`, {});
+              const data = failSafe(portsInst?.[type], {});
 
               Object.keys(data).forEach(portName => {
                 const portData = {
                   name: `${nodeName}${joinStr}${portInstName}`,
                   type: type,
-                  Template: lodash.get(portsInst, `Template`, ""),
+                  Template: failSafe(portsInst?.Template, ""),
                   origin: nodeName,
                   ...data[portName]
                 };

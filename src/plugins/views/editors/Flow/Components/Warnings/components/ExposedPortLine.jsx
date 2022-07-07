@@ -4,12 +4,12 @@ import PropTypes from "prop-types";
 import Tooltip from "@material-ui/core/Tooltip";
 import Button from "@material-ui/core/Button";
 import { buildDocPath } from "../../../../../../../utils/Utils";
-import { SCOPES, PLUGINS } from "../../../../../../../utils/Constants";
+import { PLUGINS } from "../../../../../../../utils/Constants";
 
 import { parameterLineStyles } from "../styles";
 
-const ParameterLine = props => {
-  const { subFlowInfo, call, closeModal } = props;
+const ExposedPortLine = props => {
+  const { exposedPortInfo, call, closeModal } = props;
 
   // Style hooks
   const classes = parameterLineStyles();
@@ -31,12 +31,12 @@ const ParameterLine = props => {
   const buildTooltipTitle = (template, node, params) => {
     return (
       <>
-        <strong>{t("FlowTemplate-Colon")}</strong> {template}
+        <strong>{t("NodeTemplate-Colon")}</strong> {template}
         <br />
-        <strong>{t("SubFlow-Colon")}</strong> {node}
+        <strong>{t("NodeInstance-Colon")}</strong> {node}
         <br />
-        <strong>{t("Parameters-Colon")}</strong>
-        <ul className={classes.paramsList}>
+        <strong>{t("InvalidExposedPorts-Colon")}</strong>
+        <ul>
           {params.map(param => (
             <li key={`${node}_${param}`}>{param}</li>
           ))}
@@ -52,8 +52,8 @@ const ParameterLine = props => {
   //========================================================================================
 
   const handleOpenDocument = useCallback(() => {
-    const name = subFlowInfo.containerNode.templateName;
-    const scope = SCOPES.FLOW;
+    const name = exposedPortInfo.nodeInst.templateName;
+    const scope = exposedPortInfo.nodeInst.data.model;
     const id = buildDocPath({ name, scope });
 
     closeModal();
@@ -63,9 +63,8 @@ const ParameterLine = props => {
       name,
       scope
     };
-
     call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, template);
-  }, [subFlowInfo.containerNode.templateName, closeModal, call]);
+  }, [exposedPortInfo, call, closeModal]);
 
   //========================================================================================
   /*                                                                                      *
@@ -76,9 +75,9 @@ const ParameterLine = props => {
   return (
     <Tooltip
       title={buildTooltipTitle(
-        subFlowInfo.containerNode.templateName,
-        subFlowInfo.name,
-        subFlowInfo.invalidParams
+        exposedPortInfo.nodeInst.templateName,
+        exposedPortInfo.nodeInst.data.id,
+        exposedPortInfo.invalidPorts
       )}
     >
       <div
@@ -86,11 +85,11 @@ const ParameterLine = props => {
         className={classes.invalidParameterHolder}
       >
         <div>
-          <strong>{subFlowInfo.name}</strong>
-          <ul className={classes.paramsList}>
-            {subFlowInfo.invalidParams.map(param => (
-              <li key={`${subFlowInfo.id}_${param}`}>
-                <strong>{param}</strong>
+          <strong>{exposedPortInfo.nodeInst.data.name}</strong>
+          <ul>
+            {exposedPortInfo.invalidPorts.map(port => (
+              <li key={`${exposedPortInfo.nodeInst.data.id}_${port}`}>
+                <strong>{port}</strong>
               </li>
             ))}
           </ul>
@@ -103,10 +102,10 @@ const ParameterLine = props => {
           >
             <Tooltip
               title={t("CloseModalOpenTemplate", {
-                templateName: subFlowInfo.containerNode.templateName
+                templateName: exposedPortInfo.nodeInst.templateName
               })}
             >
-              <strong>{subFlowInfo.containerNode.templateName}</strong>
+              <strong>{exposedPortInfo.nodeInst.templateName}</strong>
             </Tooltip>
           </Button>
         </div>
@@ -115,10 +114,10 @@ const ParameterLine = props => {
   );
 };
 
-ParameterLine.propTypes = {
-  subFlowInfo: PropTypes.object.isRequired,
+ExposedPortLine.propTypes = {
+  exposedPortInfo: PropTypes.object.isRequired,
   call: PropTypes.func.isRequired,
   closeModal: PropTypes.func.isRequired
 };
 
-export default ParameterLine;
+export default ExposedPortLine;

@@ -8,42 +8,53 @@
 
 import i18n from "../../../../../../i18n/i18n";
 import MESSAGES from "../../../../../../utils/Messages";
-import { ROS_VALID_NAMES } from "../../../../../../utils/Constants";
+import {
+  ROS_VALID_NAMES,
+  ALERT_SEVERITIES
+} from "../../../../../../utils/Constants";
 import { defaultFunction } from "../../../../../../utils/Utils";
 import { MisMatchMessageLink } from "../../Components/Links/Errors";
 import { isLinkeable } from "../../Components/Nodes/BaseNode/PortValidator";
+import { TYPES } from "../../Constants/constants";
 
 export const WARNING_TYPES = {
   START_LINK: "startLink",
   LINK_MISMATCH: "linkMismatchMessage",
   INVALID_PARAMETERS: "invalidParameters",
+  INVALID_EXPOSED_PORTS: "invalidExposedPorts",
   INVALID_LINKS: "invalidLinks"
 };
 
 const WARNINGS = {
   [WARNING_TYPES.START_LINK]: {
     message: i18n.t("StartLinkNotFound"),
-    type: "warning",
+    type: ALERT_SEVERITIES.WARNING,
     isRuntime: true,
     isPersistent: false
   },
   [WARNING_TYPES.LINK_MISMATCH]: {
     message: i18n.t("MessageMismatchedLinks"),
-    type: "warning",
+    type: ALERT_SEVERITIES.WARNING,
     isRuntime: false,
     isPersistent: true
   },
   [WARNING_TYPES.INVALID_PARAMETERS]: {
     message: i18n.t("InvalidSubFlowParameters"),
-    isPersistent: true,
+    type: ALERT_SEVERITIES.WARNING,
     isRuntime: false,
-    type: "warning"
+    isPersistent: true
+  },
+  [WARNING_TYPES.INVALID_EXPOSED_PORTS]: {
+    message: i18n.t("InvalidExposedPorts"),
+    type: ALERT_SEVERITIES.WARNING,
+    isRuntime: false,
+    isPersistent: true
   },
   [WARNING_TYPES.INVALID_LINKS]: {
     message: i18n.t("InvalidLinksFoundTitle"),
-    isPersistent: true,
+    type: ALERT_SEVERITIES.WARNING,
     isRuntime: false,
-    type: "warning"
+    isPersistent: true
   }
 };
 
@@ -135,6 +146,48 @@ export default class GraphValidator {
 
   /**
    * @private
+   * Validate if the flow contains any invalid Exposed Ports
+   * - Invalid Exposed Ports: Exposed Ports that exist on the Instance but no set on the Template
+   *
+   * @returns {Array} List of nodes that have invalid Exposed Ports
+   */
+  validateExposedPorts = () => {
+    const warnings = [];
+    const invalidExposedPorts = [];
+    const exposedPorts = Object.values(this.graph.exposedPorts);
+
+    exposedPorts.forEach(instExposedPorts => {
+      Object.entries(instExposedPorts).forEach(
+        ([instName, nodeExposedPorts]) => {
+          const invalidPorts = [];
+          const thisNode = this.graph.nodes.get(instName)?.obj;
+          if (!thisNode) return;
+          nodeExposedPorts.forEach(exposedPort => {
+            if (!thisNode.ports.has(exposedPort)) {
+              invalidPorts.push(exposedPort);
+            }
+          });
+
+          invalidPorts.length &&
+            invalidExposedPorts.push({
+              nodeInst: thisNode,
+              invalidPorts
+            });
+        }
+      );
+    });
+
+    invalidExposedPorts.length &&
+      warnings.push({
+        ...WARNINGS[WARNING_TYPES.INVALID_EXPOSED_PORTS],
+        data: invalidExposedPorts
+      });
+
+    return warnings;
+  };
+
+  /**
+   * @private
    * Validate if the flow contains any sub-flow with invalid params
    *  - Invalid params: params set on instance and not set on template
    *
@@ -145,7 +198,7 @@ export default class GraphValidator {
     const invalidParamsWarning = [];
     const containers = new Map(
       [...this.graph.nodes].filter(
-        ([_, node]) => node.obj.data.type === "Container"
+        ([_, node]) => node.obj.data.type === TYPES.CONTAINER
       )
     );
     containers.forEach(container => {
@@ -188,9 +241,14 @@ export default class GraphValidator {
   validateFlow = () => {
     // Gather all warnings
     const invalidLinks = this.validateLinks();
+    const invalidExposedPorts = this.validateExposedPorts();
     const invalidParams = this.validateContainerParams();
     // Merge warnings and return them
-    const warnings = [...invalidLinks, ...invalidParams];
+    const warnings = [
+      ...invalidLinks,
+      ...invalidExposedPorts,
+      ...invalidParams
+    ];
     return { warnings };
   };
 
