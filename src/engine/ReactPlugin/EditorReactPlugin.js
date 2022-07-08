@@ -106,6 +106,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
         removeKeyBind(KEYBINDINGS.SAVE);
         removeKeyBind(KEYBINDINGS.SAVE_ALL);
         off(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE);
+        off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.UPDATE_DOC_DIRTY);
       };
     }, [
       id,
