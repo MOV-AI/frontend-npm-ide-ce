@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useEffect } from "react";
+import React, { forwardRef, useCallback, useEffect, useRef } from "react";
 import withAlerts from "../../decorators/withAlerts";
 import withKeyBinds from "../../decorators/withKeyBinds";
 import withMenuHandler from "../../decorators/withMenuHandler";
@@ -6,6 +6,7 @@ import withLoader from "../../decorators/withLoader";
 import { withDataHandler } from "../../plugins/DocManager/DataHandler";
 import { KEYBINDINGS } from "../../utils/Keybindings";
 import { PLUGINS } from "../../utils/Constants";
+import { getNameFromURL } from "../../utils/Utils";
 import { ViewPlugin } from "./ViewReactPlugin";
 
 /**
@@ -52,6 +53,8 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       updateRightMenu
     } = props;
 
+    const editorContainer = useRef();
+
     /**
      * Save all documents :
      *  Saves all documents that are dirty
@@ -69,17 +72,34 @@ export function withEditorPlugin(ReactComponent, methods = []) {
     }, [activateKeyBind, updateRightMenu]);
 
     /**
+     * Activate keybinds if is this editor
+     */
+    const activateThisKeys = useCallback(
+      ({ instance }) => {
+        if (!instance) return;
+        if (instance.id === getNameFromURL(id)) editorContainer.current.focus();
+      },
+      [id]
+    );
+
+    /**
      * Component did mount
      */
     useEffect(() => {
       initRightMenu();
       addKeyBind(KEYBINDINGS.SAVE, save);
       addKeyBind(KEYBINDINGS.SAVE_ALL, saveAllDocuments);
-      on(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE, data => {
-        if (data.id === id) {
-          activateEditor();
-        }
-      });
+      on(
+        PLUGINS.TABS.NAME,
+        PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE,
+        activateThisKeys
+      );
+
+      on(
+        PLUGINS.DOC_MANAGER.NAME,
+        PLUGINS.DOC_MANAGER.ON.UPDATE_DOC_DIRTY,
+        activateThisKeys
+      );
 
       // Remove key bind on component unmount
       return () => {
@@ -89,19 +109,20 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       };
     }, [
       id,
-      activateEditor,
       addKeyBind,
       removeKeyBind,
       initRightMenu,
       on,
       off,
       save,
+      activateThisKeys,
       saveAllDocuments
     ]);
 
     return (
       <div
         tabIndex="-1"
+        ref={editorContainer}
         onFocus={activateEditor}
         onBlur={deactivateKeyBind}
         className={`container-${scope}`}
