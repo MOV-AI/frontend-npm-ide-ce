@@ -8,17 +8,23 @@ import React, {
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { filter } from "rxjs/operators";
-import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from "@material-ui/icons/Info";
 import Add from "@material-ui/icons/Add";
 import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import { usePluginMethods } from "../../../../engine/ReactPlugin/ViewReactPlugin";
 import { withEditorPlugin } from "../../../../engine/ReactPlugin/EditorReactPlugin";
-import { FLOW_EXPLORER_PROFILE, PLUGINS } from "../../../../utils/Constants";
-import { KEYBINDINGS } from "../../../../utils/Keybindings";
+import {
+  FLOW_EXPLORER_PROFILE,
+  PLUGINS,
+  ALERT_SEVERITIES
+} from "../../../../utils/Constants";
+import { SUCCESS_MESSAGES } from "../../../../utils/Messages";
+import Workspace from "../../../../utils/Workspace";
+import { KEYBINDINGS } from "../../Keybinding/shortcuts";
 import Clipboard, { KEYS } from "./Utils/Clipboard";
 import Vec2 from "./Utils/Vec2";
 import BaseFlow from "./Views/BaseFlow";
+import { WARNING_TYPES } from "./Core/Graph/GraphValidator";
 import Menu from "./Components/Menus/Menu";
 import NodeMenu from "./Components/Menus/NodeMenu";
 import FlowTopBar from "./Components/FlowTopBar/FlowTopBar";
@@ -29,20 +35,15 @@ import ContainerMenu from "./Components/Menus/ContainerMenu";
 import Explorer from "./Components/Explorer/Explorer";
 import LinkMenu from "./Components/Menus/LinkMenu";
 import PortTooltip from "./Components/Tooltips/PortTooltip";
+import InvalidLinksWarning from "./Components/Warnings/InvalidLinksWarning";
+import InvalidParametersWarning from "./Components/Warnings/InvalidParametersWarning";
 import { EVT_NAMES, EVT_TYPES } from "./events";
 import { FLOW_VIEW_MODE } from "./Constants/constants";
-import * as d3 from "d3";
+import GraphBase from "./Core/Graph/GraphBase";
+import GraphTreeView from "./Core/Graph/GraphTreeView";
 
 import "./Resources/css/Flow.css";
-
-const useStyles = makeStyles(_theme => ({
-  root: {
-    width: "100%",
-    height: "100%",
-    flexGrow: 1
-  }
-}));
-
+import { flowStyles } from "./styles";
 let activeBookmark = null;
 
 const Flow = (props, ref) => {
@@ -57,11 +58,13 @@ const Flow = (props, ref) => {
     alert,
     addKeyBind,
     removeKeyBind,
+    activateKeyBind,
+    deactivateKeyBind,
     confirmationAlert,
     saveDocument,
-    on
+    on,
+    off
   } = props;
-
   // Global consts
   const MENUS = useRef(
     Object.freeze({
@@ -81,10 +84,12 @@ const Flow = (props, ref) => {
   );
 
   // State Hooks
+  const [loading, setLoading] = useState(true);
   const [dataFromDB, setDataFromDB] = useState();
   const [robotSelected, setRobotSelected] = useState("");
   const [runningFlow, setRunningFlow] = useState("");
   const [warnings, setWarnings] = useState([]);
+  const [flowDebugging, setFlowDebugging] = useState();
   const [warningsVisibility, setWarningsVisibility] = useState(true);
   const [viewMode, setViewMode] = useState(FLOW_VIEW_MODE.default);
   const [tooltipConfig, setTooltipConfig] = useState(null);
@@ -92,24 +97,37 @@ const Flow = (props, ref) => {
     open: false,
     position: { x: 0, y: 0 }
   });
+  const [searchVisible, setSearchVisible] = useState(false);
 
   // Other Hooks
-  const classes = useStyles();
+  const classes = flowStyles();
   const { t } = useTranslation();
   const clipboard = useMemo(() => new Clipboard(), []);
   // Refs
-  const baseFlowRef = useRef();
   const mainInterfaceRef = useRef();
   const debounceSelection = useRef();
   const selectedNodeRef = useRef();
   const selectedLinkRef = useRef();
   const isEditableComponentRef = useRef(true);
+  const workspaceManager = useMemo(() => new Workspace(), []);
 
   //========================================================================================
   /*                                                                                      *
    *                                    Private Methods                                   *
    *                                                                                      */
   //========================================================================================
+
+  /**
+   * Returns flow base class from viewMode defaults to GraphBase
+   * @returns {Class} flow base class based on the viewMode
+   */
+  const getBaseFlowClass = () => {
+    const flowClasses = {
+      [FLOW_VIEW_MODE.default]: GraphBase,
+      [FLOW_VIEW_MODE.treeView]: GraphTreeView
+    };
+    return flowClasses[viewMode] ?? GraphBase;
+  };
 
   /**
    * Used to handle group visibility
@@ -126,49 +144,23 @@ const Flow = (props, ref) => {
     getMainInterface().onGroupsChange(instance.current.getGroups()?.data);
   }, [instance]);
 
-  //========================================================================================
-  /*                                                                                      *
-   *                                    React Lifecycle                                   *
-   *                                                                                      */
-  //========================================================================================
-
   /**
-   * Component did mount
+   * Updates the status of flow debugging variable on graph
+   * And then re strokes the links (to add or remove the debug colors)
    */
-  useEffect(() => {
-    on(
-      PLUGINS.RIGHT_DRAWER.NAME,
-      PLUGINS.RIGHT_DRAWER.ON.CHANGE_BOOKMARK,
-      bookmark => {
-        activeBookmark = bookmark.name;
-      }
-    );
-
-    // Subscribe to docManager broadcast for flowEditor (global events)
-    on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR, evt => {
-      // evt ex.: {action: "setMode", value: "default"}
-      const { action, value } = evt;
-      getMainInterface()?.[action](value);
-    });
-  }, [on]);
-
-  /**
-   * Initialize data
-   */
-  useEffect(() => {
-    const model = instance.current;
-
-    if (model) {
-      setDataFromDB(model.serializeToDB());
+  const updateLinkStroke = useCallback(() => {
+    if (getMainInterface()) {
+      getMainInterface().graph.isFlowDebugging = flowDebugging;
+      getMainInterface().graph.reStrokeLinks();
     }
-  }, [instance, data]);
+  }, [flowDebugging]);
 
   /**
-   * Initialize main interface
+   * Should update everything related to flowDebugging here
    */
   useEffect(() => {
-    mainInterfaceRef.current = baseFlowRef.current?.mainInterface;
-  }, [baseFlowRef.current?.mainInterface]);
+    updateLinkStroke();
+  }, [flowDebugging, updateLinkStroke]);
 
   //========================================================================================
   /*                                                                                      *
@@ -180,7 +172,7 @@ const Flow = (props, ref) => {
    * @private Get main interface instance
    */
   const getMainInterface = () => {
-    return mainInterfaceRef.current?.current;
+    return mainInterfaceRef.current;
   };
 
   /**
@@ -242,19 +234,24 @@ const Flow = (props, ref) => {
    * @param {*} invalidContainersParam
    */
   const invalidContainersParamAlert = useCallback(
-    invalidContainerParams => {
+    warning => {
+      const invalidContainers = warning?.data;
       // Don't show dialog if no invalid params found
-      if (!invalidContainerParams || !invalidContainerParams.length) return;
-      // Set title and message for alert
-      const title = t("InvalidContainersParamTitle");
-      // Add containers name to message
-      const invalidContainers = invalidContainerParams.join("\n ");
-      const message = t("InvalidContainersParamMessage", { invalidContainers });
+      if (!invalidContainers?.length) return;
 
       // Show alert dialog
-      alert({ message, title, location: "modal" });
+      call(
+        PLUGINS.DIALOG.NAME,
+        PLUGINS.DIALOG.CALL.CUSTOM,
+        {
+          title: t("InvalidContainersParamTitle"),
+          invalidContainerParams: invalidContainers,
+          call
+        },
+        InvalidParametersWarning
+      );
     },
-    [t, alert]
+    [t, call]
   );
 
   /**
@@ -323,7 +320,7 @@ const Flow = (props, ref) => {
             nodeInst={node}
             flowModel={instance}
             openDoc={openDoc}
-            editable={isEditableComponentRef.current}
+            editable={true}
             groupsVisibilities={groupsVisibilities}
           />
         )
@@ -375,7 +372,7 @@ const Flow = (props, ref) => {
           <LinkMenu
             id={id}
             call={call}
-            link={link.data}
+            link={link}
             flowModel={instance}
             sourceMessage={link?.src?.data?.message}
           />
@@ -405,7 +402,6 @@ const Flow = (props, ref) => {
   );
 
   const renderRightMenu = useCallback(() => {
-    const explorerView = new Explorer(FLOW_EXPLORER_PROFILE);
     const details = props.data?.details || {};
     const bookmarks = {
       [MENUS.current.DETAIL.NAME]: {
@@ -420,11 +416,16 @@ const Flow = (props, ref) => {
             details={details}
             model={instance}
             handleGroupVisibility={handleGroupVisibility}
-            editable={isEditableComponentRef.current}
+            editable={true}
           ></Menu>
         )
-      },
-      FlowExplorer: {
+      }
+    };
+
+    if (isEditableComponentRef.current) {
+      const explorerView = new Explorer(FLOW_EXPLORER_PROFILE);
+
+      bookmarks[FLOW_EXPLORER_PROFILE.name] = {
         icon: <Add />,
         name: FLOW_EXPLORER_PROFILE.name,
         title: t(FLOW_EXPLORER_PROFILE.title),
@@ -432,8 +433,8 @@ const Flow = (props, ref) => {
           flowId: id,
           mainInterface: getMainInterface()
         })
-      }
-    };
+      };
+    }
 
     // Add node menu if any is selected
     if (selectedNodeRef.current) {
@@ -505,15 +506,20 @@ const Flow = (props, ref) => {
    */
   const onViewModeChange = useCallback(
     newViewMode => {
-      setViewMode(prevState => {
-        if (prevState === newViewMode) return prevState;
-        isEditableComponentRef.current = newViewMode === FLOW_VIEW_MODE.default;
-        // Set mode loading after changing view mode
-        setMode(EVT_NAMES.LOADING);
-        return newViewMode;
-      });
+      if (!newViewMode || viewMode === newViewMode) return;
+      isEditableComponentRef.current = newViewMode === FLOW_VIEW_MODE.default;
+
+      setLoading(true);
+
+      // Set mode loading after changing view mode
+      setMode(EVT_NAMES.LOADING);
+
+      // Temporary fix to show loading (even though UI still freezes)
+      setTimeout(() => {
+        setViewMode(newViewMode);
+      }, 100);
     },
-    [setMode]
+    [viewMode, setMode]
   );
 
   /**
@@ -534,6 +540,13 @@ const Flow = (props, ref) => {
     getMainInterface()?.nodeStatusUpdated(nodeStatus, robotStatus);
   }, []);
 
+  /**
+   * Resets all node status
+   */
+  const onNodeCompleteStatusUpdated = useCallback(() => {
+    getMainInterface()?.resetAllNodeStatus();
+  }, []);
+
   //========================================================================================
   /*                                                                                      *
    *                                  Handle Flow Events                                  *
@@ -544,12 +557,12 @@ const Flow = (props, ref) => {
    * On flow validation
    * @param {*} validationWarnings
    */
-  const onFlowValidated = useCallback(validationWarnings => {
+  const onFlowValidated = validationWarnings => {
     const persistentWarns = validationWarnings.warnings.filter(
       el => el.isPersistent
     );
     setWarnings(persistentWarns);
-  }, []);
+  };
 
   /**
    * Remove Node Bookmark and set selectedNode to null
@@ -619,16 +632,22 @@ const Flow = (props, ref) => {
    * On Links validation
    * @param {{invalidLinks: Array, callback: Function}} eventData
    */
-  const onLinksValidated = useCallback(
-    eventData => {
-      const { invalidLinks, callback } = eventData;
+  const invalidLinksAlert = useCallback(
+    warning => {
+      const { data: invalidLinks, callback } = warning;
+
       if (invalidLinks.length) {
-        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
-          submitText: t("Fix"),
-          title: t("InvalidLinksFoundTitle"),
-          onSubmit: () => deleteInvalidLinks(invalidLinks, callback),
-          message: t("InvalidLinksFoundMessage")
-        });
+        call(
+          PLUGINS.DIALOG.NAME,
+          PLUGINS.DIALOG.CALL.CUSTOM,
+          {
+            submitText: t("Fix"),
+            title: t("InvalidLinksFoundTitle"),
+            onSubmit: () => deleteInvalidLinks(invalidLinks, callback),
+            invalidLinks
+          },
+          InvalidLinksWarning
+        );
       }
     },
     [call, t, deleteInvalidLinks]
@@ -657,6 +676,27 @@ const Flow = (props, ref) => {
    */
   const onReady = useCallback(
     mainInterface => {
+      mainInterfaceRef.current = mainInterface;
+
+      // Subscribe to on loading exit (finish) event
+      mainInterface.mode.loading.onExit.subscribe(() => {
+        // Append the document frame to the canvas
+        mainInterface.canvas.appendDocumentFragment();
+        // Reposition all nodes and subflows
+        mainInterface.graph.updateAllPositions();
+        setLoading(false);
+      });
+
+      // Set the warning types to be used in the validations
+      mainInterface.graph.validator.setWarningActions(
+        WARNING_TYPES.INVALID_PARAMETERS,
+        invalidContainersParamAlert
+      );
+      mainInterface.graph.validator.setWarningActions(
+        WARNING_TYPES.INVALID_LINKS,
+        invalidLinksAlert
+      );
+
       // subscribe to on enter default mode
       // When enter default mode remove other node/sub-flow bookmarks
       mainInterface.mode.default.onEnter.subscribe(() => {
@@ -673,13 +713,10 @@ const Flow = (props, ref) => {
       // Subscribe to flow validations
       mainInterface.graph.onFlowValidated.subscribe(evtData => {
         const persistentWarns = evtData.warnings.filter(el => el.isPersistent);
+
         groupsVisibilities();
         onFlowValidated({ warnings: persistentWarns });
-        invalidContainersParamAlert(evtData.invalidContainersParam);
       });
-
-      // Subscribe to invalid links validation
-      mainInterface.graph.onLinksValidated.subscribe(onLinksValidated);
 
       // Subscribe to double click event in a node
       mainInterface.mode.onDblClick.onEnter.subscribe(evtData => {
@@ -857,12 +894,11 @@ const Flow = (props, ref) => {
         .subscribe(evtData => console.log("onLinkErrorMouseOver", evtData));
     },
     [
-      onLinksValidated,
       onNodeSelected,
       onLinkSelected,
       setFlowsToDefault,
       groupsVisibilities,
-      onFlowValidated,
+      invalidLinksAlert,
       invalidContainersParamAlert,
       openDoc,
       handleContextClose,
@@ -876,6 +912,18 @@ const Flow = (props, ref) => {
    *                                       Handlers                                       *
    *                                                                                      */
   //========================================================================================
+
+  /**
+   * Handler for the Flow Debug Switch
+   * @param {*} e : event
+   */
+  const handleFlowDebugChange = useCallback(
+    e => {
+      workspaceManager.setFlowIsDebugging(e.target.checked);
+      setFlowDebugging(e.target.checked);
+    },
+    [workspaceManager]
+  );
 
   /**
    * Handle Delete : Show confirmation dialog before performing delete action
@@ -991,54 +1039,165 @@ const Flow = (props, ref) => {
    * Handle zoom reset
    */
   const handleResetZoom = useCallback(_e => {
-    const { canvas } = getMainInterface();
-    canvas
-      .getSvg()
-      .transition()
-      .duration(750)
-      .call(canvas.zoomBehavior.transform, d3.zoomIdentity);
+    getMainInterface()?.onResetZoom();
   }, []);
 
   /**
    * Handle Move Node
    */
-  const handleMoveNode = useCallback(event => {
-    const mainInterface = getMainInterface();
-    const currentZoom = mainInterface.canvas.currentZoom?.k ?? 1;
-    const step = 2 / currentZoom + 1;
-    const delta = {
-      ArrowRight: [1 * step, 0],
-      ArrowLeft: [-1 * step, 0],
-      ArrowUp: [0, -1 * step],
-      ArrowDown: [0, 1 * step]
-    };
-    const [dx, dy] = delta[event.code];
-    const [x, y] = [50, 50]; // skip boundaries validation used when dragging a node
-    mainInterface.graph.onNodeDrag(null, { x, y, dx, dy });
-    mainInterface.onDragEnd();
+  const handleMoveNode = useCallback(e => {
+    getMainInterface()?.onMoveNode(e);
   }, []);
+
+  /*
+   * Handle search nodes
+   */
+  const handleSearchNode = useCallback(
+    node => {
+      const mainInterface = getMainInterface();
+      const nodeInstance = node && mainInterface.searchNode(node);
+      if (!nodeInstance) return;
+      nodeInstance.handleSelectionChange();
+      mainInterface.onFocusNode(nodeInstance);
+      deactivateKeyBind();
+    },
+    [deactivateKeyBind]
+  );
+
+  const handleSearchEnabled = useCallback(
+    _e => {
+      if (!searchVisible) setSearchVisible(true);
+    },
+    [searchVisible]
+  );
+
+  const handleSearchEnable = useCallback(e => {
+    e.preventDefault();
+    setSearchVisible(true);
+  }, []);
+
+  const handleSearchDisabled = useCallback(() => {
+    setSearchVisible(false);
+  }, []);
+
+  useEffect(() => {
+    if (searchVisible) {
+      return deactivateKeyBind();
+    }
+    activateKeyBind();
+  }, [searchVisible, deactivateKeyBind, activateKeyBind]);
 
   //========================================================================================
   /*                                                                                      *
-   *                                       Shortcuts                                      *
+   *                                    React Lifecycle                                   *
    *                                                                                      */
   //========================================================================================
 
+  /**
+   * Component did mount
+   */
   useEffect(() => {
-    addKeyBind(KEYBINDINGS.COPY, handleCopyNode);
-    addKeyBind(KEYBINDINGS.PASTE, handlePasteNodes);
-    addKeyBind(KEYBINDINGS.RESET_ZOOM, handleResetZoom);
-    addKeyBind(KEYBINDINGS.MOVE_NODE, handleMoveNode);
-    addKeyBind("esc", setFlowsToDefault);
-    addKeyBind(["del", "backspace"], handleDeleteNode);
+    on(
+      PLUGINS.RIGHT_DRAWER.NAME,
+      PLUGINS.RIGHT_DRAWER.ON.CHANGE_BOOKMARK,
+      bookmark => {
+        activeBookmark = bookmark.name;
+      }
+    );
+
+    // Subscribe to docManager broadcast for flowEditor (global events)
+    on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR, evt => {
+      // evt ex.: {action: "setMode", value: "default"}
+      const { action, value } = evt;
+      getMainInterface()?.[action](value);
+    });
+
+    setFlowDebugging(workspaceManager.getFlowIsDebugging());
+
+    return () => {
+      off(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.ON.CHANGE_BOOKMARK);
+      off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.FLOW_EDITOR);
+    };
+  }, [on, off, workspaceManager]);
+
+  /**
+   * Initialize data
+   */
+  useEffect(() => {
+    const model = instance.current;
+
+    if (model) {
+      setDataFromDB(model.serializeToDB());
+    }
+  }, [instance, data]);
+
+  useEffect(() => {
+    on(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.ON.BEFORE_SAVE_DOC,
+      async docData => {
+        if (viewMode === FLOW_VIEW_MODE.treeView && docData.doc.name === name) {
+          const subFlows = mainInterfaceRef.current.graph.subFlows;
+
+          if (!docData.thisDoc.isDirty) {
+            call(PLUGINS.ALERT.NAME, PLUGINS.ALERT.CALL.SHOW, {
+              message: t(SUCCESS_MESSAGES.SAVED_SUCCESSFULLY),
+              severity: ALERT_SEVERITIES.SUCCESS
+            });
+          }
+
+          for (let i = 0, n = subFlows.length; i < n; i++) {
+            await call(
+              PLUGINS.DOC_MANAGER.NAME,
+              PLUGINS.DOC_MANAGER.CALL.SAVE,
+              {
+                scope,
+                name: subFlows[i].templateName
+              },
+              null,
+              // {{ignoreNew: true}} Because we don't want to show the new doc popup on missing subflows
+              // {{preventAlert: true}} Because independently of how many saves we do we just to want to show the snackbar once
+              { ignoreNew: true, preventAlert: true }
+            );
+          }
+        }
+      }
+    );
+    return () => {
+      off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.BEFORE_SAVE_DOC);
+    };
+  }, [name, scope, viewMode, on, off, call, t]);
+
+  useEffect(() => {
+    addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.COPY_NODE.SHORTCUTS, handleCopyNode);
+    addKeyBind(
+      KEYBINDINGS.FLOW.KEYBINDS.PASTE_NODE.SHORTCUTS,
+      handlePasteNodes
+    );
+    addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.MOVE_NODE.SHORTCUTS, handleMoveNode);
+    addKeyBind(
+      KEYBINDINGS.FLOW.KEYBINDS.SEARCH_NODE.SHORTCUTS,
+      handleSearchEnable
+    );
+    addKeyBind(KEYBINDINGS.FLOW.KEYBINDS.RESET_ZOOM.SHORTCUTS, handleResetZoom);
+
+    addKeyBind(
+      KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.CANCEL.SHORTCUTS,
+      setFlowsToDefault
+    );
+    addKeyBind(
+      KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.DELETE.SHORTCUTS,
+      handleDeleteNode
+    );
     // remove keyBind on unmount
     return () => {
-      removeKeyBind(KEYBINDINGS.COPY);
-      removeKeyBind(KEYBINDINGS.PASTE);
-      removeKeyBind(KEYBINDINGS.RESET_ZOOM);
-      removeKeyBind(KEYBINDINGS.MOVE_NODE);
-      removeKeyBind("esc");
-      removeKeyBind(["del", "backspace"]);
+      removeKeyBind(KEYBINDINGS.FLOW.KEYBINDS.COPY_NODE.SHORTCUTS);
+      removeKeyBind(KEYBINDINGS.FLOW.KEYBINDS.PASTE_NODE.SHORTCUTS);
+      removeKeyBind(KEYBINDINGS.FLOW.KEYBINDS.MOVE_NODE.SHORTCUTS);
+      removeKeyBind(KEYBINDINGS.FLOW.KEYBINDS.SEARCH_NODE.SHORTCUTS);
+      removeKeyBind(KEYBINDINGS.FLOW.KEYBINDS.RESET_ZOOM.SHORTCUTS);
+      removeKeyBind(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.CANCEL.SHORTCUTS);
+      removeKeyBind(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.DELETE.SHORTCUTS);
     };
   }, [
     addKeyBind,
@@ -1048,6 +1207,7 @@ const Flow = (props, ref) => {
     handlePasteNodes,
     handleDeleteNode,
     handleMoveNode,
+    handleSearchEnable,
     handleResetZoom
   ]);
 
@@ -1067,23 +1227,33 @@ const Flow = (props, ref) => {
           alert={alert}
           confirmationAlert={confirmationAlert}
           scope={scope}
-          warnings={warnings}
-          defaultViewMode={viewMode}
+          loading={loading}
+          viewMode={viewMode}
           version={instance.current?.version}
           mainInterface={mainInterfaceRef}
           onRobotChange={onRobotChange}
           onStartStopFlow={onStartStopFlow}
           nodeStatusUpdated={onNodeStatusUpdate}
+          nodeCompleteStatusUpdated={onNodeCompleteStatusUpdated}
           onViewModeChange={onViewModeChange}
-          // nodeCompleteStatusUpdated={onMonitoringNodeStatusUpdate}
+          searchProps={{
+            visible: searchVisible,
+            options: instance.current?.getSearchOptions(),
+            onChange: handleSearchNode,
+            onEnabled: handleSearchEnabled,
+            onDisabled: handleSearchDisabled
+          }}
         ></FlowTopBar>
       </div>
       <BaseFlow
         {...props}
-        ref={baseFlowRef}
+        graphClass={getBaseFlowClass()}
+        loading={loading}
+        viewMode={viewMode}
         dataFromDB={dataFromDB}
         warnings={warnings}
         warningsVisibility={warningsVisibility}
+        flowDebugging={flowDebugging}
         onReady={onReady}
       />
       <FlowBottomBar
@@ -1092,8 +1262,10 @@ const Flow = (props, ref) => {
         robotSelected={robotSelected}
         runningFlow={runningFlow}
         warnings={warnings}
+        toggleFlowDebug={handleFlowDebugChange}
+        flowDebugging={flowDebugging}
       />
-      {contextMenuOptions && (
+      {contextMenuOptions && isEditableComponentRef.current && (
         <FlowContextMenu
           onClose={handleContextClose}
           onNodeCopy={handleCopyNode}

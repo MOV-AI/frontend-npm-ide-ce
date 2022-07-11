@@ -1,10 +1,11 @@
 import Observable from "./Observable";
+import { GLOBAL_WORKSPACE } from "../../utils/Constants";
 
 /**
  * Abstract class of a Model
  */
 export default class Model extends Observable {
-  constructor({ id, name, version = "-", workspace = "global" }) {
+  constructor({ id, name, version = "-", workspace = GLOBAL_WORKSPACE }) {
     super();
     this.id = id ?? name;
     this.name = name;

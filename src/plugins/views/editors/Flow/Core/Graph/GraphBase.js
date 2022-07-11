@@ -1,6 +1,7 @@
 import { Subject } from "rxjs";
 import _isEqual from "lodash/isEqual";
 import _debounce from "lodash/debounce";
+import Workspace from "../../../../../../utils/Workspace";
 import { PLUGINS } from "../../../../../../utils/Constants";
 import StartNode from "../../Components/Nodes/StartNode";
 import BaseLink from "../../Components/Links/BaseLink";
@@ -29,26 +30,41 @@ export default class GraphBase {
     this.docManager = docManager;
 
     this.initialize();
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                      Properties                                      *
+     *                                                                                      */
+    //========================================================================================
+
+    this.nodes = new Map(); // <node name> : {obj: <node instance>, links: []}
+    this.links = new Map(); // linkId : <link instance>
+    this.exposedPorts = {};
+    this.selectedNodes = [];
+    this.selectedLink = null;
+    this.tempNode = null;
+    this.warnings = [];
+    this.warningsVisibility = true;
+    this.validator = new GraphValidator(this);
+    this.onFlowValidated = new Subject();
+    this.onLinksValidated = new Subject();
+    this.invalidLinks = [];
+    this.flowDebugging = new Workspace().getFlowIsDebugging();
   }
 
   //========================================================================================
   /*                                                                                      *
-   *                                      Properties                                      *
+   *                                   Getters / Setters                                  *
    *                                                                                      */
   //========================================================================================
 
-  nodes = new Map(); // <node name> : {obj: <node instance>, links: []}
-  links = new Map(); // linkId : <link instance>
-  exposedPorts = {};
-  selectedNodes = [];
-  selectedLink = null;
-  tempNode = null;
-  warnings = [];
-  warningsVisibility = true;
-  validator = new GraphValidator(this);
-  onFlowValidated = new Subject();
-  onLinksValidated = new Subject();
-  invalidLinks = [];
+  get isFlowDebugging() {
+    return this.flowDebugging;
+  }
+
+  set isFlowDebugging(isDebugging) {
+    this.flowDebugging = isDebugging;
+  }
 
   //========================================================================================
   /*                                                                                      *
@@ -83,6 +99,10 @@ export default class GraphBase {
     );
 
     return this;
+  };
+
+  updateAllPositions = () => {
+    /* Empty on Purpose */
   };
 
   /**
@@ -147,11 +167,6 @@ export default class GraphBase {
   loadLinks(links = {}) {
     Object.entries(links).forEach(([id, value]) => {
       this.addLink({ id, ...value });
-    });
-    // Emits result of links validation
-    this.onLinksValidated.next({
-      invalidLinks: this.invalidLinks,
-      callback: this.clearInvalidLinks
     });
     return this;
   }
@@ -238,6 +253,10 @@ export default class GraphBase {
    * @param {*} data
    */
   onFlowUpdate = data => {
+    if (this.updateTemplates) {
+      this.updateTemplates();
+      return;
+    }
     // Add missing nodes and update existing
     this.updateNodes(data.NodeInst, NODE_TYPES.NODE);
     this.updateNodes(data.Container, NODE_TYPES.CONTAINER);
@@ -252,6 +271,8 @@ export default class GraphBase {
     this.updateLinks(data.Links || {});
     // Update exposed ports
     this.updateExposedPorts(data.ExposedPorts || {});
+    // Let's re-validate the flow
+    this.validateFlow();
   };
 
   /**
@@ -292,24 +313,21 @@ export default class GraphBase {
    * @returns {Promise} Promise to be resolved after all nodes, containers and links are loaded
    */
   async loadData(flow) {
-    this.clear();
+    await this.loadNodes(flow.NodeInst);
+    await this.loadNodes(flow.Container, NODE_TYPES.CONTAINER, false);
 
-    return Promise.allSettled([
-      this.loadNodes(flow.NodeInst),
-      this.loadNodes(flow.Container, NODE_TYPES.CONTAINER, false)
-    ]).then(() => {
-      this.loadLinks(flow.Links)
-        .loadExposedPorts(flow.ExposedPorts || {})
-        .update();
-    });
+    this.loadLinks(flow.Links)
+      .loadExposedPorts(flow.ExposedPorts || {})
+      .update();
   }
 
   /**
    * Validate flow : get warnings
    */
   validateFlow = () => {
-    const { warnings, invalidContainersParam } = this.validator.validateFlow();
-    this.onFlowValidated.next({ warnings: warnings, invalidContainersParam });
+    const { warnings } = this.validator.validateFlow();
+
+    this.onFlowValidated.next({ warnings: warnings });
     this.warnings = warnings;
   };
 
@@ -452,6 +470,7 @@ export default class GraphBase {
         sourcePortPos,
         targetPortPos,
         parsedLink,
+        this.flowDebugging,
         this.toggleTooltip
       );
 
@@ -554,4 +573,12 @@ export default class GraphBase {
       this.selectedLink = null;
     }
   }
+
+  reStrokeLinks = () => {
+    this.links?.forEach(linkData => {
+      linkData.flowDebugging = this.flowDebugging;
+      linkData.changeStrokeColor();
+    });
+    return this;
+  };
 }

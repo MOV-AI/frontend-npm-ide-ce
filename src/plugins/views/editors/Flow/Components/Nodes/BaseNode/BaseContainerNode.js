@@ -7,12 +7,11 @@ import { convertVisualization } from "../Utils";
  */
 class BaseContainerNode extends BaseNode {
   constructor({ canvas, node, events, template }) {
-    const templateType = "MovAI/Flow";
     super({
       canvas,
       node,
       events,
-      template: { ...template, Type: templateType }
+      template
     });
     // container node's data
     this.data = {

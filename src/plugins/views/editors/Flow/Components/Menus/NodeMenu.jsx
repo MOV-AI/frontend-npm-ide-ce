@@ -90,19 +90,36 @@ const NodeMenu = memo(
      * @param {string} id : Node instance Item Id
      * @returns {NodeInstance}
      */
-    const getNodeData = useCallback(
-      () => flowModel.current.getNodeInstanceItem(data.id).serialize(),
-      [data.id, flowModel]
-    );
+    const getNodeData = useCallback(async () => {
+      const nodeInstanceItem = flowModel.current.getNodeInstanceItem(data.id);
+      if (nodeInstanceItem) {
+        return nodeInstanceItem;
+      }
+
+      const subFlowInst = await call(
+        PLUGINS.DOC_MANAGER.NAME,
+        PLUGINS.DOC_MANAGER.CALL.READ,
+        {
+          scope: "Flow",
+          name: nodeInst.parent.data.ContainerFlow
+        }
+      );
+
+      return subFlowInst.getNodeInstanceItem(data.id);
+    }, [data.id, nodeInst, flowModel, call]);
+
+    const setNodeDataInst = nodeInstance => {
+      setNodeData(nodeInstance.serialize());
+    };
 
     /**
      * @private Submit parameter change
      * @param {Object} formData : Data to Save
      */
     const handleSubmitParameter = useCallback(
-      formData => {
+      async formData => {
         const varName = formData.varName;
-        const nodeInstance = flowModel.current.getNodeInstanceItem(data.id);
+        const nodeInstance = await getNodeData();
 
         if (nodeInstance.getKeyValue(varName, formData.name)) {
           if (formData.value === DEFAULT_VALUE) {
@@ -114,9 +131,9 @@ const NodeMenu = memo(
           nodeInstance.addKeyValue(varName, formData);
         }
 
-        setNodeData(getNodeData());
+        setNodeDataInst(nodeInstance);
       },
-      [data.id, flowModel, getNodeData]
+      [getNodeData]
     );
 
     /**
@@ -125,12 +142,12 @@ const NodeMenu = memo(
      * @param {string} varName : keyValue type (parameters, envVars or cmdLine)
      */
     const handleDeleteParameter = useCallback(
-      (keyName, varName) => {
-        const nodeInstance = flowModel.current.getNodeInstanceItem(data.id);
+      async (keyName, varName) => {
+        const nodeInstance = await getNodeData();
         nodeInstance.deleteKeyValue(varName, keyName);
-        setNodeData(getNodeData());
+        setNodeDataInst(nodeInstance);
       },
-      [data.id, flowModel, getNodeData]
+      [getNodeData]
     );
 
     //========================================================================================
@@ -141,7 +158,16 @@ const NodeMenu = memo(
 
     useEffect(() => {
       // Get node data
-      setNodeData(getNodeData());
+      const fetchData = async () => {
+        // get the data from the api
+        const nodeInstance = await getNodeData();
+
+        // set state with the result
+        setNodeDataInst(nodeInstance);
+      };
+
+      fetchData();
+
       // Get protected callbacks
       call(
         PLUGINS.DOC_MANAGER.NAME,
@@ -176,14 +202,13 @@ const NodeMenu = memo(
      * @param {boolean} value : property value to update
      */
     const onChangeProperties = useCallback(
-      (prop, value) => {
-        flowModel.current
-          .getNodeInstanceItem(data.id)
-          .updateKeyValueProp(prop, value);
+      async (prop, value) => {
+        const nodeInstance = await getNodeData();
+        nodeInstance.updateKeyValueProp(prop, value);
 
-        setNodeData(getNodeData());
+        setNodeDataInst(nodeInstance);
       },
-      [flowModel, data.id, getNodeData]
+      [getNodeData]
     );
 
     /**
@@ -252,15 +277,15 @@ const NodeMenu = memo(
      * @param {boolean} checked : The flag controling if we should add or remove
      */
     const handleBelongGroup = useCallback(
-      (groupId, checked) => {
-        const nodeInstance = flowModel.current.getNodeInstanceItem(data.id);
+      async (groupId, checked) => {
+        const nodeInstance = await getNodeData();
         if (checked) nodeInstance.addGroup(groupId);
         else nodeInstance.removeGroup(groupId);
 
         groupsVisibilities();
-        setNodeData(getNodeData());
+        setNodeDataInst(nodeInstance);
       },
-      [data.id, flowModel, groupsVisibilities, getNodeData]
+      [groupsVisibilities, getNodeData]
     );
 
     //========================================================================================
@@ -299,109 +324,113 @@ const NodeMenu = memo(
           templateData={templateData.ports}
           protectedDocs={protectedDocs}
         />
-        {/* =========================== PROPERTIES =========================== */}
-        <ListItem
-          data-testid="input_properties-expand"
-          button
-          data-menu-id={ACTIVE_ITEM.PROPERTIES}
-          onClick={handleExpandClick}
-        >
-          <ListItemText primary={t("Properties")} />
-          {renderExpandIcon(ACTIVE_ITEM.PROPERTIES)}
-        </ListItem>
-        <Collapse in={activeItem === ACTIVE_ITEM.PROPERTIES} unmountOnExit>
-          <Grid container className={classes.gridContainer}>
-            <PropertiesSection
-              editable={editable}
-              templateData={templateData}
-              nodeInstance={nodeData}
-              onChangeProperties={onChangeProperties}
-            />
-          </Grid>
-          <Divider />
-        </Collapse>
-        {/* =========================== PARAMETERS =========================== */}
-        <ListItem
-          data-testid="input_parameters-expand"
-          button
-          data-menu-id={ACTIVE_ITEM.PARAMETERS}
-          onClick={handleExpandClick}
-        >
-          <ListItemText primary={t("Parameters")} />
-          {renderExpandIcon(ACTIVE_ITEM.PARAMETERS)}
-        </ListItem>
-        <Collapse in={activeItem === ACTIVE_ITEM.PARAMETERS} unmountOnExit>
-          <KeyValuesSection
-            editable={editable}
-            varName={TABLE_KEYS_NAMES.PARAMETERS}
-            instanceValues={nodeData[TABLE_KEYS_NAMES.PARAMETERS] || {}}
-            templateValues={templateData.parameters}
-            handleTableKeyEdit={handleKeyValueDialog}
-            handleTableKeyDelete={handleKeyValueDelete}
-          />
-          <Divider />
-        </Collapse>
-        {/* =========================== ENV. VARIABLES =========================== */}
-        <ListItem
-          data-testid="input_env-var-expand"
-          button
-          data-menu-id={ACTIVE_ITEM.ENVVARS}
-          onClick={handleExpandClick}
-        >
-          <ListItemText primary={t("EnvVars")} />
-          {renderExpandIcon(ACTIVE_ITEM.ENVVARS)}
-        </ListItem>
-        <Collapse in={activeItem === ACTIVE_ITEM.ENVVARS} unmountOnExit>
-          <KeyValuesSection
-            editable={editable}
-            varName={TABLE_KEYS_NAMES.ENVVARS}
-            instanceValues={nodeData[TABLE_KEYS_NAMES.ENVVARS] || {}}
-            templateValues={templateData.envVars}
-            handleTableKeyEdit={handleKeyValueDialog}
-            handleTableKeyDelete={handleKeyValueDelete}
-          />
-          <Divider />
-        </Collapse>
-        {/* =========================== COMMAND LINES =========================== */}
-        <ListItem
-          data-testid="input_cmd-line-expand"
-          button
-          data-menu-id={ACTIVE_ITEM.CMDLINE}
-          onClick={handleExpandClick}
-        >
-          <ListItemText primary={t("CommandLine")} />
-          {renderExpandIcon(ACTIVE_ITEM.CMDLINE)}
-        </ListItem>
-        <Collapse in={activeItem === ACTIVE_ITEM.CMDLINE} unmountOnExit>
-          <KeyValuesSection
-            editable={editable}
-            varName={TABLE_KEYS_NAMES.CMDLINE}
-            instanceValues={nodeData[TABLE_KEYS_NAMES.CMDLINE] || {}}
-            templateValues={templateData.commands}
-            handleTableKeyEdit={handleKeyValueDialog}
-            handleTableKeyDelete={handleKeyValueDelete}
-          />
-          <Divider />
-        </Collapse>
-        {/* =========================== GROUP =========================== */}
-        <ListItem
-          data-testid="input_group-expand"
-          button
-          data-menu-id={ACTIVE_ITEM.GROUP}
-          onClick={handleExpandClick}
-        >
-          <ListItemText primary={t("Group")} />
-          {renderExpandIcon(ACTIVE_ITEM.GROUP)}
-        </ListItem>
-        <Collapse in={activeItem === ACTIVE_ITEM.GROUP} unmountOnExit>
-          <NodeGroupSection
-            data-testid="section_node-group-section"
-            flowGroups={flowModel.current.getGroups().serialize()}
-            nodeGroups={nodeData.groups}
-            handleBelongGroup={handleBelongGroup}
-          />
-          <Divider />
-        </Collapse>
+        {nodeData && (
+          /* =========================== PROPERTIES =========================== */
+          <>
+            <ListItem
+              data-testid="input_properties-expand"
+              button
+              data-menu-id={ACTIVE_ITEM.PROPERTIES}
+              onClick={handleExpandClick}
+            >
+              <ListItemText primary={t("Properties")} />
+              {renderExpandIcon(ACTIVE_ITEM.PROPERTIES)}
+            </ListItem>
+            <Collapse in={activeItem === ACTIVE_ITEM.PROPERTIES} unmountOnExit>
+              <Grid container className={classes.gridContainer}>
+                <PropertiesSection
+                  editable={editable}
+                  templateData={templateData}
+                  nodeInstance={nodeData}
+                  onChangeProperties={onChangeProperties}
+                />
+              </Grid>
+              <Divider />
+            </Collapse>
+            {/* =========================== PARAMETERS =========================== */}
+            <ListItem
+              data-testid="input_parameters-expand"
+              button
+              data-menu-id={ACTIVE_ITEM.PARAMETERS}
+              onClick={handleExpandClick}
+            >
+              <ListItemText primary={t("Parameters")} />
+              {renderExpandIcon(ACTIVE_ITEM.PARAMETERS)}
+            </ListItem>
+            <Collapse in={activeItem === ACTIVE_ITEM.PARAMETERS} unmountOnExit>
+              <KeyValuesSection
+                editable={editable}
+                varName={TABLE_KEYS_NAMES.PARAMETERS}
+                instanceValues={nodeData[TABLE_KEYS_NAMES.PARAMETERS] || {}}
+                templateValues={templateData.parameters}
+                handleTableKeyEdit={handleKeyValueDialog}
+                handleTableKeyDelete={handleKeyValueDelete}
+              />
+              <Divider />
+            </Collapse>
+            {/* =========================== ENV. VARIABLES =========================== */}
+            <ListItem
+              data-testid="input_env-var-expand"
+              button
+              data-menu-id={ACTIVE_ITEM.ENVVARS}
+              onClick={handleExpandClick}
+            >
+              <ListItemText primary={t("EnvVars")} />
+              {renderExpandIcon(ACTIVE_ITEM.ENVVARS)}
+            </ListItem>
+            <Collapse in={activeItem === ACTIVE_ITEM.ENVVARS} unmountOnExit>
+              <KeyValuesSection
+                editable={editable}
+                varName={TABLE_KEYS_NAMES.ENVVARS}
+                instanceValues={nodeData[TABLE_KEYS_NAMES.ENVVARS] || {}}
+                templateValues={templateData.envVars}
+                handleTableKeyEdit={handleKeyValueDialog}
+                handleTableKeyDelete={handleKeyValueDelete}
+              />
+              <Divider />
+            </Collapse>
+            {/* =========================== COMMAND LINES =========================== */}
+            <ListItem
+              data-testid="input_cmd-line-expand"
+              button
+              data-menu-id={ACTIVE_ITEM.CMDLINE}
+              onClick={handleExpandClick}
+            >
+              <ListItemText primary={t("CommandLine")} />
+              {renderExpandIcon(ACTIVE_ITEM.CMDLINE)}
+            </ListItem>
+            <Collapse in={activeItem === ACTIVE_ITEM.CMDLINE} unmountOnExit>
+              <KeyValuesSection
+                editable={editable}
+                varName={TABLE_KEYS_NAMES.CMDLINE}
+                instanceValues={nodeData[TABLE_KEYS_NAMES.CMDLINE] || {}}
+                templateValues={templateData.commands}
+                handleTableKeyEdit={handleKeyValueDialog}
+                handleTableKeyDelete={handleKeyValueDelete}
+              />
+              <Divider />
+            </Collapse>
+            {/* =========================== GROUP =========================== */}
+            <ListItem
+              data-testid="input_group-expand"
+              button
+              data-menu-id={ACTIVE_ITEM.GROUP}
+              onClick={handleExpandClick}
+            >
+              <ListItemText primary={t("Group")} />
+              {renderExpandIcon(ACTIVE_ITEM.GROUP)}
+            </ListItem>
+            <Collapse in={activeItem === ACTIVE_ITEM.GROUP} unmountOnExit>
+              <NodeGroupSection
+                data-testid="section_node-group-section"
+                flowGroups={flowModel.current.getGroups().serialize()}
+                nodeGroups={nodeData.groups}
+                handleBelongGroup={handleBelongGroup}
+              />
+              <Divider />
+            </Collapse>
+          </>
+        )}
       </Typography>
     );
   }

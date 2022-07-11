@@ -17,7 +17,8 @@ const useMainInterface = props => {
   //========================================================================================
 
   useEffect(() => {
-    if (!props.data || mainInterface.current) return;
+    if (!props.data || props.containerId === mainInterface.current?.containerId)
+      return;
 
     const {
       classes,
@@ -30,7 +31,8 @@ const useMainInterface = props => {
       containerId,
       model,
       readOnly,
-      call
+      call,
+      graphCls
     } = props;
 
     mainInterface.current = new MainInterface({
@@ -44,7 +46,8 @@ const useMainInterface = props => {
       readOnly,
       data,
       classes,
-      call
+      call,
+      graphCls
     });
   }, [props]);
 

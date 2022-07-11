@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import lodash from "lodash";
+import _omit from "lodash/omit";
 import { convertVisualization, convertTypeCss } from "../Utils";
 
 import { flattenObject } from "../../../Utils/utils";
@@ -8,6 +8,7 @@ import BaseNodeStruct from "./BaseNodeStruct";
 import BasePort from "./BasePort";
 import BaseNodeHeader from "./BaseNodeHeader";
 import BaseNodeStatus from "./BaseNodeStatus";
+import { EVT_NAMES } from "../../../events";
 
 const STYLE = {
   stroke: {
@@ -78,7 +79,10 @@ class BaseNode extends BaseNodeStruct {
     // create the svg element
     this.object = d3
       .create("svg")
-      .attr("id", `${this.canvas.containerId}-${this.data.id}`)
+      .attr(
+        "id",
+        `${this.canvas.containerId}-${this.data.id || this.data.Template}`
+      )
       .style("overflow", "visible")
       .attr("width", this.width + maxPadding)
       .attr("height", this.height + maxPadding)
@@ -88,7 +92,7 @@ class BaseNode extends BaseNodeStruct {
     // add a rect to the svg element
     // this is the body of the node
     this.object
-      .append("rect")
+      .append("svg:rect")
       .attr("x", padding.x / 2)
       .attr("y", padding.y)
       .attr("rx", 6)
@@ -257,7 +261,7 @@ class BaseNode extends BaseNodeStruct {
         // check In and Out ports
         ["In", "Out"].forEach(type => {
           // get port data
-          const data = lodash.get(ports[portInstName], `${type}`, {});
+          const data = ports[portInstName]?.[type] ?? {};
 
           Object.keys(data).forEach(portName => {
             // customize port data for the instance
@@ -534,23 +538,7 @@ class BaseNode extends BaseNodeStruct {
 
     // shift key pressed
     const { shiftKey } = d3.event;
-
-    // debounce timeout
-    clearTimeout(this.dbClickTimeout);
-
-    this.dbClickTimeout = setTimeout(() => {
-      // toggle node selection
-      const selection = !this.selected;
-
-      // shift key not pressed, set mode to default
-      if (!shiftKey) this.canvas.setMode("default", null);
-
-      // set the node selection
-      this.selected = selection;
-
-      // node selected mode
-      this.canvas.setMode("selectNode", { nodes: [this], shiftKey }, true);
-    }, 100);
+    this.handleSelectionChange(shiftKey);
   };
 
   /**
@@ -626,14 +614,36 @@ class BaseNode extends BaseNodeStruct {
 
     // trigger the onDrag event
     if ("onDrag" in this.events) this.events.onDrag(this, d3.event);
-    lodash
-      .get(this.canvas.mode.current, "onDrag", {
-        next: () => {
-          /* empty method */
-        }
-      })
-      .next(this);
+
+    const _onDrag = this.canvas.mode.current?.onDrag ?? {
+      next: () => {
+        /* empty method */
+      }
+    };
+
+    _onDrag.next(this);
   };
+
+  handleSelectionChange(shiftKey) {
+    clearTimeout(this.dbClickTimeout);
+    this.dbClickTimeout = setTimeout(() => {
+      // toggle node selection
+      const selection = !this.selected;
+
+      // shift key not pressed, set mode to default
+      if (!shiftKey) this.canvas.setMode(EVT_NAMES.DEFAULT, null);
+
+      // set the node selection
+      this.selected = selection;
+
+      // node selected mode
+      this.canvas.setMode(
+        EVT_NAMES.SELECT_NODE,
+        { nodes: [this], shiftKey },
+        true
+      );
+    }, 100);
+  }
 
   /**
    * @private
@@ -648,10 +658,12 @@ class BaseNode extends BaseNodeStruct {
     const updatedPos = { ...this.data.Visualization, ...data.Visualization };
 
     // convert format
-    const _data = { Visualization: convertVisualization(updatedPos) };
+    const visualizationData = {
+      Visualization: convertVisualization(updatedPos)
+    };
 
     // set object new position
-    this.data = lodash.merge(this.data, _data);
+    this.data = { ...this.data, ...visualizationData };
 
     // set svg new posistion
     this.object.attr("x", this.posX).attr("y", this.posY);
@@ -689,8 +701,9 @@ class BaseNode extends BaseNodeStruct {
   updateNode = data => {
     const fn = {
       Visualization: _data => this.updatePosition(_data), // Position changes when dragging or when adding a new node
-      default: () => {
-        lodash.merge(this.data, data);
+      default: _data => {
+        this.data = { ...this.data, ...data };
+        this.updatePosition(_data);
         this.data.name = this.name;
       }
     };
@@ -742,12 +755,14 @@ class BaseNode extends BaseNodeStruct {
       }
     };
 
+    const defaultAction = () => {
+      console.debug("Default mode required to start linking");
+    };
+
     // call an action
-    lodash
-      .get(actions, currMode.id, () => {
-        console.debug("Default mode required to start linking");
-      })
-      .call();
+    const actualAction = actions?.[currMode.id] ?? defaultAction;
+
+    actualAction.call();
   };
 
   /**
@@ -847,7 +862,7 @@ class BaseNode extends BaseNodeStruct {
   deleteKey = data => {
     const path = flattenObject(data);
     Object.keys(path).forEach(pkey => {
-      this.data = lodash.omit(this.data, pkey);
+      this.data = _omit(this.data, pkey);
     });
     return this.isValid();
   };

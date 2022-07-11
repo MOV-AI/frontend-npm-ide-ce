@@ -38,6 +38,7 @@ class Canvas {
   currentZoom = null;
   mouse = [0, 0];
   svg = null;
+  docFrag = null;
   canvas = null;
   links = null;
   brushCanvas = null;
@@ -49,6 +50,76 @@ class Canvas {
   // brush variables
   _hoveredNode = null;
   isBrushing = false;
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                   Getters & Setters                                  *
+   *                                                                                      */
+  //========================================================================================
+
+  get mode() {
+    return this.mInterface.mode;
+  }
+
+  get previousMode() {
+    return this.mInterface.mode.previousMode;
+  }
+
+  get el() {
+    return this.svg;
+  }
+
+  /**
+   * get mouse position
+   */
+  get mousePos() {
+    return this._mouse;
+  }
+
+  /**
+   * Return mouse position in object with x and y
+   */
+  get mousePosition() {
+    return { x: this._mouse[0], y: this._mouse[1] };
+  }
+
+  /**
+   * set mouse position
+   * @param {array} value [x,y] position in canvas
+   */
+  set mousePos(value) {
+    this._mouse = value;
+  }
+
+  set hoveredNode(value) {
+    this._hoveredNode = value;
+    if (!value && d3.event.shiftKey) {
+      this.addBrushCanvas();
+    }
+  }
+
+  get isMouseOverNode() {
+    return this._hoveredNode !== null;
+  }
+
+  /**
+   * Get selected link
+   */
+  get selectedLink() {
+    return this.mInterface.selectedLink;
+  }
+
+  getSvg = () => {
+    return d3.select(this.svg) || this.initSvg();
+  };
+
+  setMode = (mode, props, force = false) => {
+    this.mInterface.setMode(mode, props, force);
+  };
+
+  setPreviousMode = () => {
+    this.mInterface.setPreviousMode();
+  };
 
   //========================================================================================
   /*                                                                                      *
@@ -78,10 +149,18 @@ class Canvas {
       .addSubscribers();
   };
 
+  appendDocumentFragment = () => {
+    const el_container = document.getElementById(this.containerId);
+    d3.select(`#${this.containerId} svg`).remove();
+    el_container.appendChild(this.svg);
+  };
+
   initSvg = () => {
     const { classes } = this;
-    this.svg = d3
-      .select(`#${this.containerId}`)
+
+    const docFragment = document.createDocumentFragment();
+
+    d3.select(docFragment)
       .append("svg")
       .attr("width", "99.8%")
       .attr("height", "99.8%")
@@ -95,6 +174,10 @@ class Canvas {
         `${FlowModel.CLASSNAME} ${classes.flowEditor.interfaceColor}`
       )
       .call(this.zoomBehavior);
+
+    this.svg = docFragment.firstChild;
+    this.docFrag = docFragment;
+
     return this;
   };
 
@@ -206,14 +289,14 @@ class Canvas {
 
   reload = () => {
     const { classes } = this;
-    this.svg.attr("class", `${classes.flowEditor.interfaceColor}`);
+    this.getSvg().attr("class", `${classes.flowEditor.interfaceColor}`);
   };
 
   /**
    * @private
    */
   addDefs = () => {
-    const defs = this.svg.append("svg:defs");
+    const defs = this.getSvg().append("svg:defs");
     const { containerId } = this;
     defs
       .selectAll("marker")
@@ -254,7 +337,8 @@ class Canvas {
    * @private
    */
   addCanvas = () => {
-    this.canvas = this.svg
+    this.canvas = d3
+      .select(this.svg)
       .append("g")
       .attr("id", `canvasContainer-${this.containerId}`)
       .attr("width", this.maxMovingPixels)
@@ -269,7 +353,8 @@ class Canvas {
    * @private
    */
   addLinksCanvas = () => {
-    this.links = this.svg
+    this.links = d3
+      .select(this.svg)
       .append("g")
       .attr("id", `linksContainer-${this.containerId}`)
       .attr("width", this.maxMovingPixels)
@@ -286,7 +371,8 @@ class Canvas {
    */
   addBrushCanvas = () => {
     this.isBrushing = true;
-    this.brushCanvas = this.svg
+    this.brushCanvas = d3
+      .select(this.svg)
       .append("g")
       .attr("class", "brush")
       .call(this.brushBehavior);
@@ -353,76 +439,6 @@ class Canvas {
     return this;
   };
 
-  //========================================================================================
-  /*                                                                                      *
-   *                                   Getters & Setters                                  *
-   *                                                                                      */
-  //========================================================================================
-
-  get mode() {
-    return this.mInterface.mode;
-  }
-
-  get previousMode() {
-    return this.mInterface.mode.previousMode;
-  }
-
-  get el() {
-    return this.svg.node();
-  }
-
-  /**
-   * get mouse position
-   */
-  get mousePos() {
-    return this._mouse;
-  }
-
-  /**
-   * Return mouse position in object with x and y
-   */
-  get mousePosition() {
-    return { x: this._mouse[0], y: this._mouse[1] };
-  }
-
-  /**
-   * set mouse position
-   * @param {array} value [x,y] position in canvas
-   */
-  set mousePos(value) {
-    this._mouse = value;
-  }
-
-  set hoveredNode(value) {
-    this._hoveredNode = value;
-    if (!value && d3.event.shiftKey) {
-      this.addBrushCanvas();
-    }
-  }
-
-  get isMouseOverNode() {
-    return this._hoveredNode !== null;
-  }
-
-  /**
-   * Get selected link
-   */
-  get selectedLink() {
-    return this.mInterface.selectedLink;
-  }
-
-  getSvg = () => {
-    return this.svg || this.initSvg();
-  };
-
-  setMode = (mode, props, force = false) => {
-    this.mInterface.setMode(mode, props, force);
-  };
-
-  setPreviousMode = () => {
-    this.mInterface.setPreviousMode();
-  };
-
   /**
    * Check if node position is in canvas boundaries
    * @param {number} x : Position in X axis
@@ -474,7 +490,7 @@ class Canvas {
 
   dispatchEvent = (name, value) => {
     const event = new CustomEvent(name, value);
-    this.svg.node().dispatchEvent(event);
+    this.el.dispatchEvent(event);
   };
 
   /**
@@ -484,7 +500,7 @@ class Canvas {
     d3.event.preventDefault();
     d3.event.stopPropagation();
 
-    const transform = d3.zoomTransform(this.svg.node());
+    const transform = d3.zoomTransform(this.el);
     let newPosition = [...this.mousePos];
 
     if (transform.k !== 1) {
@@ -527,7 +543,7 @@ class Canvas {
    * @private
    */
   onMouseMove = () => {
-    this.mousePos = d3.mouse(this.svg.node());
+    this.mousePos = d3.mouse(this.el);
     const fn = [
       { id: "addNode", fn: () => this.onAddNodeMouseMove() },
       { id: "addFlow", fn: () => this.onAddNodeMouseMove() },
@@ -566,7 +582,7 @@ class Canvas {
 
   onAddNodeExit = () => {
     const { node } = this.mode.addNode.props;
-    this.svg.style("cursor", "default");
+    this.getSvg().style("cursor", "default");
     if (node) {
       // remove temporary node from canvas
       node.destroy();
@@ -588,11 +604,11 @@ class Canvas {
 
   addNodeEnter = props => {
     const { modeEvent, node, factoryOutput } = props;
-    this.svg.node().focus();
+    this.el.focus();
 
     const mode = this.mInterface.graph.viewMode;
     const editionCursor = this.getEditionCursor(mode);
-    this.svg.style("cursor", editionCursor);
+    this.getSvg().style("cursor", editionCursor);
 
     // Add temp node
     Factory.create(this.docManager, factoryOutput, {
@@ -610,7 +626,7 @@ class Canvas {
 
   onAddFlowExit = () => {
     const { node } = this.mode.addFlow.props;
-    this.svg.style("cursor", "default");
+    this.getSvg().style("cursor", "default");
     if (node) {
       // remove temporary node from canvas
       node.destroy();
@@ -621,7 +637,7 @@ class Canvas {
    * update the node position on mouse move
    */
   onAddNodeMouseMove = () => {
-    const transform = d3.zoomTransform(this.svg.node());
+    const transform = d3.zoomTransform(this.el);
 
     // apply offset to prevent mouse from being positioned on top of the name
     const offset = { x: 0, y: -5 };
@@ -649,15 +665,19 @@ class Canvas {
     this.append(() => {
       return this.mode.linking.props.link.el;
     }, "links");
+    this.mode.linking.activelyLinking = true;
+    this.mode.linking.props.link.fadeOtherLinks();
   };
 
   onLinkingExit = () => {
     const { link } = this.mode.linking.props;
     if (link) link.destroy();
+    this.mode.linking.activelyLinking = false;
+    this.mode.linking.props.link.removeLinksFade();
   };
 
   onLinkingMouseMove = () => {
-    const transform = d3.zoomTransform(this.svg.node());
+    const transform = d3.zoomTransform(this.el);
     let newPosition = [...this.mousePos];
     newPosition = transform.invert(newPosition);
     const trg = {
@@ -667,6 +687,29 @@ class Canvas {
       data: {}
     };
     this.mode.linking.props.link.update(null, trg);
+  };
+
+  onResetZoom = () => {
+    this.getSvg()
+      .transition()
+      .duration(750)
+      .call(this.zoomBehavior.transform, d3.zoomIdentity);
+  };
+
+  zoomToCoordinates = (xCoordinate, yCoordinate) => {
+    const { width, height } = this.el.getBoundingClientRect();
+    this.getSvg()
+      .transition()
+      .duration(750)
+      .call(
+        this.zoomBehavior.transform,
+        d3.zoomIdentity
+          .translate(
+            width * 0.5 - 2 * xCoordinate,
+            height * 0.5 - 2 * yCoordinate
+          )
+          .scale(2)
+      );
   };
 }
 

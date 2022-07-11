@@ -4,12 +4,13 @@ import { useTranslation } from "react-i18next";
 import Button from "@material-ui/core/Button";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import SystemMenu from "./Components/SystemMenu";
-import buildMenus from "./buildMenus";
+import buildMenus from "./builder/buildMenus";
 
 import { systemBarStyles, helpDialogStyles } from "./styles";
+import { PLUGINS } from "../../../utils/Constants";
 
 const SystemBar = props => {
-  const { debugMode, call } = props;
+  const { debugMode, call, on } = props;
   // State Hooks
   const [openedMenuId, setOpenedMenuId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -81,10 +82,12 @@ const SystemBar = props => {
    * Component Did Mount
    */
   useEffect(() => {
-    buildMenus(call, dialogClasses).then(data => {
-      setSystemMenus(data);
+    on(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE, tab => {
+      buildMenus(call, dialogClasses).then(data => {
+        setSystemMenus(data);
+      });
     });
-  }, [call, dialogClasses]);
+  }, [on, call, dialogClasses]);
 
   return (
     <>

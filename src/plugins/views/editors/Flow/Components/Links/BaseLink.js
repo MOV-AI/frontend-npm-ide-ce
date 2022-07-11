@@ -1,11 +1,12 @@
 import * as d3 from "d3";
+import { LINK_DEPENDENCY } from "../../../../../../utils/Constants";
 import { defaultFunction } from "../../../../../../utils/Utils";
+import { MOVAI_FLOW_TYPES } from "../../Constants/constants";
 import { isLinkeable } from "../Nodes/BaseNode/PortValidator";
 import { generatePathPoints } from "./generatePathPoints";
 
 import { baseLinkStyles } from "./styles";
 
-const SUBFLOW_TYPE = "MovAI/Flow";
 const SEPARATOR = {
   SUBFLOW: "__",
   NODE: "/"
@@ -16,7 +17,17 @@ class BaseLinkStruct {
     canvas,
     src,
     trg,
-    { id, sourceNode, sourcePort, targetNode, targetPort, dependency, error }
+    {
+      id,
+      sourceNode,
+      sourcePort,
+      targetNode,
+      targetPort,
+      dependency,
+      error,
+      sourceFullPath,
+      targetFullPath
+    }
   ) {
     this.canvas = canvas;
     this.src = src; // {x, y, nodeSize {height, width}, type}
@@ -24,11 +35,13 @@ class BaseLinkStruct {
     this.error = error; // null or { message, fixError() }
     this.maxMovingPixels = canvas.maxMovingPixels;
     this.data = {
-      id: id,
-      sourceNode: sourceNode,
-      sourcePort: sourcePort,
-      targetNode: targetNode,
-      targetPort: targetPort,
+      id,
+      sourceNode,
+      sourcePort,
+      targetNode,
+      targetPort,
+      sourceFullPath,
+      targetFullPath,
       Dependency: dependency
     };
     this._visible = true;
@@ -85,11 +98,19 @@ class BaseLinkStruct {
 }
 
 export default class BaseLink extends BaseLinkStruct {
-  constructor(canvas, src, trg, data, onLinkErrorMouseOver) {
+  constructor(
+    canvas,
+    src,
+    trg,
+    data,
+    flowDebugging = false,
+    onLinkErrorMouseOver = () => defaultFunction("onLinkErrorMouseOver")
+  ) {
     super(canvas, src, trg, data);
     this.object = null;
-    this.onLinkErrorMouseOver =
-      onLinkErrorMouseOver || (() => defaultFunction("onLinkErrorMouseOver"));
+    this.flowDebugging = flowDebugging;
+    this.temporaryDependency = data.Dependency;
+    this.onLinkErrorMouseOver = onLinkErrorMouseOver;
 
     this.initialize();
   }
@@ -134,7 +155,7 @@ export default class BaseLink extends BaseLinkStruct {
       .attr("d", () => {
         return this.calculateLine(pathPoints);
       })
-      .attr("stroke", this.style.stroke.default)
+      .attr("stroke", this.getStrokeColor())
       .attr("stroke-width", this.style.stroke.width)
       .attr("pointer-events", "visibleStroke")
       .attr("fill-opacity", "0");
@@ -161,7 +182,7 @@ export default class BaseLink extends BaseLinkStruct {
    */
   refreshPath = () => {
     const { pathPoints } = this;
-    this.object.select("path").attr("d", () => {
+    this.object.select("path.nodeLink").attr("d", () => {
       return this.calculateLine(pathPoints);
     });
     return this;
@@ -200,8 +221,8 @@ export default class BaseLink extends BaseLinkStruct {
    * @private
    */
   styleMouseOver = () => {
-    this.path
-      .attr("stroke", this.style.stroke.over)
+    this.changeStrokeColor()
+      .path.attr("stroke-width", this.style.stroke.overWidth)
       .attr("marker-mid", `url(#${this.canvas.containerId}-markerselected)`);
   };
 
@@ -209,11 +230,8 @@ export default class BaseLink extends BaseLinkStruct {
    * @private
    */
   styleMouseOut = () => {
-    this.path
-      .attr(
-        "stroke",
-        this.error ? this.style.stroke.warning : this.style.stroke.default
-      )
+    this.changeStrokeColor()
+      .path.attr("stroke-width", this.style.stroke.width)
       .attr("marker-mid", null);
   };
 
@@ -234,7 +252,8 @@ export default class BaseLink extends BaseLinkStruct {
       this.styleMouseOver();
     }
     // Fade out other links
-    if (!this.canvas.selectedLink) this.fadeOtherLinks();
+    if (!this.canvas.selectedLink && !this.canvas.mode.linking.activelyLinking)
+      this.fadeOtherLinks();
     // show error tooltip (if any)
     if (this.error) {
       const message = this.error.message;
@@ -257,7 +276,8 @@ export default class BaseLink extends BaseLinkStruct {
       this.styleMouseOut();
     }
     // Remove fade out from other links
-    if (!this.canvas.selectedLink) this.removeLinksFade();
+    if (!this.canvas.selectedLink && !this.canvas.mode.linking.activelyLinking)
+      this.removeLinksFade();
     // hide tooltip
     if (this.error)
       this.onLinkErrorMouseOver({ link: this.data, mouseover: false }, "Link");
@@ -316,6 +336,23 @@ export default class BaseLink extends BaseLinkStruct {
     this.object.attr("visibility", this.visible ? "visible" : "hidden");
   }
 
+  setTemporaryDependency(dependecy) {
+    this.temporaryDependency = dependecy;
+    return this;
+  }
+
+  getStrokeColor() {
+    const type = `dependency_${
+      this.temporaryDependency ?? this.data.Dependency
+    }`;
+    const strokeColor = this.style.stroke.default;
+
+    if (this.flowDebugging && baseLinkStyles[type])
+      return baseLinkStyles[type].color;
+
+    return strokeColor;
+  }
+
   onSelected = selected => {
     this._isSelected = selected;
     if (selected) this.styleMouseOver();
@@ -338,6 +375,14 @@ export default class BaseLink extends BaseLinkStruct {
   updateError = error => {
     this.error = error;
     this.styleMouseOut();
+  };
+
+  changeStrokeColor = () => {
+    this.path.attr(
+      "stroke",
+      this.error ? this.style.stroke.warning : this.getStrokeColor()
+    );
+    return this;
   };
 
   /**
@@ -416,13 +461,21 @@ export default class BaseLink extends BaseLinkStruct {
       const type = item.node._template?.Type ?? "";
       const port = item.data.name;
       const separator =
-        type === SUBFLOW_TYPE ? SEPARATOR.SUBFLOW : SEPARATOR.NODE;
+        type === MOVAI_FLOW_TYPES.NODES.MOVAI_FLOW
+          ? SEPARATOR.SUBFLOW
+          : SEPARATOR.NODE;
 
       return [node, port].join(separator);
     });
   }
 
-  static parseLink({ id, From, To, Dependency }) {
+  static parseLink(linksData) {
+    const {
+      id,
+      From,
+      To,
+      Dependency = LINK_DEPENDENCY.ALL_DEPENDENCIES.VALUE
+    } = linksData;
     const [sourceNode, sourcePort, sourceFullPath] = BaseLink.getNodePort(From);
     const [targetNode, targetPort, targetFullPath] = BaseLink.getNodePort(To);
 
