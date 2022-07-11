@@ -199,11 +199,18 @@ class DocManager extends IDEPlugin {
         {
           name,
           scope,
-          onSubmit: action => {
+          onSubmit: async action => {
             switch (action) {
               case SAVE_OUTDATED_DOC_ACTIONS.UPDATE_DOC:
-                // TODO this is not working, needs development from https://movai.atlassian.net/browse/FP-1621
-                this.reloadDoc(modelKey);
+                this.discardDocChanges(modelKey);
+                const updatedDoc = await this.read(modelKey);
+
+                if (this.docSubscriptions.has(thisDoc.id)) {
+                  this.docSubscriptions.get(thisDoc.id)(
+                    updatedDoc.serializeToDB()
+                  );
+                }
+
                 this.saveStack.delete(`${name}_${scope}`);
                 break;
               case SAVE_OUTDATED_DOC_ACTIONS.OVERWRITE_DOC:
