@@ -200,7 +200,6 @@ class DocManager extends IDEPlugin {
                   );
                 }
 
-                updatedDoc.setIsNew(false).setDirty(false);
                 this.saveStack.delete(`${name}_${scope}`);
                 break;
               case SAVE_OUTDATED_DOC_ACTIONS.OVERWRITE_DOC:

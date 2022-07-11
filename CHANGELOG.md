@@ -14,6 +14,7 @@
 - [FP-1595 - Removed unused function that contained vulnerabilities](https://movai.atlassian.net/browse/FP-1595)
 - [FP-1610 - Remove editor keybinds when editor is blurred](https://movai.atlassian.net/browse/FP-1610)
 - [FP-1548 - Added testids to help QA](https://movai.atlassian.net/browse/FP-1548)
+- [FP-1621 - Update outdated file is now working](https://movai.atlassian.net/browse/FP-1621)
 
 **Callback Editor**
 

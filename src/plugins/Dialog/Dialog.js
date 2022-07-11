@@ -174,8 +174,13 @@ class Dialog extends IDEPlugin {
   saveOutdatedDocument(data) {
     const targetElement = this._handleDialogOpen();
     // Set dialog message
-    const title = i18n.t("SaveOutdatedDocTitle");
-    const message = i18n.t("SaveOutdatedDocMessage");
+    const title = i18n.t("SaveOutdatedDocTitle", {
+      docName: data.name
+    });
+    const message = i18n.t("SaveOutdatedDocMessage", {
+      docType: data.scope,
+      docName: data.name
+    });
     // Set dialog actions
     const actions = {
       [SAVE_OUTDATED_DOC_ACTIONS.UPDATE_DOC]: {
