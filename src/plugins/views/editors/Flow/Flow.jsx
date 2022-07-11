@@ -90,7 +90,7 @@ const Flow = (props, ref) => {
   const [runningFlow, setRunningFlow] = useState("");
   const [warnings, setWarnings] = useState([]);
   const [flowDebugging, setFlowDebugging] = useState();
-  const [warningsVisibility, setWarningsVisibility] = useState(true);
+  const [warningsVisibility, setWarningsVisibility] = useState(false);
   const [viewMode, setViewMode] = useState(FLOW_VIEW_MODE.default);
   const [tooltipConfig, setTooltipConfig] = useState(null);
   const [contextMenuOptions, setContextMenuOptions] = useState({
@@ -524,11 +524,13 @@ const Flow = (props, ref) => {
 
   /**
    * Toggle Warnings
-   * @param {boolean} isVisible
    */
-  const onToggleWarnings = useCallback(isVisible => {
-    getMainInterface()?.onToggleWarnings({ data: isVisible });
-    setWarningsVisibility(isVisible);
+  const onToggleWarnings = useCallback(() => {
+    setWarningsVisibility(prevState => {
+      const newVisibility = !prevState;
+      getMainInterface()?.onToggleWarnings({ data: newVisibility });
+      return newVisibility;
+    });
   }, []);
 
   /**
@@ -685,6 +687,8 @@ const Flow = (props, ref) => {
         // Reposition all nodes and subflows
         mainInterface.graph.updateAllPositions();
         setLoading(false);
+        // Set initial warning visibility value
+        setWarningsVisibility(true);
       });
 
       // Set the warning types to be used in the validations
@@ -1259,6 +1263,7 @@ const Flow = (props, ref) => {
       <FlowBottomBar
         openFlow={openDoc}
         onToggleWarnings={onToggleWarnings}
+        warningVisibility={warningsVisibility}
         robotSelected={robotSelected}
         runningFlow={runningFlow}
         warnings={warnings}
