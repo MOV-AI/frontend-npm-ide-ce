@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useEffect } from "react";
+import React, { forwardRef, useCallback, useEffect, useRef } from "react";
 import withAlerts from "../../decorators/withAlerts";
 import withKeyBinds from "../../decorators/withKeyBinds";
 import withMenuHandler from "../../decorators/withMenuHandler";
@@ -6,6 +6,7 @@ import withLoader from "../../decorators/withLoader";
 import { withDataHandler } from "../../plugins/DocManager/DataHandler";
 import { KEYBINDINGS } from "../../plugins/views/Keybinding/shortcuts";
 import { PLUGINS } from "../../utils/Constants";
+import { getNameFromURL } from "../../utils/Utils";
 import { ViewPlugin } from "./ViewReactPlugin";
 
 /**
@@ -51,6 +52,8 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       updateRightMenu
     } = props;
 
+    const editorContainer = useRef();
+
     /**
      * Activate editor : activate editor's keybinds and update right menu
      */
@@ -60,36 +63,55 @@ export function withEditorPlugin(ReactComponent, methods = []) {
     }, [activateKeyBind, updateRightMenu]);
 
     /**
+     * Activate keybinds if is this editor
+     */
+    const activateThisKeys = useCallback(
+      ({ instance }) => {
+        if (!instance) return;
+        if (instance.id === getNameFromURL(id)) editorContainer.current.focus();
+      },
+      [id]
+    );
+
+    /**
      * Component did mount
      */
     useEffect(() => {
       initRightMenu();
       addKeyBind(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE.SHORTCUTS, save);
-      on(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE, data => {
-        if (data.id === id) {
-          activateEditor();
-        }
-      });
+      on(
+        PLUGINS.TABS.NAME,
+        PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE,
+        activateThisKeys
+      );
+
+      on(
+        PLUGINS.DOC_MANAGER.NAME,
+        PLUGINS.DOC_MANAGER.ON.UPDATE_DOC_DIRTY,
+        activateThisKeys
+      );
 
       // Remove key bind on component unmount
       return () => {
         removeKeyBind(KEYBINDINGS.EDITOR_GENERAL.KEYBINDS.SAVE.SHORTCUTS);
         off(PLUGINS.TABS.NAME, PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE);
+        off(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.UPDATE_DOC_DIRTY);
       };
     }, [
       id,
-      activateEditor,
       addKeyBind,
       removeKeyBind,
       initRightMenu,
       on,
       off,
-      save
+      save,
+      activateThisKeys
     ]);
 
     return (
       <div
         tabIndex="-1"
+        ref={editorContainer}
         onFocus={activateEditor}
         onBlur={deactivateKeyBind}
         className={`container-${scope}`}
