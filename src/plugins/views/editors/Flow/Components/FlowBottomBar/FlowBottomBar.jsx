@@ -20,7 +20,6 @@ const FlowBottomBar = props => {
   const [barStatus, setBarStatus] = useState("default");
   const [allRobots, setRobots] = useState({});
   const [selectedRobotName, setSelectedRobotName] = useState("");
-  const [warningVisibility, setWarningVisibility] = useState(true);
 
   // Translation hook
   const { t } = useTranslation();
@@ -31,6 +30,7 @@ const FlowBottomBar = props => {
     robotSelected,
     runningFlow,
     warnings,
+    warningVisibility,
     flowDebugging = false,
     toggleFlowDebug
   } = props;
@@ -78,8 +78,8 @@ const FlowBottomBar = props => {
   const toggleVisibility = useCallback(() => {
     if (!warnings.length) return;
     // Toggle warnings if there's any
-    setWarningVisibility(prevState => !prevState);
-  }, [warnings]);
+    onToggleWarnings(!warningVisibility);
+  }, [warnings, onToggleWarnings, warningVisibility]);
 
   //========================================================================================
   /*                                                                                      *
@@ -106,11 +106,6 @@ const FlowBottomBar = props => {
       setSelectedRobotName(robotName);
     }
   }, [robotSelected, allRobots, runningFlow]);
-
-  // Call toggle warnings on change of warningVisibility
-  useEffect(() => {
-    onToggleWarnings(warningVisibility);
-  }, [warningVisibility, onToggleWarnings]);
 
   //========================================================================================
   /*                                                                                      *
