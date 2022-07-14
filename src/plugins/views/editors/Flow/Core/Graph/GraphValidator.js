@@ -30,31 +30,36 @@ const WARNINGS = {
     message: i18n.t("StartLinkNotFound"),
     type: ALERT_SEVERITIES.WARNING,
     isRuntime: true,
-    isPersistent: false
+    isPersistent: false,
+    warningType: WARNING_TYPES.START_LINK
   },
   [WARNING_TYPES.LINK_MISMATCH]: {
     message: i18n.t("MessageMismatchedLinks"),
     type: ALERT_SEVERITIES.WARNING,
     isRuntime: false,
-    isPersistent: true
+    isPersistent: true,
+    warningType: WARNING_TYPES.LINK_MISMATCH
   },
   [WARNING_TYPES.INVALID_PARAMETERS]: {
     message: i18n.t("InvalidSubFlowParameters"),
     type: ALERT_SEVERITIES.WARNING,
     isRuntime: false,
-    isPersistent: true
+    isPersistent: true,
+    warningType: WARNING_TYPES.INVALID_PARAMETERS
   },
   [WARNING_TYPES.INVALID_EXPOSED_PORTS]: {
     message: i18n.t("InvalidExposedPorts"),
     type: ALERT_SEVERITIES.WARNING,
     isRuntime: false,
-    isPersistent: true
+    isPersistent: true,
+    warningType: WARNING_TYPES.INVALID_EXPOSED_PORTS
   },
   [WARNING_TYPES.INVALID_LINKS]: {
     message: i18n.t("InvalidLinksFoundTitle"),
     type: ALERT_SEVERITIES.WARNING,
     isRuntime: false,
-    isPersistent: true
+    isPersistent: true,
+    warningType: WARNING_TYPES.INVALID_LINKS
   }
 };
 
@@ -93,9 +98,10 @@ export default class GraphValidator {
     const warnings = [];
     const links = this.graph.links;
     const nodes = this.graph.nodes;
-    const invalidLinks = this.graph.invalidLinks;
     let linksStart = false;
     let linksMismatches = false;
+
+    this.addDeletedLinks();
 
     links.forEach((link, _, _links) => {
       const linkData = link.data;
@@ -122,14 +128,12 @@ export default class GraphValidator {
     // Check rule nr. 2 : Links between ports with different message types
     if (linksMismatches) warnings.push(WARNINGS[WARNING_TYPES.LINK_MISMATCH]);
     // Check rule nr. 3 : Links that don't have start or end port
-    if (invalidLinks.length)
+    if (this.graph.invalidLinks.length)
       warnings.push({
         ...WARNINGS[WARNING_TYPES.INVALID_LINKS],
         data: this.graph.invalidLinks,
         callback: this.graph.clearInvalidLinks
       });
-
-    this.addDeletedLinks();
 
     return warnings;
   };

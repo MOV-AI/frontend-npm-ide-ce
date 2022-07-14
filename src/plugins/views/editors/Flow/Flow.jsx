@@ -62,7 +62,6 @@ const Flow = (props, ref) => {
     activateKeyBind,
     deactivateKeyBind,
     confirmationAlert,
-    saveDocument,
     on,
     off
   } = props;
@@ -223,11 +222,12 @@ const Flow = (props, ref) => {
   const deleteInvalidLinks = useCallback(
     (links, callback) => {
       links.forEach(link => instance.current.deleteLink(link.id));
-      // Save document and call graph callback
-      saveDocument();
+
+      getMainInterface().graph.clearInvalidLinks().validateFlow();
+
       callback && callback();
     },
-    [instance, saveDocument]
+    [instance]
   );
 
   /**
@@ -258,6 +258,10 @@ const Flow = (props, ref) => {
           );
         }
       });
+
+      getMainInterface()
+        .graph.clearInvalidExposedPorts(invalidExposedPorts)
+        .validateFlow();
     },
     [instance]
   );

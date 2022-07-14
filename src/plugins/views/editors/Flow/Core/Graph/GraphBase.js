@@ -1,6 +1,5 @@
 import { Subject } from "rxjs";
 import _isEqual from "lodash/isEqual";
-import _debounce from "lodash/debounce";
 import Workspace from "../../../../../../utils/Workspace";
 import { PLUGINS } from "../../../../../../utils/Constants";
 import StartNode from "../../Components/Nodes/StartNode";
@@ -176,6 +175,30 @@ export default class GraphBase {
    */
   clearInvalidLinks = () => {
     this.invalidLinks = [];
+    return this;
+  };
+
+  /**
+   * @private Clear invalid links property
+   */
+  clearInvalidExposedPorts = invalidExposedPorts => {
+    // We'll cycle all Nodes with exposedPorts
+    Object.values(this.exposedPorts).forEach(ep => {
+      // And then cycle all Nodes with Invalid Ports
+      invalidExposedPorts.forEach(iep => {
+        // If this Exposed Port Node exists in the list of Nodes with Invalid Ports
+        if (ep[iep.nodeInst.data.id]) {
+          // We'll filter all invalidPorts from this Node and assign it back to it
+          // thus removing all invalidPOrts from this Node
+          ep[iep.nodeInst.data.id] = ep[iep.nodeInst.data.id].filter(
+            port => !iep.invalidPorts.includes(port)
+          );
+        }
+      });
+    });
+    // Then we return the graph to be able to do chained functions
+    // Such as validateFlow() after removing these exposed ports
+    return this;
   };
 
   /**
@@ -205,13 +228,6 @@ export default class GraphBase {
   get viewMode() {
     return FLOW_VIEW_MODE.default;
   }
-
-  /**
-   * @private
-   */
-  debounceToValidateFlow = _debounce(() => {
-    this.validateFlow();
-  }, 500);
 
   onNodeDrag = (draggedNode, d) => {
     const allNodes = this.nodes;
@@ -289,7 +305,7 @@ export default class GraphBase {
 
       Promise.all(templateUpdatePromises).then(() => {
         this.loadExposedPorts(this.exposedPorts, true);
-        this.debounceToValidateFlow();
+        this.validateFlow();
       });
     }
   };
