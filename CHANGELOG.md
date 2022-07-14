@@ -15,6 +15,7 @@
 - [FP-1595 - Removed unused function that contained vulnerabilities](https://movai.atlassian.net/browse/FP-1595)
 - [FP-1610 - Remove editor keybinds when editor is blurred](https://movai.atlassian.net/browse/FP-1610)
 - [FP-1838 - Give focus to active editor if it becomes dirty](https://movai.atlassian.net/browse/FP-1838)
+- [FP-1978 - Add Description field when Adding/Editing parameter on Flow Template](https://movai.atlassian.net/browse/FP-1978)
 
 **Callback Editor**
 
