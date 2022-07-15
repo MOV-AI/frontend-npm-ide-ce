@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { Typography } from "@material-ui/core";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
-import { PLUGINS, APP_INFORMATION } from "../../../utils/Constants";
-import movaiLogo from "../editors/_shared/Branding/movai-flow-logo-red.png";
+import { PLUGINS } from "../../../utils/Constants";
+import AppSettings from "../../../App/AppSettings";
 import ListItemsTreeWithSearch, {
   toggleExpandRow
 } from "./components/ListItemTree/ListItemsTreeWithSearch";
@@ -260,7 +260,7 @@ const Explorer = props => {
   return (
     <>
       <h1 className={classes.header}>
-        <img src={movaiLogo} alt={APP_INFORMATION.LABEL} />
+        <img src={AppSettings.LOGO} alt={AppSettings.APP_INFORMATION.LABEL} />
       </h1>
       <Typography
         data-testid="section_explorer"

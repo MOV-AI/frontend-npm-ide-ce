@@ -10,10 +10,16 @@ class LocalStorage {
   }
 
   get(key, defaultValue) {
-    if (key in localStorage) {
-      return JSON.parse(localStorage[key]);
+    try {
+      if (key in localStorage) {
+        return JSON.parse(localStorage[key]);
+      } else {
+        return defaultValue;
+      }
+    } catch (e) {
+      console.warn("failed to load layout", localStorage[key]);
+      return defaultValue;
     }
-    return defaultValue;
   }
 
   hasKey(key) {

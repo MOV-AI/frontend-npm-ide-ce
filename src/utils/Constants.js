@@ -3,27 +3,7 @@ import i18n from "../i18n/i18n";
 export const APP_DEFAULT_CONFIG = "app-ide-ce";
 export const APP_CUSTOM_CONFIG = "app-custom-ide-ce";
 
-const APPLICATION_DATA = window.SERVER_DATA?.Application;
-
 export const MANAGER = "manager";
-
-export const BRANDING = {
-  NAME: "MOV.AI Flow™"
-};
-
-export const APP_INFORMATION = {
-  VERSION: APPLICATION_DATA?.Version || "0.0.1",
-  LAST_UPDATE: APPLICATION_DATA?.LastUpdate || "-",
-  CONFIGURATION_FILE: APPLICATION_DATA?.Configuration || "-",
-  CUSTOM_CONFIGURATION_FILE: APPLICATION_DATA?.CustomConfiguration || "-",
-  DESCRIPTION: APPLICATION_DATA?.Description || "-",
-  LABEL: APPLICATION_DATA?.Label || BRANDING.NAME
-};
-
-export const APP_LINKS = {
-  DOCUMENTATION: "https://flow.mov.ai/",
-  FORUM: "https://forum.flow.mov.ai/"
-};
 
 export const GLOBAL_WORKSPACE = "global";
 
@@ -315,4 +295,29 @@ export const DEFAULT_LAYOUT = {
   windowbox: { children: [] },
   maxbox: { children: [] },
   floatbox: { children: [] }
+};
+
+//========================================================================================
+/*                                                                                      *
+ *                                 Flow/Nodes Constants                                 *
+ *                                                                                      */
+//========================================================================================
+
+export const MOVAI_FLOW_TYPES = {
+  NODES: {
+    ROS1_NODELETE: "ROS1/Nodelet",
+    ROS1_NODE: "ROS1/Node",
+    ROS1_PLUGIN: "ROS1/Plugin",
+    ROS1_STATEM: "ROS1/StateM",
+    MOVAI_NODE: "MovAI/Node",
+    MOVAI_STATE: "MovAI/State",
+    MOVAI_SERVER: "MovAI/Server",
+    MOVAI_FLOW: "MovAI/Flow",
+    ROS2_NODE: "ROS2/Node",
+    ROS2_LIFECYCLENODE: "ROS2/LifecycleNode"
+  },
+  LINKS: {
+    TRANSITION: "movai_msgs/Transition",
+    NODELET: "movai_msgs/Nodelet"
+  }
 };

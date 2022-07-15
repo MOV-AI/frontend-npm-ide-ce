@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography } from "@material-ui/core";
 import { getRefComponent } from "../utils/Utils";
-import Loader from "../plugins/views/editors/_shared/Loader/Loader";
+import Loader from "../editors/_shared/Loader/Loader";
 
 import { loaderStyles } from "./styles";
 

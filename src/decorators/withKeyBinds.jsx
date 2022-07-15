@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import hotkeys from "hotkeys-js";
 import { getRefComponent, parseKeybinds } from "../utils/Utils";
-import { KEYBINDINGS } from "../plugins/views/Keybinding/shortcuts";
+import { KEYBINDINGS } from "../utils/shortcuts";
 
 /**
  * By default hotkeys are not enabled for INPUT SELECT TEXTAREA elements.

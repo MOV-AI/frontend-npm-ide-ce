@@ -4,7 +4,7 @@ import withKeyBinds from "../../decorators/withKeyBinds";
 import withMenuHandler from "../../decorators/withMenuHandler";
 import withLoader from "../../decorators/withLoader";
 import { withDataHandler } from "../../plugins/DocManager/DataHandler";
-import { KEYBINDINGS } from "../../plugins/views/Keybinding/shortcuts";
+import { KEYBINDINGS } from "../../utils/shortcuts";
 import { PLUGINS } from "../../utils/Constants";
 import { getNameFromURL } from "../../utils/Utils";
 import { ViewPlugin } from "./ViewReactPlugin";

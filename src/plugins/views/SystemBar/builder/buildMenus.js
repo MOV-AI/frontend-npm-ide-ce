@@ -1,15 +1,19 @@
 import i18n from "../../../../i18n/i18n";
+import { getSystemBarTools, hasTool } from "../../../../tools";
+import AppSettings from "../../../../App/AppSettings";
 import { parseKeybinds } from "../../../../utils/Utils";
-import { APP_LINKS } from "../../../../utils/Constants";
-import { KEYBINDINGS } from "../../Keybinding/shortcuts";
+import {
+  HOMETAB_PROFILE,
+  SHORTCUTS_PROFILE
+} from "../../../../utils/Constants";
+import { KEYBINDINGS } from "../../../../utils/shortcuts";
 import { buildNewFileSubmenu } from "./buildSubMenus";
 import {
   saveDocument,
   saveAllDocument,
   aboutPopup,
   openLink,
-  openWelcomeTab,
-  openShortcutsTab
+  openTool
 } from "./buildFunctions";
 
 const buildMenus = async (call, classes) => {
@@ -126,46 +130,75 @@ const buildMenus = async (call, classes) => {
   // };
 
   function buildHelpMenu() {
+    const hasHomeTab = hasTool(HOMETAB_PROFILE.name);
+    const hasShortcutsTab = hasTool(SHORTCUTS_PROFILE.name);
+    const hasDocumentation = Boolean(AppSettings.HELP.DOCUMENTATION);
+    const hasForum = Boolean(AppSettings.HELP.FORUM);
     return {
       id: "helpMenu",
       title: "Help",
       data: [
-        {
-          id: "getStarted",
-          title: i18n.t(KEYBINDINGS.GENERAL.KEYBINDS.OPEN_WELCOME_TAB.LABEL),
-          keybind: parseKeybinds(
-            KEYBINDINGS.GENERAL.KEYBINDS.OPEN_WELCOME_TAB.SHORTCUTS
-          ),
-          callback: () => openWelcomeTab(call)
-        },
-        {
-          id: "keyboardShortcuts",
-          title: i18n.t(KEYBINDINGS.GENERAL.KEYBINDS.OPEN_SHORTCUTS_TAB.LABEL),
-          keybind: parseKeybinds(
-            KEYBINDINGS.GENERAL.KEYBINDS.OPEN_SHORTCUTS_TAB.SHORTCUTS
-          ),
-          callback: () => openShortcutsTab(call)
-        },
-        {},
-        {
-          id: "documentation",
-          title: i18n.t("Documentation"),
-          externalLink: true,
-          callback: () => openLink(APP_LINKS.DOCUMENTATION)
-        },
-        {
-          id: "forum",
-          title: i18n.t("Forum"),
-          externalLink: true,
-          callback: () => openLink(APP_LINKS.FORUM)
-        },
-        {},
+        hasHomeTab
+          ? {
+              id: "getStarted",
+              title: i18n.t(
+                KEYBINDINGS.GENERAL.KEYBINDS.OPEN_WELCOME_TAB.LABEL
+              ),
+              keybind: parseKeybinds(
+                KEYBINDINGS.GENERAL.KEYBINDS.OPEN_WELCOME_TAB.SHORTCUTS
+              ),
+              callback: () => openTool(call, HOMETAB_PROFILE.name)
+            }
+          : null,
+        hasShortcutsTab
+          ? {
+              id: "keyboardShortcuts",
+              title: i18n.t(
+                KEYBINDINGS.GENERAL.KEYBINDS.OPEN_SHORTCUTS_TAB.LABEL
+              ),
+              keybind: parseKeybinds(
+                KEYBINDINGS.GENERAL.KEYBINDS.OPEN_SHORTCUTS_TAB.SHORTCUTS
+              ),
+              callback: () => openTool(call, SHORTCUTS_PROFILE.name)
+            }
+          : null,
+        hasHomeTab || hasShortcutsTab ? {} : null,
+
+        hasDocumentation
+          ? {
+              id: "documentation",
+              title: i18n.t("Documentation"),
+              externalLink: true,
+              callback: () => openLink(AppSettings.HELP.DOCUMENTATION)
+            }
+          : null,
+        hasForum
+          ? {
+              id: "forum",
+              title: i18n.t("Forum"),
+              externalLink: true,
+              callback: () => openLink(AppSettings.HELP.FORUM)
+            }
+          : null,
+        hasDocumentation || hasForum ? {} : null,
         {
           id: "about",
           title: i18n.t("About"),
           callback: () => aboutPopup(call, classes)
         }
-      ]
+      ].filter(el => el)
+    };
+  }
+
+  function buildToolsMenu() {
+    return {
+      id: "toolsMenu",
+      title: i18n.t("Tools"),
+      data: getSystemBarTools().map(tool => ({
+        id: tool.id,
+        title: tool.profile.title,
+        callback: () => openTool(call, tool.profile.name)
+      }))
     };
   }
 
@@ -179,6 +212,9 @@ const buildMenus = async (call, classes) => {
     // menu.push(buildEditMenu());
     // innerMenus.length && menu.push(...innerMenus);
     menu.push(buildHelpMenu());
+    // Add tools menu
+    const tools = buildToolsMenu();
+    if (tools.data.length) menu.push(tools);
 
     return menu;
   }

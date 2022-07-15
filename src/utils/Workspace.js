@@ -72,7 +72,7 @@ class Workspace {
       return [DEFAULT_LAYOUT, DEFAULT_TABS];
     }
 
-    return [this.storage.get(this.LAYOUT_KEY), tabs];
+    return [this.storage.get(this.LAYOUT_KEY, DEFAULT_LAYOUT), tabs];
   }
 
   /**
@@ -98,7 +98,7 @@ class Workspace {
    * @returns {Map<TabData>}
    */
   getStoredTabs() {
-    const storedTabs = this.storage.get(this.TABS_KEY) ?? {};
+    const storedTabs = this.storage.get(this.TABS_KEY, DEFAULT_TABS) ?? {};
     return new Map(Object.entries(storedTabs));
   }
 

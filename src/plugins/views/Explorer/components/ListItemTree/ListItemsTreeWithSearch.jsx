@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Divider, List, ListItem } from "@material-ui/core";
-import Search from "../../../editors/_shared/Search/Search";
+import Search from "../../../../../utils/components/Search/Search";
 import VirtualizedTree from "../VirtualizedTree/VirtualizedTree";
 
 import { listItemsTreeWithSearchStyles } from "./styles";

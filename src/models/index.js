@@ -1,11 +1,6 @@
-import Callback from "./Callback/Callback";
-import Configuration from "./Configuration/Configuration";
-import Flow from "./Flow/Flow";
-import Node from "./Node/Node";
+import Model from "./Model";
+import Manager from "./Manager";
+import { Command, EnvVar, Parameter, Port } from "./subModels";
 
-export const MODELS_CLASS_BY_NAME = {
-  Callback: Callback,
-  Configuration: Configuration,
-  Flow: Flow,
-  Node: Node
-};
+export { Model, Manager };
+export { Command, EnvVar, Parameter, Port };

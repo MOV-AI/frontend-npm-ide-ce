@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useContext
-} from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import {
@@ -18,11 +12,14 @@ import { Tooltip } from "@material-ui/core";
 import { useTheme } from "@material-ui/core/styles";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import { MainContext } from "../../../main-context";
-import { APP_INFORMATION, PLUGINS, HOSTS } from "../../../utils/Constants";
+import AppSettings from "../../../App/AppSettings";
+import { PLUGINS, HOSTS } from "../../../utils/Constants";
+import { getMainMenuTools } from "../../../tools";
 import { getIconByScope } from "../../../utils/Utils";
-import movaiIcon from "../editors/_shared/Branding/movai-logo-transparent.png";
+import movaiIcon from "../../../Branding/movai-logo-transparent.png";
 
 import { mainMenuStyles } from "./styles";
+import { openTool } from "../SystemBar/builder/buildFunctions";
 
 const MainMenu = props => {
   const { call } = props;
@@ -34,7 +31,7 @@ const MainMenu = props => {
   const { t } = useTranslation();
   const { isDarkTheme, handleLogOut } = useContext(MainContext);
   // Refs
-  const MENUS = useRef([
+  const MENUS = [
     {
       name: PLUGINS.EXPLORER.NAME,
       icon: _props => <TextSnippetIcon {..._props}></TextSnippetIcon>,
@@ -44,8 +41,21 @@ const MainMenu = props => {
         // Toggle left drawer
         call(HOSTS.LEFT_DRAWER.NAME, HOSTS.LEFT_DRAWER.CALL.TOGGLE);
       }
-    }
-  ]);
+    },
+    ...getMainMenuTools().map(tool => {
+      const Icon = tool.icon;
+      return {
+        name: tool.id,
+        icon: _props => <Icon {..._props} />,
+        title: tool.profile.title,
+        isActive: true,
+        getOnClick: () => {
+          // Open tool
+          openTool(call, tool.profile.name);
+        }
+      };
+    })
+  ];
 
   //========================================================================================
   /*                                                                                      *
@@ -116,7 +126,7 @@ const MainMenu = props => {
             }))}
           ></ContextMenu>
         }
-        navigationList={MENUS.current.map(menu => (
+        navigationList={MENUS.map(menu => (
           <Tooltip key={menu.name} title={menu.title} placement="right" arrow>
             {menu.icon({
               className: classes.icon,
@@ -127,7 +137,7 @@ const MainMenu = props => {
         lowerElement={[
           <ProfileMenu
             key={"profileMenu"}
-            version={APP_INFORMATION.VERSION}
+            version={AppSettings.APP_INFORMATION.VERSION}
             isDarkTheme={isDarkTheme}
             handleLogout={handleLogoutClick}
           />,

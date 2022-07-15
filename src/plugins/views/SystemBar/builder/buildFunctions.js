@@ -1,12 +1,10 @@
 import i18n from "../../../../i18n/i18n";
-import {
-  APP_INFORMATION,
-  BRANDING,
-  PLUGINS
-} from "../../../../utils/Constants";
-import { getHomeTab } from "../../HomeTab/HomeTab";
-import movaiIconWhite from "../../editors/_shared/Branding/movai-logo-white.png";
-import { getShortcutsTab } from "../../Keybinding/Shortcuts";
+import AppSettings from "../../../../App/AppSettings";
+import { PLUGINS } from "../../../../utils/Constants";
+import movaiIconWhite from "../../../../Branding/movai-logo-white.png";
+import { getHomeTab } from "../../../../tools/HomeTab/HomeTab";
+import { getShortcutsTab } from "../../../../tools/AppShortcuts/AppShortcuts";
+import { getToolTabData } from "../../../../tools";
 
 //========================================================================================
 /*                                                                                      *
@@ -18,20 +16,21 @@ function renderPopupInfo(classes) {
   return (
     <div className={classes.contentHolder}>
       <p>
-        {i18n.t("Version-Colon")} {APP_INFORMATION.VERSION}
+        {i18n.t("Version-Colon")} {AppSettings.APP_INFORMATION.VERSION}
       </p>
       <p>
-        {i18n.t("LastUpdate-Colon")} {APP_INFORMATION.LAST_UPDATE}
+        {i18n.t("LastUpdate-Colon")} {AppSettings.APP_INFORMATION.LAST_UPDATE}
       </p>
       <p>
-        {i18n.t("ConfigurationFile-Colon")} {APP_INFORMATION.CONFIGURATION_FILE}
+        {i18n.t("ConfigurationFile-Colon")}{" "}
+        {AppSettings.APP_INFORMATION.CONFIGURATION_FILE}
       </p>
       <p>
         {i18n.t("CustomConfigurationFile-Colon")}
-        {APP_INFORMATION.CUSTOM_CONFIGURATION_FILE}
+        {AppSettings.APP_INFORMATION.CUSTOM_CONFIGURATION_FILE}
       </p>
       <p>
-        {i18n.t("AppDescription")}: {APP_INFORMATION.DESCRIPTION}
+        {i18n.t("AppDescription")}: {AppSettings.APP_INFORMATION.DESCRIPTION}
       </p>
     </div>
   );
@@ -60,7 +59,7 @@ export function aboutPopup(call, classes) {
           src={movaiIconWhite}
           alt="MOV.AI Logo"
         />
-        <span>{BRANDING.NAME}</span>
+        <span>{AppSettings.NAME}</span>
       </>
     ),
     message: renderPopupInfo(classes),
@@ -70,6 +69,16 @@ export function aboutPopup(call, classes) {
 
 export function openLink(link) {
   window.open(link, "_blank");
+}
+
+/**
+ * Open Tool tab
+ * @param {function} call : Plugin call method
+ * @param {string} toolName : Tool Unique Name
+ */
+export function openTool(call, toolName) {
+  const tabData = getToolTabData({ id: toolName });
+  call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN, tabData);
 }
 
 /**

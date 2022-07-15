@@ -1,10 +1,8 @@
-import {
-  CallbackStore,
-  ConfigurationStore,
-  FlowStore,
-  NodeStore
-} from "../../store";
-import { Callback, Configuration, Flow, Node } from "../views/editors";
+const EDITORS = {};
+
+export const addEditor = (scope, store, plugin) => {
+  EDITORS[scope] = { store, plugin };
+};
 
 /**
  * Returns a list of interfaces
@@ -13,24 +11,15 @@ import { Callback, Configuration, Flow, Node } from "../views/editors";
  */
 
 const factory = (workspace, observer, docManager) => {
-  return {
-    [FlowStore.SCOPE]: {
-      store: new FlowStore(workspace, observer, docManager),
-      plugin: Flow
-    },
-    [NodeStore.SCOPE]: {
-      store: new NodeStore(workspace, observer, docManager),
-      plugin: Node
-    },
-    [CallbackStore.SCOPE]: {
-      store: new CallbackStore(workspace, observer, docManager),
-      plugin: Callback
-    },
-    [ConfigurationStore.SCOPE]: {
-      store: new ConfigurationStore(workspace, observer, docManager),
-      plugin: Configuration
-    }
-  };
+  Object.keys(EDITORS).forEach(scope => {
+    const editor = EDITORS[scope];
+    const Store = editor.store;
+    EDITORS[scope] = {
+      store: new Store(workspace, observer, docManager),
+      plugin: editor.plugin
+    };
+  });
+  return EDITORS;
 };
 
 export default factory;
