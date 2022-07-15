@@ -33,16 +33,16 @@ const KeyValueEditorDialog = props => {
     onSubmit,
     nameValidation,
     valueValidation,
-    validate,
     title,
     isNew,
     disabled,
-    disableName,
-    disableDescription,
-    showDescription,
     renderCustomContent,
     renderValueEditor,
-    showDefault
+    validate = _data => Promise.resolve({ success: true, data: _data }),
+    disableName = false,
+    disableDescription = false,
+    showDescription = true,
+    showDefault = false
   } = props;
   // State hook
   const [data, setData] = useState({});
@@ -292,14 +292,6 @@ KeyValueEditorDialog.propTypes = {
   renderCustomContent: PropTypes.func,
   nameValidation: PropTypes.func,
   valueValidation: PropTypes.func
-};
-
-KeyValueEditorDialog.defaultProps = {
-  disableName: false,
-  disableDescription: false,
-  showDescription: true,
-  showDefault: false,
-  validate: data => Promise.resolve({ success: true, data })
 };
 
 //The function returns true when the compared props equal, preventing the component from re-rendering
