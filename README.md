@@ -8,17 +8,6 @@ MOV.AI Flow™ is an integrated development environment offering multiple editor
 
 [![Deploy - On branch main/release Push](https://github.com/MOV-AI/frontend-npm-ide-ce/actions/workflows/DeployOnMergeMain.yml/badge.svg?branch=dev)](https://github.com/MOV-AI/frontend-npm-ide-ce/actions/workflows/DeployOnMergeMain.yml)
 
-## Development
-
-Open the project in VS Code and then choose to reopen in container.
-Once the container is ready, open a new terminal inside VS Code and run:
-
-```
-npm start
-```
-
-Note: ~/.npmrc must be previously configured with access to github.
-
 ## Proxy
 
 During development requests are proxied using http-proxy-middleware.
@@ -35,3 +24,7 @@ A host plugin is any class that extends [HostReactPlugin](./ReactPlugin/HostReac
 ## View plugin
 
 A view plugin is any class that extends [ViewReactPlugin](./ReactPlugin/ViewReactPlugin.js). A view plugin is able to be rendered in host plugins. A way to transform any React Component into a view plugin is to use `withPlugin: ReactComponent -> ReactComponent`.
+
+# Usage
+
+TODO...
