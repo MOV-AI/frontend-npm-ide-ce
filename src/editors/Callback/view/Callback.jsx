@@ -96,8 +96,6 @@ const Callback = (props, ref) => {
   );
 };
 
-Callback.scope = "Configuration";
-
 Callback.propTypes = {
   id: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Style } from "@mov-ai/mov-fe-lib-react";
 import { Typography } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
@@ -22,6 +22,7 @@ import { PLUGINS, HOSTS } from "../utils/Constants";
 import { MainContext } from "../main-context";
 import { addEditor } from "../plugins/DocManager/factory";
 import { addTool } from "../tools";
+import { setLinks, setLogo, setName, setShortcuts } from "./AppSettings";
 
 import "./App.css";
 import { appStyles } from "./styles";
@@ -29,6 +30,16 @@ import { appStyles } from "./styles";
 const DEBUG_MODE = false;
 
 function BaseApp(props) {
+  // Props
+  const {
+    theme,
+    handleToggleTheme,
+    handleLogOut,
+    logo,
+    links,
+    shortcuts,
+    appName
+  } = props;
   // Style hook
   const classes = appStyles(DEBUG_MODE)();
 
@@ -38,12 +49,30 @@ function BaseApp(props) {
    *                                                                                      */
   //========================================================================================
 
-  React.useEffect(() => {
+  useEffect(() => {
     installAppPlugins();
     installViewPlugins();
     // Write log in consle
     writeMovaiLogo();
   }, []);
+
+  // Set app settings
+
+  useEffect(() => {
+    if (logo) setLogo(logo);
+  }, [logo]);
+
+  useEffect(() => {
+    if (links) setLinks(links);
+  }, [links]);
+
+  useEffect(() => {
+    if (shortcuts) setShortcuts(shortcuts);
+  }, [shortcuts]);
+
+  useEffect(() => {
+    if (appName) setName(appName);
+  }, [appName]);
 
   //========================================================================================
   /*                                                                                      *
@@ -62,10 +91,10 @@ function BaseApp(props) {
   return (
     <MainContext.Provider
       value={{
-        selectedTheme: props.theme,
-        isDarkTheme: props.theme === "dark",
-        handleToggleTheme: props.handleToggleTheme,
-        handleLogOut: props.handleLogOut
+        selectedTheme: theme,
+        isDarkTheme: theme === "dark",
+        handleToggleTheme: handleToggleTheme,
+        handleLogOut: handleLogOut
       }}
     >
       <Style />
