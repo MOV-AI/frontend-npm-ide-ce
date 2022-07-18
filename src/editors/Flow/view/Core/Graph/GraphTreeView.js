@@ -1,7 +1,7 @@
 import StartNode from "../../Components/Nodes/StartNode";
 import BaseLink from "../../Components/Links/BaseLink";
 import Factory from "../../Components/Nodes/Factory";
-import { FLOW_VIEW_MODE, NODE_TYPES } from "../../Constants/constants";
+import { FLOW_VIEW_MODE, NODE_TYPES, TYPES } from "../../Constants/constants";
 import { InvalidLink } from "../../Components/Links/Errors";
 import GraphBase from "./GraphBase";
 import GraphValidator from "./GraphValidator";
@@ -262,7 +262,7 @@ export default class GraphTreeView extends GraphBase {
    * @param {string} nodeId node's unique id
    * @param {obj} data node's data that has changed
    */
-  updateNode = (_event, _nodeId, _data, _type = "NodeInst") => {
+  updateNode = (_event, _nodeId, _data, _type = TYPES.NODE) => {
     // TODO: Handle changes in nodes from main flow
     return;
   };

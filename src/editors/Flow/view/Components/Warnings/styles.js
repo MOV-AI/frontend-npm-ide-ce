@@ -113,6 +113,23 @@ export const invalidParametersWarningStyles = makeStyles(_theme => ({
   }
 }));
 
+export const invalidExposedPortsWarningStyles = makeStyles(_theme => ({
+  root: {
+    "& p": {
+      whiteSpace: "pre-wrap"
+    }
+  },
+  invalidExposedPortsHeader: {
+    ...headerStyles
+  },
+  invalidExposedPortsMessageHolder: {
+    ...linesHolderStyles
+  },
+  postMessage: {
+    marginTop: "40px"
+  }
+}));
+
 export const parameterLineStyles = makeStyles(_theme => ({
   invalidParameterHolder: {
     ...lineStyles

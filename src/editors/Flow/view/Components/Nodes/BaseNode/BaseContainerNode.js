@@ -1,5 +1,6 @@
 import BaseNode from "./BaseNode";
 import { convertVisualization } from "../Utils";
+import { TYPES } from "../../../Constants/constants";
 
 /**
  * BaseContainerNode: Class containing all base properties and methods
@@ -21,7 +22,7 @@ class BaseContainerNode extends BaseNode {
       name: node.ContainerLabel, // standard way to get NodeLabel, StateLabel, ContainerLabel
       Visualization: convertVisualization(node.Visualization) || [50, 50],
       Parameter: node.Parameter || {},
-      type: "Container",
+      type: TYPES.CONTAINER,
       model: "Flow"
     };
     this.requiredKeys = ["ContainerFlow", "ContainerLabel", "Visualization"];

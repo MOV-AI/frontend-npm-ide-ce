@@ -37,8 +37,9 @@ import LinkMenu from "./Components/Menus/LinkMenu";
 import PortTooltip from "./Components/Tooltips/PortTooltip";
 import InvalidLinksWarning from "./Components/Warnings/InvalidLinksWarning";
 import InvalidParametersWarning from "./Components/Warnings/InvalidParametersWarning";
+import InvalidExposedPortsWarning from "./Components/Warnings/InvalidExposedPortsWarning";
 import { EVT_NAMES, EVT_TYPES } from "./events";
-import { FLOW_VIEW_MODE } from "./Constants/constants";
+import { FLOW_VIEW_MODE, TYPES } from "./Constants/constants";
 import GraphBase from "./Core/Graph/GraphBase";
 import GraphTreeView from "./Core/Graph/GraphTreeView";
 
@@ -61,7 +62,6 @@ const Flow = (props, ref) => {
     activateKeyBind,
     deactivateKeyBind,
     confirmationAlert,
-    saveDocument,
     on,
     off
   } = props;
@@ -222,11 +222,99 @@ const Flow = (props, ref) => {
   const deleteInvalidLinks = useCallback(
     (links, callback) => {
       links.forEach(link => instance.current.deleteLink(link.id));
-      // Save document and call graph callback
-      saveDocument();
+
+      getMainInterface().graph.clearInvalidLinks().validateFlow();
+
       callback && callback();
     },
-    [instance, saveDocument]
+    [instance]
+  );
+
+  /**
+   * @private Used to remove invalid links
+   * @param {*} callback
+   */
+  const deleteInvalidExposedPorts = useCallback(
+    invalidExposedPorts => {
+      const exposedPorts = instance.current.exposedPorts.data;
+
+      invalidExposedPorts.forEach(port => {
+        const portData = port.nodeInst.data;
+        const portTemplate =
+          portData.type === TYPES.CONTAINER
+            ? `__${portData.ContainerFlow}`
+            : portData.Template;
+
+        if (
+          exposedPorts.has(portTemplate) &&
+          exposedPorts.get(portTemplate)[portData.id]
+        ) {
+          port.invalidPorts.forEach(invalidPort =>
+            instance.current.exposedPorts.toggleExposedPort(
+              portTemplate,
+              portData.id,
+              invalidPort
+            )
+          );
+        }
+      });
+
+      getMainInterface()
+        .graph.clearInvalidExposedPorts(invalidExposedPorts)
+        .validateFlow();
+    },
+    [instance]
+  );
+
+  /**
+   * On Links validation
+   * @param {{invalidLinks: Array, callback: Function}} eventData
+   */
+  const invalidLinksAlert = useCallback(
+    warning => {
+      const { data: invalidLinks, callback } = warning;
+
+      if (invalidLinks.length) {
+        call(
+          PLUGINS.DIALOG.NAME,
+          PLUGINS.DIALOG.CALL.CUSTOM,
+          {
+            submitText: t("Fix"),
+            title: t("InvalidLinksFoundTitle"),
+            onSubmit: () => deleteInvalidLinks(invalidLinks, callback),
+            invalidLinks
+          },
+          InvalidLinksWarning
+        );
+      }
+    },
+    [call, t, deleteInvalidLinks]
+  );
+
+  /**
+   * On Links validation
+   * @param {{invalidLinks: Array, callback: Function}} eventData
+   */
+  const invalidExposedPortsAlert = useCallback(
+    warning => {
+      const { data: invalidExposedPorts } = warning;
+
+      if (invalidExposedPorts.length) {
+        call(
+          PLUGINS.DIALOG.NAME,
+          PLUGINS.DIALOG.CALL.CUSTOM,
+          {
+            submitText: t("Fix"),
+            title: t("InvalidExposedPortsFound"),
+            onSubmit: () => deleteInvalidExposedPorts(invalidExposedPorts),
+            call,
+            invalidExposedPorts
+          },
+          InvalidExposedPortsWarning
+        );
+      }
+    },
+    [call, t, deleteInvalidExposedPorts]
   );
 
   /**
@@ -631,31 +719,6 @@ const Flow = (props, ref) => {
   }, []);
 
   /**
-   * On Links validation
-   * @param {{invalidLinks: Array, callback: Function}} eventData
-   */
-  const invalidLinksAlert = useCallback(
-    warning => {
-      const { data: invalidLinks, callback } = warning;
-
-      if (invalidLinks.length) {
-        call(
-          PLUGINS.DIALOG.NAME,
-          PLUGINS.DIALOG.CALL.CUSTOM,
-          {
-            submitText: t("Fix"),
-            title: t("InvalidLinksFoundTitle"),
-            onSubmit: () => deleteInvalidLinks(invalidLinks, callback),
-            invalidLinks
-          },
-          InvalidLinksWarning
-        );
-      }
-    },
-    [call, t, deleteInvalidLinks]
-  );
-
-  /**
    * Call broadcast method to emit event to all open flows
    */
   const setFlowsToDefault = useCallback(() => {
@@ -693,12 +756,16 @@ const Flow = (props, ref) => {
 
       // Set the warning types to be used in the validations
       mainInterface.graph.validator.setWarningActions(
-        WARNING_TYPES.INVALID_PARAMETERS,
-        invalidContainersParamAlert
+        WARNING_TYPES.INVALID_EXPOSED_PORTS,
+        invalidExposedPortsAlert
       );
       mainInterface.graph.validator.setWarningActions(
         WARNING_TYPES.INVALID_LINKS,
         invalidLinksAlert
+      );
+      mainInterface.graph.validator.setWarningActions(
+        WARNING_TYPES.INVALID_PARAMETERS,
+        invalidContainersParamAlert
       );
 
       // subscribe to on enter default mode
@@ -903,6 +970,7 @@ const Flow = (props, ref) => {
       setFlowsToDefault,
       groupsVisibilities,
       invalidLinksAlert,
+      invalidExposedPortsAlert,
       invalidContainersParamAlert,
       openDoc,
       handleContextClose,
