@@ -9,6 +9,7 @@ import BasePort from "./BasePort";
 import BaseNodeHeader from "./BaseNodeHeader";
 import BaseNodeStatus from "./BaseNodeStatus";
 import { EVT_NAMES } from "../../../events";
+import { TYPES } from "../../../Constants/constants";
 
 const STYLE = {
   stroke: {
@@ -41,14 +42,159 @@ class BaseNode extends BaseNodeStruct {
     this.canvas = canvas;
     this.events = events;
     this._template = template;
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                      Properties                                      *
+     *                                                                                      */
+    //========================================================================================
+
+    this.dbClickTimeout = null;
+    this.object = null;
+    this._drag = { handler: null, debounce: null, delta: { x: 0, y: 0 } };
+    this._header = null;
+    this._selected = false;
+    this._status = false; // true -> running: flase -> stopped
   }
 
-  dbClickTimeout = null;
-  object = null;
-  _drag = { handler: null, debounce: null, delta: { x: 0, y: 0 } };
-  _header = null;
-  _selected = false;
-  _status = false; // true -> running: flase -> stopped
+  //========================================================================================
+  /*                                                                                      *
+   *                                   Getters & Setters                                  *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * el - returns svg element
+   *
+   * @returns {object} svg element
+   */
+  get el() {
+    return this.object.node();
+  }
+
+  /**
+   * Returns the name of the node
+   *
+   * @returns {string} name of the node
+   */
+  get name() {
+    return this.data.NodeLabel;
+  }
+
+  /**
+   * Returns the port size
+   *
+   * @returns {number} port size
+   */
+  get portSize() {
+    return this.minSize.w * 0.07;
+  }
+
+  /**
+   * status - returns the status of the node
+   *
+   * @returns {boolean} true if running, false otherwise
+   */
+  get status() {
+    return this._status.status;
+  }
+
+  get readOnly() {
+    return this.canvas.readOnly;
+  }
+
+  /**
+   * template - returns node template data
+   *
+   * @returns {object} node template data
+   */
+  get template() {
+    return this._template;
+  }
+
+  /**
+   * status - set the status of the node
+   *
+   * @param {boolean} value true if running, false otherwise
+   */
+  set status(value) {
+    this._status.status = value;
+  }
+
+  /**
+   * selected - returns if the node is selected
+   *
+   * @returns {boolean} true if the node is selected, false otherwise
+   */
+  get selected() {
+    return this._selected;
+  }
+
+  /**
+   * selected - set node to selected
+   *
+   * @param {boolean} value true if the node is selected, false otherwise
+   */
+  set selected(value) {
+    this._selected = Boolean(value);
+    this.onSelected();
+  }
+
+  /**
+   * headerPos - get the position of the header
+   *
+   * @returns {object} object with the header position {x: val, y: val}
+   */
+  get headerPos() {
+    return {
+      x: this.width / 2 + this.padding.x / 2,
+      y: -10
+    };
+  }
+
+  /**
+   * Returns the node's template name
+   *
+   * @returns {string} the template name
+   */
+  get templateName() {
+    return this.data.Template;
+  }
+
+  /**
+   * visibility - set the node's visibility
+   *
+   * @param {boolean} visible true if the node is visible, false otherwise
+   */
+  set visibility(visible) {
+    this.visible = Boolean(visible);
+    this.object.attr("visibility", this.visible ? "visible" : "hidden");
+    this._ports.forEach(port => (port.visible = this.visible));
+  }
+
+  /**
+   * Return visualization to DB format
+   */
+  get visualizationToDB() {
+    return {
+      x: { Value: this.data.Visualization[0] },
+      y: { Value: this.data.Visualization[1] }
+    };
+  }
+
+  /**
+   * Get the node ports
+   * @return {Map} : This node's ports
+   */
+  get ports() {
+    return this._ports;
+  }
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
 
   /**
    * initialize the node element
@@ -324,125 +470,6 @@ class BaseNode extends BaseNodeStruct {
   };
 
   /**
-   * el - returns svg element
-   *
-   * @returns {object} svg element
-   */
-  get el() {
-    return this.object.node();
-  }
-
-  /**
-   * Returns the name of the node
-   *
-   * @returns {string} name of the node
-   */
-  get name() {
-    return this.data.NodeLabel;
-  }
-
-  /**
-   * Returns the port size
-   *
-   * @returns {number} port size
-   */
-  get portSize() {
-    return this.minSize.w * 0.07;
-  }
-
-  /**
-   * status - returns the status of the node
-   *
-   * @returns {boolean} true if running, false otherwise
-   */
-  get status() {
-    return this._status.status;
-  }
-
-  get readOnly() {
-    return this.canvas.readOnly;
-  }
-
-  /**
-   * template - returns node template data
-   *
-   * @returns {object} node template data
-   */
-  get template() {
-    return this._template;
-  }
-
-  /**
-   * status - set the status of the node
-   *
-   * @param {boolean} value true if running, false otherwise
-   */
-  set status(value) {
-    this._status.status = value;
-  }
-
-  /**
-   * selected - returns if the node is selected
-   *
-   * @returns {boolean} true if the node is selected, false otherwise
-   */
-  get selected() {
-    return this._selected;
-  }
-
-  /**
-   * selected - set node to selected
-   *
-   * @param {boolean} value true if the node is selected, false otherwise
-   */
-  set selected(value) {
-    this._selected = Boolean(value);
-    this.onSelected();
-  }
-
-  /**
-   * headerPos - get the position of the header
-   *
-   * @returns {object} object with the header position {x: val, y: val}
-   */
-  get headerPos() {
-    return {
-      x: this.width / 2 + this.padding.x / 2,
-      y: -10
-    };
-  }
-
-  /**
-   * Returns the node's template name
-   *
-   * @returns {string} the template name
-   */
-  get templateName() {
-    return this.data.Template;
-  }
-
-  /**
-   * visibility - set the node's visibility
-   *
-   * @param {boolean} visible true if the node is visible, false otherwise
-   */
-  set visibility(visible) {
-    this.visible = Boolean(visible);
-    this.object.attr("visibility", this.visible ? "visible" : "hidden");
-    this._ports.forEach(port => (port.visible = this.visible));
-  }
-
-  /**
-   * Return visualization to DB format
-   */
-  get visualizationToDB() {
-    return {
-      x: { Value: this.data.Visualization[0] },
-      y: { Value: this.data.Visualization[1] }
-    };
-  }
-
-  /**
    * setPosition - update the node's position
    *
    * @param {number} x position in x
@@ -677,9 +704,11 @@ class BaseNode extends BaseNodeStruct {
    * @private
    * updateTemplate
    */
-  updateTemplate = () => {
+  updateTemplate = async () => {
     this.object.select("rect").attr("class", convertTypeCss(this._template));
-    this.update().updateSize();
+
+    await this.update();
+    this.updateSize();
 
     return this;
   };
@@ -690,7 +719,7 @@ class BaseNode extends BaseNodeStruct {
    */
   update = () => {
     this.addPorts().renderHeader().renderStatus().renderPorts();
-    return this;
+    return Promise.resolve(this);
   };
 
   /**
@@ -820,10 +849,15 @@ class BaseNode extends BaseNodeStruct {
    *
    * @param {string} data node's template name
    */
-  onTemplateUpdate = data => {
-    if (data.Label !== this.templateName) return; // not my template
-    this._template = Object.assign(this._template, data);
-    this.updateTemplate();
+  onTemplateUpdate = async data => {
+    const isNotInnerTemplate = !(
+      this.data.type === TYPES.CONTAINER && this.template?.NodeInst[data.Label]
+    );
+    if (data.Label !== this.templateName && isNotInnerTemplate) return; // not my template and if I'm a flow and it's not a children node
+
+    isNotInnerTemplate &&
+      (this._template = Object.assign(this._template, data));
+    await this.updateTemplate();
   };
 
   /**

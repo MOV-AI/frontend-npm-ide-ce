@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 import { InputPort, OutputPort } from "./PortIcons";
 import BaseNode from "../BaseNode";
+import { TYPES } from "../../../../Constants/constants";
 
 class TreeNodePortLink {
   constructor(link, type, node) {
@@ -137,8 +138,8 @@ class TreeNodePortLink {
       let name = node;
       if (index === pathLength) type = node === "start" ? node : "node";
       const info = {
-        flow: { model: "Flow", nodeType: "Container" },
-        node: { model: "Node", nodeType: "NodeInst" },
+        flow: { model: "Flow", nodeType: TYPES.CONTAINER },
+        node: { model: "Node", nodeType: TYPES.NODE },
         start: {}
       };
       return { name, type, ...info[type], data };
