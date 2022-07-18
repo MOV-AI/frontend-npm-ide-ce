@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import Tooltip from "@material-ui/core/Tooltip";
 import Button from "@material-ui/core/Button";
-import { buildDocPath } from "../../../../../../../utils/Utils";
-import { PLUGINS } from "../../../../../../../utils/Constants";
+import { buildDocPath } from "../../../../../../utils/Utils";
+import { PLUGINS } from "../../../../../../utils/Constants";
 
 import { parameterLineStyles } from "../styles";
 
