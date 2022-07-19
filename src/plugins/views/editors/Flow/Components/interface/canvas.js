@@ -201,17 +201,15 @@ class Canvas {
       .on("zoom", cameraUpdate);
   };
 
-  cameraUpdate = () => {
+  cameraUpdate = (transform = d3.event.transform) => {
     const lowScale =
-      d3.event.transform.k <= this.minScale
-        ? this.minScale
-        : d3.event.transform.k * 0.9;
-    const maxScale = d3.event.transform.k >= 4 ? 4 : d3.event.transform.k * 1.1;
+      transform.k <= this.minScale ? this.minScale : transform.k * 0.9;
+    const maxScale = transform.k >= 4 ? 4 : transform.k * 1.1;
 
     this.zoomBehavior.scaleExtent([lowScale, maxScale]);
-    this.canvas.attr("transform", d3.event.transform);
-    this.links.attr("transform", d3.event.transform);
-    this.currentZoom = d3.event.transform;
+    this.canvas.attr("transform", transform);
+    this.links.attr("transform", transform);
+    this.currentZoom = transform;
   };
 
   createBrushBehavior = () => {
@@ -697,18 +695,19 @@ class Canvas {
   };
 
   zoomToCoordinates = (xCoordinate, yCoordinate) => {
+    const SCALE = 3;
     const { width, height } = this.el.getBoundingClientRect();
+    const x = SCALE * xCoordinate - width * 0.5;
+    const y = SCALE * yCoordinate - height * 0.5;
+    const [xInCanvas, yInCanvas] = this.getPositionInBoundaries(x, y).map(
+      el => el * -1
+    );
     this.getSvg()
       .transition()
       .duration(750)
       .call(
         this.zoomBehavior.transform,
-        d3.zoomIdentity
-          .translate(
-            width * 0.5 - 2 * xCoordinate,
-            height * 0.5 - 2 * yCoordinate
-          )
-          .scale(2)
+        d3.zoomIdentity.translate(xInCanvas, yInCanvas).scale(SCALE)
       );
   };
 }
