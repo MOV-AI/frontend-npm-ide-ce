@@ -214,3 +214,17 @@ export function simulateMouseClick(element) {
     )
   );
 }
+
+/**
+ * Trigger callback before unload app
+ * @param {function} callback
+ */
+export function runBeforeUnload(callback) {
+  // Previous beforeunload method
+  const onAppUnload = window.onbeforeunload;
+  // Set new beforeunload method with given callback
+  window.onbeforeunload = event => {
+    callback && callback(event);
+    return onAppUnload(event);
+  };
+}

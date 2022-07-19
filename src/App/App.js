@@ -1,8 +1,8 @@
 import React from "react";
-import { withAuthentication, Style } from "@mov-ai/mov-fe-lib-react";
+import { Style, withDefaults } from "@mov-ai/mov-fe-lib-react";
 import { Typography } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
 import DocManager from "../plugins/DocManager/DocManager";
 import FlowExplorer from "../plugins/views/editors/Flow/Components/Explorer/Explorer";
 import Dialog from "../plugins/Dialog/Dialog";
@@ -20,7 +20,6 @@ import HomeTab from "../plugins/views/HomeTab/HomeTab";
 import Tabs from "../plugins/views/Tabs/Tabs";
 import PluginManagerIDE from "../engine/PluginManagerIDE/PluginManagerIDE";
 import Placeholder from "../plugins/views/Placeholder/Placeholder";
-import { withTheme } from "../decorators/withTheme";
 import {
   HOMETAB_PROFILE,
   FLOW_EXPLORER_PROFILE,
@@ -30,6 +29,7 @@ import {
 import { MainContext } from "../main-context";
 
 import "./App.css";
+import { ApplicationTheme } from "../themes";
 
 const DEBUG_MODE = false;
 
@@ -53,13 +53,35 @@ const useStyles = debugMode =>
   }));
 
 function App(props) {
+  // Style hook
   const classes = useStyles(DEBUG_MODE)();
-  writeMovaiLogo();
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    React Lifecycle                                   *
+   *                                                                                      */
+  //========================================================================================
 
   React.useEffect(() => {
     installAppPlugins();
     installViewPlugins();
+    // Write log in consle
+    writeMovaiLogo();
   }, []);
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                       Handlers                                       *
+   *                                                                                      */
+  //========================================================================================
+
+  const onContextMenu = event => event.preventDefault();
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                        Render                                        *
+   *                                                                                      */
+  //========================================================================================
 
   return (
     <MainContext.Provider
@@ -71,7 +93,9 @@ function App(props) {
       }}
     >
       <Style />
-      <div className="App">{getHostedPlugins(classes)}</div>
+      <div className="App" onContextMenu={onContextMenu}>
+        {getHostedPlugins(classes)}
+      </div>
     </MainContext.Provider>
   );
 }
@@ -194,4 +218,12 @@ const MOVAI_LOGO = `
 ██║ ╚═╝ ██║ ╚██████═╝   ╚███═╝         ██║  ██║██║
 `;
 
-export default withTheme(withAuthentication(App));
+export default withDefaults({
+  name: "mov-fe-app-ide-ce",
+  component: App,
+  offlineValidation: false,
+  theme: {
+    provider: ThemeProvider,
+    props: ApplicationTheme
+  }
+});

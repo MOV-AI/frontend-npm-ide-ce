@@ -58,6 +58,20 @@ const ContainerMenu = props => {
     [flowModel, data.id, getFlowData]
   );
 
+  /**
+   * @private Handle Delete invalid parameters
+   * @param {string} paramName : Parameter name
+   * @param {string} varName : keyValue type (parameters, envVars or cmdLine)
+   */
+  const handleDeleteParameter = useCallback(
+    (paramName, varName) => {
+      const containerInstance = flowModel.current.getSubFlowItem(data.id);
+      containerInstance.deleteKeyValue(varName, paramName);
+      setFlowData(getFlowData());
+    },
+    [data.id, flowModel, getFlowData]
+  );
+
   //========================================================================================
   /*                                                                                      *
    *                                     Handle Events                                    *
@@ -74,14 +88,15 @@ const ContainerMenu = props => {
   /**
    * Open dialog to edit/add new Parameter
    * @param {string} dataId : Unique identifier of item (undefined when not created yet)
-   * @param {ReactComponent} DialogComponent : Dialog component to render
+   * @param {string} varName : keyValue type (parameters, envVars or cmdLine)
+   * @param {boolean} viewOnly : Disable all inputs if True
    */
   const handleKeyValueDialog = useCallback(
-    (keyValueData, param) => {
-      const paramType = t(DIALOG_TITLE[param.toUpperCase()]);
+    (keyValueData, varName, viewOnly) => {
+      const paramType = t(DIALOG_TITLE[varName.toUpperCase()]);
       const obj = {
         ...keyValueData,
-        varName: param,
+        varName: varName,
         type: keyValueData.type ?? DATA_TYPES.ANY,
         name: keyValueData.key,
         paramType
@@ -91,12 +106,14 @@ const ContainerMenu = props => {
         onSubmit: handleSubmitParameter,
         title: t("EditParamType", { paramType }),
         data: obj,
-        showDefault: true,
+        showDefault: !viewOnly,
         showValueOptions: true,
+        showDescription: !viewOnly,
         disableName: true,
         disableType: true,
         disableDescription: true,
-        preventRenderType: param !== TABLE_KEYS_NAMES.PARAMETERS,
+        preventRenderType: varName !== TABLE_KEYS_NAMES.PARAMETERS,
+        disabled: viewOnly,
         call
       };
 
@@ -108,6 +125,24 @@ const ContainerMenu = props => {
       );
     },
     [call, handleSubmitParameter, t]
+  );
+
+  /**
+   * Show confirmation dialog before deleting parameter
+   * @param {{key: string}} item : Object containing a key holding the param name
+   * @param {string} varName : keyValue type (parameters, envVars or cmdLine)
+   */
+  const handleKeyValueDelete = useCallback(
+    (item, varName) => {
+      const paramName = item.key;
+      call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
+        submitText: t("Delete"),
+        title: t("DeleteDocConfirmationTitle"),
+        onSubmit: () => handleDeleteParameter(paramName, varName),
+        message: t("DeleteKeyConfirmationMessage", { key: paramName })
+      });
+    },
+    [call, handleDeleteParameter, t]
   );
 
   //========================================================================================
@@ -165,6 +200,7 @@ const ContainerMenu = props => {
           instanceValues={flowData[TABLE_KEYS_NAMES.PARAMETERS] || {}}
           templateValues={templateData.parameters}
           handleTableKeyEdit={handleKeyValueDialog}
+          handleTableKeyDelete={handleKeyValueDelete}
         />
         <Divider />
       </Collapse>
