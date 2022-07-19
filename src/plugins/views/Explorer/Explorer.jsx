@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import _get from "lodash/get";
@@ -14,7 +14,7 @@ import { explorerStyles } from "./styles";
 const Explorer = props => {
   const { call, on, height } = props;
   const classes = explorerStyles();
-  const [data, setData] = React.useState([]);
+  const [data, setData] = useState([]);
 
   const { t } = useTranslation();
 
@@ -198,17 +198,17 @@ const Explorer = props => {
       const { name, scope } = node;
       call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
         submitText: t("Delete"),
-        title: t("Confirm to delete"),
+        title: t("DeleteDocConfirmationTitle"),
         onSubmit: () =>
           call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.DELETE, {
             name,
             scope
           }).catch(error =>
-            console.log(
+            console.warn(
               `Could not delete ${name} \n ${error.statusText ?? error}`
             )
           ),
-        message: `Are you sure you want to delete the document "${name}"?`
+        message: t("DeleteDocConfirmationMessage", { docName: name })
       });
     },
     [call, t]
@@ -271,7 +271,7 @@ const Explorer = props => {
    *                                                                                      */
   //========================================================================================
 
-  React.useEffect(() => {
+  useEffect(() => {
     on(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.ON.LOAD_DOCS, loadDocs);
     on(
       PLUGINS.DOC_MANAGER.NAME,

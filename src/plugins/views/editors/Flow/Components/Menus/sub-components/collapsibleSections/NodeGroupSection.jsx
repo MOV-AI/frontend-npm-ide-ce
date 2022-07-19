@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { IconButton, Tooltip, Typography } from "@material-ui/core";
@@ -10,7 +10,7 @@ import { nodeGroupStyles } from "../../styles";
 const NodeGroupSection = props => {
   const { nodeGroups, flowGroups, handleBelongGroup } = props;
   // State hooks
-  const [groups, setGroups] = React.useState([]);
+  const [groups, setGroups] = useState([]);
   // Other hooks
   const classes = nodeGroupStyles();
   const { t } = useTranslation();
@@ -21,7 +21,7 @@ const NodeGroupSection = props => {
    *                                                                                      */
   //========================================================================================
 
-  React.useEffect(() => {
+  useEffect(() => {
     setGroups(Object.values(flowGroups));
   }, [flowGroups]);
 
@@ -47,7 +47,10 @@ const NodeGroupSection = props => {
                 {groupName}
               </Typography>
             </Tooltip>
-            <IconButton onClick={() => handleBelongGroup(key, !checked)}>
+            <IconButton
+              data-testid="input_belong-group"
+              onClick={() => handleBelongGroup(key, !checked)}
+            >
               {checked && <LayersIcon fontSize="small" color="primary" />}
               {!checked && (
                 <LayersClearIcon fontSize="small" color="disabled" />
@@ -59,7 +62,7 @@ const NodeGroupSection = props => {
     </Typography>
   ) : (
     <Typography className={`${classes.itemValue} ${classes.disabled}`}>
-      {t("No groups")}
+      {t("NoGroups")}
     </Typography>
   );
 };

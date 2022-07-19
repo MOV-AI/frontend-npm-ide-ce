@@ -667,7 +667,7 @@ class BaseNode extends BaseNodeStruct {
    */
   updateTemplate = () => {
     this.object.select("rect").attr("class", convertTypeCss(this._template));
-    this.update();
+    this.update().updateSize();
 
     return this;
   };
@@ -909,7 +909,7 @@ class BaseNode extends BaseNodeStruct {
    * @param {string} type: "node" or "flow" or "start"
    * @param {number} offsetX: Starting point of svg "x" attribute
    */
-  static async getMiniature(template, type = "node", offsetX = 30) {
+  static async getMiniature(template, _type = "node", offsetX = 30) {
     const { width, height, padding } = MINI;
     // create the svg element
     const { stroke } = STYLE;

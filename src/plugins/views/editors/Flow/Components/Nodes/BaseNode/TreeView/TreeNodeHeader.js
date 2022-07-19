@@ -7,7 +7,7 @@ const TEMPLATE_LABEL = {
 };
 
 class TreeNodeHeader extends BaseNodeHeader {
-  constructor(x, y, text, template, templateType = "node", type) {
+  constructor(x, y, text, template, type, templateType = "node") {
     super(x, y, text);
     this.dy = 18;
     this.type = type;
@@ -58,7 +58,7 @@ class TreeNodeHeader extends BaseNodeHeader {
   parseText() {
     const ret = [this.text];
 
-    if(this.type) ret.push(this.type);
+    if (this.type) ret.push(this.type);
     return ret;
   }
 }

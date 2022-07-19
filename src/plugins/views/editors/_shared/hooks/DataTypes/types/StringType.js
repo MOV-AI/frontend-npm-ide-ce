@@ -34,8 +34,7 @@ class StringType extends DataType {
           typeof parsed === DATA_TYPES.STRING || parsed instanceof String;
         resolve({ success: isValid });
       } catch (e) {
-        console.log("debug e", e);
-        resolve({ success: false, error: "String must be in quotes" });
+        resolve({ success: false, error: "MandatoryStringQuotes" });
       }
     });
   }

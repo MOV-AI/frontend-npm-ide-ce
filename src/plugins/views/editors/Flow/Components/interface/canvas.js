@@ -1,13 +1,14 @@
 import * as d3 from "d3";
 import { Subject } from "rxjs";
+import FlowModel from "../../../../../../models/Flow/Flow";
+import { defaultFunction } from "../../../../../../utils/Utils";
 import Factory from "../../Components/Nodes/Factory";
-import TemporaryLink from "../Links/TemporaryLink";
 import {
   FLOW_VIEW_MODE,
   CANVAS_LIMITS,
   MAX_MOVING_PIXELS
 } from "../../Constants/constants";
-import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
+import TemporaryLink from "../Links/TemporaryLink";
 
 class Canvas {
   constructor({ classes, containerId, docManager, height, mInterface, width }) {
@@ -89,7 +90,10 @@ class Canvas {
       .attr("tabindex", "-1")
       .style("outline", "none")
       //.style("background-color", classes.flowEditor.interfaceColor)
-      .attr("class", `flow-interface ${classes.flowEditor.interfaceColor}`)
+      .attr(
+        "class",
+        `${FlowModel.CLASSNAME} ${classes.flowEditor.interfaceColor}`
+      )
       .call(this.zoomBehavior);
     return this;
   };
@@ -257,7 +261,7 @@ class Canvas {
       .attr("height", this.maxMovingPixels)
       .attr("stroke", "black")
       .style("pointer-events", "all")
-      .on("click", _ => DEFAULT_FUNCTION());
+      .on("click", _ => defaultFunction());
     return this;
   };
 
@@ -272,7 +276,7 @@ class Canvas {
       .attr("height", this.maxMovingPixels)
       .attr("stroke", "black")
       .style("pointer-events", "all")
-      .on("click", _ => DEFAULT_FUNCTION());
+      .on("click", _ => defaultFunction());
 
     return this;
   };
@@ -654,7 +658,7 @@ class Canvas {
 
   onLinkingMouseMove = () => {
     const transform = d3.zoomTransform(this.svg.node());
-    let newPosition = [...this.mouse];
+    let newPosition = [...this.mousePos];
     newPosition = transform.invert(newPosition);
     const trg = {
       x: newPosition[0],

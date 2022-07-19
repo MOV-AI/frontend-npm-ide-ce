@@ -23,7 +23,7 @@ export function convertVisualization(obj) {
 
 export function convertTypeCss(template, isMiniature = false) {
   const clickableAreaClass = !isMiniature ? " node-inst-click-area" : "";
-  const templateClass = template.Type?.replace(/\//g, "-") ?? "unknown";
+  const templateClass = template.Type?.replace(/\//g, "-") || "unknown";
   const css = template.Label === "start" ? "start" : templateClass;
 
   return `${css}${clickableAreaClass}`;

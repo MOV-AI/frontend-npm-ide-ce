@@ -146,7 +146,7 @@ export default class Callback extends Model {
    * @param {string} prop : The of the property updated
    * @param {any} value : The new value of the property
    */
-  propsUpdate(event, prop, value) {
+  propsUpdate(_, prop, value) {
     // force dispatch
     this.dispatch(prop, value);
   }

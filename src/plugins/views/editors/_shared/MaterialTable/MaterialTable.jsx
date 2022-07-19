@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import MaterialTableCore from "@material-table/core";
 import { useTheme } from "@material-ui/core/styles";
 
-import materialTableStyles from "./styles";
+import { materialTableStyles } from "./styles";
 
 const MaterialTable = forwardRef((props, ref) => {
   const {
@@ -130,7 +130,7 @@ const MaterialTable = forwardRef((props, ref) => {
             actions: t("Actions")
           },
           body: {
-            emptyDataSourceMessage: t("No records to display"),
+            emptyDataSourceMessage: t("NoRecordsMessage"),
             deleteTooltip: t("Delete"),
             editTooltip: t("Edit"),
             addTooltip: t("Add"),

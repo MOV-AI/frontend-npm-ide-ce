@@ -1,5 +1,6 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import { PLUGINS } from "../utils/Constants";
+import { getRefComponent } from "../utils/Utils";
 
 /**
  * Handle actions to update right menu of each editor
@@ -7,9 +8,11 @@ import { PLUGINS } from "../utils/Constants";
  * @returns {ReactComponent} React component that receives props to handle menu actions
  */
 const withMenuHandler = Component => {
+  const RefComponent = getRefComponent(Component);
+
   return (props, ref) => {
     const { call } = props;
-    const updateRightMenuRef = React.useRef();
+    const updateRightMenuRef = useRef();
 
     /**
      * Reset right menu : clear menu and close right drawer
@@ -46,7 +49,7 @@ const withMenuHandler = Component => {
     }, [initRightMenu]);
 
     return (
-      <Component
+      <RefComponent
         {...props}
         ref={ref}
         initRightMenu={initRightMenu}

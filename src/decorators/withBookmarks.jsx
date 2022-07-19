@@ -6,6 +6,29 @@ import BookmarkTab from "./Components/BookmarkTab";
 import { bookmarkStyles } from "./styles";
 
 const withBookmarks = Component => {
+  /**
+   * Small extract method to return the oposite side of the anchor
+   * @param {string} anchor : side
+   * @returns oposite side of anchor
+   */
+  function getOpositeSide(anchor) {
+    if (anchor === "left") return "right";
+
+    return "left";
+  }
+
+  /**
+   * Small extract method to return a valid bookmark from the bookmarks list
+   * @param {Array} bookmarks : the bookmarks list
+   * @param {String} name : name to search
+   * @returns a valid bookmark
+   */
+  function getValidBookmark(bookmarks, name) {
+    if (bookmarks[name]) return name;
+
+    return Object.keys(bookmarks)[0];
+  }
+
   return (props, ref) => {
     const { anchor, emit } = props;
     // React state hooks
@@ -14,7 +37,7 @@ const withBookmarks = Component => {
     const [renderedView, setRenderedView] = useState(<></>);
     // Refs
     const drawerRef = useRef();
-    const oppositeSide = anchor === "left" ? "right" : "left";
+    const oppositeSide = getOpositeSide(anchor);
     // Style hooks
     const classes = bookmarkStyles(anchor, oppositeSide)();
 
@@ -26,17 +49,18 @@ const withBookmarks = Component => {
 
     /**
      * Select bookmark
-     *  name {String} : Bookmark name
+     * @param {String} name : Bookmark name
      */
     const selectBookmark = useCallback(
       name => {
         if (active === name) {
           drawerRef.current.toggleDrawer();
-        } else {
-          drawerRef.current.openDrawer();
-          setActive(name);
-          emit && emit(PLUGINS.RIGHT_DRAWER.ON.CHANGE_BOOKMARK, { name });
+          return;
         }
+
+        drawerRef.current.openDrawer();
+        setActive(name);
+        emit(PLUGINS.RIGHT_DRAWER.ON.CHANGE_BOOKMARK, { name });
       },
       [active, emit]
     );
@@ -44,11 +68,11 @@ const withBookmarks = Component => {
     /**
      * Add bookmark to drawer
      * @param data : {
-     *    icon {Element}  : Bookmark icon
-     *    name {String}   : Title
-     *    view {Element}  : Element to be rendered in menu container
+     *    {Element} icon : Bookmark icon
+     *    {String} name : Title
+     *    {Element} view : Element to be rendered in menu container
      *  }
-     *  @param isDefault {Boolean} : Set bookmark as active if true
+     *  @param {Boolean} isDefault : Set bookmark as active if true
      *  @param {string} activeBookmark : bookmark to make active
      */
     const addBookmark = useCallback(
@@ -57,12 +81,12 @@ const withBookmarks = Component => {
         let newActive = isDefault && name;
         setBookmarks(prevState => {
           const newBookmarks = { ...prevState, [name]: data };
-          newActive = newBookmarks[activeBookmark] && activeBookmark;
+          newActive = getValidBookmark(newBookmarks, activeBookmark);
 
           return { ...prevState, [name]: data };
         });
 
-        if (newActive) setActive(newActive);
+        setActive(newActive);
         if (shouldOpen) drawerRef.current.openDrawer();
       },
       []
@@ -73,23 +97,25 @@ const withBookmarks = Component => {
      * @param {string} name : bookmark name
      * @param {string} activeBookmark : bookmark to make active
      */
-    const removeBookmark = useCallback((name, activeBookmark) => {
-      setBookmarks(prevState => {
-        // *BEWARE* This is making just a shallow clone, so deep properties are still mutable
-        const otherBookmarks = { ...prevState };
-        delete otherBookmarks[name];
+    const removeBookmark = useCallback(
+      (name, activeBookmark) => {
+        setBookmarks(prevState => {
+          // *BEWARE* This is making just a shallow clone, so deep properties are still mutable
+          const otherBookmarks = { ...prevState };
+          delete otherBookmarks[name];
+
+          return otherBookmarks;
+        });
 
         // Reset active bookmark
         setActive(prevActiveState => {
-          if (prevActiveState === name)
-            return otherBookmarks[activeBookmark]
-              ? activeBookmark
-              : Object.keys(otherBookmarks)[0];
-          else return prevActiveState;
+          if (prevActiveState !== name) return prevActiveState;
+
+          return getValidBookmark(bookmarks, activeBookmark);
         });
-        return otherBookmarks;
-      });
-    }, []);
+      },
+      [bookmarks]
+    );
 
     /**
      * Reset bookmarks (remove all)
@@ -108,11 +134,8 @@ const withBookmarks = Component => {
     const setBookmark = useCallback((newBookmarks, activeBookmark) => {
       if (!newBookmarks) return;
       setBookmarks(newBookmarks);
-      const bookmarkToActivate =
-        newBookmarks[activeBookmark] || Object.values(newBookmarks)[0];
-      if (bookmarkToActivate) {
-        setActive(bookmarkToActivate.name);
-      }
+
+      setActive(getValidBookmark(newBookmarks, activeBookmark));
     }, []);
 
     //========================================================================================
@@ -125,7 +148,7 @@ const withBookmarks = Component => {
      * On change of active bookmark
      */
     useEffect(() => {
-      if (active && bookmarks[active]) {
+      if (bookmarks[active]) {
         const view = bookmarks[active].view;
         setRenderedView(view);
       }
@@ -162,6 +185,7 @@ const withBookmarks = Component => {
             <div className={classes.panel}>
               {Object.values(bookmarks).map((bookmark, index) => (
                 <BookmarkTab
+                  data-testid="section_bookmark-tab"
                   key={index}
                   classes={classes}
                   bookmark={bookmark}
@@ -177,7 +201,7 @@ const withBookmarks = Component => {
     );
 
     return (
-      <div style={{ position: "relative" }}>
+      <div className={classes.bookmarksContainer}>
         {renderBookmarks("left")}
         <Component {...props} ref={drawerRef}>
           <div id="custom-drawer-view">{renderedView}</div>

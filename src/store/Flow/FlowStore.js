@@ -1,7 +1,7 @@
 import Model from "../../models/Flow/Flow";
 import DBSubscriber from "../DBSubscriber";
 import Store from "../Store";
-import Helper from "./FlowHelper";
+import Helper from "./Helper";
 
 class FlowStore extends Store {
   constructor(workspace, observer, docManager) {

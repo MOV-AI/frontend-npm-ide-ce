@@ -1,9 +1,9 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { Divider, Link, Typography } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
-import { portStyles } from "../styles";
+import { Divider, Link, Tooltip, Typography } from "@material-ui/core";
 import { SCOPES } from "../../../../../../../utils/Constants";
+import { portStyles } from "../styles";
 
 const PortsDetails = props => {
   // Props
@@ -60,29 +60,37 @@ const PortsDetails = props => {
       const isProtected = protectedDocs.includes(callback);
       return isProtected ? (
         <Typography
+          key={`${callback}_${index}`}
           className={`${classes.portCallbackLink} ${classes.disabled}`}
         >
           {callback}
         </Typography>
       ) : (
-        <Link
+        <Tooltip
           key={`${callback}_${index}`}
+          placement={"bottom-start"}
           className={classes.portCallbackLink}
-          disabled={true}
-          component="button"
-          onClick={event => {
-            openDoc({
-              scope: SCOPES.CALLBACK,
-              name: callback,
-              ctrlKey: event.ctrlKey
-            });
-          }}
+          title={t("OpenCallbackName", { callbackName: callback })}
         >
-          {callback}
-        </Link>
+          <span>
+            <Link
+              data-testid="input_open-callback"
+              component="button"
+              onClick={event => {
+                openDoc({
+                  scope: SCOPES.CALLBACK,
+                  name: callback,
+                  ctrlKey: event.ctrlKey
+                });
+              }}
+            >
+              {callback}
+            </Link>
+          </span>
+        </Tooltip>
       );
     },
-    [protectedDocs, classes, openDoc]
+    [protectedDocs, classes, openDoc, t]
   );
 
   /**
@@ -95,6 +103,7 @@ const PortsDetails = props => {
       return portsData.map((port, portIndex) => {
         return (
           <Typography
+            data-testid="section_port"
             key={`${port.name}_${portIndex}`}
             component="div"
             className={classes.portRow}
@@ -117,7 +126,7 @@ const PortsDetails = props => {
    *                                                                                      */
   //========================================================================================
 
-  React.useEffect(() => {
+  useEffect(() => {
     getPorts(templateData);
   }, [getPorts, templateData]);
 
@@ -130,7 +139,7 @@ const PortsDetails = props => {
   return (
     <>
       <Typography component="div" className={classes.detailsSection}>
-        {t("Ports:")}
+        {t("Ports-Colon")}
       </Typography>
       <Typography component="div" className={classes.detailsContent}>
         <Typography component="div">

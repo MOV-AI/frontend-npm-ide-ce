@@ -59,7 +59,10 @@ const GroupItem = ({
           {name}
         </Typography>
       </Tooltip>
-      <IconButton onClick={handleGroupActive}>
+      <IconButton
+        data-testid="input_toggle-visibility"
+        onClick={handleGroupActive}
+      >
         {enabled && (
           <VisibilityIcon fontSize="small" color="primary"></VisibilityIcon>
         )}
@@ -71,15 +74,15 @@ const GroupItem = ({
         )}
       </IconButton>
       {editable && (
-        <Tooltip title={t("Edit Group")}>
-          <IconButton onClick={handleGroupEdit}>
+        <Tooltip title={t("EditGroup")}>
+          <IconButton data-testid="input_edit" onClick={handleGroupEdit}>
             <EditIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       )}
       {editable && (
-        <Tooltip title={t("Delete Group")}>
-          <IconButton onClick={handleGroupDelete}>
+        <Tooltip title={t("DeleteGroup")}>
+          <IconButton data-testid="input_delete" onClick={handleGroupDelete}>
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Tooltip>

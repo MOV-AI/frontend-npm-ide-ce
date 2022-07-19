@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { Typography } from "@material-ui/core";
 import Search, { filter } from "../../../../_shared/Search/Search";
@@ -11,8 +11,8 @@ import { tableKeyValueStyles } from "../styles";
  * @param {array} list { key: "bla", value: "bla", defaultValue: "place" }
  */
 const TableKeyValue = props => {
-  const { list, allowSearch } = props;
-  const [searchValue, setSearchValue] = React.useState("");
+  const { list, allowSearch, allowDelete } = props;
+  const [searchValue, setSearchValue] = useState("");
   const classes = tableKeyValueStyles();
 
   return (
@@ -25,7 +25,14 @@ const TableKeyValue = props => {
       {filter(searchValue, list)
         .sort((a, b) => a.key.localeCompare(b.key))
         .map((item, index) => (
-          <RowKeyValue {...props} key={index} item={item} />
+          <RowKeyValue
+            data-testid="section_key-value-row"
+            {...props}
+            key={index}
+            item={item}
+            allowEdit={!item.invalid}
+            allowDelete={item.invalid || allowDelete}
+          />
         ))}
     </Typography>
   );
@@ -33,11 +40,13 @@ const TableKeyValue = props => {
 
 TableKeyValue.propTypes = {
   list: PropTypes.array.isRequired, //[{ key: "bla", value: "bla", defaultValue: "place" }]
-  allowSearch: PropTypes.bool
+  allowSearch: PropTypes.bool,
+  allowDelete: PropTypes.bool
 };
 
 TableKeyValue.defaultProps = {
-  allowSearch: false
+  allowSearch: false,
+  allowDelete: false
 };
 
 export default TableKeyValue;

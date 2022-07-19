@@ -1,9 +1,10 @@
 import React, {
-  useState,
+  forwardRef,
   useCallback,
-  useRef,
+  useEffect,
+  useState,
   useMemo,
-  useEffect
+  useRef
 } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
@@ -24,7 +25,7 @@ import { RobotManager } from "@mov-ai/mov-fe-lib-core";
 import Workspace from "../../../../../../utils/Workspace";
 import { PLUGINS, ALERT_SEVERITIES } from "../../../../../../utils/Constants";
 import { ERROR_MESSAGES } from "../../../../../../utils/Messages";
-import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
+import { defaultFunction } from "../../../../../../utils/Utils";
 import { ROBOT_BLACKLIST } from "../../Constants/constants";
 import useNodeStatusUpdate from "./hooks/useNodeStatusUpdate";
 
@@ -33,11 +34,12 @@ import { buttonStyles, flowTopBarStyles } from "./styles";
 const BACKEND_CALLBACK_NAME = "backend.FlowTopBar";
 const FEEDBACK_TIMEOUT = 10000;
 
-const ButtonTopBar = React.forwardRef((props, ref) => {
-  const { disabled, onClick, children } = props;
+const ButtonTopBar = forwardRef((props, ref) => {
+  const { disabled, onClick, children, testId = "input_top-bar" } = props;
   const classes = buttonStyles();
   return (
     <Button
+      data-testid={testId}
       ref={ref}
       size="small"
       color="primary"
@@ -148,7 +150,7 @@ const FlowTopBar = props => {
    * @param {String} currentRobot : current selected robot id
    */
   const getRunningRobot = useCallback(
-    currentRobot => {
+    (currentRobot, robots) => {
       // If there's a currently selected robot in local storage
       if (currentRobot) initSelectedRobot(currentRobot);
       // Call callback to get default robot
@@ -165,10 +167,14 @@ const FlowTopBar = props => {
               };
             });
             // Update Flow selected robot if none is selected yet
-            if (!currentRobot) {
+            let robotToSelect = currentRobot;
+            if (!currentRobot || !(currentRobot in robots)) {
               workspaceManager.setSelectedRobot(robotId);
               initSelectedRobot(robotId);
+              robotToSelect = robotId;
             }
+            // Set selected robot
+            setRobotSelected(robotToSelect);
           }
         })
         .catch(err => {
@@ -204,9 +210,8 @@ const FlowTopBar = props => {
       });
       // Update state hooks
       setRobotList(robots);
-      setRobotSelected(currentSelected);
       // Get running Robot
-      getRunningRobot(currentSelected);
+      getRunningRobot(currentSelected, robots);
     },
     [getRunningRobot, workspaceManager]
   );
@@ -337,7 +342,7 @@ const FlowTopBar = props => {
             // Set loading false and show error message
             setLoading(false);
             alert({
-              message: t("Failed to {{action}} flow", {
+              message: t("FailedFlowAction", {
                 action: t(action.toLowerCase())
               }),
               severity: ALERT_SEVERITIES.ERROR
@@ -345,6 +350,7 @@ const FlowTopBar = props => {
           }, FEEDBACK_TIMEOUT);
         })
         .catch(err => {
+          console.warn("Error sending action to robot", err);
           alert({
             message: t(ERROR_MESSAGES.ERROR_RUNNING_SPECIFIC_CALLBACK, {
               callbackName: BACKEND_CALLBACK_NAME
@@ -368,15 +374,12 @@ const FlowTopBar = props => {
         sendActionToRobot("START", flowUrl);
       } else {
         // Confirmation alert if Another flow is running!
-        const title = t("Another flow is running!");
-        const message = t(
-          "'{{robotName}}' is running flow '{{activeFlow}}'.\nAre you sure you want to run the flow '{{id}}'?",
-          {
-            robotName: robotList[robotSelected].RobotName,
-            activeFlow: robotStatus.activeFlow,
-            id: id
-          }
-        );
+        const title = t("AnotherFlowRunningConfirmationTitle");
+        const message = t("AnotherFlowRunningConfirmationMessage", {
+          robotName: robotList[robotSelected].RobotName,
+          activeFlow: robotStatus.activeFlow,
+          id: id
+        });
         confirmationAlert({
           title,
           message,
@@ -425,13 +428,13 @@ const FlowTopBar = props => {
 
   /**
    * Handle view mode change : default view to tree view
-   * @param {Event} _ : Event change
+   * @param {Event} event : Event change
    * @param {string} newViewMode : New value
    * @returns
    */
   // Commented out for posterity
   // const handleViewModeChange = useCallback(
-  //   (_, newViewMode) => {
+  //   (_event, newViewMode) => {
   //     if (!newViewMode) return;
   //     setViewMode(prevState => {
   //       if (prevState === newViewMode) return prevState;
@@ -457,9 +460,9 @@ const FlowTopBar = props => {
     return loading ? (
       <CircularProgress size={25} color="inherit" />
     ) : (
-      <Tooltip title={t("Start Flow")}>
+      <Tooltip title={t("StartFlow")}>
         <>
-          <PlayArrowIcon /> {t("Save & Run")}
+          <PlayArrowIcon /> {t("SaveAndRun")}
         </>
       </Tooltip>
     );
@@ -474,18 +477,23 @@ const FlowTopBar = props => {
     return loading ? (
       <CircularProgress size={25} color="inherit" />
     ) : (
-      <Tooltip title={t("Stop Flow")}>
+      <Tooltip title={t("StopFlow")}>
         <StopIcon />
       </Tooltip>
     );
   }, [loading, t]);
 
   return (
-    <AppBar position="static" color="inherit">
+    <AppBar
+      data-testid="section-flow-top-bar"
+      position="static"
+      color="inherit"
+    >
       <Toolbar variant="dense">
         <Typography component="div" className={classes.grow}>
           <FormControl className={classes.formControl}>
             <Select
+              inputProps={{ "data-testid": "input_change-robot" }}
               id="robot-selector"
               value={robotSelected}
               startAdornment={<i className="icon-Happy"></i>}
@@ -507,6 +515,7 @@ const FlowTopBar = props => {
           </FormControl>
           {getFlowPath() === robotStatus.activeFlow ? (
             <ButtonTopBar
+              testId="input_stop-flow"
               ref={buttonDOMRef}
               disabled={loading}
               onClick={handleStopFlow}
@@ -515,6 +524,7 @@ const FlowTopBar = props => {
             </ButtonTopBar>
           ) : (
             <ButtonTopBar
+              testId="input_save-before-start"
               ref={buttonDOMRef}
               disabled={!robotStatus.isOnline || loading}
               onClick={handleSaveBeforeStart}
@@ -523,20 +533,24 @@ const FlowTopBar = props => {
             </ButtonTopBar>
           )}
         </Typography>
-        <Typography component="div" className={classes.visualizationToggle}>
+        <Typography
+          data-testid="section_view-mode-toggle"
+          component="div"
+          className={classes.visualizationToggle}
+        >
           {/* <ToggleButtonGroup
             exclusive
             size="small"
             value={viewMode}
             onChange={handleViewModeChange}
           >
-            <ToggleButton value={FLOW_VIEW_MODE.default}>
-              <Tooltip title={t("Main flow view")}>
+            <ToggleButton data-testid="input_default-flow" value={FLOW_VIEW_MODE.default}>
+              <Tooltip title={t("DefaultFlowView")}>
                 <GrainIcon fontSize="small" />
               </Tooltip>
             </ToggleButton>
-            <ToggleButton value={FLOW_VIEW_MODE.treeView} disabled>
-              <Tooltip title={t("Tree view")}>
+            <ToggleButton data-testid="input_tree-view-flow" value={FLOW_VIEW_MODE.treeView} disabled>
+              <Tooltip title={t("TreeView")}>
                 <i className="icon-tree" style={{ fontSize: "1.2rem" }}></i>
               </Tooltip>
             </ToggleButton>
@@ -561,12 +575,12 @@ FlowTopBar.propTypes = {
 };
 
 FlowTopBar.defaultProps = {
-  openFlow: () => DEFAULT_FUNCTION("openFlow"),
-  onRobotChange: () => DEFAULT_FUNCTION("onRobotChange"),
-  onViewModeChange: () => DEFAULT_FUNCTION("onViewModeChange"),
-  onStartStopFlow: () => DEFAULT_FUNCTION("onStartStopFlow"),
-  nodeStatusUpdated: () => DEFAULT_FUNCTION("nodeStatusUpdated"),
-  nodeCompleteStatusUpdated: () => DEFAULT_FUNCTION("completeStatusUpdated"),
+  openFlow: () => defaultFunction("openFlow"),
+  onRobotChange: () => defaultFunction("onRobotChange"),
+  onViewModeChange: () => defaultFunction("onViewModeChange"),
+  onStartStopFlow: () => defaultFunction("onStartStopFlow"),
+  nodeStatusUpdated: () => defaultFunction("nodeStatusUpdated"),
+  nodeCompleteStatusUpdated: () => defaultFunction("completeStatusUpdated"),
   workspace: "global",
   type: "Flow",
   version: "__UNVERSIONED__"

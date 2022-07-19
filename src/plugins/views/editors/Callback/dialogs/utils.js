@@ -1,5 +1,13 @@
 //========================================================================================
 /*                                                                                      *
+ *                                   Public constants                                   *
+ *                                                                                      */
+//========================================================================================
+
+export const EXCLUDED_PATHS = ["functions", "consts", "classes"];
+
+//========================================================================================
+/*                                                                                      *
  *                                 Private methods                                      *
  *                                                                                      */
 //========================================================================================
@@ -36,7 +44,7 @@ const _searchInnerKeys = (result, value, allImports, key) => {
     _children = searchImports(value, allImports[key].modules);
   }
 
-  ["functions", "consts", "classes"].forEach(x => {
+  EXCLUDED_PATHS.forEach(x => {
     const array =
       x in allImports[key]
         ? allImports[key][x].filter(elem =>

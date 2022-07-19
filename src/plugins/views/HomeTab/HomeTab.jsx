@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
-import withAlerts from "../../../decorators/withAlerts";
 import { withViewPlugin } from "../../../engine/ReactPlugin/ViewReactPlugin";
 import Workspace from "../../../utils/Workspace";
 import { getNameFromURL } from "../../../utils/Utils";
@@ -14,6 +13,7 @@ import { ERROR_MESSAGES } from "../../../utils/Messages";
 import QuickAccessComponent from "./components/QuickAccess";
 import RecentDocumentsComponent from "./components/RecentDocuments";
 import ExamplesComponent from "./components/Examples";
+import withAlerts from "../../../decorators/withAlerts";
 
 import { homeTabStyles } from "./styles";
 
@@ -79,7 +79,7 @@ const HomeTab = props => {
   //========================================================================================
 
   return (
-    <div className={classes.root}>
+    <div data-testid="section_hometab" className={classes.root}>
       <div className={classes.body}>
         <div className={classes.column}>
           <QuickAccessComponent call={call} />
@@ -96,11 +96,31 @@ const HomeTab = props => {
       </div>
     </div>
   );
-}
+};
 
-export default withViewPlugin(withAlerts(HomeTab));
+const HomeTabPlugin = withViewPlugin(withAlerts(HomeTab));
+
+export default HomeTabPlugin;
 
 HomeTab.propTypes = {
   call: PropTypes.func.isRequired,
   on: PropTypes.func.isRequired
+};
+
+/**
+ * Get welcome tab data
+ * @returns {TabData} Data used to create tab
+ */
+export const getHomeTab = () => {
+  const viewPlugin = new HomeTabPlugin(HOMETAB_PROFILE);
+
+  return {
+    ...HOMETAB_PROFILE,
+    id: HOMETAB_PROFILE.name,
+    name: HOMETAB_PROFILE.title,
+    tabTitle: HOMETAB_PROFILE.title,
+    scope: HOMETAB_PROFILE.name,
+    extension: "",
+    content: viewPlugin.render()
+  };
 };

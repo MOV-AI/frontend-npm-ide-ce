@@ -68,7 +68,7 @@ class DBSubscriber extends StoreAbstractPlugin {
     return this.iStore.getDoc(name);
   }
 
-  onLoad(data) {
+  onLoad(_) {
     // not in use
   }
 

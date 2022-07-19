@@ -86,10 +86,13 @@ class ContainerNode extends BaseContainerNode {
 
           // check if templateName is a node template or is a reference to a sub flow
           const isSubFlow = this.isFlow(templateName);
-          const joinStr = isSubFlow ? "__" : "/";
-          const docPath = isSubFlow
-            ? this._template.Container[nodeName]?.ContainerFlow
-            : this._template.NodeInst[nodeName]?.Template;
+          let joinStr = "/";
+          let docPath = this._template.NodeInst[nodeName]?.Template;
+
+          if (isSubFlow) {
+            joinStr = "__";
+            docPath = this._template.Container[nodeName]?.ContainerFlow;
+          }
 
           // get the port data
 

@@ -7,13 +7,17 @@
    - Vicente Queiroz (vicente.queiroz@mov.ai) - 2020
 
 """
+"""
+ FleetRobot and Robot are builtin in callbacks
+ 
+"""
 
 
-def getDefaultRobot(msg):
+def get_default_robot(msg):
     return {"robotName": Robot.name, "robotIP": Robot.IP}
 
 
-def sendToRobot(msg):
+def send_to_robot(msg):
     action_name = msg[0]
     flow_name = msg[1]
     robot_name = msg[2]
@@ -26,7 +30,7 @@ def sendToRobot(msg):
     return True
 
 
-def commandNode(msg):
+def command_node(msg):
     if msg["robotName"] == "Default":
         robot = Robot
     else:
@@ -35,9 +39,9 @@ def commandNode(msg):
 
 
 key2action_map = {
-    "getDefaultRobot": getDefaultRobot,
-    "sendToRobot": sendToRobot,
-    "commandNode": commandNode,
+    "getDefaultRobot": get_default_robot,
+    "sendToRobot": send_to_robot,
+    "commandNode": command_node,
 }
 
 try:

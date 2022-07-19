@@ -1,4 +1,5 @@
 import React from "react";
+import { getRefComponent } from "../utils/Utils";
 import { PLUGINS } from "../utils/Constants";
 
 /**
@@ -7,6 +8,8 @@ import { PLUGINS } from "../utils/Constants";
  * @returns
  */
 const withAlerts = Component => {
+  const RefComponent = getRefComponent(Component);
+
   return (props, ref) => {
     // Props
     const { call } = props;
@@ -33,7 +36,7 @@ const withAlerts = Component => {
     };
 
     return (
-      <Component
+      <RefComponent
         {...props}
         ref={ref}
         alert={alert}

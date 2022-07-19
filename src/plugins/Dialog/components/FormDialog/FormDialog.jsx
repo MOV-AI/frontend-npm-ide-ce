@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
@@ -8,21 +9,15 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { CircularProgress } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
 import { withTheme } from "../../../../decorators/withTheme";
-import { useTranslation } from "react-i18next";
 
-const useStyles = makeStyles(theme => ({
-  loadingContainer: {
-    height: "100px",
-    width: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
-  }
-}));
+import { appDialogStyles } from "./styles";
+
+const DEFAULT_VALIDATION = () => ({ result: true, error: "" });
 
 const FormDialog = props => {
+  // Translation hook
+  const { t } = useTranslation();
   // Props
   const {
     size,
@@ -30,15 +25,15 @@ const FormDialog = props => {
     title,
     message,
     onSubmit,
-    onValidation,
     onPostValidation,
-    submitText,
     placeholder,
-    inputLabel,
     multiline,
     loadingMessage,
     defaultValue,
-    maxLength
+    maxLength,
+    onValidation = DEFAULT_VALIDATION,
+    inputLabel = t("Name"),
+    submitText = t("Submit")
   } = props;
   // State hook
   const [open, setOpen] = useState(true);
@@ -49,9 +44,7 @@ const FormDialog = props => {
     message: ""
   });
   // Style hook
-  const classes = useStyles();
-  // Translation hook
-  const { t } = useTranslation();
+  const classes = appDialogStyles();
   // Ref
   const inputRef = useRef();
 
@@ -101,11 +94,11 @@ const FormDialog = props => {
 
   /**
    * Handle dialog close
-   * @param {Event} _ : Close Event
+   * @param {Event} closeEvent : Close Event
    * @param {String} reason : close reason
    * @returns
    */
-  const handleClose = (_, reason) => {
+  const handleClose = (_closeEvent, reason) => {
     if (reason === "backdropClick") return;
     setOpen(false);
     if (onClose) onClose();
@@ -154,15 +147,24 @@ const FormDialog = props => {
    */
   const handlePaste = event => {
     event.preventDefault();
+    // Get current value and current cursor position
+    const oldValue = event.target.value;
+    const position = event.target.selectionStart;
     // Trim pasted text
     const pastedText = event.clipboardData
       .getData("text/plain")
       .trim()
       .replace(/(\r\n|\n|\r)/gm, "");
+    // Set new value
+    const newValue = [
+      oldValue.slice(0, position),
+      pastedText,
+      oldValue.slice(position)
+    ].join("");
     // Validate pasted text
-    validateValue(pastedText);
+    validateValue(newValue);
     // Set text in input field
-    event.target.value = pastedText;
+    event.target.value = newValue;
   };
 
   return (
@@ -172,52 +174,60 @@ const FormDialog = props => {
       fullWidth={!!size}
       maxWidth={size}
     >
-      <DialogTitle>
-        {loadingMessage && isLoading ? loadingMessage : title}
-      </DialogTitle>
-      <DialogContent style={{ minWidth: 450 }}>
-        {message && <DialogContentText>{message}</DialogContentText>}
-        {isLoading ? (
-          <div className={classes.loadingContainer}>
-            <CircularProgress />
-          </div>
-        ) : (
-          <TextField
-            ref={inputRef}
-            autoFocus={true}
-            error={validation.error}
-            helperText={validation.message}
-            style={{ width: "100%" }}
-            label={t(inputLabel)}
-            InputLabelProps={{ shrink: true }}
-            defaultValue={value}
-            placeholder={placeholder}
-            multiline={multiline}
-            onPaste={handlePaste}
-            onKeyPress={handleKeyPress}
-            onChange={handleOnChange}
-            inputProps={{ maxLength: multiline ? "" : maxLength }} // limit of characters here
-            margin="normal"
-          />
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} color="secondary">
-          {t("Cancel")}
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          disabled={validation.error}
-          color="primary"
-        >
-          {submitText}
-        </Button>
-      </DialogActions>
+      <div data-testid="section_form-dialog">
+        <DialogTitle>
+          {loadingMessage && isLoading ? loadingMessage : title}
+        </DialogTitle>
+        <DialogContent className={classes.dialogContent}>
+          {message && <DialogContentText>{message}</DialogContentText>}
+          {isLoading ? (
+            <div className={classes.loadingContainer}>
+              <CircularProgress />
+            </div>
+          ) : (
+            <TextField
+              ref={inputRef}
+              autoFocus={true}
+              error={validation.error}
+              helperText={validation.message}
+              className={classes.textfield}
+              label={t(inputLabel)}
+              InputLabelProps={{ shrink: true }}
+              defaultValue={value}
+              placeholder={placeholder}
+              multiline={multiline}
+              onPaste={handlePaste}
+              onKeyPress={handleKeyPress}
+              onChange={handleOnChange}
+              inputProps={{
+                "data-testid": "input_value",
+                maxLength: multiline ? "" : maxLength
+              }} // limit of characters here
+              margin="normal"
+            />
+          )}
+        </DialogContent>
+        <DialogActions data-testid="section_dialog-actions">
+          <Button
+            data-testid="input_close"
+            onClick={handleClose}
+            color="secondary"
+          >
+            {t("Cancel")}
+          </Button>
+          <Button
+            data-testid="input_confirm"
+            onClick={handleSubmit}
+            disabled={validation.error}
+            color="primary"
+          >
+            {submitText}
+          </Button>
+        </DialogActions>
+      </div>
     </Dialog>
   );
 };
-
-export default withTheme(FormDialog);
 
 FormDialog.propTypes = {
   onValidation: PropTypes.func,
@@ -233,9 +243,9 @@ FormDialog.propTypes = {
 
 FormDialog.defaultProps = {
   onValidation: () => ({ result: true, error: "" }),
-  inputLabel: "Name",
-  submitText: "Submit",
   defaultValue: "",
   multiline: false,
   maxLength: 40
 };
+
+export default withTheme(FormDialog);

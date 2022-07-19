@@ -1,8 +1,9 @@
 import * as d3 from "d3";
-import { baseLinkStyles } from "./styles";
-import { generatePathPoints } from "./generatePathPoints";
+import { defaultFunction } from "../../../../../../utils/Utils";
 import { isLinkeable } from "../Nodes/BaseNode/PortValidator";
-import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
+import { generatePathPoints } from "./generatePathPoints";
+
+import { baseLinkStyles } from "./styles";
 
 const SUBFLOW_TYPE = "MovAI/Flow";
 const SEPARATOR = {
@@ -88,7 +89,7 @@ export default class BaseLink extends BaseLinkStruct {
     super(canvas, src, trg, data);
     this.object = null;
     this.onLinkErrorMouseOver =
-      onLinkErrorMouseOver || (() => DEFAULT_FUNCTION("onLinkErrorMouseOver"));
+      onLinkErrorMouseOver || (() => defaultFunction("onLinkErrorMouseOver"));
 
     this.initialize();
   }

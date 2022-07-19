@@ -16,7 +16,8 @@ import {
   TABLE_KEYS_NAMES,
   DIALOG_TITLE,
   PLUGINS,
-  SCOPES
+  SCOPES,
+  DEFAULT_VALUE
 } from "../../../../../../utils/Constants";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
 import MenuDetails from "./sub-components/MenuDetails";
@@ -47,15 +48,7 @@ const ACTIVE_ITEM = {
  * @returns {ReaactElement} Node Menu
  */
 const NodeMenu = memo(
-  ({
-    nodeInst,
-    openDialog,
-    call,
-    openDoc,
-    editable,
-    flowModel,
-    groupsVisibilities
-  }) => {
+  ({ nodeInst, call, openDoc, editable, flowModel, groupsVisibilities }) => {
     const data = nodeInst.data;
     // State hooks
     const [templateData, setTemplateData] = useState({});
@@ -93,7 +86,7 @@ const NodeMenu = memo(
     //========================================================================================
 
     /**
-     * Get the node instance item
+     * @private Get the node instance item
      * @param {string} id : Node instance Item Id
      * @returns {NodeInstance}
      */
@@ -103,6 +96,7 @@ const NodeMenu = memo(
     );
 
     /**
+     * @private Submit parameter change
      * @param {Object} formData : Data to Save
      */
     const handleSubmitParameter = useCallback(
@@ -111,7 +105,7 @@ const NodeMenu = memo(
         const nodeInstance = flowModel.current.getNodeInstanceItem(data.id);
 
         if (nodeInstance.getKeyValue(varName, formData.name)) {
-          if (formData.value === "") {
+          if (formData.value === DEFAULT_VALUE) {
             nodeInstance.deleteKeyValue(varName, formData.name);
           } else {
             nodeInstance.updateKeyValueItem(varName, formData);
@@ -120,6 +114,20 @@ const NodeMenu = memo(
           nodeInstance.addKeyValue(varName, formData);
         }
 
+        setNodeData(getNodeData());
+      },
+      [data.id, flowModel, getNodeData]
+    );
+
+    /**
+     * @private Handle Delete invalid parameters
+     * @param {string} paramName : Parameter name
+     * @param {string} varName : keyValue type (parameters, envVars or cmdLine)
+     */
+    const handleDeleteParameter = useCallback(
+      (keyName, varName) => {
+        const nodeInstance = flowModel.current.getNodeInstanceItem(data.id);
+        nodeInstance.deleteKeyValue(varName, keyName);
         setNodeData(getNodeData());
       },
       [data.id, flowModel, getNodeData]
@@ -181,10 +189,11 @@ const NodeMenu = memo(
     /**
      * Open dialog to edit/add new Parameter
      * @param {object} objData : data to construct the object
-     * @param {ReactComponent} DialogComponent : Dialog component to render
+     * @param {string} param : varName ("parameters", "envVars" or "cmdLine")
+     * @param {boolean} viewOnly : Disable all inputs if True
      */
     const handleKeyValueDialog = useCallback(
-      (objData, param) => {
+      (objData, param, viewOnly) => {
         const paramType = t(DIALOG_TITLE[param.toUpperCase()]);
         const obj = {
           ...objData,
@@ -194,23 +203,47 @@ const NodeMenu = memo(
           paramType
         };
 
-        const method = PLUGINS.DIALOG.CALL.CUSTOM_DIALOG;
         const args = {
           onSubmit: handleSubmitParameter,
-          title: t("Edit {{paramType}}", { paramType }),
+          title: t("EditParamType", { paramType }),
           data: obj,
-          showDefault: true,
+          showDefault: !viewOnly,
           showValueOptions: true,
+          showDescription: !viewOnly,
           disableName: true,
           disableType: true,
           disableDescription: true,
           preventRenderType: param !== TABLE_KEYS_NAMES.PARAMETERS,
+          disabled: viewOnly,
           call
         };
 
-        openDialog({ method, args }, ParameterEditorDialog);
+        call(
+          PLUGINS.DIALOG.NAME,
+          PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
+          args,
+          ParameterEditorDialog
+        );
       },
-      [openDialog, call, handleSubmitParameter, t]
+      [call, handleSubmitParameter, t]
+    );
+
+    /**
+     * Show confirmation dialog before deleting parameter
+     * @param {{key: string}} item : Object containing a key holding the param name
+     * @param {string} varName : keyValue type (parameters, envVars or cmdLine)
+     */
+    const handleKeyValueDelete = useCallback(
+      (item, varName) => {
+        const paramName = item.key;
+        call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
+          submitText: t("Delete"),
+          title: t("DeleteDocConfirmationTitle"),
+          onSubmit: () => handleDeleteParameter(paramName, varName),
+          message: t("DeleteKeyConfirmationMessage", { key: paramName })
+        });
+      },
+      [call, handleDeleteParameter, t]
     );
 
     /**
@@ -248,12 +281,16 @@ const NodeMenu = memo(
     );
 
     return (
-      <Typography component="div" className={classes.root}>
+      <Typography
+        data-testid="section_flow-node-menu"
+        component="div"
+        className={classes.root}
+      >
         <MenuDetails
           id={data.id}
           model={data.model}
           template={data.Template}
-          label={"Template Name:"}
+          label="TemplateName-Colon"
           type={templateData.type}
           openDoc={openDoc}
         />
@@ -264,6 +301,7 @@ const NodeMenu = memo(
         />
         {/* =========================== PROPERTIES =========================== */}
         <ListItem
+          data-testid="input_properties-expand"
           button
           data-menu-id={ACTIVE_ITEM.PROPERTIES}
           onClick={handleExpandClick}
@@ -284,6 +322,7 @@ const NodeMenu = memo(
         </Collapse>
         {/* =========================== PARAMETERS =========================== */}
         <ListItem
+          data-testid="input_parameters-expand"
           button
           data-menu-id={ACTIVE_ITEM.PARAMETERS}
           onClick={handleExpandClick}
@@ -298,16 +337,18 @@ const NodeMenu = memo(
             instanceValues={nodeData[TABLE_KEYS_NAMES.PARAMETERS] || {}}
             templateValues={templateData.parameters}
             handleTableKeyEdit={handleKeyValueDialog}
+            handleTableKeyDelete={handleKeyValueDelete}
           />
           <Divider />
         </Collapse>
         {/* =========================== ENV. VARIABLES =========================== */}
         <ListItem
+          data-testid="input_env-var-expand"
           button
           data-menu-id={ACTIVE_ITEM.ENVVARS}
           onClick={handleExpandClick}
         >
-          <ListItemText primary={t("Env. Variables")} />
+          <ListItemText primary={t("EnvVars")} />
           {renderExpandIcon(ACTIVE_ITEM.ENVVARS)}
         </ListItem>
         <Collapse in={activeItem === ACTIVE_ITEM.ENVVARS} unmountOnExit>
@@ -317,16 +358,18 @@ const NodeMenu = memo(
             instanceValues={nodeData[TABLE_KEYS_NAMES.ENVVARS] || {}}
             templateValues={templateData.envVars}
             handleTableKeyEdit={handleKeyValueDialog}
+            handleTableKeyDelete={handleKeyValueDelete}
           />
           <Divider />
         </Collapse>
         {/* =========================== COMMAND LINES =========================== */}
         <ListItem
+          data-testid="input_cmd-line-expand"
           button
           data-menu-id={ACTIVE_ITEM.CMDLINE}
           onClick={handleExpandClick}
         >
-          <ListItemText primary={t("Command Line")} />
+          <ListItemText primary={t("CommandLine")} />
           {renderExpandIcon(ACTIVE_ITEM.CMDLINE)}
         </ListItem>
         <Collapse in={activeItem === ACTIVE_ITEM.CMDLINE} unmountOnExit>
@@ -336,11 +379,13 @@ const NodeMenu = memo(
             instanceValues={nodeData[TABLE_KEYS_NAMES.CMDLINE] || {}}
             templateValues={templateData.commands}
             handleTableKeyEdit={handleKeyValueDialog}
+            handleTableKeyDelete={handleKeyValueDelete}
           />
           <Divider />
         </Collapse>
         {/* =========================== GROUP =========================== */}
         <ListItem
+          data-testid="input_group-expand"
           button
           data-menu-id={ACTIVE_ITEM.GROUP}
           onClick={handleExpandClick}
@@ -350,6 +395,7 @@ const NodeMenu = memo(
         </ListItem>
         <Collapse in={activeItem === ACTIVE_ITEM.GROUP} unmountOnExit>
           <NodeGroupSection
+            data-testid="section_node-group-section"
             flowGroups={flowModel.current.getGroups().serialize()}
             nodeGroups={nodeData.groups}
             handleBelongGroup={handleBelongGroup}

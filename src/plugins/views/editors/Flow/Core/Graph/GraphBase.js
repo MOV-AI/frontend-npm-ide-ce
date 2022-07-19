@@ -21,10 +21,7 @@ const NODE_DATA = {
   }
 };
 
-// to remove
-const t = v => v;
-
-export default class Graph {
+export default class GraphBase {
   constructor({ mInterface, canvas, id, docManager }) {
     this.mInterface = mInterface;
     this.canvas = canvas;
@@ -180,9 +177,7 @@ export default class Graph {
       const node = this.nodes.get(obj.node);
       node
         ? node.obj.setExposedPort(obj.port, obj.value)
-        : console.error(
-            `${t("Exposed port: node")} ${obj.node} ${t("not found")}`
-          );
+        : console.error(`Exposed port: node ${obj.node} not found`);
     });
     this.exposedPorts = exposedPorts;
     return this;

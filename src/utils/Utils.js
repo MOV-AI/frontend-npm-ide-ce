@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import AccountTreeIcon from "@material-ui/icons/AccountTree";
 import BuildIcon from "@material-ui/icons/Build";
 import CodeIcon from "@material-ui/icons/Code";
@@ -5,8 +6,29 @@ import DescriptionIcon from "@material-ui/icons/Description";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import { Utils } from "@mov-ai/mov-fe-lib-core";
 import movaiIcon from "../plugins/views/editors/_shared/Branding/movai-logo-white.png";
-import { HOMETAB_PROFILE } from "./Constants";
-import HomeTab from "../plugins/views/HomeTab/HomeTab";
+import { ERROR_MESSAGES } from "./Messages";
+
+/**
+ * Export a non implemented empty function
+ * @param {String} name : function name
+ * @returns console.warn call with the function name
+ */
+export const defaultFunction = (name, logToConsole = true) => {
+  if (logToConsole) console.warn(`${name} not implemented`);
+};
+
+/**
+ * Checks if it's a React Component or Functional Component to return it's ref
+ * @param {*} Component
+ * @returns {Component} RefComponent
+ */
+export const getRefComponent = Component => {
+  let RefComponent = Component;
+  if (typeof Component === "function")
+    RefComponent = forwardRef((props, ref) => Component(props, ref));
+
+  return RefComponent;
+};
 
 /**
  * Generate random ID
@@ -123,7 +145,7 @@ export function getWorkspaceFromUrl(url) {
  */
 export function validateDocumentName(name) {
   if (!Utils.validateEntityName(name)) {
-    throw new Error("Invalid name");
+    throw new Error(ERROR_MESSAGES.INVALID_NAME);
   } else {
     return true;
   }
@@ -177,25 +199,6 @@ export function pythonToBool(value) {
 }
 
 /**
- * Gets the HomeTab Plugin
- * @private
- * @returns {Promise} the HomeTab
- */
-export const getHomeTab = () => {
-  const viewPlugin = new HomeTab(HOMETAB_PROFILE);
-
-  return {
-    ...HOMETAB_PROFILE,
-    id: HOMETAB_PROFILE.name,
-    name: HOMETAB_PROFILE.title,
-    tabTitle: HOMETAB_PROFILE.title,
-    scope: HOMETAB_PROFILE.name,
-    extension: "",
-    content: viewPlugin.render()
-  };
-};
-
-/**
  * Trigger a simulated mouse click (react element)
  * @param {*} element
  */
@@ -210,4 +213,18 @@ export function simulateMouseClick(element) {
       })
     )
   );
+}
+
+/**
+ * Trigger callback before unload app
+ * @param {function} callback
+ */
+export function runBeforeUnload(callback) {
+  // Previous beforeunload method
+  const onAppUnload = window.onbeforeunload;
+  // Set new beforeunload method with given callback
+  window.onbeforeunload = event => {
+    callback && callback(event);
+    return onAppUnload(event);
+  };
 }

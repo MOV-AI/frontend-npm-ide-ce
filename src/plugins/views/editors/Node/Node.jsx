@@ -13,34 +13,26 @@ import {
   DIALOG_TITLE,
   DATA_TYPES,
   ROS_VALID_NAMES,
+  ROS_VALID_NAMES_VARIATION,
   PLUGINS,
   SCOPES,
   ALERT_SEVERITIES
 } from "../../../../utils/Constants";
+import { ERROR_MESSAGES } from "../../../../utils/Messages";
 import ParameterEditorDialog from "../_shared/KeyValueTable/ParametersEditorDialog";
+import KeyValueTable from "../_shared/KeyValueTable/KeyValueTable";
 import useDataSubscriber from "../../../DocManager/useDataSubscriber";
-import Menu from "./Menu";
 import Description from "./components/Description/Description";
 import ExecutionParameters from "./components/ExecutionParameters/ExecutionParameters";
 import ParametersTable from "./components/ParametersTable/ParametersTable";
-import KeyValueTable from "./components/KeyValueTable/KeyValueTable";
 import IOConfig from "./components/IOConfig/IOConfig";
-import useKeyValueMethods from "./components/KeyValueTable/useKeyValueMethods";
+import useKeyValueMethods from "./components/hooks/useKeyValueMethods";
+import Menu from "./Menu";
 
 import { nodeStyles } from "./styles";
-import { ERROR_MESSAGES } from "../../../../utils/Messages";
 
 const Node = (props, ref) => {
-  const {
-    id,
-    name,
-    call,
-    alert,
-    instance,
-    editable = true,
-    activateKeyBind,
-    deactivateKeyBind
-  } = props;
+  const { id, name, call, alert, instance, editable = true } = props;
 
   // Hooks
   const [protectedCallbacks, setProtectedCallbacks] = useState([]);
@@ -72,7 +64,7 @@ const Node = (props, ref) => {
     (paramName, type, previousData) => {
       const typeName = DIALOG_TITLE[type.toUpperCase()] ?? type;
       const newName = paramName.name ?? paramName;
-      const re = ROS_VALID_NAMES;
+      const re = type === "ports" ? ROS_VALID_NAMES : ROS_VALID_NAMES_VARIATION;
       try {
         if (!paramName)
           throw new Error(
@@ -223,31 +215,10 @@ const Node = (props, ref) => {
    *                                                                                      */
   //========================================================================================
 
-  /**
-   * Handle dialog opening
-   * @param {*} method
-   * @param {*} args
-   * @param {*} resolve
-   */
-  const openDialog = useCallback(
-    ({ method, args, resolve }, dialogComponent) => {
-      // Deactivate key bind before opening dialog
-      deactivateKeyBind();
-      // On close dialog reactivate keybind and resolve promise
-      args.onClose = () => {
-        activateKeyBind();
-        resolve && resolve();
-      };
-      // Call dialog plugin with given method and args
-      call(PLUGINS.DIALOG.NAME, method, args, dialogComponent);
-    },
-    [activateKeyBind, call, deactivateKeyBind]
-  );
-
   const renderRightMenu = useCallback(() => {
     const details = props.data?.details ?? {};
     const menuName = `${id}-detail-menu`;
-    const menuTitle = t("Node Details Menu");
+    const menuTitle = t("NodeDetailsMenuTitle");
     // add bookmark
     call(PLUGINS.RIGHT_DRAWER.NAME, PLUGINS.RIGHT_DRAWER.CALL.SET_BOOKMARK, {
       [menuName]: {
@@ -288,22 +259,26 @@ const Node = (props, ref) => {
         name: objData.key || dataId,
         paramType
       };
-      const method = PLUGINS.DIALOG.CALL.CUSTOM_DIALOG;
       const args = {
         onSubmit: formData => {
           return updateKeyValue(param, formData, obj, isNew);
         },
         nameValidation: newData =>
           Promise.resolve(validateName(newData, param, obj.name)),
-        title: t("Edit {{paramType}}", { paramType }),
+        title: t("EditParamType", { paramType }),
         data: obj,
         preventRenderType: param !== TABLE_KEYS_NAMES.PARAMETERS,
         call
       };
 
-      openDialog({ method, args }, ParameterEditorDialog);
+      call(
+        PLUGINS.DIALOG.NAME,
+        PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
+        args,
+        ParameterEditorDialog
+      );
     },
-    [data, validateName, updateKeyValue, openDialog, call, t]
+    [data, validateName, updateKeyValue, call, t]
   );
 
   /**
@@ -410,7 +385,11 @@ const Node = (props, ref) => {
   //========================================================================================
 
   return (
-    <Typography component="div" className={classes.container}>
+    <Typography
+      data-testid="section_node-editor"
+      component="div"
+      className={classes.container}
+    >
       <Description
         onChangeDescription={updateDescription}
         editable={editable}
@@ -446,7 +425,8 @@ const Node = (props, ref) => {
         onRowDelete={deleteKeyValue}
       ></ParametersTable>
       <KeyValueTable
-        title={t("Environment Variables")}
+        testId="section_env-vars"
+        title={t("EnvironmentVariables")}
         editable={editable}
         data={data.envVars}
         columns={defaultColumns}
@@ -455,7 +435,8 @@ const Node = (props, ref) => {
         varName="envVars"
       ></KeyValueTable>
       <KeyValueTable
-        title={t("Command Line")}
+        testId="section_command-line"
+        title={t("CommandLine")}
         editable={editable}
         data={data.commands}
         columns={defaultColumns}
@@ -470,10 +451,12 @@ const Node = (props, ref) => {
 Node.scope = "Node";
 
 Node.propTypes = {
-  profile: PropTypes.object.isRequired,
+  id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  call: PropTypes.func.isRequired,
   data: PropTypes.object,
-  editable: PropTypes.bool,
-  alert: PropTypes.func
+  instance: PropTypes.object,
+  editable: PropTypes.bool
 };
 
 export default withEditorPlugin(Node);

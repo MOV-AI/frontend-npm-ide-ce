@@ -4,7 +4,7 @@ import WarningIcon from "@material-ui/icons/Warning";
 import { makeStyles } from "@material-ui/styles";
 import { Typography, Tooltip } from "@material-ui/core";
 import { RobotManager, Document } from "@mov-ai/mov-fe-lib-core";
-import { DEFAULT_FUNCTION } from "../../../_shared/mocks";
+import { defaultFunction } from "../../../../../../utils/Utils";
 import styles from "./styles";
 
 const useStyles = makeStyles(styles);
@@ -104,6 +104,7 @@ const FlowBottomBar = props => {
 
   return (
     <Typography
+      data-testid="section_flow-bottom-bar"
       component="div"
       className={`${classes.bar} ${classes[barStatus]}`}
     >
@@ -116,6 +117,7 @@ const FlowBottomBar = props => {
             )}`}
           >
             <Typography
+              data-testid="input_open-flow"
               component="div"
               className={classes.action}
               onClick={evt => handleOpenFlow(evt)}
@@ -127,6 +129,7 @@ const FlowBottomBar = props => {
         )}
         <Tooltip title="Show warnings" classes={{ tooltip: classes.tooltip }}>
           <Typography
+            data-testid="input_show-warnings"
             component="div"
             className={`${classes.action} ${classes.alignRight} ${
               warningVisibility ? classes.actionActive : ""
@@ -148,7 +151,7 @@ FlowBottomBar.propTypes = {
 };
 
 FlowBottomBar.defaultProps = {
-  openFlow: () => DEFAULT_FUNCTION("openFlow"),
+  openFlow: () => defaultFunction("openFlow"),
   robotSelected: "",
   runningFlow: ""
 };

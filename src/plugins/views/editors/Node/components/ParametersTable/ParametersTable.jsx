@@ -1,10 +1,11 @@
 import React, { memo } from "react";
 import PropTypes from "prop-types";
 import _isEqual from "lodash/isEqual";
-import { useTranslation, DEFAULT_FUNCTION } from "../../../_shared/mocks";
-import useDataTypes from "../../../_shared/hooks/useDataTypes";
-import KeyValueTable from "../KeyValueTable/KeyValueTable";
+import { useTranslation } from "react-i18next";
+import { defaultFunction } from "../../../../../../utils/Utils";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
+import KeyValueTable from "../../../_shared/KeyValueTable/KeyValueTable";
+import useDataTypes from "../../../_shared/hooks/useDataTypes";
 
 const ParametersTable = props => {
   // Props
@@ -25,7 +26,9 @@ const ParametersTable = props => {
       whiteSpace: "nowrap",
       overflow: "hidden"
     },
-    render: rowData => getLabel(rowData.type)
+    render: rowData => (
+      <span data-testid="output_type">{getLabel(rowData.type)}</span>
+    )
   };
   const columns = [...defaultColumns];
   columns.push(typeColumn);
@@ -38,6 +41,7 @@ const ParametersTable = props => {
 
   return (
     <KeyValueTable
+      testId="section_parameters"
       title={t("Parameters")}
       varName="parameters"
       editable={editable}
@@ -62,8 +66,8 @@ ParametersTable.propTypes = {
 ParametersTable.defaultProps = {
   data: [],
   defaultColumns: [],
-  onRowDelete: () => DEFAULT_FUNCTION("onRowDelete"),
-  openEditDialog: () => DEFAULT_FUNCTION("openEditDialog"),
+  onRowDelete: () => defaultFunction("onRowDelete"),
+  openEditDialog: () => defaultFunction("openEditDialog"),
   editable: false
 };
 

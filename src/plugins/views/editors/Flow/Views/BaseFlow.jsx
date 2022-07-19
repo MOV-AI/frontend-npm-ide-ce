@@ -1,25 +1,24 @@
 import React, {
-  useState,
+  forwardRef,
+  useCallback,
   useEffect,
+  useState,
   useMemo,
-  useRef,
-  useCallback
+  useRef
 } from "react";
 import PropTypes from "prop-types";
 import Backdrop from "@material-ui/core/Backdrop";
-import { makeStyles } from "@material-ui/core/styles";
 import { usePluginMethods } from "../../../../../engine/ReactPlugin/ViewReactPlugin";
 import { generateContainerId } from "../Constants/constants";
 import { EVT_NAMES } from "../events";
 import Loader from "../../_shared/Loader/Loader";
 import Warnings from "../Components/Warnings/Warnings";
 import useMainInterface from "./hooks/useMainInterface";
-import { PLUGINS } from "../../../../../utils/Constants";
-import styles from "./styles";
+import { PLUGINS, SCOPES } from "../../../../../utils/Constants";
 
-const useStyles = makeStyles(styles);
+import { baseFlowStyles } from "./styles";
 
-const BaseFlow = React.forwardRef((props, ref) => {
+const BaseFlow = forwardRef((props, ref) => {
   const {
     call,
     instance,
@@ -30,7 +29,6 @@ const BaseFlow = React.forwardRef((props, ref) => {
     dataFromDB,
     off,
     on,
-    onNodeSelected,
     warnings,
     warningsVisibility,
     onReady
@@ -39,14 +37,12 @@ const BaseFlow = React.forwardRef((props, ref) => {
 
   // State Hooks
   const [loading, setLoading] = useState(true);
-
-  const containerId = useMemo(() => generateContainerId(id), [id]);
-
   // Refs
-  const warningsRef = useRef();
   const containerRef = useRef();
+  const isMountedRef = useRef(false);
   // Other hooks
-  const classes = useStyles(props);
+  const classes = baseFlowStyles();
+  const containerId = useMemo(() => generateContainerId(id), [id]);
 
   const { mainInterface } = useMainInterface({
     classes,
@@ -75,13 +71,14 @@ const BaseFlow = React.forwardRef((props, ref) => {
       if (currMode === EVT_NAMES.LOADING) return;
 
       const scopes = {
-        Node: "addNode",
-        Flow: "addFlow"
+        [SCOPES.NODE]: EVT_NAMES.ADD_NODE,
+        [SCOPES.FLOW]: EVT_NAMES.ADD_FLOW
       };
       const templateId = node.name;
+      const isSubFlow = node.scope === SCOPES.FLOW;
       // If user tries to add the flow as a sub-flow to itself,
       //  it's considered a forbidden operation
-      if (dataFromDB.Label === templateId) return;
+      if (dataFromDB.Label === templateId && isSubFlow) return;
       // Add interface mode to add node/sub-flow
       getMainInterface()?.setMode(scopes[node.scope], { templateId }, true);
     });
@@ -92,7 +89,8 @@ const BaseFlow = React.forwardRef((props, ref) => {
 
   useEffect(() => {
     const mInt = getMainInterface();
-    if (!mInt) return;
+    if (!mInt || isMountedRef.current) return;
+    isMountedRef.current = true;
 
     // Subscribe to on loading exit (finish) event
     mInt.mode.loading.onExit.subscribe(() => {
@@ -101,11 +99,14 @@ const BaseFlow = React.forwardRef((props, ref) => {
 
     // Dispatch on ready event
     onReady(mInt);
-  }, [getMainInterface, dataFromDB, onNodeSelected, onReady]);
+  }, [getMainInterface, dataFromDB, onReady]);
 
   // On before unmount
   useEffect(() => {
-    return () => getMainInterface().graph.destroy();
+    return () => {
+      getMainInterface().graph.destroy();
+      isMountedRef.current = false;
+    };
   }, [getMainInterface]);
 
   usePluginMethods(ref, { mainInterface });
@@ -123,14 +124,11 @@ const BaseFlow = React.forwardRef((props, ref) => {
         id={containerId}
         tagindex="0"
       >
-        <React.Fragment>
-          <Warnings
-            ref={warningsRef}
-            warnings={warnings}
-            isVisible={warningsVisibility}
-            domNode={containerRef}
-          />
-        </React.Fragment>
+        <Warnings
+          warnings={warnings}
+          isVisible={warningsVisibility}
+          domNode={containerRef}
+        />
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { Typography } from "@material-ui/core";
@@ -10,13 +10,15 @@ import { keyValueSectionStyles } from "../../styles";
 const KeyValuesSection = props => {
   const {
     editable,
+    deletable,
     handleTableKeyEdit,
+    handleTableKeyDelete,
     instanceValues,
     templateValues,
     varName
   } = props;
   // State hooks
-  const [keyValues, setKeyValues] = React.useState([]);
+  const [keyValues, setKeyValues] = useState([]);
   // Other hooks
   const classes = keyValueSectionStyles();
   const { t } = useTranslation();
@@ -33,16 +35,24 @@ const KeyValuesSection = props => {
    */
   const getTableValues = useCallback(() => {
     const output = [];
-    Object.keys(templateValues).forEach(key => {
-      const value = instanceValues[key]?.value || "";
+    const allValues = [
+      ...new Set([
+        ...Object.keys(templateValues),
+        ...Object.keys(instanceValues)
+      ])
+    ];
+    allValues.forEach(key => {
+      const value = instanceValues[key]?.value;
       const type = templateValues[key]?.type;
       const defaultValue = templateValues[key]?.value;
       const description = templateValues[key]?.description || "";
+      const invalid = key in instanceValues && !(key in templateValues);
       output.push({
         key,
         value,
         description,
         defaultValue,
+        invalid,
         type
       });
     });
@@ -57,7 +67,7 @@ const KeyValuesSection = props => {
    *                                                                                      */
   //========================================================================================
 
-  React.useEffect(() => {
+  useEffect(() => {
     getTableValues();
   }, [getTableValues]);
 
@@ -72,7 +82,9 @@ const KeyValuesSection = props => {
       <TableKeyValue
         list={keyValues}
         allowEdit={editable}
+        allowDelete={deletable}
         handleParameterEditModal={handleTableKeyEdit}
+        handleParameterDeleteModal={handleTableKeyDelete}
         type={varName}
         allowSearch
       />
@@ -88,12 +100,15 @@ KeyValuesSection.propTypes = {
   varName: PropTypes.string.isRequired,
   handleTableKeyEdit: PropTypes.func.isRequired,
   instanceValues: PropTypes.object.isRequired,
+  handleTableKeyDelete: PropTypes.func,
   templateValues: PropTypes.object,
-  editable: PropTypes.bool
+  editable: PropTypes.bool,
+  deletable: PropTypes.bool
 };
 
 KeyValuesSection.defaultProps = {
-  editable: false
+  editable: false,
+  deletable: false
 };
 
 export default KeyValuesSection;

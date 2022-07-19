@@ -1,3 +1,4 @@
+import { defaultFunction } from "../../../../../../utils/Utils";
 import BaseNode from "./BaseNode/BaseNode";
 
 class TemporaryNode extends BaseNode {
@@ -24,9 +25,7 @@ class TemporaryNode extends BaseNode {
   /**
    * @override
    */
-  onClick = () => {
-    // Empty on purpose
-  };
+  onClick = () => defaultFunction("onClick");
 }
 
 export default TemporaryNode;

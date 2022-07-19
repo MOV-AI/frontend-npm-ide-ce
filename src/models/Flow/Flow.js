@@ -381,7 +381,7 @@ class Flow extends Model {
    * @param {string} id : The node (nodeInst or subFlow) id
    */
   deleteNodeExposedPorts = id => {
-    this.getExposedPorts().data.forEach((item, key) => {
+    this.getExposedPorts().data.forEach((_, key) => {
       if (id === key) {
         this.deleteExposedPorts(key);
       }
@@ -448,7 +448,7 @@ class Flow extends Model {
    *                                                                                      */
   //========================================================================================
 
-  propsUpdate(event, prop, value) {
+  propsUpdate(_, prop, value) {
     // force dispatch
     this.dispatch(prop, value);
   }
@@ -549,8 +549,16 @@ class Flow extends Model {
   }
 
   static SCOPE = "Flow";
+  static CLASSNAME = "flow-interface";
 
   static EXTENSION = ".flo";
+
+  static KEYS_TO_DISCONSIDER = [
+    "subFlows",
+    "exposedPorts",
+    "links",
+    "nodeInstances"
+  ];
 
   static OBSERVABLE_KEYS = {
     NAME: "name",

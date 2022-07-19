@@ -7,6 +7,7 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import { Typography } from "@material-ui/core";
 import {
   DATA_TYPES,
+  DEFAULT_VALUE,
   DISABLED_VALUE
 } from "../../../../../../../utils/Constants";
 
@@ -21,7 +22,7 @@ const RowKeyValue = ({
   handleParameterDeleteModal
 }) => {
   const classes = rowKeyValueStyles();
-  const viewOnly = !allowEdit && !allowDelete;
+  const viewOnly = !allowEdit;
 
   //========================================================================================
   /*                                                                                      *
@@ -49,8 +50,8 @@ const RowKeyValue = ({
    * Handle Key Value Edit Dialog
    */
   const handleKeyValueEditModal = useCallback(() => {
-    handleParameterEditModal(item, type);
-  }, [item, type, handleParameterEditModal]);
+    handleParameterEditModal(item, type, viewOnly);
+  }, [item, type, handleParameterEditModal, viewOnly]);
 
   /**
    * Handle Key Value Delete Dialog
@@ -72,7 +73,7 @@ const RowKeyValue = ({
    */
   const renderParamRow = useCallback(
     row => {
-      if (row.value === "" || row.value === null) {
+      if (row.value === DEFAULT_VALUE || row.value === null) {
         return (
           <Typography
             component="div"
@@ -113,12 +114,20 @@ const RowKeyValue = ({
       </Typography>
       {renderParamRow(item)}
       {(allowEdit || viewOnly) && (
-        <IconButton onClick={handleKeyValueEditModal} size="small">
-          {viewOnly ? <VisibilityIcon /> : <Edit></Edit>}
+        <IconButton
+          data-testid="input_edit"
+          onClick={handleKeyValueEditModal}
+          size="small"
+        >
+          {viewOnly ? <VisibilityIcon /> : <Edit />}
         </IconButton>
       )}
       {allowDelete && (
-        <IconButton onClick={handleKeyValueDeleteModal} size="small">
+        <IconButton
+          data-testid="input_delete"
+          onClick={handleKeyValueDeleteModal}
+          size="small"
+        >
           <DeleteIcon />
         </IconButton>
       )}

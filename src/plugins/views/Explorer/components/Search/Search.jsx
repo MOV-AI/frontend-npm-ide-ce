@@ -1,86 +1,86 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { InputBase, IconButton, Typography } from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
 import ClearIcon from "@material-ui/icons/Clear";
 
-const styles = theme => ({
-  root: {
-    padding: "2px 4px",
-    display: "flex",
-    alignItems: "center",
-    width: "100%"
-  },
-  input: {
-    marginLeft: 10,
-    flex: 1,
-    "& input::placeholder": {
-      color: theme.backdrop.color
-    }
-  },
-  icon: {
-    color: theme.palette.primary.main
-  }
-});
+import { searchStyles } from "./styles";
+const Search = props => {
+  const [searchInput, setSearchInput] = useState("");
 
-const t = s => s;
-class Search extends Component {
-  searchInput = null;
-  timer = null;
-  inputRef = React.createRef();
+  const classes = searchStyles();
+  const { t } = useTranslation();
 
-  handleChange = evt => {
-    this.searchInput = evt.target.value;
-    if (this.timer) {
-      clearTimeout(this.timer);
-    }
-    this.timer = setTimeout(this.handleSearch, 250);
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * Resets the search value
+   */
+  const resetValue = () => {
+    setSearchInput("");
+    handleSearch("");
   };
 
-  handleSearch = () => {
-    if (this.searchInput !== null) this.props.search(this.searchInput);
+  /**
+   * Calls search from props to do a search on the files
+   * @param {String} query : to filter the files
+   */
+  const handleSearch = query => {
+    props.search(query);
   };
 
-  resetValue() {
-    const input = this.inputRef.current.children[0];
-    input.value = "";
-    input.focus();
-    this.searchInput = "";
-    this.handleSearch();
-    this.forceUpdate();
-  }
+  /**
+   * Simple check to see if there's any value on searchInput
+   * @returns {Boolean} true if there's any value on the search
+   */
+  const isEmpty = () => {
+    return searchInput === null || searchInput.trim() === "";
+  };
 
-  isEmpty() {
-    return this.searchInput === null || this.searchInput.trim() === "";
-  }
+  //========================================================================================
+  /*                                                                                      *
+   *                                       Handlers                                       *
+   *                                                                                      */
+  //========================================================================================
 
-  render() {
-    const { classes } = this.props;
-    return (
-      <Typography component="div" className={classes.root}>
-        <InputBase
-          ref={this.inputRef}
-          className={classes.input}
-          placeholder={t("Search")}
-          onChange={this.handleChange}
-        />
-        <IconButton
-          style={{ padding: 10 }}
-          onClick={() => {
-            if (!this.isEmpty()) {
-              this.resetValue();
-            }
-          }}
-        >
-          {this.isEmpty() ? (
-            <SearchIcon className={classes.icon} />
-          ) : (
-            <ClearIcon className={classes.icon} />
-          )}
-        </IconButton>
-      </Typography>
-    );
-  }
-}
+  /**
+   * Change handler for search input
+   * @param {*} evt
+   */
+  const handleChange = evt => {
+    setSearchInput(evt.target.value);
+    handleSearch(evt.target.value);
+  };
 
-export default withStyles(styles, { withTheme: true })(Search);
+  return (
+    <Typography
+      data-testid="section_search"
+      component="div"
+      className={classes.root}
+    >
+      <InputBase
+        value={searchInput}
+        className={classes.input}
+        placeholder={t("Search")}
+        onChange={handleChange}
+      />
+      <IconButton
+        data-testid="input_confirm"
+        className={classes.iconButton}
+        onClick={resetValue}
+      >
+        {isEmpty() ? (
+          <SearchIcon className={classes.icon} />
+        ) : (
+          <ClearIcon className={classes.icon} />
+        )}
+      </IconButton>
+    </Typography>
+  );
+};
+
+export default Search;

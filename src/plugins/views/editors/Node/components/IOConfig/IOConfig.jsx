@@ -3,42 +3,15 @@ import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import _isEqual from "lodash/isEqual";
 import { MTableToolbar, MTableEditRow } from "material-table";
-import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
 import { PLUGINS } from "../../../../../../utils/Constants";
 import MaterialTable from "../../../_shared/MaterialTable/MaterialTable";
-import CollapsibleHeader from "../_shared/CollapsibleHeader";
+import CollapsibleHeader from "../../../_shared/CollapsibleHeader/CollapsibleHeader";
 import useIOConfigColumns from "./hooks/useIOConfigColumns";
 import useHelper from "./hooks/useHelper";
 import IOPorts from "./IOPorts/IOPorts";
 
-const useStyles = makeStyles(theme => ({
-  details: {
-    padding: "8px 24px 24px",
-    "&.editing div[class^='MTableToolbar-actions'] .MuiIconButton-root, &.editing .Mui-selected, &.editing .child-row":
-      {
-        opacity: "0.2",
-        transition: "all 300ms ease 0s",
-        cursor: "default",
-        pointerEvents: "none"
-      }
-  },
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 120
-  },
-  control: {
-    fontSize: "0.875rem"
-  },
-  toolbar: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center"
-  },
-  toolbarComponents: {
-    width: "100%"
-  }
-}));
+import { ioConfigStyles } from "./styles";
 
 const IOConfig = props => {
   // Refs
@@ -67,7 +40,7 @@ const IOConfig = props => {
   const [ioData, setIOData] = useState([]);
 
   // Other hooks
-  const classes = useStyles();
+  const classes = ioConfigStyles();
   const { t } = useTranslation();
   const { getEffectiveMessage } = useHelper();
   const { getColumns } = useIOConfigColumns({
@@ -353,7 +326,11 @@ const IOConfig = props => {
   //========================================================================================
 
   return (
-    <CollapsibleHeader title={t("I/O Configuration")} defaultExpanded={true}>
+    <CollapsibleHeader
+      testId="section_io-configuration"
+      title={t("IOConfiguration")}
+      defaultExpanded={true}
+    >
       <Typography
         component="div"
         className={classes.details}

@@ -8,7 +8,8 @@ import {
   DATA_TYPES,
   PLUGINS,
   TABLE_KEYS_NAMES,
-  DIALOG_TITLE
+  DIALOG_TITLE,
+  DEFAULT_VALUE
 } from "../../../../../../utils/Constants";
 import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
 import KeyValuesSection from "./sub-components/collapsibleSections/KeyValuesSection";
@@ -16,7 +17,7 @@ import MenuDetails from "./sub-components/MenuDetails";
 
 const ContainerMenu = props => {
   // Props
-  const { nodeInst, call, openDoc, flowModel, editable, openDialog } = props;
+  const { nodeInst, call, openDoc, flowModel, editable } = props;
   // State hooks
   const [templateData, setTemplateData] = useState({});
   const [flowData, setFlowData] = useState({});
@@ -44,7 +45,7 @@ const ContainerMenu = props => {
       const varName = formData.varName;
       const containerInstance = flowModel.current.getSubFlowItem(data.id);
       if (containerInstance.getKeyValue(varName, formData.name)) {
-        if (formData.value === "") {
+        if (formData.value === DEFAULT_VALUE) {
           containerInstance.deleteKeyValue(varName, formData.name);
         } else {
           containerInstance.updateKeyValueItem(varName, formData);
@@ -55,6 +56,20 @@ const ContainerMenu = props => {
       setFlowData(getFlowData());
     },
     [flowModel, data.id, getFlowData]
+  );
+
+  /**
+   * @private Handle Delete invalid parameters
+   * @param {string} paramName : Parameter name
+   * @param {string} varName : keyValue type (parameters, envVars or cmdLine)
+   */
+  const handleDeleteParameter = useCallback(
+    (paramName, varName) => {
+      const containerInstance = flowModel.current.getSubFlowItem(data.id);
+      containerInstance.deleteKeyValue(varName, paramName);
+      setFlowData(getFlowData());
+    },
+    [data.id, flowModel, getFlowData]
   );
 
   //========================================================================================
@@ -73,36 +88,61 @@ const ContainerMenu = props => {
   /**
    * Open dialog to edit/add new Parameter
    * @param {string} dataId : Unique identifier of item (undefined when not created yet)
-   * @param {ReactComponent} DialogComponent : Dialog component to render
+   * @param {string} varName : keyValue type (parameters, envVars or cmdLine)
+   * @param {boolean} viewOnly : Disable all inputs if True
    */
   const handleKeyValueDialog = useCallback(
-    (keyValueData, param) => {
-      const paramType = t(DIALOG_TITLE[param.toUpperCase()]);
+    (keyValueData, varName, viewOnly) => {
+      const paramType = t(DIALOG_TITLE[varName.toUpperCase()]);
       const obj = {
         ...keyValueData,
-        varName: param,
+        varName: varName,
         type: keyValueData.type ?? DATA_TYPES.ANY,
         name: keyValueData.key,
         paramType
       };
 
-      const method = PLUGINS.DIALOG.CALL.CUSTOM_DIALOG;
       const args = {
         onSubmit: handleSubmitParameter,
-        title: t("Edit {{paramType}}", { paramType }),
+        title: t("EditParamType", { paramType }),
         data: obj,
-        showDefault: true,
+        showDefault: !viewOnly,
         showValueOptions: true,
+        showDescription: !viewOnly,
         disableName: true,
         disableType: true,
         disableDescription: true,
-        preventRenderType: param !== TABLE_KEYS_NAMES.PARAMETERS,
+        preventRenderType: varName !== TABLE_KEYS_NAMES.PARAMETERS,
+        disabled: viewOnly,
         call
       };
 
-      openDialog({ method, args }, ParameterEditorDialog);
+      call(
+        PLUGINS.DIALOG.NAME,
+        PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
+        args,
+        ParameterEditorDialog
+      );
     },
-    [openDialog, call, handleSubmitParameter, t]
+    [call, handleSubmitParameter, t]
+  );
+
+  /**
+   * Show confirmation dialog before deleting parameter
+   * @param {{key: string}} item : Object containing a key holding the param name
+   * @param {string} varName : keyValue type (parameters, envVars or cmdLine)
+   */
+  const handleKeyValueDelete = useCallback(
+    (item, varName) => {
+      const paramName = item.key;
+      call(PLUGINS.DIALOG.NAME, PLUGINS.DIALOG.CALL.CONFIRMATION, {
+        submitText: t("Delete"),
+        title: t("DeleteDocConfirmationTitle"),
+        onSubmit: () => handleDeleteParameter(paramName, varName),
+        message: t("DeleteKeyConfirmationMessage", { key: paramName })
+      });
+    },
+    [call, handleDeleteParameter, t]
   );
 
   //========================================================================================
@@ -135,17 +175,21 @@ const ContainerMenu = props => {
   //========================================================================================
 
   return (
-    <>
+    <div data-testid="section_flow-container-menu">
       <MenuDetails
         id={data.id}
         model={data.model}
         template={data.ContainerFlow}
-        label={"Template Name:"}
+        label="TemplateName-Colon"
         type={"Sub-Flow"}
         openDoc={openDoc}
       />
       {/* =========================== PARAMETERS =========================== */}
-      <ListItem button onClick={toggleExpanded}>
+      <ListItem
+        data-testid="input_toggle-expanded-parameters"
+        button
+        onClick={toggleExpanded}
+      >
         <ListItemText primary={t("Parameters")} />
         {expanded ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
@@ -156,10 +200,11 @@ const ContainerMenu = props => {
           instanceValues={flowData[TABLE_KEYS_NAMES.PARAMETERS] || {}}
           templateValues={templateData.parameters}
           handleTableKeyEdit={handleKeyValueDialog}
+          handleTableKeyDelete={handleKeyValueDelete}
         />
         <Divider />
       </Collapse>
-    </>
+    </div>
   );
 };
 

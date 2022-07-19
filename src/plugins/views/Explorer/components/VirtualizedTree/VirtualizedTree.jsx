@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import _get from "lodash/get";
 import _debounce from "lodash/debounce";
 import { ContextMenu } from "@mov-ai/mov-fe-lib-react";
+import { withStyles } from "@material-ui/core/styles";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import DeleteIcon from "@material-ui/icons/DeleteOutline";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
@@ -13,65 +14,16 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
-import { withStyles } from "@material-ui/core/styles";
 import { Tooltip, Typography } from "@material-ui/core";
-import { stopPropagation } from "../../../../../utils/Utils";
+import { stopPropagation, defaultFunction } from "../../../../../utils/Utils";
 import ListItemsTreeWithSearch from "../ListItemTree/ListItemsTreeWithSearch";
 
 import "react-virtualized/styles.css";
 import "react-virtualized-tree/lib/main.css";
 import "material-icons/css/material-icons.css";
-
-const styles = theme => ({
-  horizFlex: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center"
-  },
-  spaceBetween: {
-    display: "flex",
-    width: "100%",
-    justifyContent: "space-between"
-  },
-  preContainer: {
-    justifyContent: "space-between",
-    "& button": {
-      display: "none"
-    },
-    "&:hover": {
-      backgroundColor: `${theme.palette.primary.main}26`,
-      "& button": {
-        display: "inline-flex"
-      }
-    }
-  },
-  ellipsis: {
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    flex: 2
-  },
-  displayContents: {
-    display: "contents"
-  },
-  iconSpace: {
-    flex: 1,
-    textAlign: "right",
-    maxWidth: 38,
-    "& button": {
-      position: "relative",
-      bottom: 7,
-      padding: 7
-    }
-  },
-  contextMenuIcon: {
-    color: "white",
-    fontSize: 18
-  }
-});
+import { virtualizedTreeStyles } from "./styles";
 
 const EXPANDED = "EXPANDED";
-const DEFAULT_FUNCTION = name => console.log(name, "not implemented");
 
 const CustomTooltip = withStyles(theme => ({
   tooltip: {
@@ -138,9 +90,9 @@ class VirtualizedTree extends Component {
     const hasOverflow = target.offsetWidth < target.scrollWidth;
     const nodeUrl = node.url ?? node.name;
     if (hasOverflow && nodeTooltip !== nodeUrl) {
-      setImmediate(() => {
+      setTimeout(() => {
         this.setState({ nodeTooltip: nodeUrl });
-      });
+      }, 0);
     }
   }, 500);
 
@@ -166,16 +118,18 @@ class VirtualizedTree extends Component {
         >
           <div style={{ height: this.props.height }}>
             <Tree
+              data-testid="section_explorer"
               nodes={this.searchFilter(nodes, this.state.searchValue)}
               onChange={this.props.handleChange}
             >
-              {({ style, node, ...rest }) => {
+              {({ style, node, ..._rest }) => {
                 // Adjust tree indentation
                 style.paddingLeft = style.marginLeft / 1.5;
                 style.marginLeft = 0;
                 // Render tree element
                 return (
                   <div
+                    data-testid="input_node"
                     style={style}
                     onMouseEnter={() => this.props.onMouseEnter(node)}
                     onMouseLeave={() => this.props.onMouseLeave(node)}
@@ -207,11 +161,11 @@ class VirtualizedTree extends Component {
                           <CustomTooltip
                             arrow
                             title={
-                              <React.Fragment>
+                              <>
                                 <Typography color="inherit">
                                   {node.name}
                                 </Typography>
-                              </React.Fragment>
+                              </>
                             }
                             disableFocusListener
                             disableHoverListener
@@ -246,7 +200,7 @@ class VirtualizedTree extends Component {
                                 }
                                 menuList={[
                                   {
-                                    onClick: evt => {
+                                    onClick: _evt => {
                                       this.props.handleCopyClick({
                                         ...node,
                                         scopeTitle: removePlural(
@@ -317,14 +271,14 @@ VirtualizedTree.propTypes = {
 VirtualizedTree.defaultProps = {
   data: [],
   showIcons: false,
-  onClickNode: () => DEFAULT_FUNCTION("onClickNode"),
-  onMouseEnter: () => {},
-  onMouseLeave: () => {},
-  onDoubleClickNode: () => DEFAULT_FUNCTION("onDoubleClickNode"),
-  handleChange: () => DEFAULT_FUNCTION("handleChange"),
-  handleCopyClick: () => DEFAULT_FUNCTION("handleCopyClick"),
-  handleDeleteClick: () => DEFAULT_FUNCTION("handleDeleteClick"),
-  handleCompareClick: () => DEFAULT_FUNCTION("handleCompareClick"),
+  onClickNode: () => defaultFunction("onClickNode"),
+  onMouseEnter: () => defaultFunction("onMouseEnter", false),
+  onMouseLeave: () => defaultFunction("onMouseLeave", false),
+  onDoubleClickNode: () => defaultFunction("onDoubleClickNode"),
+  handleChange: () => defaultFunction("handleChange"),
+  handleCopyClick: () => defaultFunction("handleCopyClick"),
+  handleDeleteClick: () => defaultFunction("handleDeleteClick"),
+  handleCompareClick: () => defaultFunction("handleCompareClick"),
   height: 700
 };
 
@@ -332,6 +286,6 @@ function removePlural(s) {
   return s[s.length - 1].toLowerCase() === "s" ? s.slice(0, s.length - 1) : s;
 }
 
-export default withStyles(styles, { withTheme: true })(
+export default withStyles(virtualizedTreeStyles, { withTheme: true })(
   withTranslation()(VirtualizedTree)
 );

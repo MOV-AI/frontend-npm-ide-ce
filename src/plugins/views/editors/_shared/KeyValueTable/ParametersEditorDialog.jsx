@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, forwardRef } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import {
@@ -11,8 +11,10 @@ import {
   RadioGroup
 } from "@material-ui/core";
 import { withTheme } from "../../../../../decorators/withTheme";
+import { ERROR_MESSAGES } from "../../../../../utils/Messages";
 import {
   DATA_TYPES,
+  DEFAULT_VALUE,
   DISABLED_VALUE,
   ALERT_SEVERITIES
 } from "../../../../../utils/Constants";
@@ -28,9 +30,10 @@ const VALUE_OPTIONS = {
   DISABLED: "disabled"
 };
 
-const ParameterEditorDialog = forwardRef((props, ref) => {
+const ParameterEditorDialog = props => {
   const {
     isNew,
+    disabled,
     disableType,
     customValidation,
     preventRenderType,
@@ -78,7 +81,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
     if (value === DISABLED_VALUE) {
       result = VALUE_OPTIONS.DISABLED;
     }
-    if (value === "") {
+    if (value === DEFAULT_VALUE) {
       result = VALUE_OPTIONS.DEFAULT;
     }
 
@@ -91,7 +94,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
    * @returns {*} Formatted value
    */
   const valueToRender = useCallback(formData => {
-    const formValue = formData.value || formData.defaultValue;
+    const formValue = formData.value ?? formData.defaultValue;
     return formData?.type === DATA_TYPES.STRING
       ? JSON.stringify(formValue)
       : formValue;
@@ -108,7 +111,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
 
       if (showValueOptions) {
         if (valueOption === VALUE_OPTIONS.DEFAULT) {
-          return "";
+          return DEFAULT_VALUE;
         }
         if (valueOption === VALUE_OPTIONS.DISABLED) {
           return DISABLED_VALUE;
@@ -138,7 +141,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
         ...formData,
         value:
           showValueOptions && valueOption === VALUE_OPTIONS.DEFAULT
-            ? ""
+            ? DEFAULT_VALUE
             : data.value,
         type: data.type
       };
@@ -148,7 +151,9 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
       return validate(dataToValidate)
         .then(res => {
           if (!res.success)
-            throw new Error(res.error || t("Data validation failed"));
+            throw new Error(
+              t(res.error) || t(ERROR_MESSAGES.DATA_VALIDATION_FAILED)
+            );
           // Prepare data to submit
           if (res.parsed) data.value = res.parsed.toString();
           const dataToSubmit = {
@@ -255,7 +260,8 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
           fullWidth
           value={data.type || DATA_TYPES.ANY}
           onChange={handleTypeChange}
-          disabled={disableType}
+          disabled={disableType || disabled}
+          inputProps={{ "data-testid": "input_type" }}
         >
           {getDataTypes().map(key => (
             <MenuItem key={key} value={key}>
@@ -266,6 +272,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
       </FormControl>
     );
   }, [
+    disabled,
     classes,
     data,
     preventRenderType,
@@ -280,31 +287,42 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
     return (
       <FormControl component="fieldset">
         <RadioGroup
+          data-testid="section_value-option"
           value={valueOption}
           onChange={handleChangeValueOption}
           className={classes.valueOptions}
         >
           <FormControlLabel
             value={VALUE_OPTIONS.CUSTOM}
-            control={<Radio />}
-            label={t("Use Custom Value")}
+            disabled={disabled}
+            control={<Radio inputProps={{ "data-testid": "input_custom" }} />}
+            label={t("UseCustomValue")}
           />
           <FormControlLabel
             value={VALUE_OPTIONS.DEFAULT}
-            control={<Radio />}
-            label={t("Use Default Value")}
+            disabled={disabled}
+            control={<Radio inputProps={{ "data-testid": "input_default" }} />}
+            label={t("UseDefaultValue")}
           />
           <FormControlLabel
             value={VALUE_OPTIONS.DISABLED}
-            control={<Radio />}
-            label={t("Disable {{paramType}}", {
+            disabled={disabled}
+            control={<Radio inputProps={{ "data-testid": "input_disabled" }} />}
+            label={t("DisableParamType", {
               paramType: data.paramType || t("Value")
             })}
           />
         </RadioGroup>
       </FormControl>
     );
-  }, [data.paramType, valueOption, classes, handleChangeValueOption, t]);
+  }, [
+    data.paramType,
+    valueOption,
+    classes,
+    handleChangeValueOption,
+    t,
+    disabled
+  ]);
 
   /**
    * Render Value Editor Component
@@ -318,7 +336,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
           {!options.isDefault && showValueOptions && renderValueOptions()}
           {!options.isDefault && valueOption === VALUE_OPTIONS.DISABLED ? (
             <p className={classes.disabledValue}>
-              {t("Disabled {{paramType}}", {
+              {t("DisabledParamType", {
                 paramType: data.paramType || t("Value")
               })}
             </p>
@@ -341,7 +359,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
                     return { ...prevState, value: _value };
                   });
                 },
-                disabled: options.disabled,
+                disabled: options.disabled || disabled,
                 isNew: options.isNew ?? isNew
               },
               "dialog"
@@ -353,6 +371,7 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
     [
       valueOption,
       showValueOptions,
+      disabled,
       data,
       isNew,
       classes,
@@ -371,14 +390,16 @@ const ParameterEditorDialog = forwardRef((props, ref) => {
       renderCustomContent={renderTypeSelector}
     />
   );
-});
+};
 
 ParameterEditorDialog.propTypes = {
   data: PropTypes.object.isRequired,
   isNew: PropTypes.bool,
   disableType: PropTypes.bool,
-  customValidation: PropTypes.func,
+  disabled: PropTypes.bool,
   preventRenderType: PropTypes.bool,
+  showValueOptions: PropTypes.bool,
+  customValidation: PropTypes.func,
   alert: PropTypes.func
 };
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Divider,
   List,
@@ -7,23 +8,30 @@ import {
   Typography
 } from "@material-ui/core";
 
+import { detailsMenuStyles } from "./styles";
+
 const DetailsMenu = ({ name, details }) => {
+  // Style hook
+  const classes = detailsMenuStyles();
+  // Translation hook
+  const { t } = useTranslation();
+
   return (
     <div>
-      <h2 style={{ textAlign: "center" }}>{name}</h2>
+      <h2 className={classes.detailsName}>{name}</h2>
       <List sx={{ width: "100%", bgcolor: "background.paper" }} component="nav">
         <ListItem>
-          <ListItemText primary={`Name:`} />
+          <ListItemText primary={t("Name-Colon")} />
           <Typography>{name}</Typography>
         </ListItem>
         <Divider />
         <ListItem divider>
-          <ListItemText primary={`Last Updated:`} />
+          <ListItemText primary={t("LastUpdate-Colon")} />
           <Typography>{details.date || "N/A"}</Typography>
         </ListItem>
         <Divider />
         <ListItem divider>
-          <ListItemText primary={`User:`} />
+          <ListItemText primary={t("User-Colon")} />
           <Typography>{details.user || "N/A"}</Typography>
         </ListItem>
       </List>

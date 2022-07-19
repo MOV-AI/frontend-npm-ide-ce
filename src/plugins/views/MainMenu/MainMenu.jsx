@@ -12,7 +12,6 @@ import {
   ProfileMenu,
   ContextMenu
 } from "@mov-ai/mov-fe-lib-react";
-import { Authentication } from "@mov-ai/mov-fe-lib-core";
 import TextSnippetIcon from "@material-ui/icons/Description";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 import { Tooltip } from "@material-ui/core";
@@ -33,8 +32,7 @@ const MainMenu = props => {
   const classes = mainMenuStyles();
   const theme = useTheme();
   const { t } = useTranslation();
-  const { isDarkTheme, handleLogOut, handleToggleTheme } =
-    useContext(MainContext);
+  const { isDarkTheme, handleLogOut } = useContext(MainContext);
   // Refs
   const MENUS = useRef([
     {
@@ -82,56 +80,66 @@ const MainMenu = props => {
   //========================================================================================
 
   return (
-    <VerticalBar
-      unsetAccountAreaPadding={true}
-      backgroundColor={theme.palette.background.default}
-      upperElement={
-        <ContextMenu
-          element={
-            <Tooltip title={t("Create new document")} placement="right" arrow>
-              <AddBoxIcon
-                id="mainMenuCreateNewDocument"
-                className={classes.icon}
-              ></AddBoxIcon>
-            </Tooltip>
-          }
-          menuList={docTypes.map(docType => ({
-            onClick: () =>
-              call(PLUGINS.DOC_MANAGER.NAME, PLUGINS.DOC_MANAGER.CALL.CREATE, {
-                scope: docType.scope
-              }).then(document => {
-                call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, {
-                  id: document.getUrl(),
-                  name: document.getName(),
-                  scope: docType.scope,
-                  isNew: true
-                });
-              }),
-            element: docType.scope,
-            icon: getIconByScope(docType.scope),
-            onClose: true
-          }))}
-        ></ContextMenu>
-      }
-      navigationList={MENUS.current.map(menu => (
-        <Tooltip title={menu.title} placement="right" arrow>
-          {menu.icon({
-            className: classes.icon,
-            onClick: () => menu.getOnClick()
-          })}
-        </Tooltip>
-      ))}
-      lowerElement={[
-        <ProfileMenu
-          version={APP_INFORMATION.VERSION}
-          userName={Authentication.getTokenData().message.name ?? ""}
-          isDarkTheme={isDarkTheme}
-          handleLogout={handleLogoutClick}
-          handleToggleTheme={handleToggleTheme}
-        />,
-        <img src={movaiIcon} className={classes.movaiIcon} alt="MOV.AI" />
-      ]}
-    ></VerticalBar>
+    <div className={classes.mainMenuHolder} data-testid="section_main-menu">
+      <VerticalBar
+        unsetAccountAreaPadding={true}
+        backgroundColor={theme.palette.background.default}
+        upperElement={
+          <ContextMenu
+            element={
+              <Tooltip title={t("CreateNewDoc")} placement="right" arrow>
+                <AddBoxIcon
+                  id="mainMenuCreateNewDocument"
+                  className={classes.icon}
+                ></AddBoxIcon>
+              </Tooltip>
+            }
+            menuList={docTypes.map(docType => ({
+              onClick: () =>
+                call(
+                  PLUGINS.DOC_MANAGER.NAME,
+                  PLUGINS.DOC_MANAGER.CALL.CREATE,
+                  {
+                    scope: docType.scope
+                  }
+                ).then(document => {
+                  call(PLUGINS.TABS.NAME, PLUGINS.TABS.CALL.OPEN_EDITOR, {
+                    id: document.getUrl(),
+                    name: document.getName(),
+                    scope: docType.scope,
+                    isNew: true
+                  });
+                }),
+              element: docType.scope,
+              icon: getIconByScope(docType.scope),
+              onClose: true
+            }))}
+          ></ContextMenu>
+        }
+        navigationList={MENUS.current.map(menu => (
+          <Tooltip key={menu.name} title={menu.title} placement="right" arrow>
+            {menu.icon({
+              className: classes.icon,
+              onClick: () => menu.getOnClick()
+            })}
+          </Tooltip>
+        ))}
+        lowerElement={[
+          <ProfileMenu
+            key={"profileMenu"}
+            version={APP_INFORMATION.VERSION}
+            isDarkTheme={isDarkTheme}
+            handleLogout={handleLogoutClick}
+          />,
+          <img
+            key={"movaiIcon"}
+            src={movaiIcon}
+            className={classes.movaiIcon}
+            alt="MOV.AI"
+          />
+        ]}
+      ></VerticalBar>
+    </div>
   );
 };
 
