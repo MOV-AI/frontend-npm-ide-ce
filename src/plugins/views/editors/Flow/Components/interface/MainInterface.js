@@ -425,7 +425,7 @@ export default class MainInterface {
   };
 
   onFocusNode = node => {
-    const { xCenter, yCenter } = node.center;
+    const { xCenter, yCenter } = node.getCenter();
     this.setMode(EVT_NAMES.DEFAULT, null, true);
     node.selected = true;
     if (node.data.id !== "start") {

@@ -174,6 +174,19 @@ class TreeNode extends BaseNode {
   }
 
   /**
+   * @override Get node center
+   * @returns {{xCenter: number, yCenter: number}}
+   */
+  getCenter() {
+    const { x, y } = this.getAbsolutePosition(this);
+
+    return {
+      xCenter: x + this.width / 2,
+      yCenter: y + this.height / 2
+    };
+  }
+
+  /**
    * @private
    * Get x and y lines to draw belong lines
    * @param {Object} offset: {x, y}

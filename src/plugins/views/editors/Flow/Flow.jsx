@@ -196,6 +196,13 @@ const Flow = (props, ref) => {
   }, [contextMenuOptions]);
 
   /**
+   * Get search options
+   */
+  const getSearchOptions = useCallback(() => {
+    return getMainInterface()?.graph.getSearchOptions() || [];
+  }, []);
+
+  /**
    * Open document in new tab
    * @param {*} docData
    */
@@ -1152,13 +1159,6 @@ const Flow = (props, ref) => {
     setSearchVisible(false);
   }, []);
 
-  useEffect(() => {
-    if (searchVisible) {
-      return deactivateKeyBind();
-    }
-    activateKeyBind();
-  }, [searchVisible, deactivateKeyBind, activateKeyBind]);
-
   //========================================================================================
   /*                                                                                      *
    *                                    React Lifecycle                                   *
@@ -1283,6 +1283,13 @@ const Flow = (props, ref) => {
     handleResetZoom
   ]);
 
+  useEffect(() => {
+    if (searchVisible) {
+      return deactivateKeyBind();
+    }
+    activateKeyBind();
+  }, [searchVisible, deactivateKeyBind, activateKeyBind]);
+
   //========================================================================================
   /*                                                                                      *
    *                                        Render                                        *
@@ -1310,7 +1317,7 @@ const Flow = (props, ref) => {
           onViewModeChange={onViewModeChange}
           searchProps={{
             visible: searchVisible,
-            options: instance.current?.getSearchOptions(),
+            options: getSearchOptions(),
             onChange: handleSearchNode,
             onEnabled: handleSearchEnabled,
             onDisabled: handleSearchDisabled
