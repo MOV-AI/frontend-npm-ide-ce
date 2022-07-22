@@ -447,4 +447,17 @@ export default class GraphTreeView extends GraphBase {
   reStrokeLinks = () => {
     /* empty on purpose */
   };
+
+  /**
+   * @override Get Search options recursevely
+   * @returns {array<object>} Tree of Nodes/sub-flows options
+   */
+  getSearchOptions = () => {
+    return Array.from(this.nodes.values())
+      .map(el => ({
+        ...el.obj.data,
+        parent: el.obj.parent?.data?.id || this.id
+      }))
+      .filter(el => el.id !== StartNode.model && el.id !== this.id);
+  };
 }

@@ -603,4 +603,17 @@ export default class GraphBase {
     });
     return this;
   };
+
+  /**
+   * Get Search options
+   * @returns {array<object>} Tree of Nodes/sub-flows options
+   */
+  getSearchOptions = () => {
+    return Array.from(this.nodes.values())
+      .map(el => ({
+        ...el.obj.data,
+        parent: this.id
+      }))
+      .filter(el => el.id !== StartNode.model);
+  };
 }

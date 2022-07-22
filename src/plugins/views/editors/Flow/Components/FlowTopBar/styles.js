@@ -31,7 +31,7 @@ export const flowTopBarStyles = makeStyles(theme => ({
     marginRight: theme.spacing(3)
   },
   searchInputText: {
-    width: "200px"
+    width: "400px"
   },
   searchPopup: {
     width: "fit-content"

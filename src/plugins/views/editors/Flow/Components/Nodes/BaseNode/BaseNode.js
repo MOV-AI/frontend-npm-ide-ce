@@ -952,6 +952,20 @@ class BaseNode extends BaseNodeStruct {
   }
 
   /**
+   * Get node center
+   * @returns {{xCenter: number, yCenter: number}}
+   */
+  getCenter() {
+    const posX = parseFloat(this.object.attr("x"));
+    const posY = parseFloat(this.object.attr("y"));
+
+    return {
+      xCenter: posX + this.width / 2,
+      yCenter: posY + this.height / 2
+    };
+  }
+
+  /**
    * getMiniature - Get svg d3 object with node miniature
    *
    * @param {string} templateName: Node/Container template name
