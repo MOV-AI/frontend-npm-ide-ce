@@ -20,7 +20,7 @@
     "@material-ui/styles": "^4.11.4",
     "@mov-ai/mov-fe-lib-code-editor": "^1.0.6",
     "@mov-ai/mov-fe-lib-core": "^1.1.1-2",
-    "@mov-ai/mov-fe-lib-react": "^1.0.46-2",
+    "@mov-ai/mov-fe-lib-react": "^1.1.1-12",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
     "@remixproject/engine": "^0.3.19",
     "@remixproject/engine-web": "^0.3.19",

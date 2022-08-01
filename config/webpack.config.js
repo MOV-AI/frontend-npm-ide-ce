@@ -193,13 +193,25 @@ module.exports = function (webpackEnv) {
       historyApiFallback: {
         index: "/index.html"
       },
-      proxy: {
-        "/": {
-          target: "http://localhost:8083",
-          router: () => "http://localhost",
-          logLevel: "debug" /*optional*/
+      proxy: [
+        {
+          context: [
+            "/token-auth/**",
+            "/api/**",
+            "/token-verify/**",
+            "/token-refresh/**",
+            "/domains/**",
+            "/ws/**",
+            "/static/maps/**",
+            "/static/meshes/**",
+            "/static/point_clouds/**"
+          ],
+          target: "https://localhost",
+          ws: true,
+          logLevel: "debug",
+          secure: false
         }
-      }
+      ]
     },
     resolve: {
       // This allows you to set a fallback for where webpack should look for modules.
