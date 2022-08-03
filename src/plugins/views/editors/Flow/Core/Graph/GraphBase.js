@@ -269,10 +269,6 @@ export default class GraphBase {
    * @param {*} data
    */
   onFlowUpdate = data => {
-    if (this.updateTemplates) {
-      this.updateTemplates();
-      return;
-    }
     // Add missing nodes and update existing
     this.updateNodes(data.NodeInst, NODE_TYPES.NODE);
     this.updateNodes(data.Container, NODE_TYPES.CONTAINER);
@@ -461,6 +457,8 @@ export default class GraphBase {
         { canvas: this.canvas, node, events }
       );
 
+      // TODO there's a bug where if there's another node / flow with the same name
+      // This is overwritting it https://movai.atlassian.net/browse/FP-2008
       this.nodes.set(node.id, { obj: inst, links: [] });
 
       return inst;

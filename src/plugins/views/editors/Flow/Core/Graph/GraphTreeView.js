@@ -124,6 +124,11 @@ export default class GraphTreeView extends GraphBase {
     }
   }
 
+  updateSubFlow = async (inst, subflowTemplate) => {
+    await this.loadNodes(subflowTemplate, inst);
+    this.updateAllPositions();
+  };
+
   updateAllPositions = async () => {
     for (const parent of this.subFlows) {
       await parent.updateChildrenPosition();
@@ -196,15 +201,6 @@ export default class GraphTreeView extends GraphBase {
       this._updateNodeStatus(nodeName, status);
     });
   }
-
-  /**
-   * @override onTemplateUpdate
-   *
-   * @param {string} name Template name
-   */
-  onTemplateUpdate = name => {
-    this.updateTemplates(name);
-  };
 
   /**
    * @override addLink from GraphBase class
@@ -295,22 +291,6 @@ export default class GraphTreeView extends GraphBase {
     const node = parent.children.find(n => n.data.id === nodeName);
 
     node.status = [1, true, "true"].includes(status);
-  };
-
-  /**
-   * @private
-   * updateTemplates: Update templates of template
-   *
-   * @param {String} templateName
-   * @param {TreeNode} node
-   */
-  updateTemplates = (templateName, node = this.rootNode) => {
-    // Update template with name
-    if (node.templateName === templateName) node.onTemplateUpdate(templateName);
-    // Check all children
-    node.children.forEach(child => {
-      this.updateTemplates(templateName, child);
-    });
   };
 
   /**
