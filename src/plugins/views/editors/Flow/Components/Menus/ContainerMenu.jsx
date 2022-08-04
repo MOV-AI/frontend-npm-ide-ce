@@ -38,7 +38,7 @@ const ContainerMenu = props => {
    * @returns {NodeInstance}
    */
   const getFlowData = useCallback(async () => {
-    const containerInstance = flowModel.current.getSubFlowItem(data.id);
+    const containerInstance = flowModel.current.getSubFlowItem(data.name);
     if (containerInstance) {
       return containerInstance;
     }
@@ -52,8 +52,8 @@ const ContainerMenu = props => {
       }
     );
 
-    return subFlowInst.getSubFlowItem(data.id);
-  }, [data.id, nodeInst, flowModel, call]);
+    return subFlowInst.getSubFlowItem(data.name);
+  }, [data.name, nodeInst, flowModel, call]);
 
   const setFlowDataInst = containerInstance => {
     setFlowData(containerInstance.serialize());
@@ -210,6 +210,7 @@ const ContainerMenu = props => {
     <div data-testid="section_flow-container-menu">
       <MenuDetails
         id={data.id}
+        name={data.name}
         model={data.model}
         template={data.ContainerFlow}
         label="TemplateName-Colon"

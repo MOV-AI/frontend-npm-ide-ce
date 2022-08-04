@@ -2,6 +2,7 @@ import lodash from "lodash";
 import { BehaviorSubject } from "rxjs";
 import { filter } from "rxjs/operators";
 import { NODE_TYPES, TYPES } from "../../Constants/constants";
+import { getNodeNameFromId } from "../../Core/Graph/Utils";
 import Graph from "../../Core/Graph/GraphBase";
 import { EVT_NAMES } from "../../events";
 import StartNode from "../Nodes/StartNode";
@@ -254,7 +255,8 @@ export default class MainInterface {
   };
 
   searchNode = node => {
-    return node.name && this.graph.nodes.get(node.name)?.obj;
+    const nodeName = node.parent !== this.id ? node.id : node.name;
+    return nodeName && this.graph.nodes.get(nodeName)?.obj;
   };
 
   //========================================================================================
@@ -330,6 +332,7 @@ export default class MainInterface {
 
     nodes.forEach(node => {
       const { id } = node.data;
+      const nodeName = getNodeNameFromId(id);
       const [x, y] = node.data.Visualization;
 
       const items =
@@ -337,7 +340,7 @@ export default class MainInterface {
           ? this.modelView.current.getSubFlows()
           : this.modelView.current.getNodeInstances();
 
-      items.getItem(id).setPosition(x, y);
+      items.getItem(nodeName).setPosition(x, y);
     });
   };
 

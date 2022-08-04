@@ -45,9 +45,12 @@ const generateContainerId = flowId => {
   return `base-${flowId?.replace(/\//g, "-")}`;
 };
 
+const PARENT_NODE_SEP = "^";
+
 export {
   MAX_MOVING_PIXELS,
   CANVAS_LIMITS,
+  PARENT_NODE_SEP,
   generateContainerId,
   FLOW_VIEW_MODE,
   MOVAI_FLOW_TYPES,
