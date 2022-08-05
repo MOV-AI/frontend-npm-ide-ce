@@ -1,7 +1,12 @@
 import StartNode from "../../Components/Nodes/StartNode";
 import BaseLink from "../../Components/Links/BaseLink";
 import Factory from "../../Components/Nodes/Factory";
-import { FLOW_VIEW_MODE, NODE_TYPES, TYPES } from "../../Constants/constants";
+import {
+  PARENT_NODE_SEP,
+  FLOW_VIEW_MODE,
+  NODE_TYPES,
+  TYPES
+} from "../../Constants/constants";
 import { InvalidLink } from "../../Components/Links/Errors";
 import GraphBase from "./GraphBase";
 import GraphValidator from "./GraphValidator";
@@ -109,7 +114,11 @@ export default class GraphTreeView extends GraphBase {
         const subFlows = Object.values(flow.Container);
 
         for (const subFlow of subFlows) {
-          const subFlowInst = this.nodes.get(subFlow.ContainerLabel).obj;
+          const subFlowId =
+            parent.name === this.id
+              ? subFlow.ContainerLabel
+              : `${parent.name}${PARENT_NODE_SEP}${subFlow.ContainerLabel}`;
+          const subFlowInst = this.nodes.get(subFlowId).obj;
           const subFlowTemplate = subFlowInst.template;
 
           await this.loadNodes(subFlowTemplate, subFlowInst);
@@ -220,7 +229,7 @@ export default class GraphTreeView extends GraphBase {
       const parsedLink = BaseLink.parseLink(link);
 
       const { sourcePortPos, targetPortPos } =
-        GraphValidator.extractLinkPortsPos(parsedLink, this.nodes);
+        GraphValidator.extractLinkPortsPos(parsedLink, this.nodes, parent);
 
       if (!sourcePortPos || !targetPortPos) {
         throw new InvalidLink(parsedLink);
@@ -282,13 +291,13 @@ export default class GraphTreeView extends GraphBase {
     // is this a subflow node?
     if (nodeName.indexOf("__") >= 0) {
       const nodePath = nodeName.split("__");
-      const nodeParent = parent.children.find(n => n.data.id === nodePath[0]);
+      const nodeParent = parent.children.find(n => n.data.name === nodePath[0]);
       const newNodeName = nodePath.splice(1).join("__");
       // let's call this function again with the newNodeName (child) and the parent is the node
       return this._updateNodeStatus(newNodeName, status, nodeParent);
     }
 
-    const node = parent.children.find(n => n.data.id === nodeName);
+    const node = parent.children.find(n => n.data.name === nodeName);
 
     node.status = [1, true, "true"].includes(status);
   };
@@ -368,7 +377,11 @@ export default class GraphTreeView extends GraphBase {
     const keys = Object.keys(_nodes);
 
     for (const nodeKey of keys) {
-      const _node = { ..._nodes[nodeKey], id: nodeKey };
+      const id =
+        parent.name === this.id
+          ? nodeKey
+          : `${parent.name}${PARENT_NODE_SEP}${nodeKey}`;
+      const _node = { ..._nodes[nodeKey], id };
 
       try {
         await this.addNode(_node, _type, parent);

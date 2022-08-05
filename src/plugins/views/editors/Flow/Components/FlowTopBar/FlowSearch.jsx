@@ -29,7 +29,7 @@ const FlowSearch = props => {
    */
   const getOptionLabel = option => {
     const template = option.Template || option.ContainerFlow;
-    return `${option.id} [${template}]`;
+    return `${option.name} [${template}]`;
   };
 
   //========================================================================================

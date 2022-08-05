@@ -21,6 +21,7 @@
 - [FP-1913 - Add editing capabilities to Tree View Editor](https://movai.atlassian.net/browse/FP-1913)
 - [FP-1913 - Added Exposed Ports validation and fix to remove them](https://movai.atlassian.net/browse/FP-1913)
 - [FP-1993 - Tree View subflows now correctly update changes made to them](https://movai.atlassian.net/browse/FP-1993)
+- [FP-2008 - Composed the names of the subflow children on Tree View](https://movai.atlassian.net/browse/FP-2008)
 
 # 3.0.0
 
