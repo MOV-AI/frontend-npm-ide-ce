@@ -121,7 +121,9 @@ export default class GraphTreeView extends GraphBase {
           const subFlowInst = this.nodes.get(subFlowId).obj;
           const subFlowTemplate = subFlowInst.template;
 
-          await this.loadNodes(subFlowTemplate, subFlowInst);
+          if (!this.isEndlessChild(subFlowInst)) {
+            await this.loadNodes(subFlowTemplate, subFlowInst);
+          }
         }
 
         // Add parent children to canvas
@@ -132,6 +134,21 @@ export default class GraphTreeView extends GraphBase {
       console.warn("Error has ocurred loading children", flow, error);
     }
   }
+
+  isEndlessChild = baseFlowInst => {
+    let parent = this.nodes.get(baseFlowInst.parent.name);
+
+    while (Boolean(parent)) {
+      if (parent.obj.templateName !== baseFlowInst.templateName) {
+        parent = this.nodes.get(parent.obj.parent?.name);
+        continue;
+      }
+
+      return true;
+    }
+
+    return false;
+  };
 
   updateAllPositions = async () => {
     for (const parent of this.subFlows) {
@@ -426,7 +443,7 @@ export default class GraphTreeView extends GraphBase {
         { canvas: this.canvas, node }
       );
 
-      this.nodes.set(node.id, { obj: inst, links: [] });
+      this.nodes.set(node.id, { obj: inst, links: [], rootNode: true });
 
       this.tree.root = inst;
     } catch (error) {
