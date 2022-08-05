@@ -87,11 +87,10 @@ const NodeMenu = memo(
 
     /**
      * @private Get the node instance item
-     * @param {string} id : Node instance Item Id
      * @returns {NodeInstance}
      */
     const getNodeData = useCallback(async () => {
-      const nodeInstanceItem = flowModel.current.getNodeInstanceItem(data.id);
+      const nodeInstanceItem = flowModel.current.getNodeInstanceItem(data.name);
       if (nodeInstanceItem) {
         return nodeInstanceItem;
       }
@@ -105,8 +104,8 @@ const NodeMenu = memo(
         }
       );
 
-      return subFlowInst.getNodeInstanceItem(data.id);
-    }, [data.id, nodeInst, flowModel, call]);
+      return subFlowInst.getNodeInstanceItem(data.name);
+    }, [data.name, nodeInst, flowModel, call]);
 
     const setNodeDataInst = nodeInstance => {
       setNodeData(nodeInstance.serialize());
@@ -313,6 +312,7 @@ const NodeMenu = memo(
       >
         <MenuDetails
           id={data.id}
+          name={data.name}
           model={data.model}
           template={data.Template}
           label="TemplateName-Colon"

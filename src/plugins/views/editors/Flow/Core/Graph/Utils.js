@@ -1,3 +1,4 @@
+import { PARENT_NODE_SEP } from "../../Constants/constants";
 import { flattenObject } from "../../Utils/utils";
 
 const SEPARATOR = ",";
@@ -57,3 +58,13 @@ const shouldUpdateExposedPorts = (prevState, newState, updateAll) => {
 };
 
 export { shouldUpdateExposedPorts };
+
+export function getNodeParentNameFromId(nodeId) {
+  return nodeId.split(PARENT_NODE_SEP)[0];
+}
+
+export function getNodeNameFromId(nodeId) {
+  return nodeId.includes(PARENT_NODE_SEP)
+    ? nodeId.split(PARENT_NODE_SEP)[1]
+    : nodeId;
+}
