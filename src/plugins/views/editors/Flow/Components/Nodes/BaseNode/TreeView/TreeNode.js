@@ -407,18 +407,30 @@ class TreeNode extends BaseNode {
     if (this.isContainer) {
       // Remove old belong line
       this.removeBelongLine();
-      // Remove all children
-      this.children.forEach(child => child.destroy());
-      this.children = [];
-      // Remove collapsableItem (NODES)
-      this.collapsableItem.destroy();
-      this._collapsableItem = null;
+      this.removeAllChildren();
+      this.removeCollapsibleElement();
 
       // Re-add the subflow
       this.canvas.mInterface.graph.updateSubFlow(this, template);
     }
 
     this.update(true);
+  };
+
+  /**
+   * Removes all children and clears the array
+   */
+  removeAllChildren = () => {
+    this.children.forEach(child => child.destroy());
+    this.children = [];
+  };
+
+  /**
+   * Removes the NODES collapsible item
+   */
+  removeCollapsibleElement = () => {
+    this.collapsableItem.destroy();
+    this._collapsableItem = null;
   };
 
   /**
