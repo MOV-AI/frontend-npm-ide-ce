@@ -199,6 +199,7 @@
   "PreviewHelperText": "Hover a node to see more information",
   "Properties": "Properties",
   "QuickAccess": "Quick Access",
+  "RecursiveTemplate-Colon": "Recursive Template:",
   "Recent": "Recent",
   "Redo": "Redo",
   "RedoKeybindDescription": "Use to rollforward changes.",
