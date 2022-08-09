@@ -136,11 +136,11 @@ export default class GraphTreeView extends GraphBase {
   }
 
   isEndlessChild = baseFlowInst => {
-    let parent = this.nodes.get(baseFlowInst.parent.name);
+    let parent = this.nodes.get(baseFlowInst.parent.data.id);
 
     while (Boolean(parent)) {
       if (parent.obj.templateName !== baseFlowInst.templateName) {
-        parent = this.nodes.get(parent.obj.parent?.name);
+        parent = this.nodes.get(parent.obj?.parent?.data?.id);
         continue;
       }
 
@@ -168,6 +168,18 @@ export default class GraphTreeView extends GraphBase {
    */
   async addNode(node, nodeType, parent) {
     try {
+      const thisNode = {
+        parent,
+        templateName: node.ContainerFlow
+      };
+
+      if (
+        nodeType === NODE_TYPES.TREE_CONTAINER &&
+        this.isEndlessChild(thisNode)
+      ) {
+        node.endless = true;
+      }
+
       const inst = await Factory.create(
         this.docManager,
         Factory.OUTPUT[nodeType],
