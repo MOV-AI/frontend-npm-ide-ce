@@ -457,8 +457,6 @@ export default class GraphBase {
         { canvas: this.canvas, node, events }
       );
 
-      // TODO there's a bug where if there's another node / flow with the same name
-      // This is overwritting it https://movai.atlassian.net/browse/FP-2008
       this.nodes.set(node.id, { obj: inst, links: [] });
 
       return inst;
