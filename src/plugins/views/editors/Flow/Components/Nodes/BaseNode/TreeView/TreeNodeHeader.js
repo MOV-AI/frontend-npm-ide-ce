@@ -50,6 +50,7 @@ class TreeNodeHeader extends BaseNodeHeader {
         .append("tspan")
         .attr("x", this.x)
         .attr("dy", "1.2em")
+        .attr("fill", "red")
         .text(this.templateString);
     }
 
