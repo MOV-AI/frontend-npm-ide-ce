@@ -23,7 +23,8 @@ class BaseContainerNode extends BaseNode {
       Visualization: convertVisualization(node.Visualization) || [50, 50],
       Parameter: node.Parameter || {},
       type: TYPES.CONTAINER,
-      model: "Flow"
+      model: "Flow",
+      endless: node.endless ?? false
     };
     this.requiredKeys = ["ContainerFlow", "ContainerLabel", "Visualization"];
   }

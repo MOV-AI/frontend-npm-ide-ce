@@ -68,7 +68,8 @@ class TreeNode extends BaseNode {
       this.headerPos.y,
       this.name,
       this.templateName,
-      this._type
+      this._type,
+      this.data.endless
     );
 
     // append to the svg element
