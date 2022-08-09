@@ -1,15 +1,16 @@
 import * as d3 from "d3";
 import _debounce from "lodash/debounce";
+import { belongLineBuilder } from "../../Utils";
 import BaseNode from "../BaseNode";
+import BaseNodeStatus from "../BaseNodeStatus";
 import TreeNodeHeader from "./TreeNodeHeader";
 import TreeNodePort from "./TreeNodePort";
 import CollapsableItem from "./CollapsableItem";
-import { belongLineBuilder } from "../../Utils";
-import BaseNodeStatus from "../BaseNodeStatus";
 
 class TreeNode extends BaseNode {
   constructor({ canvas, node, events, _type, template, parent }) {
     super({ canvas, node, events, _type, template });
+    this.isContainer = false;
     this.parent = parent;
     this.children = [];
     this._links = new Map();
@@ -151,6 +152,7 @@ class TreeNode extends BaseNode {
       .renderStatus();
 
     if (addLinks) this.updateLinks();
+
     return this;
   };
 
@@ -398,10 +400,38 @@ class TreeNode extends BaseNode {
    *
    * @param {string} templateName node's template name
    */
-  onTemplateUpdate = templateName => {
+  onTemplateUpdate = template => {
+    const templateName = template.Label ?? template;
     if (templateName !== this.templateName) return; //not my template
     this._template = undefined;
+
+    if (this.isContainer) {
+      // Remove old belong line
+      this.removeBelongLine();
+      this.removeAllChildren();
+      this.removeCollapsibleElement();
+
+      // Re-add the subflow
+      this.canvas.mInterface.graph.updateSubFlow(this, template);
+    }
+
     this.update(true);
+  };
+
+  /**
+   * Removes all children and clears the array
+   */
+  removeAllChildren = () => {
+    this.children.forEach(child => child.destroy());
+    this.children = [];
+  };
+
+  /**
+   * Removes the NODES collapsible item
+   */
+  removeCollapsibleElement = () => {
+    this.collapsableItem.destroy();
+    this._collapsableItem = null;
   };
 
   /**

@@ -269,10 +269,6 @@ export default class GraphBase {
    * @param {*} data
    */
   onFlowUpdate = data => {
-    if (this.updateTemplates) {
-      this.updateTemplates();
-      return;
-    }
     // Add missing nodes and update existing
     this.updateNodes(data.NodeInst, NODE_TYPES.NODE);
     this.updateNodes(data.Container, NODE_TYPES.CONTAINER);

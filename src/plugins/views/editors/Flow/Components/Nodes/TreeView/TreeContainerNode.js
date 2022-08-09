@@ -22,6 +22,7 @@ class TreeContainerNode extends TreeNode {
     this._template = this.base._template;
     this.getExposedName = this.base.getExposedName;
     this._addPorts = () => this;
+    this.isContainer = true;
 
     // initialize the container
     this.init();
