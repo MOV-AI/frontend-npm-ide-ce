@@ -20,12 +20,13 @@ import useDataSubscriber from "../../../../../plugins/DocManager/useDataSubscrib
 import {
   DEFAULT_KEY_VALUE_DATA,
   DATA_TYPES,
-  PLUGINS
-} from "../../../../../utils/Constants";
-import { validateDocumentName } from "../../../../../utils/Utils";
-import { ERROR_MESSAGES } from "../../../../../utils/Messages";
-import ParameterEditorDialog from "../../../../_shared/KeyValueTable/ParametersEditorDialog";
-import DetailsMenu from "../../../../_shared/DetailsMenu/DetailsMenu";
+  PLUGINS,
+  TABLE_KEYS_NAMES,
+  DIALOG_TITLE
+} from "../../../../../../utils/Constants";
+import { validateDocumentName } from "../../../../../../utils/Utils";
+import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
+import DetailsMenu from "../../../_shared/DetailsMenu/DetailsMenu";
 import TableKeyValue from "./sub-components/TableKeyValue";
 import GroupItem from "./sub-components/GroupItem";
 import menuStyles from "./styles";
@@ -167,7 +168,11 @@ const Menu = ({
       if (oldName === "") {
         model.current.addParameter(newData.name, newData);
       } else {
-        model.current.updateKeyValueItem("parameters", newData, oldName);
+        model.current.updateKeyValueItem(
+          TABLE_KEYS_NAMES.PARAMETERS,
+          newData,
+          oldName
+        );
       }
     },
     [model]
@@ -176,17 +181,16 @@ const Menu = ({
   /**
    * Open dialog to edit/add new Parameter
    * @param {string} dataId : Unique identifier of item (undefined when not created yet)
-   * @param {ReactComponent} DialogComponent : Dialog component to render
    */
   const handleParameterDialog = useCallback(
     dataId => {
       const obj = model.current.getParameter(dataId) || DEFAULT_KEY_VALUE_DATA;
+      const paramType = t(DIALOG_TITLE.PARAMETERS);
 
       const args = {
         onSubmit: formData => handleSubmitParameter(obj.name, formData),
         nameValidation: newData => validateParamName(obj.name, newData),
-        renderType: true,
-        title: t("Parameter"),
+        title: t("EditParamType", { paramType }),
         data: obj,
         call
       };
@@ -198,7 +202,7 @@ const Menu = ({
         ParameterEditorDialog
       );
     },
-    [model, call, validateParamName, handleSubmitParameter, t]
+    [model, validateParamName, handleSubmitParameter, call, t]
   );
 
   //========================================================================================

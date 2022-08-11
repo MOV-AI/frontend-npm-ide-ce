@@ -15,7 +15,7 @@ import {
 import { defaultFunction } from "../../../../../utils/Utils";
 import { MisMatchMessageLink } from "../../Components/Links/Errors";
 import { isLinkeable } from "../../Components/Nodes/BaseNode/PortValidator";
-import { TYPES } from "../../Constants/constants";
+import { PARENT_NODE_SEP, TYPES } from "../../Constants/constants";
 
 export const WARNING_TYPES = {
   START_LINK: "startLink",
@@ -299,9 +299,11 @@ export default class GraphValidator {
    * @param {array} nodes : Array of nodes to get ports position
    * @returns
    */
-  static extractLinkPortsPos = (link, nodes) => {
+  static extractLinkPortsPos = (link, nodes, parent) => {
     const [sourceNode, targetNode] = ["sourceNode", "targetNode"].map(key => {
-      const node = nodes.get(link[key]);
+      const node =
+        nodes.get(link[key]) ??
+        nodes.get(`${parent?.name}${PARENT_NODE_SEP}${link[key]}`);
       if (!node) throw new Error(`Node ${link[key]} not found`);
       return node;
     });

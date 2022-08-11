@@ -1,7 +1,12 @@
 import StartNode from "../../Components/Nodes/StartNode";
 import BaseLink from "../../Components/Links/BaseLink";
 import Factory from "../../Components/Nodes/Factory";
-import { FLOW_VIEW_MODE, NODE_TYPES, TYPES } from "../../Constants/constants";
+import {
+  PARENT_NODE_SEP,
+  FLOW_VIEW_MODE,
+  NODE_TYPES,
+  TYPES
+} from "../../Constants/constants";
 import { InvalidLink } from "../../Components/Links/Errors";
 import GraphBase from "./GraphBase";
 import GraphValidator from "./GraphValidator";
@@ -109,10 +114,16 @@ export default class GraphTreeView extends GraphBase {
         const subFlows = Object.values(flow.Container);
 
         for (const subFlow of subFlows) {
-          const subFlowInst = this.nodes.get(subFlow.ContainerLabel).obj;
+          const subFlowId =
+            parent.name === this.id
+              ? subFlow.ContainerLabel
+              : `${parent.name}${PARENT_NODE_SEP}${subFlow.ContainerLabel}`;
+          const subFlowInst = this.nodes.get(subFlowId).obj;
           const subFlowTemplate = subFlowInst.template;
 
-          await this.loadNodes(subFlowTemplate, subFlowInst);
+          if (!this.isEndlessChild(subFlowInst)) {
+            await this.loadNodes(subFlowTemplate, subFlowInst);
+          }
         }
 
         // Add parent children to canvas
@@ -123,6 +134,26 @@ export default class GraphTreeView extends GraphBase {
       console.warn("Error has ocurred loading children", flow, error);
     }
   }
+
+  updateSubFlow = async (inst, subflowTemplate) => {
+    await this.loadNodes(subflowTemplate, inst);
+    this.updateAllPositions();
+  };
+
+  isEndlessChild = baseFlowInst => {
+    let parent = this.nodes.get(baseFlowInst.parent.data.id);
+
+    while (Boolean(parent)) {
+      if (parent.obj.templateName !== baseFlowInst.templateName) {
+        parent = this.nodes.get(parent.obj?.parent?.data?.id);
+        continue;
+      }
+
+      return true;
+    }
+
+    return false;
+  };
 
   updateAllPositions = async () => {
     for (const parent of this.subFlows) {
@@ -142,6 +173,18 @@ export default class GraphTreeView extends GraphBase {
    */
   async addNode(node, nodeType, parent) {
     try {
+      const thisNode = {
+        parent,
+        templateName: node.ContainerFlow
+      };
+
+      if (
+        nodeType === NODE_TYPES.TREE_CONTAINER &&
+        this.isEndlessChild(thisNode)
+      ) {
+        node.endless = true;
+      }
+
       const inst = await Factory.create(
         this.docManager,
         Factory.OUTPUT[nodeType],
@@ -198,15 +241,6 @@ export default class GraphTreeView extends GraphBase {
   }
 
   /**
-   * @override onTemplateUpdate
-   *
-   * @param {string} name Template name
-   */
-  onTemplateUpdate = name => {
-    this.updateTemplates(name);
-  };
-
-  /**
    * @override addLink from GraphBase class
    * @param {Object} link : Link info
    * @param {String} nodeId : Parent node ID
@@ -224,7 +258,7 @@ export default class GraphTreeView extends GraphBase {
       const parsedLink = BaseLink.parseLink(link);
 
       const { sourcePortPos, targetPortPos } =
-        GraphValidator.extractLinkPortsPos(parsedLink, this.nodes);
+        GraphValidator.extractLinkPortsPos(parsedLink, this.nodes, parent);
 
       if (!sourcePortPos || !targetPortPos) {
         throw new InvalidLink(parsedLink);
@@ -286,31 +320,15 @@ export default class GraphTreeView extends GraphBase {
     // is this a subflow node?
     if (nodeName.indexOf("__") >= 0) {
       const nodePath = nodeName.split("__");
-      const nodeParent = parent.children.find(n => n.data.id === nodePath[0]);
+      const nodeParent = parent.children.find(n => n.data.name === nodePath[0]);
       const newNodeName = nodePath.splice(1).join("__");
       // let's call this function again with the newNodeName (child) and the parent is the node
       return this._updateNodeStatus(newNodeName, status, nodeParent);
     }
 
-    const node = parent.children.find(n => n.data.id === nodeName);
+    const node = parent.children.find(n => n.data.name === nodeName);
 
     node.status = [1, true, "true"].includes(status);
-  };
-
-  /**
-   * @private
-   * updateTemplates: Update templates of template
-   *
-   * @param {String} templateName
-   * @param {TreeNode} node
-   */
-  updateTemplates = (templateName, node = this.rootNode) => {
-    // Update template with name
-    if (node.templateName === templateName) node.onTemplateUpdate(templateName);
-    // Check all children
-    node.children.forEach(child => {
-      this.updateTemplates(templateName, child);
-    });
   };
 
   /**
@@ -388,7 +406,11 @@ export default class GraphTreeView extends GraphBase {
     const keys = Object.keys(_nodes);
 
     for (const nodeKey of keys) {
-      const _node = { ..._nodes[nodeKey], id: nodeKey };
+      const id =
+        parent.name === this.id
+          ? nodeKey
+          : `${parent.name}${PARENT_NODE_SEP}${nodeKey}`;
+      const _node = { ..._nodes[nodeKey], id };
 
       try {
         await this.addNode(_node, _type, parent);
@@ -413,7 +435,7 @@ export default class GraphTreeView extends GraphBase {
         { canvas: this.canvas, node }
       );
 
-      this.nodes.set(node.id, { obj: inst, links: [] });
+      this.nodes.set(node.id, { obj: inst, links: [], rootNode: true });
 
       this.tree.root = inst;
     } catch (error) {
@@ -446,5 +468,18 @@ export default class GraphTreeView extends GraphBase {
 
   reStrokeLinks = () => {
     /* empty on purpose */
+  };
+
+  /**
+   * @override Get Search options recursevely
+   * @returns {array<object>} Tree of Nodes/sub-flows options
+   */
+  getSearchOptions = () => {
+    return Array.from(this.nodes.values())
+      .map(el => ({
+        ...el.obj.data,
+        parent: el.obj.parent?.data?.id || this.id
+      }))
+      .filter(el => el.id !== StartNode.model && el.id !== this.id);
   };
 }

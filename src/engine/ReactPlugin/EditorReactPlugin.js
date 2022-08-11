@@ -63,14 +63,15 @@ export function withEditorPlugin(ReactComponent, methods = []) {
     }, [activateKeyBind, updateRightMenu]);
 
     /**
-     * Activate keybinds if is this editor
+     * Triggers activateEditor if is this editor
      */
-    const activateThisKeys = useCallback(
-      ({ instance }) => {
-        if (!instance) return;
-        if (instance.id === getNameFromURL(id)) editorContainer.current.focus();
+    const activateThisEditor = useCallback(
+      data => {
+        const { instance } = data;
+        if (data.id === id || instance?.id === getNameFromURL(id))
+          activateEditor();
       },
-      [id]
+      [id, activateEditor]
     );
 
     /**
@@ -82,13 +83,13 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       on(
         PLUGINS.TABS.NAME,
         PLUGINS.TABS.ON.ACTIVE_TAB_CHANGE,
-        activateThisKeys
+        activateThisEditor
       );
 
       on(
         PLUGINS.DOC_MANAGER.NAME,
         PLUGINS.DOC_MANAGER.ON.UPDATE_DOC_DIRTY,
-        activateThisKeys
+        activateThisEditor
       );
 
       // Remove key bind on component unmount
@@ -105,7 +106,7 @@ export function withEditorPlugin(ReactComponent, methods = []) {
       on,
       off,
       save,
-      activateThisKeys
+      activateThisEditor
     ]);
 
     return (

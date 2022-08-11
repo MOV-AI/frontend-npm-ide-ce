@@ -269,10 +269,6 @@ export default class GraphBase {
    * @param {*} data
    */
   onFlowUpdate = data => {
-    if (this.updateTemplates) {
-      this.updateTemplates();
-      return;
-    }
     // Add missing nodes and update existing
     this.updateNodes(data.NodeInst, NODE_TYPES.NODE);
     this.updateNodes(data.Container, NODE_TYPES.CONTAINER);
@@ -602,5 +598,18 @@ export default class GraphBase {
       linkData.changeStrokeColor();
     });
     return this;
+  };
+
+  /**
+   * Get Search options
+   * @returns {array<object>} Tree of Nodes/sub-flows options
+   */
+  getSearchOptions = () => {
+    return Array.from(this.nodes.values())
+      .map(el => ({
+        ...el.obj.data,
+        parent: this.id
+      }))
+      .filter(el => el.id !== StartNode.model);
   };
 }

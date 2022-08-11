@@ -397,7 +397,6 @@ ParameterEditorDialog.propTypes = {
   isNew: PropTypes.bool,
   disableType: PropTypes.bool,
   disabled: PropTypes.bool,
-  showDescription: PropTypes.bool,
   preventRenderType: PropTypes.bool,
   showValueOptions: PropTypes.bool,
   customValidation: PropTypes.func,
