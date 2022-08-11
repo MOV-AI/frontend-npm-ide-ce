@@ -17,16 +17,18 @@ import Add from "@material-ui/icons/Add";
 import { Utils } from "@mov-ai/mov-fe-lib-core";
 import Model from "../../../model/Flow";
 import useDataSubscriber from "../../../../../plugins/DocManager/useDataSubscriber";
+
+import { ERROR_MESSAGES } from "../../../../../utils/Messages";
 import {
   DEFAULT_KEY_VALUE_DATA,
   DATA_TYPES,
   PLUGINS,
   TABLE_KEYS_NAMES,
   DIALOG_TITLE
-} from "../../../../../../utils/Constants";
-import { validateDocumentName } from "../../../../../../utils/Utils";
-import ParameterEditorDialog from "../../../_shared/KeyValueTable/ParametersEditorDialog";
-import DetailsMenu from "../../../_shared/DetailsMenu/DetailsMenu";
+} from "../../../../../utils/Constants";
+import { validateDocumentName } from "../../../../../utils/Utils";
+import ParametersEditorDialog from "../../../../_shared/KeyValueTable/ParametersEditorDialog";
+import DetailsMenu from "../../../../_shared/DetailsMenu/DetailsMenu";
 import TableKeyValue from "./sub-components/TableKeyValue";
 import GroupItem from "./sub-components/GroupItem";
 import menuStyles from "./styles";
@@ -199,7 +201,7 @@ const Menu = ({
         PLUGINS.DIALOG.NAME,
         PLUGINS.DIALOG.CALL.CUSTOM_DIALOG,
         args,
-        ParameterEditorDialog
+        ParametersEditorDialog
       );
     },
     [model, validateParamName, handleSubmitParameter, call, t]

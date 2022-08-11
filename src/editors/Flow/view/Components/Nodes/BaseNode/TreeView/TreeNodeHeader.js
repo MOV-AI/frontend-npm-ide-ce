@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import i18n from "../../../../../../../../i18n/i18n";
+import i18n from "../../../../../../../i18n/i18n";
 import BaseNodeHeader from "../BaseNodeHeader";
 
 class TreeNodeHeader extends BaseNodeHeader {
