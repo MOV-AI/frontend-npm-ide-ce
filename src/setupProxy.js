@@ -1,15 +1,17 @@
 const { createProxyMiddleware } = require("http-proxy-middleware");
 
+console.log("SetupProxy");
 module.exports = function (app) {
   app.use(
     createProxyMiddleware(
       [
         "/token-auth/**",
         "/api/**",
+        "/domains/**",
         "/token-verify/**",
         "/token-refresh/**",
-        "/domains/**",
         "/ws/**",
+        "/logout/**",
         "/static/maps/**",
         "/static/meshes/**",
         "/static/point_clouds/**"

@@ -12,32 +12,15 @@
   "dependencies": {
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
-    "@material-table/core": "^4.3.11",
-    "@material-ui/core": "^4.12.3",
-    "@material-ui/icons": "^4.11.2",
-    "@material-ui/lab": "^4.0.0-alpha.60",
-    "@material-ui/styles": "^4.11.4",
-    "@mov-ai/mov-fe-lib-code-editor": "^1.0.6",
-    "@mov-ai/mov-fe-lib-core": "^1.1.1-4",
-    "@mov-ai/mov-fe-lib-react": "^1.1.1-4",
-    "@remixproject/engine": "^0.3.19",
-    "@remixproject/engine-web": "^0.3.19",
+    "@mov-ai/mov-fe-lib-core": "^1.1.1-11",
+    "@mov-ai/mov-fe-lib-ide": "file:../frontend-npm-lib-ide",
+    "@mov-ai/mov-fe-lib-react": "^1.1.1-12",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
-    "d3": "^5.16.0",
-    "hotkeys-js": "^3.8.7",
-    "joi": "^17.4.2",
-    "lodash": "^4.17.21",
-    "material-table": "^1.69.3",
-    "monet": "^0.9.2",
-    "rc-dock": "^3.2.2",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-i18next": "^11.13.0",
-    "react-scripts": "^5.0.1",
-    "react-virtualized-auto-sizer": "^1.0.6",
-    "react-window": "^1.8.7",
     "rxjs": "^6.6.7",
     "web-vitals": "^1.1.2"
   },
@@ -69,7 +52,8 @@
     ]
   },
   "devDependencies": {
-    "http-proxy-middleware": "^2.0.4"
+    "http-proxy-middleware": "^2.0.4",
+    "react-scripts": "^5.0.1"
   },
   "jest": {
     "transformIgnorePatterns": [
