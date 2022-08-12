@@ -9,6 +9,7 @@ import { reportWebVitals } from "@mov-ai/mov-fe-lib-ide";
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
 
+window.React = React;
 ReactDOM.render(
   <React.StrictMode>
     <App />
