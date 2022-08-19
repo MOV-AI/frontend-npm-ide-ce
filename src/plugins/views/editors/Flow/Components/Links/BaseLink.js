@@ -2,6 +2,7 @@ import * as d3 from "d3";
 import { LINK_DEPENDENCY } from "../../../../../../utils/Constants";
 import { defaultFunction } from "../../../../../../utils/Utils";
 import { MOVAI_FLOW_TYPES } from "../../Constants/constants";
+import { EVT_NAMES } from "../../events";
 import { isLinkeable } from "../Nodes/BaseNode/PortValidator";
 import { generatePathPoints } from "./generatePathPoints";
 
@@ -248,7 +249,7 @@ export default class BaseLink extends BaseLinkStruct {
    * @private
    */
   onMouseOver = () => {
-    if (this.canvas.mode.current.id === "default") {
+    if (this.canvas.mode.current.id !== EVT_NAMES.LINKING) {
       this.styleMouseOver();
     }
     // Fade out other links
@@ -290,7 +291,11 @@ export default class BaseLink extends BaseLinkStruct {
   onClick = () => {
     if (d3.event.shiftKey) return;
 
-    this.canvas.events.next({ name: "onClick", type: "Link", data: this });
+    this.canvas.events.next({
+      name: EVT_NAMES.ON_CLICK,
+      type: "Link",
+      data: this
+    });
     this.onSelected(!this._isSelected);
   };
 
@@ -299,7 +304,7 @@ export default class BaseLink extends BaseLinkStruct {
    */
   onContextMenu = () => {
     this.canvas.setMode(
-      "linkCtxMenu",
+      EVT_NAMES.ON_LINK_CTX_MENU,
       {
         event: d3.event,
         linkId: this.data.id, //this.data has the linkId

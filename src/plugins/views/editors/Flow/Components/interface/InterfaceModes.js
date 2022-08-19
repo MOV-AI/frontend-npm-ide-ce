@@ -1,3 +1,4 @@
+import { EVT_NAMES } from "../../events";
 import { BaseMode, AddNodeMode, DragMode, LinkingMode } from "./Modes";
 
 /**
@@ -24,52 +25,52 @@ export default class InterfaceModes {
    */
   initialize = () => {
     // loading mode
-    this._loading = BaseMode("loading");
+    this._loading = BaseMode(EVT_NAMES.LOADING);
 
     // default mode
-    this._default = BaseMode("default");
+    this._default = BaseMode(EVT_NAMES.DEFAULT);
 
     // drag mode
-    this._drag = DragMode("drag");
+    this._drag = DragMode(EVT_NAMES.DRAG);
 
     // add node mode
-    this._addNode = AddNodeMode("addNode");
+    this._addNode = AddNodeMode(EVT_NAMES.ADD_NODE);
 
     // add flow mode
-    this._addFlow = AddNodeMode("addFlow");
+    this._addFlow = AddNodeMode(EVT_NAMES.ADD_FLOW);
 
     // add state mode
-    this._addState = AddNodeMode("addState");
+    this._addState = AddNodeMode(EVT_NAMES.ADD_STATE);
 
     // linking mode
-    this._linking = LinkingMode("linking");
+    this._linking = LinkingMode(EVT_NAMES.LINKING);
 
     // select node mode
-    this._selectNode = BaseMode("selectNode");
+    this._selectNode = BaseMode(EVT_NAMES.SELECT_NODE);
 
     // node context menu
-    this._nodeCtxMenu = BaseMode("nodeCtxMenu");
+    this._nodeCtxMenu = BaseMode(EVT_NAMES.ON_NODE_CTX_MENU);
 
     // canvas context menu
-    this._canvasCtxMenu = BaseMode("canvasCtxMenu");
+    this._canvasCtxMenu = BaseMode(EVT_NAMES.ON_CANVAS_CTX_MENU);
 
     // link context menu
-    this._linkCtxMenu = BaseMode("linkCtxMenu");
+    this._linkCtxMenu = BaseMode(EVT_NAMES.ON_LINK_CTX_MENU);
 
     // port context menu
-    this._portCtxMenu = BaseMode("portCtxMenu");
+    this._portCtxMenu = BaseMode(EVT_NAMES.ON_PORT_CTX_MENU);
 
     // dbclick event
-    this._onDblClick = BaseMode("onDblClick");
+    this._onDblClick = BaseMode(EVT_NAMES.ON_DBL_CLICK);
 
     // port mouseover/mouseout events
-    this._onPortMouseOver = BaseMode("onPortMouseOver");
+    this._onPortMouseOver = BaseMode(EVT_NAMES.ON_PORT_MOUSE_OVER);
 
     // link error mouseover/mouseout events
-    this._onLinkErrorMouseOver = BaseMode("onLinkErrorMouseOver");
+    this._onLinkErrorMouseOver = BaseMode(EVT_NAMES.ON_LINK_ERROR_MOUSE_OVER);
 
     // toggle warnings events
-    this._onToggleWarnings = BaseMode("onToggleWarnings");
+    this._onToggleWarnings = BaseMode(EVT_NAMES.ON_TOGGLE_WARNINGS);
   };
 
   get current() {
@@ -90,67 +91,67 @@ export default class InterfaceModes {
 
   // getters for interface modes
 
-  get loading() {
+  get [EVT_NAMES.LOADING]() {
     return this._loading;
   }
 
-  get default() {
+  get [EVT_NAMES.DEFAULT]() {
     return this._default;
   }
 
-  get drag() {
+  get [EVT_NAMES.DRAG]() {
     return this._drag;
   }
 
-  get addNode() {
+  get [EVT_NAMES.ADD_NODE]() {
     return this._addNode;
   }
 
-  get addFlow() {
+  get [EVT_NAMES.ADD_FLOW]() {
     return this._addFlow;
   }
 
-  get addState() {
+  get [EVT_NAMES.ADD_STATE]() {
     return this._addState;
   }
 
-  get linking() {
+  get [EVT_NAMES.LINKING]() {
     return this._linking;
   }
 
-  get selectNode() {
+  get [EVT_NAMES.SELECT_NODE]() {
     return this._selectNode;
   }
 
-  get nodeCtxMenu() {
+  get [EVT_NAMES.ON_NODE_CTX_MENU]() {
     return this._nodeCtxMenu;
   }
 
-  get canvasCtxMenu() {
+  get [EVT_NAMES.ON_CANVAS_CTX_MENU]() {
     return this._canvasCtxMenu;
   }
 
-  get linkCtxMenu() {
+  get [EVT_NAMES.ON_LINK_CTX_MENU]() {
     return this._linkCtxMenu;
   }
 
-  get portCtxMenu() {
+  get [EVT_NAMES.ON_PORT_CTX_MENU]() {
     return this._portCtxMenu;
   }
 
-  get onDblClick() {
+  get [EVT_NAMES.ON_DBL_CLICK]() {
     return this._onDblClick;
   }
 
-  get onPortMouseOver() {
+  get [EVT_NAMES.ON_PORT_MOUSE_OVER]() {
     return this._onPortMouseOver;
   }
 
-  get onLinkErrorMouseOver() {
+  get [EVT_NAMES.ON_LINK_ERROR_MOUSE_OVER]() {
     return this._onLinkErrorMouseOver;
   }
 
-  get onToggleWarnings() {
+  get [EVT_NAMES.ON_TOGGLE_WARNINGS]() {
     return this._onToggleWarnings;
   }
 

@@ -8,6 +8,7 @@ import {
   CANVAS_LIMITS,
   MAX_MOVING_PIXELS
 } from "../../Constants/constants";
+import { EVT_NAMES } from "../../events";
 import TemporaryLink from "../Links/TemporaryLink";
 
 class Canvas {
@@ -267,7 +268,7 @@ class Canvas {
     );
     if (selectedSet.size > 0) {
       this.setMode(
-        "selectNode",
+        EVT_NAMES.SELECT_NODE,
         {
           nodes: Array.from(selectedSet),
           shiftKey: true
@@ -506,7 +507,7 @@ class Canvas {
     }
 
     this.setMode(
-      "canvasCtxMenu",
+      EVT_NAMES.ON_CANVAS_CTX_MENU,
       { event: d3.event, position: { x: newPosition[0], y: newPosition[1] } },
       true
     );
@@ -527,11 +528,12 @@ class Canvas {
     // next function in the default object
 
     // skip event if pressing shift while on selectNode mode
-    if (d3.event.shiftKey && this.mode.current.id === "selectNode") return;
+    if (d3.event.shiftKey && this.mode.current.id === EVT_NAMES.SELECT_NODE)
+      return;
 
     const fn = this.mode.current.onClick ?? {
       next: () => {
-        this.setMode("default", null, true);
+        this.setMode(EVT_NAMES.DEFAULT, null, true);
       }
     };
     fn.next();
@@ -543,10 +545,10 @@ class Canvas {
   onMouseMove = () => {
     this.mousePos = d3.mouse(this.el);
     const fn = [
-      { id: "addNode", fn: () => this.onAddNodeMouseMove() },
-      { id: "addFlow", fn: () => this.onAddNodeMouseMove() },
-      { id: "addState", fn: () => this.onAddNodeMouseMove() },
-      { id: "linking", fn: () => this.onLinkingMouseMove() }
+      { id: EVT_NAMES.ADD_NODE, fn: () => this.onAddNodeMouseMove() },
+      { id: EVT_NAMES.ADD_FLOW, fn: () => this.onAddNodeMouseMove() },
+      { id: EVT_NAMES.ADD_STATE, fn: () => this.onAddNodeMouseMove() },
+      { id: EVT_NAMES.LINKING, fn: () => this.onLinkingMouseMove() }
     ];
     fn.filter(obj => obj.id === this.mode.current.id).forEach(obj => obj.fn());
   };

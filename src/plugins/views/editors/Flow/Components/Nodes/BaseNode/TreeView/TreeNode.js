@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import _debounce from "lodash/debounce";
+import { EVT_NAMES } from "../../../../events";
 import { belongLineBuilder } from "../../Utils";
 import BaseNode from "../BaseNode";
 import BaseNodeStatus from "../BaseNodeStatus";
@@ -448,7 +449,7 @@ class TreeNode extends BaseNode {
       data: { model: mini.model, type: mini.nodeType }
     };
     // set mode to double click
-    this.canvas.setMode("onDblClick", { node: dummyNode }, true);
+    this.canvas.setMode(EVT_NAMES.ON_DBL_CLICK, { node: dummyNode }, true);
   };
 
   /**

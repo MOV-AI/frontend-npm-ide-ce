@@ -535,7 +535,7 @@ class BaseNode extends BaseNodeStruct {
     const { shiftKey } = d3.event;
 
     if (!this.selected && !shiftKey) {
-      this.canvas.setMode("default", { event: "onMouseDown" });
+      this.canvas.setMode(EVT_NAMES.DEFAULT, { event: "onMouseDown" });
     }
   };
 
@@ -581,7 +581,7 @@ class BaseNode extends BaseNodeStruct {
     clearTimeout(this.dbClickTimeout);
 
     // set mode to double click
-    this.canvas.setMode("onDblClick", { node: this }, true);
+    this.canvas.setMode(EVT_NAMES.ON_DBL_CLICK, { node: this }, true);
   };
 
   /**
@@ -594,7 +594,11 @@ class BaseNode extends BaseNodeStruct {
     d3.event.stopPropagation();
 
     // set mode to node context menu
-    this.canvas.setMode("nodeCtxMenu", { node: this, event: d3.event }, true);
+    this.canvas.setMode(
+      [EVT_NAMES.ON_NODE_CTX_MENU],
+      { node: this, event: d3.event },
+      true
+    );
   };
 
   /**
@@ -618,10 +622,10 @@ class BaseNode extends BaseNodeStruct {
     // change the cursor style
     this.object.style("cursor", "default");
 
-    if (this.canvas.mode.current.id === "drag") {
-      this.canvas.mode.previous.id === "selectNode"
+    if (this.canvas.mode.current.id === EVT_NAMES.DRAG) {
+      this.canvas.mode.previous.id === EVT_NAMES.SELECT_NODE
         ? this.canvas.setPreviousMode()
-        : this.canvas.setMode("default");
+        : this.canvas.setMode(EVT_NAMES.DEFAULT);
     }
   };
 
@@ -633,7 +637,7 @@ class BaseNode extends BaseNodeStruct {
   onDrag = () => {
     // this will only set the mode once
     // done here to filter from click events
-    this.canvas.setMode("drag", this);
+    this.canvas.setMode(EVT_NAMES.DRAG, this);
     const { delta } = this._drag;
 
     // set the node position
@@ -679,7 +683,7 @@ class BaseNode extends BaseNodeStruct {
    */
   updatePosition(data) {
     // ignore position update if dragging
-    if (this.canvas.mode.current.id === "drag") return;
+    if (this.canvas.mode.current.id === EVT_NAMES.DRAG) return;
 
     // keys x and y are received separatly
     const updatedPos = { ...this.data.Visualization, ...data.Visualization };
@@ -752,12 +756,12 @@ class BaseNode extends BaseNodeStruct {
     const currMode = this.canvas.mode.current;
 
     // skip event if pressing shift while on selectNode mode
-    if (d3.event.shiftKey && currMode.id === "selectNode") return;
+    if (d3.event.shiftKey && currMode.id === EVT_NAMES.SELECT_NODE) return;
 
     const actions = {
       // start linking mode if on default mode
       default: () => {
-        this.canvas.setMode("linking", {
+        this.canvas.setMode(EVT_NAMES.LINKING, {
           src: port,
           link: null,
           trg: null,
@@ -765,8 +769,8 @@ class BaseNode extends BaseNodeStruct {
         });
       },
       selectNode: () => {
-        this.canvas.setMode("default");
-        this.canvas.setMode("linking", {
+        this.canvas.setMode(EVT_NAMES.DEFAULT);
+        this.canvas.setMode(EVT_NAMES.LINKING, {
           src: port,
           link: null,
           trg: null,
@@ -780,7 +784,7 @@ class BaseNode extends BaseNodeStruct {
         if (!currMode.props.link.isValid(src, port)) return;
         currMode.props.trg = port;
         currMode.props.toCreate = true;
-        this.canvas.setMode("default");
+        this.canvas.setMode(EVT_NAMES.DEFAULT);
       }
     };
 
@@ -801,7 +805,7 @@ class BaseNode extends BaseNodeStruct {
    */
   onPortMouseOver = port => {
     this.canvas.events.next({
-      name: "onMouseOver",
+      name: EVT_NAMES.ON_MOUSE_OVER,
       type: "Port",
       event: d3.event,
       port
@@ -815,7 +819,7 @@ class BaseNode extends BaseNodeStruct {
    */
   onPortMouseOut = port => {
     this.canvas.events.next({
-      name: "onMouseOut",
+      name: EVT_NAMES.ON_MOUSE_OUT,
       type: "Port",
       event: d3.event,
       port
@@ -823,7 +827,11 @@ class BaseNode extends BaseNodeStruct {
   };
 
   onPortContext = port => {
-    this.canvas.setMode("portCtxMenu", { port: port, event: d3.event }, true);
+    this.canvas.setMode(
+      EVT_NAMES.ON_PORT_CTX_MENU,
+      { port: port, event: d3.event },
+      true
+    );
   };
 
   /**
