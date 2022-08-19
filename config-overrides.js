@@ -18,6 +18,5 @@ module.exports = function override(config, env) {
   };
 
   finalConfig.output.filename = "[name].bundle.js";
-
   return finalConfig;
 };

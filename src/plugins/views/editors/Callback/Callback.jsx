@@ -91,6 +91,7 @@ const Callback = (props, ref) => {
         onChange={updateCallbackCode}
         onSave={saveDocument}
         onLoad={onEditorLoad}
+        useLanguageServer
       />
     </div>
   );
