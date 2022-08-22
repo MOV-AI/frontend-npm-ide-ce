@@ -80,7 +80,7 @@ const Callback = (props, ref) => {
    *                                   Render Functions                                   *
    *                                                                                      */
   //========================================================================================
-
+  console.log("debug data", data);
   return (
     <div data-testid="section_callback-editor" className={classes.container}>
       <MonacoCodeEditor
@@ -92,6 +92,7 @@ const Callback = (props, ref) => {
         onSave={saveDocument}
         onLoad={onEditorLoad}
         useLanguageServer
+        builtins={Object.values(data.pyLibs).map(libs => libs.name)}
       />
     </div>
   );
