@@ -91,6 +91,8 @@ const Callback = (props, ref) => {
         onChange={updateCallbackCode}
         onSave={saveDocument}
         onLoad={onEditorLoad}
+        useLanguageServer
+        builtins={Object.values(data.pyLibs).map(libs => libs.name)}
       />
     </div>
   );

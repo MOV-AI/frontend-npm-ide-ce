@@ -20,6 +20,8 @@
 **Callback Editor**
 
 - [FP-1327 - Added a way to remove messages from Callback](https://movai.atlassian.net/browse/FP-1327)
+- [FP-1881 - Create Endpoint to get Classes definitions for autocomplete in Python Callbacks](https://movai.atlassian.net/browse/FP-1881)
+- [FP-1882 - Use endpoint to populate autocomplete in python Language Server](https://movai.atlassian.net/browse/FP-1882)
 
 **Flow Editor**
 
