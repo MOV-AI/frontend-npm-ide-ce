@@ -1,3 +1,30 @@
+# 3.0.1
+
+**IDE**
+
+- [FP-1085 - Add Shortcuts helper with all keybind shortcuts](https://movai.atlassian.net/browse/FP-1085)
+- [FP-1523 - Replaced old virtualize tree with react-window](https://movai.atlassian.net/browse/FP-1523)
+- [FP-1621 - Update outdated file is now working](https://movai.atlassian.net/browse/FP-1621)
+
+**FLOW**
+
+- [FP-897 - Ability to search node instances](https://movai.atlassian.net/browse/FP-897)
+- [FP-1084 - Add debug colors to links](https://movai.atlassian.net/browse/FP-1084)
+- [FP-1441 - Add Tree view mode to Flow Editor](https://movai.atlassian.net/browse/FP-1441)
+- [FP-1667 - Add More information to missing links](https://movai.atlassian.net/browse/FP-1667)
+- [FP-1669 - Add More information to missing parameters](https://movai.atlassian.net/browse/FP-1669)
+- [FP-1741 - Push flow parameter errors to Warnings, and make warnings clickable](https://movai.atlassian.net/browse/FP-1741)
+- [FP-1768 - Grey out other links when creating a new link](https://movai.atlassian.net/browse/FP-1768)
+- [FP-1794 - Add invalid links to warnings](https://movai.atlassian.net/browse/FP-1794)
+- [FP-1839 - New snackbar is crashing in all apps](https://movai.atlassian.net/browse/FP-1839)
+- [FP-1853 - Migrate Flow shortcuts - Reset Zoom and move nodes with arrow keys](https://movai.atlassian.net/browse/FP-1853)
+- [FP-1913 - Add editing capabilities to Tree View Editor](https://movai.atlassian.net/browse/FP-1913)
+- [FP-1931 - Added Exposed Ports validation and fix to remove them](https://movai.atlassian.net/browse/FP-1931)
+- [FP-1987 - Selecting a node will allow you to fade other links when over a link](https://movai.atlassian.net/browse/FP-1987)
+- [FP-1993 - Tree View subflows now correctly update changes made to them](https://movai.atlassian.net/browse/FP-1993)
+- [FP-2007 - Avoid recursive template rendering](https://movai.atlassian.net/browse/FP-2007)
+- [FP-2008 - Composed the names of the subflow children on Tree View](https://movai.atlassian.net/browse/FP-2008)
+
 # 3.0.0
 
 **System Bar**
@@ -20,6 +47,8 @@
 **Callback Editor**
 
 - [FP-1327 - Added a way to remove messages from Callback](https://movai.atlassian.net/browse/FP-1327)
+- [FP-1881 - Create Endpoint to get Classes definitions for autocomplete in Python Callbacks](https://movai.atlassian.net/browse/FP-1881)
+- [FP-1882 - Use endpoint to populate autocomplete in python Language Server](https://movai.atlassian.net/browse/FP-1882)
 
 **Flow Editor**
 

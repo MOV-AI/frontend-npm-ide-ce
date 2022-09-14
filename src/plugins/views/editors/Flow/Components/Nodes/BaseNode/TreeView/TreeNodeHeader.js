@@ -1,17 +1,14 @@
 import * as d3 from "d3";
+import i18n from "../../../../../../../../i18n/i18n";
 import BaseNodeHeader from "../BaseNodeHeader";
 
-const TEMPLATE_LABEL = {
-  container: "Flow",
-  node: "Node"
-};
-
 class TreeNodeHeader extends BaseNodeHeader {
-  constructor(x, y, text, template, type, templateType = "node") {
+  constructor(x, y, text, template, type, endless = false) {
     super(x, y, text);
     this.dy = 18;
     this.type = type;
-    this.template = `${TEMPLATE_LABEL[templateType]}: ${template}`;
+    this.templateString = `${i18n.t("RecursiveTemplate-Colon")} ${template}`;
+    this.isEndless = endless;
     // Update rendered header
     this.render();
   }
@@ -47,6 +44,15 @@ class TreeNodeHeader extends BaseNodeHeader {
       .text(function (d) {
         return d;
       });
+
+    if (this.isEndless) {
+      this.object
+        .append("tspan")
+        .attr("x", this.x)
+        .attr("dy", "1.2em")
+        .attr("fill", "red")
+        .text(this.templateString);
+    }
 
     return this;
   }

@@ -1,4 +1,5 @@
 import { PLUGINS } from "../../../../../../utils/Constants";
+import { MOVAI_FLOW_TYPES } from "../../Constants/constants";
 import ClassicNode from "./ClassicNode";
 import ContainerNode from "./ContainerNode";
 import TemporaryContainerNode from "./TemporaryContainerNode";
@@ -6,6 +7,7 @@ import TemporaryNode from "./TemporaryNode";
 import TreeClassicNode from "./TreeView/TreeClassicNode";
 import PreviewClassicNode from "./Preview/PreviewClassicNode";
 import PreviewContainerNode from "./Preview/PreviewContainerNode";
+import TreeContainerNode from "./TreeView/TreeContainerNode";
 
 /**
  * Factory class to produce Nodes and Containers (aka Sub-Flows)
@@ -31,8 +33,12 @@ class Factory {
         name
       }
     );
+    const finalObject = obj.serializeToDB();
 
-    return obj.serializeToDB();
+    if (!obj.isNew)
+      finalObject.Type = finalObject.Type ?? MOVAI_FLOW_TYPES.NODES.MOVAI_FLOW;
+
+    return finalObject;
   }
 
   /**
@@ -75,7 +81,7 @@ class Factory {
     TREE_NODE: { cls: TreeClassicNode, scope: "Node" },
     CONTAINER: { cls: ContainerNode, scope: "Flow" },
     TMP_CONTAINER: { cls: TemporaryContainerNode, scope: "Flow" },
-    TREE_CONTAINER: { cls: TreeClassicNode, scope: "Flow" }
+    TREE_CONTAINER: { cls: TreeContainerNode, scope: "Flow" }
   };
 }
 

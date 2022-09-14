@@ -3,8 +3,11 @@ const EVT_NAMES = {
   ADD_FLOW: "addFlow",
   ADD_STATE: "addState",
   DEFAULT: "default",
+  DRAG: "drag",
+  LINKING: "linking",
   LOADING: "loading",
   ON_CLICK: "onClick",
+  ON_DBL_CLICK: "onDblClick",
   ON_CANVAS_CTX_MENU: "onCanvasCtxMenu",
   ON_CHG_MOUSE_OVER: "onChangeMouseOver",
   ON_LINK_CTX_MENU: "onLinkCtxMenu",
@@ -14,7 +17,8 @@ const EVT_NAMES = {
   ON_NODE_CTX_MENU: "onNodeCtxMenu",
   ON_PORT_CTX_MENU: "onPortCtxMenu",
   ON_PORT_MOUSE_OVER: "onPortMouseOver",
-  ON_TOGGLE_WARNINGS: "onToggleWarnings"
+  ON_TOGGLE_WARNINGS: "onToggleWarnings",
+  SELECT_NODE: "selectNode"
 };
 
 const EVT_TYPES = {

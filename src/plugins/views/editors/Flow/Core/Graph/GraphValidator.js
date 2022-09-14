@@ -8,29 +8,72 @@
 
 import i18n from "../../../../../../i18n/i18n";
 import MESSAGES from "../../../../../../utils/Messages";
-import { ROS_VALID_NAMES } from "../../../../../../utils/Constants";
+import {
+  ROS_VALID_NAMES,
+  ALERT_SEVERITIES
+} from "../../../../../../utils/Constants";
 import { defaultFunction } from "../../../../../../utils/Utils";
 import { MisMatchMessageLink } from "../../Components/Links/Errors";
 import { isLinkeable } from "../../Components/Nodes/BaseNode/PortValidator";
+import { PARENT_NODE_SEP, TYPES } from "../../Constants/constants";
 
-const messages = {
-  startLink: {
+export const WARNING_TYPES = {
+  START_LINK: "startLink",
+  LINK_MISMATCH: "linkMismatchMessage",
+  INVALID_PARAMETERS: "invalidParameters",
+  INVALID_EXPOSED_PORTS: "invalidExposedPorts",
+  INVALID_LINKS: "invalidLinks"
+};
+
+const WARNINGS = {
+  [WARNING_TYPES.START_LINK]: {
     message: i18n.t("StartLinkNotFound"),
-    type: "warning",
+    type: ALERT_SEVERITIES.WARNING,
     isRuntime: true,
-    isPersistent: false
+    isPersistent: false,
+    warningType: WARNING_TYPES.START_LINK
   },
-  linkMismatchMessage: {
+  [WARNING_TYPES.LINK_MISMATCH]: {
     message: i18n.t("MessageMismatchedLinks"),
-    type: "warning",
+    type: ALERT_SEVERITIES.WARNING,
     isRuntime: false,
-    isPersistent: true
+    isPersistent: true,
+    warningType: WARNING_TYPES.LINK_MISMATCH
+  },
+  [WARNING_TYPES.INVALID_PARAMETERS]: {
+    message: i18n.t("InvalidSubFlowParameters"),
+    type: ALERT_SEVERITIES.WARNING,
+    isRuntime: false,
+    isPersistent: true,
+    warningType: WARNING_TYPES.INVALID_PARAMETERS
+  },
+  [WARNING_TYPES.INVALID_EXPOSED_PORTS]: {
+    message: i18n.t("InvalidExposedPorts"),
+    type: ALERT_SEVERITIES.WARNING,
+    isRuntime: false,
+    isPersistent: true,
+    warningType: WARNING_TYPES.INVALID_EXPOSED_PORTS
+  },
+  [WARNING_TYPES.INVALID_LINKS]: {
+    message: i18n.t("InvalidLinksFoundTitle"),
+    type: ALERT_SEVERITIES.WARNING,
+    isRuntime: false,
+    isPersistent: true,
+    warningType: WARNING_TYPES.INVALID_LINKS
   }
 };
 
 export default class GraphValidator {
   constructor(graph) {
     this.graph = graph;
+  }
+
+  setWarningActions(warningType, action) {
+    if (WARNINGS[warningType]) WARNINGS[warningType].onClick = action;
+  }
+
+  removeWarningAction(warningType) {
+    if (WARNINGS[warningType]) delete WARNINGS[warningType].onClick;
   }
 
   /**
@@ -48,6 +91,7 @@ export default class GraphValidator {
    * Validate links in graph
    *  Rule nr. 1 : Missing start link
    *  Rule nr. 2 : Links between ports with different message types
+   *  Rule nr. 3 : Links that don't have start or end port
    * @returns {Array} warnings objects
    */
   validateLinks = () => {
@@ -56,6 +100,8 @@ export default class GraphValidator {
     const nodes = this.graph.nodes;
     let linksStart = false;
     let linksMismatches = false;
+
+    this.addDeletedLinks();
 
     links.forEach((link, _, _links) => {
       const linkData = link.data;
@@ -78,11 +124,16 @@ export default class GraphValidator {
     });
 
     // Check rule nr. 1 : Missing start link
-    if (!linksStart) warnings.push(messages.startLink);
+    if (!linksStart) warnings.push(WARNINGS[WARNING_TYPES.START_LINK]);
     // Check rule nr. 2 : Links between ports with different message types
-    if (linksMismatches) warnings.push(messages.linkMismatchMessage);
-
-    this.addDeletedLinks();
+    if (linksMismatches) warnings.push(WARNINGS[WARNING_TYPES.LINK_MISMATCH]);
+    // Check rule nr. 3 : Links that don't have start or end port
+    if (this.graph.invalidLinks.length)
+      warnings.push({
+        ...WARNINGS[WARNING_TYPES.INVALID_LINKS],
+        data: this.graph.invalidLinks,
+        callback: this.graph.clearInvalidLinks
+      });
 
     return warnings;
   };
@@ -99,30 +150,89 @@ export default class GraphValidator {
 
   /**
    * @private
+   * Validate if the flow contains any invalid Exposed Ports
+   * - Invalid Exposed Ports: Exposed Ports that exist on the Instance but no set on the Template
+   *
+   * @returns {Array} List of nodes that have invalid Exposed Ports
+   */
+  validateExposedPorts = () => {
+    const warnings = [];
+    const invalidExposedPorts = [];
+    const exposedPorts = Object.values(this.graph.exposedPorts);
+
+    exposedPorts.forEach(instExposedPorts => {
+      Object.entries(instExposedPorts).forEach(
+        ([instName, nodeExposedPorts]) => {
+          const invalidPorts = [];
+          const thisNode = this.graph.nodes.get(instName)?.obj;
+          if (!thisNode) return;
+          nodeExposedPorts.forEach(exposedPort => {
+            if (!thisNode.ports.has(exposedPort)) {
+              invalidPorts.push(exposedPort);
+            }
+          });
+
+          invalidPorts.length &&
+            invalidExposedPorts.push({
+              nodeInst: thisNode,
+              invalidPorts
+            });
+        }
+      );
+    });
+
+    invalidExposedPorts.length &&
+      warnings.push({
+        ...WARNINGS[WARNING_TYPES.INVALID_EXPOSED_PORTS],
+        data: invalidExposedPorts
+      });
+
+    return warnings;
+  };
+
+  /**
+   * @private
    * Validate if the flow contains any sub-flow with invalid params
    *  - Invalid params: params set on instance and not set on template
    *
    * @returns {Array} List of container id that has invalid params
    */
   validateContainerParams = () => {
-    const invalidContainers = new Map();
+    const invalidContainers = [];
+    const invalidParamsWarning = [];
     const containers = new Map(
       [...this.graph.nodes].filter(
-        ([_, node]) => node.obj.data.type === "Container"
+        ([_, node]) => node.obj.data.type === TYPES.CONTAINER
       )
     );
     containers.forEach(container => {
       const containerNode = container.obj;
       const instanceParams = containerNode?.data?.Parameter ?? {};
       const templateParams = containerNode?._template?.Parameter ?? {};
+      const invalidParams = [];
+
       for (const param in instanceParams) {
         if (!Object.hasOwnProperty.call(templateParams, param)) {
-          invalidContainers.set(containerNode.data.id, containerNode);
+          invalidParams.push(param);
         }
       }
+      invalidParams.length &&
+        invalidContainers.push({
+          id: containerNode.data.id,
+          name: containerNode.data.name,
+          containerNode,
+          invalidParams
+        });
     });
+
+    invalidContainers.length &&
+      invalidParamsWarning.push({
+        ...WARNINGS[WARNING_TYPES.INVALID_PARAMETERS],
+        data: invalidContainers
+      });
+
     // return containers id
-    return [...invalidContainers.keys()];
+    return invalidParamsWarning;
   };
 
   /**
@@ -133,9 +243,17 @@ export default class GraphValidator {
    *  invalidContainers: array with containers id with invalid params
    */
   validateFlow = () => {
-    const warnings = this.validateLinks();
-    const invalidContainersParam = this.validateContainerParams();
-    return { warnings, invalidContainersParam };
+    // Gather all warnings
+    const invalidLinks = this.validateLinks();
+    const invalidExposedPorts = this.validateExposedPorts();
+    const invalidParams = this.validateContainerParams();
+    // Merge warnings and return them
+    const warnings = [
+      ...invalidLinks,
+      ...invalidExposedPorts,
+      ...invalidParams
+    ];
+    return { warnings };
   };
 
   /**
@@ -181,9 +299,11 @@ export default class GraphValidator {
    * @param {array} nodes : Array of nodes to get ports position
    * @returns
    */
-  static extractLinkPortsPos = (link, nodes) => {
+  static extractLinkPortsPos = (link, nodes, parent) => {
     const [sourceNode, targetNode] = ["sourceNode", "targetNode"].map(key => {
-      const node = nodes.get(link[key]);
+      const node =
+        nodes.get(link[key]) ??
+        nodes.get(`${parent?.name}${PARENT_NODE_SEP}${link[key]}`);
       if (!node) throw new Error(`Node ${link[key]} not found`);
       return node;
     });

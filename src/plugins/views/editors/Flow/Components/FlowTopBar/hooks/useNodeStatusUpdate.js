@@ -2,7 +2,6 @@ import { useState, useRef, useMemo, useEffect, useCallback } from "react";
 import { RobotManager } from "@mov-ai/mov-fe-lib-core";
 import { FLOW_VIEW_MODE } from "../../../Constants/constants";
 import { compareDocumentPaths } from "../../../Utils/utils";
-import _get from "lodash/get";
 import _isEqual from "lodash/isEqual";
 
 const DEBOUNCE_TIME = 600; // ms
@@ -170,11 +169,7 @@ const useNodeStatusUpdate = (props, robotSelected, viewMode) => {
       let activeFlow = "";
 
       // get robot status
-      const robotStatusData = _get(
-        data,
-        `${key}.Robot.${targetValue}.Status`,
-        undefined
-      );
+      const robotStatusData = data[key].Robot?.[targetValue]?.Status;
 
       if (robotStatusData) {
         isOnline = isRobotOnline(robotStatusData.timestamp);
@@ -200,8 +195,7 @@ const useNodeStatusUpdate = (props, robotSelected, viewMode) => {
           nodeStatusRef.current = nodeStatus;
           allNodeStatusRef.current = allNodesStatus;
           nodeStatusViewModeRef.current = viewMode;
-          nodeStatusUpdated(nodeStatus, { isOnline, activeFlow });
-          nodeCompleteStatusUpdated(allNodesStatus, { isOnline, activeFlow });
+          nodeStatusUpdated(allNodesStatus, { isOnline, activeFlow });
         }
 
         activeFlow = isOnline ? robotStatusData.active_flow : "";
@@ -227,7 +221,6 @@ const useNodeStatusUpdate = (props, robotSelected, viewMode) => {
       getNodesToUpdate,
       isFlowRunning,
       isRobotOnline,
-      nodeCompleteStatusUpdated,
       nodeStatusUpdated,
       onStartStopFlow,
       onlineAlert,
@@ -305,7 +298,7 @@ const useNodeStatusUpdate = (props, robotSelected, viewMode) => {
    * Reset node status when flow stop running
    */
   useEffect(() => {
-    const isSameFlow = compareDocumentPaths(robotStatus.activeFlow, id)
+    const isSameFlow = compareDocumentPaths(robotStatus.activeFlow, id);
     if (!isSameFlow) resetNodeStatus();
   }, [robotStatus.activeFlow, id, resetNodeStatus]);
 

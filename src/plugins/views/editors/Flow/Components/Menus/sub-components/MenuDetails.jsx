@@ -9,7 +9,7 @@ import { menuDetailsStyles } from "../styles";
 
 const MenuDetails = props => {
   // Props
-  const { id, template, model, type, openDoc, label } = props;
+  const { id, name, template, model, type, openDoc, label } = props;
   // Other hooks
   const classes = menuDetailsStyles();
   const { t } = useTranslation();
@@ -22,7 +22,7 @@ const MenuDetails = props => {
 
   return (
     <>
-      <h2 className={classes.header}>{id}</h2>
+      <h2 className={classes.header}>{name ?? id}</h2>
       <ListItem divider>
         <ListItemText primary={t(label)} />
         <NodeLink

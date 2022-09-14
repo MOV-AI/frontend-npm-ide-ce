@@ -1,18 +1,14 @@
 import lodash from "lodash";
 import { BehaviorSubject } from "rxjs";
 import { filter } from "rxjs/operators";
-import { NODE_TYPES } from "../../Constants/constants";
+import { NODE_TYPES, TYPES } from "../../Constants/constants";
+import { getNodeNameFromId } from "../../Core/Graph/Utils";
 import Graph from "../../Core/Graph/GraphBase";
 import { EVT_NAMES } from "../../events";
 import StartNode from "../Nodes/StartNode";
 import InterfaceModes from "./InterfaceModes";
 import Events from "./Events";
 import Canvas from "./canvas";
-
-const TYPES = {
-  NODE: "NodeInst",
-  CONTAINER: "Container"
-};
 
 const NODE_PROPS = {
   Node: {
@@ -41,6 +37,11 @@ export default class MainInterface {
     call,
     graphCls
   }) {
+    //========================================================================================
+    /*                                                                                      *
+     *                                      Properties                                      *
+     *                                                                                      */
+    //========================================================================================
     this.id = id;
     this.containerId = containerId;
     this.width = width;
@@ -50,23 +51,16 @@ export default class MainInterface {
     this.graphCls = graphCls ?? Graph;
     this.classes = classes;
     this.docManager = call;
+    this.stateSub = new BehaviorSubject(0);
+    this.events = new Events();
+    this.mode = new InterfaceModes(this);
+    this.api = null;
+    this.canvas = null;
+    this.graph = null;
+    this.shortcuts = null;
 
     this.initialize();
   }
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                      Properties                                      *
-   *                                                                                      */
-  //========================================================================================
-
-  stateSub = new BehaviorSubject(0);
-  events = new Events();
-  mode = new InterfaceModes(this);
-  api = null;
-  canvas = null;
-  graph = null;
-  shortcuts = null;
 
   //========================================================================================
   /*                                                                                      *
@@ -75,9 +69,10 @@ export default class MainInterface {
   //========================================================================================
 
   initialize = () => {
-    this.mode.setMode(EVT_NAMES.LOADING);
-
     const { classes, containerId, docManager, height, id, width } = this;
+
+    // Set initial mode as loading
+    this.setMode(EVT_NAMES.LOADING);
 
     this.canvas = new Canvas({
       mInterface: this,
@@ -95,23 +90,13 @@ export default class MainInterface {
       docManager
     });
 
-    // Set initial mode as loading
-    this.setMode(EVT_NAMES.LOADING);
-
     // Load document and add subscribers
     this.addSubscribers()
       .loadDoc()
       .then(() => {
         this.canvas.el.focus();
-
-        this.mode.setMode(EVT_NAMES.DEFAULT);
+        this.setMode(EVT_NAMES.DEFAULT);
       });
-  };
-
-  reload = () => {
-    this.canvas.reload();
-    this.destroy();
-    this.loadDoc();
   };
 
   /**
@@ -119,8 +104,8 @@ export default class MainInterface {
    * Loads the document in the graph
    * @returns {MainInterface} : The instance
    */
-  loadDoc = () => {
-    return this.graph.loadData(this.data);
+  loadDoc = async () => {
+    await this.graph.loadData(this.modelView.current.serializeToDB());
   };
 
   //========================================================================================
@@ -269,6 +254,11 @@ export default class MainInterface {
     );
   };
 
+  searchNode = node => {
+    const nodeName = node.parent !== this.id ? node.id : node.name;
+    return nodeName && this.graph.nodes.get(nodeName)?.obj;
+  };
+
   //========================================================================================
   /*                                                                                      *
    *                                      Subscribers                                     *
@@ -342,6 +332,7 @@ export default class MainInterface {
 
     nodes.forEach(node => {
       const { id } = node.data;
+      const nodeName = getNodeNameFromId(id);
       const [x, y] = node.data.Visualization;
 
       const items =
@@ -349,7 +340,7 @@ export default class MainInterface {
           ? this.modelView.current.getSubFlows()
           : this.modelView.current.getNodeInstances();
 
-      items.getItem(id).setPosition(x, y);
+      items.getItem(nodeName).setPosition(x, y);
     });
   };
 
@@ -370,9 +361,7 @@ export default class MainInterface {
   onSelectNode = data => {
     const { nodes, shiftKey } = data;
     const { selectedNodes } = this;
-    const filterNodes = nodes.filter(
-      n => n.data.model !== StartNode.model
-    );
+    const filterNodes = nodes.filter(n => n.data.model !== StartNode.model);
 
     this.selectedLink = null;
 
@@ -410,6 +399,46 @@ export default class MainInterface {
         this.hideLinks(node, visitedLinks);
       }
     });
+  };
+
+  /**
+   * Resets all Node status (Turns of the center)
+   */
+  resetAllNodeStatus = () => {
+    this.graph.resetStatus && this.graph.resetStatus();
+  };
+
+  onResetZoom = () => {
+    this.canvas.onResetZoom();
+  };
+
+  onMoveNode = event => {
+    const currentZoom = this.canvas.currentZoom?.k ?? 1;
+    const step = 2 / currentZoom + 1;
+    const delta = {
+      ArrowRight: [1 * step, 0],
+      ArrowLeft: [-1 * step, 0],
+      ArrowUp: [0, -1 * step],
+      ArrowDown: [0, 1 * step]
+    };
+    const [dx, dy] = delta[event.code];
+    const [x, y] = [50, 50]; // skip boundaries validation used when dragging a node
+    this.graph.onNodeDrag(null, { x, y, dx, dy });
+    this.onDragEnd();
+  };
+
+  onFocusNode = node => {
+    const { xCenter, yCenter } = node.getCenter();
+    this.setMode(EVT_NAMES.DEFAULT, null, true);
+    node.selected = true;
+    if (node.data.id !== "start") {
+      this.setMode(
+        EVT_NAMES.SELECT_NODE,
+        { nodes: [node], shiftKey: false },
+        true
+      );
+    }
+    this.canvas.zoomToCoordinates(xCenter, yCenter);
   };
 
   destroy = () => {

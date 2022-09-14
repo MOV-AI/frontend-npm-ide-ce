@@ -11,7 +11,7 @@ import { tableKeyValueStyles } from "../styles";
  * @param {array} list { key: "bla", value: "bla", defaultValue: "place" }
  */
 const TableKeyValue = props => {
-  const { list, allowSearch, allowDelete } = props;
+  const { list, allowSearch, allowEdit, allowDelete } = props;
   const [searchValue, setSearchValue] = useState("");
   const classes = tableKeyValueStyles();
 
@@ -30,7 +30,7 @@ const TableKeyValue = props => {
             {...props}
             key={index}
             item={item}
-            allowEdit={!item.invalid}
+            allowEdit={!item.invalid && allowEdit}
             allowDelete={item.invalid || allowDelete}
           />
         ))}
