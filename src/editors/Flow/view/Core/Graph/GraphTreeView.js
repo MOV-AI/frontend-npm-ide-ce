@@ -156,6 +156,10 @@ export default class GraphTreeView extends GraphBase {
   };
 
   updateAllPositions = async () => {
+    // If there are no subflows, we still want to update the children position
+    // of the rootNode (which was not added to the subFlows list to avoid saving recursive issues)
+    if (!this.subFlows.length) return this.rootNode.updateChildrenPosition();
+
     for (const parent of this.subFlows) {
       await parent.updateChildrenPosition();
     }
