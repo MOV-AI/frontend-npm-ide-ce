@@ -1,34 +1,35 @@
 import React, { useEffect } from "react";
-import { withDefaults } from "@mov-ai/mov-fe-lib-react";
-import { ThemeProvider } from "@material-ui/core/styles";
-import { ApplicationTheme } from "../themes";
-import BaseApp, { installEditor, installTool } from "./BaseApp";
-// Editors
 import {
+  BaseApp,
+  installEditor,
+  installTool,
   ConfigurationModel,
   ConfigurationStore,
-  ConfigurationView
-} from "../editors/Configuration";
-import {
+  ConfigurationView,
   CallbackModel,
   CallbackStore,
-  CallbackView
-} from "../editors/Callback";
-import { NodeStore, NodeModel, NodeView } from "../editors/Node";
-import { FlowModel, FlowStore, FlowView } from "../editors/Flow";
-import FlowExplorer from "../editors/Flow/view/Components/Explorer/Explorer";
-// Tools
-import {
-  FLOW_EXPLORER_PROFILE,
-  HOMETAB_PROFILE,
-  SHORTCUTS_PROFILE
-} from "../utils/Constants";
-import HomeTabPlugin, { getHomeTab } from "../tools/HomeTab/HomeTab";
-import ShortcutsPlugin, {
-  getShortcutsTab
-} from "../tools/AppShortcuts/AppShortcuts";
+  CallbackView,
+  NodeStore,
+  NodeModel,
+  NodeView,
+  FlowModel,
+  FlowStore,
+  FlowView,
+  FlowExplorer,
+  CONSTANTS,
+  getHomeTab,
+  HomeTabPlugin,
+  ShortcutsPlugin,
+  getShortcutsTab,
+  ApplicationTheme,
+  ThemeProvider
+} from "@mov-ai/mov-fe-lib-ide";
+import { withDefaults } from "@mov-ai/mov-fe-lib-react";
+// Editors
 import KeyboardIcon from "@material-ui/icons/Keyboard";
 import HomeIcon from "@material-ui/icons/Home";
+
+const { HOMETAB_PROFILE, SHORTCUTS_PROFILE, FLOW_EXPLORER_PROFILE } = CONSTANTS;
 
 const AppCE = props => {
   //========================================================================================
