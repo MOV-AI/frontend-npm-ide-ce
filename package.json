@@ -17,7 +17,7 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.60",
     "@material-ui/styles": "^4.11.4",
-    "@mov-ai/mov-fe-lib-code-editor": "^1.0.6",
+    "@mov-ai/mov-fe-lib-code-editor": "^1.0.8-1",
     "@mov-ai/mov-fe-lib-core": "^1.1.1-4",
     "@mov-ai/mov-fe-lib-react": "^1.1.1-4",
     "@remixproject/engine": "^0.3.19",
@@ -42,9 +42,9 @@
     "web-vitals": "^1.1.2"
   },
   "scripts": {
-    "start": "GENERATE_SOURCEMAP=false react-scripts start",
-    "build": "react-scripts --max_old_space_size=4096 build && python3 ./scripts/detach_manifest.py",
-    "test": "react-scripts test",
+    "start": "GENERATE_SOURCEMAP=false react-app-rewired start",
+    "build": "react-app-rewired --max_old_space_size=4096 build && python3 ./scripts/detach_manifest.py",
+    "test": "react-app-rewired test",
     "eject": "react-scripts eject",
     "clean": "rm -r node_modules; rm package-lock.json",
     "deploy": "./scripts/deployApp.sh mov-fe-app-ide-ce",
@@ -69,7 +69,17 @@
     ]
   },
   "devDependencies": {
-    "http-proxy-middleware": "^2.0.4"
+    "@babel/core": "^7.15.5",
+    "@babel/plugin-syntax-import-meta": "^7.10.4",
+    "@babel/plugin-transform-runtime": "^7.15.0",
+    "@babel/preset-env": "^7.15.6",
+    "@babel/preset-react": "^7.14.5",
+    "@codingame/monaco-languageclient": "^0.17.4",
+    "customize-cra": "^1.0.0",
+    "http-proxy-middleware": "^2.0.4",
+    "monaco-editor-core": "^0.33.0",
+    "react-app-rewired": "^2.2.1",
+    "webpack-node-externals": "^3.0.0"
   },
   "jest": {
     "transformIgnorePatterns": [
