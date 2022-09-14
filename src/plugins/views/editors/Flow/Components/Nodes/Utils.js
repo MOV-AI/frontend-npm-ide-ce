@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import lodash from "lodash";
+import { MOVAI_FLOW_TYPES } from "../../Constants/constants";
 
 /**
  * convert Visualization.x.Value, Visualization.y.Value to [x,y]
@@ -36,7 +37,7 @@ export function portConvertTypeCss(message) {
 export function getBaseTemplate(type) {
   const baseTemplate = {
     start: { id: type },
-    container: { Type: "MovAI/Flow" }
+    container: { Type: MOVAI_FLOW_TYPES.NODES.MOVAI_FLOW }
   };
   return baseTemplate[type];
 }

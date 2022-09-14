@@ -27,10 +27,22 @@ export const flowTopBarStyles = makeStyles(theme => ({
     fontSize: "15px",
     flexGrow: 1
   },
+  searchFlowArea: {
+    marginRight: theme.spacing(3)
+  },
+  searchInputText: {
+    width: "400px"
+  },
+  searchPopup: {
+    width: "fit-content"
+  },
   visualizationToggle: {
     marginRight: "10px"
   },
   grow: {
     flexGrow: 1
+  },
+  treeIcon: {
+    fontSize: "1.2rem"
   }
 }));

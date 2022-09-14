@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import lodash from "lodash";
+import _omit from "lodash/omit";
 import { convertVisualization, convertTypeCss } from "../Utils";
 
 import { flattenObject } from "../../../Utils/utils";
@@ -8,6 +8,8 @@ import BaseNodeStruct from "./BaseNodeStruct";
 import BasePort from "./BasePort";
 import BaseNodeHeader from "./BaseNodeHeader";
 import BaseNodeStatus from "./BaseNodeStatus";
+import { EVT_NAMES } from "../../../events";
+import { TYPES } from "../../../Constants/constants";
 
 const STYLE = {
   stroke: {
@@ -40,14 +42,159 @@ class BaseNode extends BaseNodeStruct {
     this.canvas = canvas;
     this.events = events;
     this._template = template;
+
+    //========================================================================================
+    /*                                                                                      *
+     *                                      Properties                                      *
+     *                                                                                      */
+    //========================================================================================
+
+    this.dbClickTimeout = null;
+    this.object = null;
+    this._drag = { handler: null, debounce: null, delta: { x: 0, y: 0 } };
+    this._header = null;
+    this._selected = false;
+    this._status = false; // true -> running: flase -> stopped
   }
 
-  dbClickTimeout = null;
-  object = null;
-  _drag = { handler: null, debounce: null, delta: { x: 0, y: 0 } };
-  _header = null;
-  _selected = false;
-  _status = false; // true -> running: flase -> stopped
+  //========================================================================================
+  /*                                                                                      *
+   *                                   Getters & Setters                                  *
+   *                                                                                      */
+  //========================================================================================
+
+  /**
+   * el - returns svg element
+   *
+   * @returns {object} svg element
+   */
+  get el() {
+    return this.object.node();
+  }
+
+  /**
+   * Returns the name of the node
+   *
+   * @returns {string} name of the node
+   */
+  get name() {
+    return this.data.NodeLabel;
+  }
+
+  /**
+   * Returns the port size
+   *
+   * @returns {number} port size
+   */
+  get portSize() {
+    return this.minSize.w * 0.07;
+  }
+
+  /**
+   * status - returns the status of the node
+   *
+   * @returns {boolean} true if running, false otherwise
+   */
+  get status() {
+    return this._status.status;
+  }
+
+  get readOnly() {
+    return this.canvas.readOnly;
+  }
+
+  /**
+   * template - returns node template data
+   *
+   * @returns {object} node template data
+   */
+  get template() {
+    return this._template;
+  }
+
+  /**
+   * status - set the status of the node
+   *
+   * @param {boolean} value true if running, false otherwise
+   */
+  set status(value) {
+    this._status.status = value;
+  }
+
+  /**
+   * selected - returns if the node is selected
+   *
+   * @returns {boolean} true if the node is selected, false otherwise
+   */
+  get selected() {
+    return this._selected;
+  }
+
+  /**
+   * selected - set node to selected
+   *
+   * @param {boolean} value true if the node is selected, false otherwise
+   */
+  set selected(value) {
+    this._selected = Boolean(value);
+    this.onSelected();
+  }
+
+  /**
+   * headerPos - get the position of the header
+   *
+   * @returns {object} object with the header position {x: val, y: val}
+   */
+  get headerPos() {
+    return {
+      x: this.width / 2 + this.padding.x / 2,
+      y: -10
+    };
+  }
+
+  /**
+   * Returns the node's template name
+   *
+   * @returns {string} the template name
+   */
+  get templateName() {
+    return this.data.Template;
+  }
+
+  /**
+   * visibility - set the node's visibility
+   *
+   * @param {boolean} visible true if the node is visible, false otherwise
+   */
+  set visibility(visible) {
+    this.visible = Boolean(visible);
+    this.object.attr("visibility", this.visible ? "visible" : "hidden");
+    this._ports.forEach(port => (port.visible = this.visible));
+  }
+
+  /**
+   * Return visualization to DB format
+   */
+  get visualizationToDB() {
+    return {
+      x: { Value: this.data.Visualization[0] },
+      y: { Value: this.data.Visualization[1] }
+    };
+  }
+
+  /**
+   * Get the node ports
+   * @return {Map} : This node's ports
+   */
+  get ports() {
+    return this._ports;
+  }
+
+  //========================================================================================
+  /*                                                                                      *
+   *                                    Private Methods                                   *
+   *                                                                                      */
+  //========================================================================================
 
   /**
    * initialize the node element
@@ -78,7 +225,10 @@ class BaseNode extends BaseNodeStruct {
     // create the svg element
     this.object = d3
       .create("svg")
-      .attr("id", `${this.canvas.containerId}-${this.data.id}`)
+      .attr(
+        "id",
+        `${this.canvas.containerId}-${this.data.id || this.data.Template}`
+      )
       .style("overflow", "visible")
       .attr("width", this.width + maxPadding)
       .attr("height", this.height + maxPadding)
@@ -88,7 +238,7 @@ class BaseNode extends BaseNodeStruct {
     // add a rect to the svg element
     // this is the body of the node
     this.object
-      .append("rect")
+      .append("svg:rect")
       .attr("x", padding.x / 2)
       .attr("y", padding.y)
       .attr("rx", 6)
@@ -257,7 +407,7 @@ class BaseNode extends BaseNodeStruct {
         // check In and Out ports
         ["In", "Out"].forEach(type => {
           // get port data
-          const data = lodash.get(ports[portInstName], `${type}`, {});
+          const data = ports[portInstName]?.[type] ?? {};
 
           Object.keys(data).forEach(portName => {
             // customize port data for the instance
@@ -318,125 +468,6 @@ class BaseNode extends BaseNodeStruct {
   destroy = () => {
     this.object.remove();
   };
-
-  /**
-   * el - returns svg element
-   *
-   * @returns {object} svg element
-   */
-  get el() {
-    return this.object.node();
-  }
-
-  /**
-   * Returns the name of the node
-   *
-   * @returns {string} name of the node
-   */
-  get name() {
-    return this.data.NodeLabel;
-  }
-
-  /**
-   * Returns the port size
-   *
-   * @returns {number} port size
-   */
-  get portSize() {
-    return this.minSize.w * 0.07;
-  }
-
-  /**
-   * status - returns the status of the node
-   *
-   * @returns {boolean} true if running, false otherwise
-   */
-  get status() {
-    return this._status.status;
-  }
-
-  get readOnly() {
-    return this.canvas.readOnly;
-  }
-
-  /**
-   * template - returns node template data
-   *
-   * @returns {object} node template data
-   */
-  get template() {
-    return this._template;
-  }
-
-  /**
-   * status - set the status of the node
-   *
-   * @param {boolean} value true if running, false otherwise
-   */
-  set status(value) {
-    this._status.status = value;
-  }
-
-  /**
-   * selected - returns if the node is selected
-   *
-   * @returns {boolean} true if the node is selected, false otherwise
-   */
-  get selected() {
-    return this._selected;
-  }
-
-  /**
-   * selected - set node to selected
-   *
-   * @param {boolean} value true if the node is selected, false otherwise
-   */
-  set selected(value) {
-    this._selected = Boolean(value);
-    this.onSelected();
-  }
-
-  /**
-   * headerPos - get the position of the header
-   *
-   * @returns {object} object with the header position {x: val, y: val}
-   */
-  get headerPos() {
-    return {
-      x: this.width / 2 + this.padding.x / 2,
-      y: -10
-    };
-  }
-
-  /**
-   * Returns the node's template name
-   *
-   * @returns {string} the template name
-   */
-  get templateName() {
-    return this.data.Template;
-  }
-
-  /**
-   * visibility - set the node's visibility
-   *
-   * @param {boolean} visible true if the node is visible, false otherwise
-   */
-  set visibility(visible) {
-    this.visible = Boolean(visible);
-    this.object.attr("visibility", this.visible ? "visible" : "hidden");
-    this._ports.forEach(port => (port.visible = this.visible));
-  }
-
-  /**
-   * Return visualization to DB format
-   */
-  get visualizationToDB() {
-    return {
-      x: { Value: this.data.Visualization[0] },
-      y: { Value: this.data.Visualization[1] }
-    };
-  }
 
   /**
    * setPosition - update the node's position
@@ -504,7 +535,7 @@ class BaseNode extends BaseNodeStruct {
     const { shiftKey } = d3.event;
 
     if (!this.selected && !shiftKey) {
-      this.canvas.setMode("default", { event: "onMouseDown" });
+      this.canvas.setMode(EVT_NAMES.DEFAULT, { event: "onMouseDown" });
     }
   };
 
@@ -534,23 +565,7 @@ class BaseNode extends BaseNodeStruct {
 
     // shift key pressed
     const { shiftKey } = d3.event;
-
-    // debounce timeout
-    clearTimeout(this.dbClickTimeout);
-
-    this.dbClickTimeout = setTimeout(() => {
-      // toggle node selection
-      const selection = !this.selected;
-
-      // shift key not pressed, set mode to default
-      if (!shiftKey) this.canvas.setMode("default", null);
-
-      // set the node selection
-      this.selected = selection;
-
-      // node selected mode
-      this.canvas.setMode("selectNode", { nodes: [this], shiftKey }, true);
-    }, 100);
+    this.handleSelectionChange(shiftKey);
   };
 
   /**
@@ -566,7 +581,7 @@ class BaseNode extends BaseNodeStruct {
     clearTimeout(this.dbClickTimeout);
 
     // set mode to double click
-    this.canvas.setMode("onDblClick", { node: this }, true);
+    this.canvas.setMode(EVT_NAMES.ON_DBL_CLICK, { node: this }, true);
   };
 
   /**
@@ -579,7 +594,11 @@ class BaseNode extends BaseNodeStruct {
     d3.event.stopPropagation();
 
     // set mode to node context menu
-    this.canvas.setMode("nodeCtxMenu", { node: this, event: d3.event }, true);
+    this.canvas.setMode(
+      [EVT_NAMES.ON_NODE_CTX_MENU],
+      { node: this, event: d3.event },
+      true
+    );
   };
 
   /**
@@ -603,10 +622,10 @@ class BaseNode extends BaseNodeStruct {
     // change the cursor style
     this.object.style("cursor", "default");
 
-    if (this.canvas.mode.current.id === "drag") {
-      this.canvas.mode.previous.id === "selectNode"
+    if (this.canvas.mode.current.id === EVT_NAMES.DRAG) {
+      this.canvas.mode.previous.id === EVT_NAMES.SELECT_NODE
         ? this.canvas.setPreviousMode()
-        : this.canvas.setMode("default");
+        : this.canvas.setMode(EVT_NAMES.DEFAULT);
     }
   };
 
@@ -618,7 +637,7 @@ class BaseNode extends BaseNodeStruct {
   onDrag = () => {
     // this will only set the mode once
     // done here to filter from click events
-    this.canvas.setMode("drag", this);
+    this.canvas.setMode(EVT_NAMES.DRAG, this);
     const { delta } = this._drag;
 
     // set the node position
@@ -626,14 +645,36 @@ class BaseNode extends BaseNodeStruct {
 
     // trigger the onDrag event
     if ("onDrag" in this.events) this.events.onDrag(this, d3.event);
-    lodash
-      .get(this.canvas.mode.current, "onDrag", {
-        next: () => {
-          /* empty method */
-        }
-      })
-      .next(this);
+
+    const _onDrag = this.canvas.mode.current?.onDrag ?? {
+      next: () => {
+        /* empty method */
+      }
+    };
+
+    _onDrag.next(this);
   };
+
+  handleSelectionChange(shiftKey) {
+    clearTimeout(this.dbClickTimeout);
+    this.dbClickTimeout = setTimeout(() => {
+      // toggle node selection
+      const selection = !this.selected;
+
+      // shift key not pressed, set mode to default
+      if (!shiftKey) this.canvas.setMode(EVT_NAMES.DEFAULT, null);
+
+      // set the node selection
+      this.selected = selection;
+
+      // node selected mode
+      this.canvas.setMode(
+        EVT_NAMES.SELECT_NODE,
+        { nodes: [this], shiftKey },
+        true
+      );
+    }, 100);
+  }
 
   /**
    * @private
@@ -642,16 +683,18 @@ class BaseNode extends BaseNodeStruct {
    */
   updatePosition(data) {
     // ignore position update if dragging
-    if (this.canvas.mode.current.id === "drag") return;
+    if (this.canvas.mode.current.id === EVT_NAMES.DRAG) return;
 
     // keys x and y are received separatly
     const updatedPos = { ...this.data.Visualization, ...data.Visualization };
 
     // convert format
-    const _data = { Visualization: convertVisualization(updatedPos) };
+    const visualizationData = {
+      Visualization: convertVisualization(updatedPos)
+    };
 
     // set object new position
-    this.data = lodash.merge(this.data, _data);
+    this.data = { ...this.data, ...visualizationData };
 
     // set svg new posistion
     this.object.attr("x", this.posX).attr("y", this.posY);
@@ -665,9 +708,11 @@ class BaseNode extends BaseNodeStruct {
    * @private
    * updateTemplate
    */
-  updateTemplate = () => {
+  updateTemplate = async () => {
     this.object.select("rect").attr("class", convertTypeCss(this._template));
-    this.update().updateSize();
+
+    await this.update();
+    this.updateSize();
 
     return this;
   };
@@ -678,7 +723,7 @@ class BaseNode extends BaseNodeStruct {
    */
   update = () => {
     this.addPorts().renderHeader().renderStatus().renderPorts();
-    return this;
+    return Promise.resolve(this);
   };
 
   /**
@@ -689,8 +734,9 @@ class BaseNode extends BaseNodeStruct {
   updateNode = data => {
     const fn = {
       Visualization: _data => this.updatePosition(_data), // Position changes when dragging or when adding a new node
-      default: () => {
-        lodash.merge(this.data, data);
+      default: _data => {
+        this.data = { ...this.data, ...data };
+        this.updatePosition(_data);
         this.data.name = this.name;
       }
     };
@@ -710,12 +756,12 @@ class BaseNode extends BaseNodeStruct {
     const currMode = this.canvas.mode.current;
 
     // skip event if pressing shift while on selectNode mode
-    if (d3.event.shiftKey && currMode.id === "selectNode") return;
+    if (d3.event.shiftKey && currMode.id === EVT_NAMES.SELECT_NODE) return;
 
     const actions = {
       // start linking mode if on default mode
       default: () => {
-        this.canvas.setMode("linking", {
+        this.canvas.setMode(EVT_NAMES.LINKING, {
           src: port,
           link: null,
           trg: null,
@@ -723,8 +769,8 @@ class BaseNode extends BaseNodeStruct {
         });
       },
       selectNode: () => {
-        this.canvas.setMode("default");
-        this.canvas.setMode("linking", {
+        this.canvas.setMode(EVT_NAMES.DEFAULT);
+        this.canvas.setMode(EVT_NAMES.LINKING, {
           src: port,
           link: null,
           trg: null,
@@ -738,16 +784,18 @@ class BaseNode extends BaseNodeStruct {
         if (!currMode.props.link.isValid(src, port)) return;
         currMode.props.trg = port;
         currMode.props.toCreate = true;
-        this.canvas.setMode("default");
+        this.canvas.setMode(EVT_NAMES.DEFAULT);
       }
     };
 
+    const defaultAction = () => {
+      console.debug("Default mode required to start linking");
+    };
+
     // call an action
-    lodash
-      .get(actions, currMode.id, () => {
-        console.debug("Default mode required to start linking");
-      })
-      .call();
+    const actualAction = actions?.[currMode.id] ?? defaultAction;
+
+    actualAction.call();
   };
 
   /**
@@ -757,7 +805,7 @@ class BaseNode extends BaseNodeStruct {
    */
   onPortMouseOver = port => {
     this.canvas.events.next({
-      name: "onMouseOver",
+      name: EVT_NAMES.ON_MOUSE_OVER,
       type: "Port",
       event: d3.event,
       port
@@ -771,7 +819,7 @@ class BaseNode extends BaseNodeStruct {
    */
   onPortMouseOut = port => {
     this.canvas.events.next({
-      name: "onMouseOut",
+      name: EVT_NAMES.ON_MOUSE_OUT,
       type: "Port",
       event: d3.event,
       port
@@ -779,7 +827,11 @@ class BaseNode extends BaseNodeStruct {
   };
 
   onPortContext = port => {
-    this.canvas.setMode("portCtxMenu", { port: port, event: d3.event }, true);
+    this.canvas.setMode(
+      EVT_NAMES.ON_PORT_CTX_MENU,
+      { port: port, event: d3.event },
+      true
+    );
   };
 
   /**
@@ -805,10 +857,15 @@ class BaseNode extends BaseNodeStruct {
    *
    * @param {string} data node's template name
    */
-  onTemplateUpdate = data => {
-    if (data.Label !== this.templateName) return; // not my template
-    this._template = Object.assign(this._template, data);
-    this.updateTemplate();
+  onTemplateUpdate = async data => {
+    const isNotInnerTemplate = !(
+      this.data.type === TYPES.CONTAINER && this.template?.NodeInst[data.Label]
+    );
+    if (data.Label !== this.templateName && isNotInnerTemplate) return; // not my template and if I'm a flow and it's not a children node
+
+    isNotInnerTemplate &&
+      (this._template = Object.assign(this._template, data));
+    await this.updateTemplate();
   };
 
   /**
@@ -847,7 +904,7 @@ class BaseNode extends BaseNodeStruct {
   deleteKey = data => {
     const path = flattenObject(data);
     Object.keys(path).forEach(pkey => {
-      this.data = lodash.omit(this.data, pkey);
+      this.data = _omit(this.data, pkey);
     });
     return this.isValid();
   };
@@ -900,6 +957,20 @@ class BaseNode extends BaseNodeStruct {
    */
   getExposedName() {
     return this.templateName;
+  }
+
+  /**
+   * Get node center
+   * @returns {{xCenter: number, yCenter: number}}
+   */
+  getCenter() {
+    const posX = parseFloat(this.object.attr("x"));
+    const posY = parseFloat(this.object.attr("y"));
+
+    return {
+      xCenter: posX + this.width / 2,
+      yCenter: posY + this.height / 2
+    };
   }
 
   /**

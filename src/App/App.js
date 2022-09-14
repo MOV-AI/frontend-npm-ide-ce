@@ -2,7 +2,7 @@ import React from "react";
 import { Style, withDefaults } from "@mov-ai/mov-fe-lib-react";
 import { Typography } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
-import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
+import { ThemeProvider } from "@material-ui/core/styles";
 import DocManager from "../plugins/DocManager/DocManager";
 import FlowExplorer from "../plugins/views/editors/Flow/Components/Explorer/Explorer";
 import Dialog from "../plugins/Dialog/Dialog";
@@ -12,11 +12,14 @@ import CentralPanel from "../plugins/hosts/CentralPanel/CentralPanel";
 import DrawerPanel from "../plugins/hosts/DrawerPanel/DrawerPanel";
 import SidePanel from "../plugins/hosts/SidePanel/SidePanel";
 import TopBar from "../plugins/hosts/TopBar/TopBar";
+import AbstractHost from "../plugins/hosts/AbstractHost/AbstractHost";
 import SystemBar from "../plugins/views/SystemBar/SystemBar";
 import AlertPanel from "../plugins/hosts/AlertPanel/AlertPanel";
 import Explorer from "../plugins/views/Explorer/Explorer";
 import MainMenu from "../plugins/views/MainMenu/MainMenu";
 import HomeTab from "../plugins/views/HomeTab/HomeTab";
+import Shortcuts from "../plugins/views/Keybinding/Shortcuts";
+import AppKeybindings from "../plugins/views/Keybinding/AppKeybindings";
 import Tabs from "../plugins/views/Tabs/Tabs";
 import PluginManagerIDE from "../engine/PluginManagerIDE/PluginManagerIDE";
 import Placeholder from "../plugins/views/Placeholder/Placeholder";
@@ -24,37 +27,20 @@ import {
   HOMETAB_PROFILE,
   FLOW_EXPLORER_PROFILE,
   PLUGINS,
-  HOSTS
+  HOSTS,
+  SHORTCUTS_PROFILE
 } from "../utils/Constants";
 import { MainContext } from "../main-context";
 
 import "./App.css";
 import { ApplicationTheme } from "../themes";
+import { appStyles } from "./styles";
 
 const DEBUG_MODE = false;
 
-const useStyles = debugMode =>
-  makeStyles(theme => ({
-    leftPanel: {
-      border: debugMode ? "solid 5px red" : "",
-      borderRight: debugMode ? "" : `1px solid ${theme.background}`,
-      display: "flex",
-      position: "relative"
-    },
-    mainGrid: { flexGrow: 1 },
-    sidePanel: { height: "100%" },
-    centralPanel: { flexGrow: 1, border: debugMode ? "solid 5px green" : "" },
-    rightDrawer: {
-      border: debugMode ? "solid 5px blue" : "",
-      borderLeft: debugMode ? "" : `1px solid ${theme.background}`,
-      position: "relative"
-    },
-    bottomBar: { border: debugMode ? "solid 5px orange" : "", width: "100%" }
-  }));
-
 function App(props) {
   // Style hook
-  const classes = useStyles(DEBUG_MODE)();
+  const classes = appStyles(DEBUG_MODE)();
 
   //========================================================================================
   /*                                                                                      *
@@ -150,6 +136,10 @@ function installViewPlugins() {
       factory: profile => new HomeTab(profile)
     },
     {
+      profile: SHORTCUTS_PROFILE,
+      factory: profile => new Shortcuts(profile)
+    },
+    {
       profile: {
         name: PLUGINS.PLACEHOLDER.NAME,
         location: PLUGINS.RIGHT_DRAWER.NAME
@@ -159,6 +149,13 @@ function installViewPlugins() {
     {
       profile: { name: PLUGINS.SYSTEM_BAR.NAME, location: HOSTS.TOP_BAR.NAME },
       factory: profile => new SystemBar(profile)
+    },
+    {
+      profile: {
+        name: PLUGINS.APP_KEYBINDINGS.NAME,
+        location: HOSTS.ABSTRACT_HOST.NAME
+      },
+      factory: profile => new AppKeybindings(profile)
     }
   ];
   plugins.forEach(pluginDescription => {
@@ -170,6 +167,7 @@ function installViewPlugins() {
 function getHostedPlugins(classes) {
   return (
     <Grid container direction="column">
+      <AbstractHost hostName={HOSTS.ABSTRACT_HOST.NAME}></AbstractHost>
       <Grid container alignItems="flex-start">
         <TopBar hostName={HOSTS.TOP_BAR.NAME} debugMode={DEBUG_MODE}></TopBar>
       </Grid>

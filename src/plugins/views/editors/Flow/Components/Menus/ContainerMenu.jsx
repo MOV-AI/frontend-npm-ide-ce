@@ -32,18 +32,41 @@ const ContainerMenu = props => {
    *                                                                                      */
   //========================================================================================
 
-  const getFlowData = useCallback(
-    () => flowModel.current.getSubFlowItem(data.id).serialize(),
-    [data.id, flowModel]
-  );
+  /**
+   * @private Get the node instance item
+   * @param {string} id : Node instance Item Id
+   * @returns {NodeInstance}
+   */
+  const getFlowData = useCallback(async () => {
+    const containerInstance = flowModel.current.getSubFlowItem(data.name);
+    if (containerInstance) {
+      return containerInstance;
+    }
+
+    const subFlowInst = await call(
+      PLUGINS.DOC_MANAGER.NAME,
+      PLUGINS.DOC_MANAGER.CALL.READ,
+      {
+        scope: "Flow",
+        name: nodeInst.parent.data.ContainerFlow
+      }
+    );
+
+    return subFlowInst.getSubFlowItem(data.name);
+  }, [data.name, nodeInst, flowModel, call]);
+
+  const setFlowDataInst = containerInstance => {
+    setFlowData(containerInstance.serialize());
+  };
 
   /**
    * @param {Object} formData : Data to Save
    */
   const handleSubmitParameter = useCallback(
-    formData => {
+    async formData => {
       const varName = formData.varName;
-      const containerInstance = flowModel.current.getSubFlowItem(data.id);
+      const containerInstance = await getFlowData();
+
       if (containerInstance.getKeyValue(varName, formData.name)) {
         if (formData.value === DEFAULT_VALUE) {
           containerInstance.deleteKeyValue(varName, formData.name);
@@ -53,9 +76,9 @@ const ContainerMenu = props => {
       } else {
         containerInstance.addKeyValue(varName, formData);
       }
-      setFlowData(getFlowData());
+      setFlowDataInst(containerInstance);
     },
-    [flowModel, data.id, getFlowData]
+    [getFlowData]
   );
 
   /**
@@ -64,12 +87,12 @@ const ContainerMenu = props => {
    * @param {string} varName : keyValue type (parameters, envVars or cmdLine)
    */
   const handleDeleteParameter = useCallback(
-    (paramName, varName) => {
-      const containerInstance = flowModel.current.getSubFlowItem(data.id);
+    async (paramName, varName) => {
+      const containerInstance = await getFlowData();
       containerInstance.deleteKeyValue(varName, paramName);
-      setFlowData(getFlowData());
+      setFlowDataInst(containerInstance);
     },
-    [data.id, flowModel, getFlowData]
+    [getFlowData]
   );
 
   //========================================================================================
@@ -153,7 +176,16 @@ const ContainerMenu = props => {
 
   // Component Did Mount
   useEffect(() => {
-    setFlowData(getFlowData());
+    // Get node data
+    const fetchData = async () => {
+      // get the data from the api
+      const containerInstance = await getFlowData();
+
+      // set state with the result
+      setFlowDataInst(containerInstance);
+    };
+
+    fetchData();
   }, [getFlowData]);
 
   useEffect(() => {
@@ -178,6 +210,7 @@ const ContainerMenu = props => {
     <div data-testid="section_flow-container-menu">
       <MenuDetails
         id={data.id}
+        name={data.name}
         model={data.model}
         template={data.ContainerFlow}
         label="TemplateName-Colon"

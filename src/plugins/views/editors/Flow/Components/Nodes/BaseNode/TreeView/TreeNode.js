@@ -1,17 +1,19 @@
 import * as d3 from "d3";
 import _debounce from "lodash/debounce";
+import { EVT_NAMES } from "../../../../events";
+import { belongLineBuilder } from "../../Utils";
 import BaseNode from "../BaseNode";
+import BaseNodeStatus from "../BaseNodeStatus";
 import TreeNodeHeader from "./TreeNodeHeader";
 import TreeNodePort from "./TreeNodePort";
 import CollapsableItem from "./CollapsableItem";
-import { belongLineBuilder } from "../../Utils";
-import BaseNodeStatus from "../BaseNodeStatus";
 
 class TreeNode extends BaseNode {
-  constructor(canvas, node, events, _type, template, parent) {
-    super(canvas, node, events, _type, template);
+  constructor({ canvas, node, events, _type, template, parent }) {
+    super({ canvas, node, events, _type, template });
+    this.isContainer = false;
     this.parent = parent;
-    this.children = new Map();
+    this.children = [];
     this._links = new Map();
     this._displayPorts = false;
     this._collapsablePorts = null;
@@ -40,6 +42,22 @@ class TreeNode extends BaseNode {
   }
 
   /**
+   * @private
+   * addEvents - add events to the svg element
+   */
+  addEvents = () => {
+    // node event listeners
+    this.object.on("click", () => {
+      if (!this.parent) return;
+      this.eventsOn(this.onClick);
+    });
+    this.object.on("mousedown", () => this.eventsOn(this.onMouseDown));
+    this.object.on("dblclick", () => this.eventsOn(this.onDblClick));
+
+    return this;
+  };
+
+  /**
    * @override renderHeader - render the node header
    */
   renderHeader() {
@@ -52,7 +70,8 @@ class TreeNode extends BaseNode {
       this.headerPos.y,
       this.name,
       this.templateName,
-      this._type
+      this._type,
+      this.data.endless
     );
 
     // append to the svg element
@@ -134,6 +153,7 @@ class TreeNode extends BaseNode {
       .renderStatus();
 
     if (addLinks) this.updateLinks();
+
     return this;
   };
 
@@ -155,6 +175,19 @@ class TreeNode extends BaseNode {
         y + nodeContainer.y.baseVal.value + parentContainer.y.baseVal.value;
     }
     return { x: nodePosX, y: nodePosY };
+  }
+
+  /**
+   * @override Get node center
+   * @returns {{xCenter: number, yCenter: number}}
+   */
+  getCenter() {
+    const { x, y } = this.getAbsolutePosition(this);
+
+    return {
+      xCenter: x + this.width / 2,
+      yCenter: y + this.height / 2
+    };
   }
 
   /**
@@ -198,18 +231,11 @@ class TreeNode extends BaseNode {
    * @returns {TreeNode} Tree node object right before this node
    */
   getPreviousBrother() {
-    let previousBrother = this.parent;
-    const siblings = [...this.parent.children.keys()];
-    siblings.forEach((sibling, index) => {
-      const nextSibling = siblings[index + 1];
-      const siblingNode = this.parent.children.get(sibling);
-      if (
-        nextSibling === this.data.id &&
-        siblingNode.data.type === this.data.type
-      )
-        previousBrother = siblingNode;
-    });
-    return previousBrother;
+    const thisIndex = this.parent.children.findIndex(
+      n => n.data.id === this.data.id
+    );
+    const previousBrother = thisIndex - 1;
+    return this.parent.children[previousBrother] ?? this.parent;
   }
 
   /**
@@ -375,10 +401,38 @@ class TreeNode extends BaseNode {
    *
    * @param {string} templateName node's template name
    */
-  onTemplateUpdate = templateName => {
+  onTemplateUpdate = template => {
+    const templateName = template.Label ?? template;
     if (templateName !== this.templateName) return; //not my template
     this._template = undefined;
+
+    if (this.isContainer) {
+      // Remove old belong line
+      this.removeBelongLine();
+      this.removeAllChildren();
+      this.removeCollapsibleElement();
+
+      // Re-add the subflow
+      this.canvas.mInterface.graph.updateSubFlow(this, template);
+    }
+
     this.update(true);
+  };
+
+  /**
+   * Removes all children and clears the array
+   */
+  removeAllChildren = () => {
+    this.children.forEach(child => child.destroy());
+    this.children = [];
+  };
+
+  /**
+   * Removes the NODES collapsible item
+   */
+  removeCollapsibleElement = () => {
+    this.collapsableItem.destroy();
+    this._collapsableItem = null;
   };
 
   /**
@@ -395,7 +449,7 @@ class TreeNode extends BaseNode {
       data: { model: mini.model, type: mini.nodeType }
     };
     // set mode to double click
-    this.canvas.setMode("onDblClick", { node: dummyNode }, true);
+    this.canvas.setMode(EVT_NAMES.ON_DBL_CLICK, { node: dummyNode }, true);
   };
 
   /**
@@ -417,9 +471,11 @@ class TreeNode extends BaseNode {
    * @override addToCanvas - append node element to canvas
    */
   addToCanvas() {
+    // render children (meaning this is a node)
     if (this.parent) {
       this.parent.renderChild(this);
     } else {
+      // render itself (meaning this is a container)
       this.canvas.append(() => {
         this.object.attr("x", 50).attr("y", 50);
         return this.el;

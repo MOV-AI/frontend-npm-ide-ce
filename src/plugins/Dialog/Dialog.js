@@ -174,8 +174,13 @@ class Dialog extends IDEPlugin {
   saveOutdatedDocument(data) {
     const targetElement = this._handleDialogOpen();
     // Set dialog message
-    const title = i18n.t("SaveOutdatedDocTitle");
-    const message = i18n.t("SaveOutdatedDocMessage");
+    const title = i18n.t("SaveOutdatedDocTitle", {
+      docName: data.name
+    });
+    const message = i18n.t("SaveOutdatedDocMessage", {
+      docType: data.scope,
+      docName: data.name
+    });
     // Set dialog actions
     const actions = {
       [SAVE_OUTDATED_DOC_ACTIONS.UPDATE_DOC]: {
@@ -212,6 +217,9 @@ class Dialog extends IDEPlugin {
   custom(data, Component) {
     const { title, actions, onSubmit, submitText, ...props } = data;
     const targetElement = this._handleDialogOpen();
+    const closeModal = () =>
+      this._handleDialogClose(targetElement, data.onClose);
+
     // Show dialog
     ReactDOM.render(
       <AppDialog
@@ -219,9 +227,9 @@ class Dialog extends IDEPlugin {
         actions={actions}
         submitText={submitText}
         onSubmit={onSubmit}
-        onClose={() => this._handleDialogClose(targetElement, data.onClose)}
+        onClose={closeModal}
       >
-        <Component {...props} />
+        <Component {...props} closeModal={closeModal} />
       </AppDialog>,
       targetElement
     );

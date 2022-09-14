@@ -1,5 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import React from "react";
 import PropTypes from "prop-types";
 import clsx from "clsx";
 import SnackbarContent from "@material-ui/core/SnackbarContent";
@@ -19,11 +18,9 @@ const variantIcon = {
 
 const Warnings = props => {
   // Props
-  const { domNode, warnings = [], isVisible } = props;
+  const { warnings = [], isVisible } = props;
   // Other hooks
   const classes = warningsStyles();
-  // Ref
-  const el = useRef(document.createElement("div"));
 
   //========================================================================================
   /*                                                                                      *
@@ -35,19 +32,25 @@ const Warnings = props => {
    *
    * @returns
    */
-  const createSnacks = useCallback(() => {
+  const createSnacks = () => {
     return warnings.map((warning, index) => {
-      const { type, message } = warning;
+      const { type, message, onClick } = warning;
       const Icon = variantIcon[type];
       const html = warning.html
         ? warning.html
         : () => {
             /* empty */
           };
+      const handleOnSnackClick = () => {
+        onClick && onClick(warning);
+      };
       return (
         <SnackbarContent
           key={index}
-          className={`${clsx(classes[type])} ${classes.snackbar}`}
+          className={`${clsx(classes[type])} ${classes.snackbar} ${
+            onClick ? classes.clickableSnack : ""
+          }`}
+          onClick={handleOnSnackClick}
           message={
             <span className={classes.message}>
               <Icon className={clsx(classes.icon, classes.iconVariant)} />
@@ -58,18 +61,7 @@ const Warnings = props => {
         />
       );
     });
-  }, [classes, warnings]);
-
-  //========================================================================================
-  /*                                                                                      *
-   *                                    React Lifecycle                                   *
-   *                                                                                      */
-  //========================================================================================
-
-  useEffect(() => {
-    el.current.classList.add(classes.root);
-    domNode.current.appendChild(el.current);
-  }, [classes.root, domNode]);
+  };
 
   //========================================================================================
   /*                                                                                      *
@@ -77,17 +69,14 @@ const Warnings = props => {
    *                                                                                      */
   //========================================================================================
 
-  return isVisible ? createPortal(createSnacks(), el.current) : <></>;
+  return (
+    <>{isVisible && <div className={classes.root}>{createSnacks()}</div>}</>
+  );
 };
 
 Warnings.propTypes = {
   warnings: PropTypes.array.isRequired,
-  domNode: PropTypes.object
-};
-
-Warnings.defaultProps = {
-  warnings: [],
-  domNode: null
+  isVisible: PropTypes.bool
 };
 
 export default Warnings;

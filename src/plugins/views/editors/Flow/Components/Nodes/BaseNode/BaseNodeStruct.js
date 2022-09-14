@@ -1,5 +1,5 @@
 import { convertVisualization } from "../Utils";
-import { MAX_MOVING_PIXELS } from "../../../Constants/constants";
+import { MAX_MOVING_PIXELS, TYPES } from "../../../Constants/constants";
 
 export default class BaseNodeStruct {
   constructor(data) {
@@ -15,7 +15,7 @@ export default class BaseNodeStruct {
       Persistent: data.Persistent,
       Remappable: data.Remappable,
       Launch: data.Launch,
-      type: "NodeInst",
+      type: TYPES.NODE,
       model: "Node"
     };
   }

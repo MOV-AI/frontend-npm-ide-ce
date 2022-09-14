@@ -1,5 +1,6 @@
 import BaseNode from "./BaseNode";
 import { convertVisualization } from "../Utils";
+import { TYPES } from "../../../Constants/constants";
 
 /**
  * BaseContainerNode: Class containing all base properties and methods
@@ -7,12 +8,11 @@ import { convertVisualization } from "../Utils";
  */
 class BaseContainerNode extends BaseNode {
   constructor({ canvas, node, events, template }) {
-    const templateType = "MovAI/Flow";
     super({
       canvas,
       node,
       events,
-      template: { ...template, Type: templateType }
+      template
     });
     // container node's data
     this.data = {
@@ -22,8 +22,9 @@ class BaseContainerNode extends BaseNode {
       name: node.ContainerLabel, // standard way to get NodeLabel, StateLabel, ContainerLabel
       Visualization: convertVisualization(node.Visualization) || [50, 50],
       Parameter: node.Parameter || {},
-      type: "Container",
-      model: "Flow"
+      type: TYPES.CONTAINER,
+      model: "Flow",
+      endless: node.endless ?? false
     };
     this.requiredKeys = ["ContainerFlow", "ContainerLabel", "Visualization"];
   }

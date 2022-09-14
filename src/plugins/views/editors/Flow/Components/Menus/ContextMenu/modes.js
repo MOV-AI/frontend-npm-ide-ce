@@ -1,7 +1,9 @@
+import { TYPES } from "../../../Constants/constants";
+
 const MODES = {
-  NODE: "NodeInst",
+  NODE: TYPES.NODE,
+  SUBFLOW: TYPES.CONTAINER,
   LINK: "Link",
-  SUBFLOW: "Container",
   PORT: "Port",
   CANVAS: "Canvas"
 };

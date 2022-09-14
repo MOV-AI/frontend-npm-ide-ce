@@ -35,6 +35,15 @@ const parameters = {
   }
 };
 
+const infoContainer = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  "& > p": {
+    margin: "0"
+  }
+};
+
 const menuStyles = makeStyles(_theme => ({
   ...common,
   ...parameters,
@@ -89,6 +98,18 @@ export const linkMenuStyles = makeStyles(_theme => ({
   },
   directionContainer: {
     padding: "0 10px"
+  },
+  selectHolder: {
+    "& > div": {
+      ...infoContainer
+    }
+  },
+  infoContainer: {
+    ...infoContainer
+  },
+  colorChip: {
+    width: "40px",
+    height: "4px"
   }
 }));
 

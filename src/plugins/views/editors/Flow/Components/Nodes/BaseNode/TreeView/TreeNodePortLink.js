@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 import { InputPort, OutputPort } from "./PortIcons";
 import BaseNode from "../BaseNode";
+import { TYPES } from "../../../../Constants/constants";
 
 class TreeNodePortLink {
   constructor(link, type, node) {
@@ -38,7 +39,11 @@ class TreeNodePortLink {
     const templates = this.getTemplates(data);
     const [nodeName, nodePort] = this.parseNodePort(data);
     templates.forEach(item => {
-      BaseNode.getMiniature(item.name, item.type, xPosition).then(miniature => {
+      BaseNode.getMiniature(
+        item.templateData ?? item.name,
+        item.type,
+        xPosition
+      ).then(miniature => {
         this.object.append(() => {
           const mini = miniature.node();
           mini.style.pointerEvents = "all";
@@ -136,12 +141,15 @@ class TreeNodePortLink {
       let type = "flow";
       let name = node;
       if (index === pathLength) type = node === "start" ? node : "node";
+      const templateData =
+        this.parentNode.canvas.mInterface.graph.nodes.get(data.node)?.obj
+          ?.template || {};
       const info = {
-        flow: { model: "Flow", nodeType: "Container" },
-        node: { model: "Node", nodeType: "NodeInst" },
+        flow: { model: "Flow", nodeType: TYPES.CONTAINER },
+        node: { model: "Node", nodeType: TYPES.NODE },
         start: {}
       };
-      return { name, type, ...info[type], data };
+      return { name, type, ...info[type], data, templateData };
     });
   }
 }
