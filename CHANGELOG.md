@@ -5,6 +5,7 @@
 - [FP-1085 - Add Shortcuts helper with all keybind shortcuts](https://movai.atlassian.net/browse/FP-1085)
 - [FP-1523 - Replaced old virtualize tree with react-window](https://movai.atlassian.net/browse/FP-1523)
 - [FP-1621 - Update outdated file is now working](https://movai.atlassian.net/browse/FP-1621)
+- update code editor
 
 **FLOW**
 
