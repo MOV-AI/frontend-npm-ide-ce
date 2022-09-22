@@ -25,4 +25,5 @@ jobs:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
       sonar_token: ${{ secrets.SONAR_TOKEN }}
       npm_token: ${{ secrets.NPM_TOKEN }}
+      prod_publish_repos: '["ppa-main","ppa-public"]'
       
