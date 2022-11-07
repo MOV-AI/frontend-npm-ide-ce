@@ -25,7 +25,7 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
-    "d3": "^5.16.0",
+    "d3": "^7.6.1",
     "hotkeys-js": "^3.8.7",
     "joi": "^17.4.2",
     "lodash": "^4.17.21",
