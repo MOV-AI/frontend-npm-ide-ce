@@ -5,16 +5,16 @@ import {
   installTool,
   ConfigurationModel,
   ConfigurationStore,
-  ConfigurationView,
+  ConfigurationEditor,
   CallbackModel,
   CallbackStore,
-  CallbackView,
+  CallbackEditor,
   NodeStore,
   NodeModel,
-  NodeView,
+  NodeEditor,
   FlowModel,
   FlowStore,
-  FlowView,
+  FlowEditor,
   FlowExplorer,
   CONSTANTS,
   getHomeTab,
@@ -44,7 +44,7 @@ const AppCE = props => {
     installEditor({
       scope: FlowModel.SCOPE,
       store: FlowStore,
-      editorPlugin: FlowView,
+      editorPlugin: FlowEditor,
       otherPlugins: [
         {
           profile: FLOW_EXPLORER_PROFILE,
@@ -55,17 +55,17 @@ const AppCE = props => {
     installEditor({
       scope: NodeModel.SCOPE,
       store: NodeStore,
-      editorPlugin: NodeView
+      editorPlugin: NodeEditor
     });
     installEditor({
       scope: CallbackModel.SCOPE,
       store: CallbackStore,
-      editorPlugin: CallbackView
+      editorPlugin: CallbackEditor
     });
     installEditor({
       scope: ConfigurationModel.SCOPE,
       store: ConfigurationStore,
-      editorPlugin: ConfigurationView
+      editorPlugin: ConfigurationEditor
     });
 
     // Install tools
