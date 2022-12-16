@@ -22,7 +22,7 @@ export const APP_INFORMATION = {
 
 export const APP_LINKS = {
   DOCUMENTATION: "https://flow.mov.ai/",
-  FORUM: "https://forum.flow.mov.ai/"
+  FORUM: "https://github.com/MOV-AI/movai-flow/discussions"
 };
 
 export const GLOBAL_WORKSPACE = "global";
