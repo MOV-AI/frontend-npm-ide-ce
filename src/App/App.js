@@ -28,6 +28,10 @@ import { withDefaults } from "@mov-ai/mov-fe-lib-react";
 // Editors
 import KeyboardIcon from "@material-ui/icons/Keyboard";
 import HomeIcon from "@material-ui/icons/Home";
+import { I18nextProvider } from "react-i18next";
+import i18n from "../i18n/i18n"
+import { withStyles } from "@material-ui/core/styles";
+
 
 const { HOMETAB_PROFILE, SHORTCUTS_PROFILE, FLOW_EXPLORER_PROFILE } = CONSTANTS;
 
@@ -60,7 +64,8 @@ const AppCE = props => {
     installEditor({
       scope: CallbackModel.SCOPE,
       store: CallbackStore,
-      editorPlugin: CallbackEditor
+      editorPlugin: CallbackEditor,
+      props: { useLanguageServer: true }
     });
     installEditor({
       scope: ConfigurationModel.SCOPE,
@@ -94,12 +99,16 @@ const AppCE = props => {
   return <BaseApp {...props} />;
 };
 
+
+const dependencies = {
+  "@material-ui/styles": { ThemeProvider, withStyles },
+  "react-i18next": { I18nextProvider },
+  i18n
+};
+
 export default withDefaults({
   name: "mov-fe-app-ide-ce",
   component: AppCE,
-  offlineValidation: false,
-  theme: {
-    provider: ThemeProvider,
-    props: ApplicationTheme
-  }
+  themeProps: ApplicationTheme,
+  dependencies
 });

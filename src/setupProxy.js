@@ -12,10 +12,11 @@ module.exports = function (app) {
         "/ws/**",
         "/static/maps/**",
         "/static/meshes/**",
-        "/static/point_clouds/**"
+        "/static/point_clouds/**",
+        "/lsp/languageServer/**"
       ],
       {
-        target: "https://localhost",
+        target: "https://localhost:8083",
         ws: true,
         logLevel: "debug",
         secure: false
