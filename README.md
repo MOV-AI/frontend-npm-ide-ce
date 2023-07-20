@@ -8,9 +8,9 @@ MOV.AI Flow™ is an integrated development environment offering multiple editor
 
 [![Deploy - On branch main/release Push](https://github.com/MOV-AI/frontend-npm-ide-ce/actions/workflows/DeployOnMergeMain.yml/badge.svg?branch=dev)](https://github.com/MOV-AI/frontend-npm-ide-ce/actions/workflows/DeployOnMergeMain.yml)
 
-## Development
+# Development
 
-Open the project in VS Code and then choose to reopen in container.
+Open [movai-flow](https://github.com/MOV-AI/movai-flow) repo and run `docker-compose up -d`. Then open this project in VS Code and then choose to reopen in container.
 Once the container is ready, open a new terminal inside VS Code and run:
 
 ```
