@@ -65,7 +65,7 @@ const AppCE = props => {
       scope: CallbackModel.SCOPE,
       store: CallbackStore,
       editorPlugin: CallbackEditor,
-      props: { useLanguageServer: true }
+      props: { useLanguageServer: false }
     });
     installEditor({
       scope: ConfigurationModel.SCOPE,
