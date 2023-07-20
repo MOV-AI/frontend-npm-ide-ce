@@ -13,10 +13,10 @@ module.exports = function (app) {
         "/static/maps/**",
         "/static/meshes/**",
         "/static/point_clouds/**",
-        "/lsp/languageServer/**"
+        "/lsp/**"
       ],
       {
-        target: "https://localhost:8083",
+        target: "http://localhost:8080",
         ws: true,
         logLevel: "debug",
         secure: false
